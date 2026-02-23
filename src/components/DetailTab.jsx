@@ -12,16 +12,17 @@ export default function DetailTab({ stats, characters }) {
       {/* 1. Top Stats */}
       <TopStats stats={stats} characters={characters} />
 
-      {/* 2. 가장 오래된 / 최신 캐릭터 */}
+      {/* 3. 가장 오래된 / 최신 캐릭터 */}
       <CharacterMilestones characters={characters} />
 
-      {/* 3. 생성 히스토리 (GitHub style) */}
+
+      {/* 5. 생성 히스토리 (GitHub style) */}
       <ContributionGraph characters={characters} />
 
-      {/* 4. 티어 분포 */}
+      {/* 6. 티어 분포 */}
       <TierDistribution characters={characters} />
 
-      {/* 5. 해시태그 클라우드 */}
+      {/* 7. 해시태그 클라우드 */}
       <WordCloud characters={characters} />
     </div>
   );
@@ -178,3 +179,4 @@ function StatCard({ label, value, sub }) {
     </div>
   );
 }
+

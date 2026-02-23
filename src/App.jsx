@@ -4,10 +4,11 @@ import { useTheme } from './contexts/ThemeContext';
 import ProfileHeader from './components/ProfileHeader';
 import SummaryTab from './components/SummaryTab';
 import DetailTab from './components/DetailTab';
-
+import AchievementsTab, { EncouragementBanner } from './components/AchievementsTab';
 import SkeletonUI from './components/SkeletonUI';
 import { proxyImageUrl, getPlotImageUrl, getPlotImageUrls } from './utils/imageUtils';
 import { getRecentSearches, addRecentSearch, removeRecentSearch } from './utils/storage';
+import { getCreatorTier, calculateCreatorScore } from './utils/tierCalculator';
 
 async function fetchAllPlots(creatorId) {
   const all = [];
@@ -151,8 +152,9 @@ export default function App() {
         <div className="flex-1 flex flex-col items-center justify-center px-4 pb-20">
           <div className="text-center mb-8">
             <div className="mb-4"><ZetaLogo /></div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] mb-2">Zeta Analytics</h1>
-            <p className="text-sm text-[var(--text-tertiary)]">크리에이터 통계 &amp; 업적 카드</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] mb-2 tracking-tighter">EGO-BLOOM</h1>
+            <p className="text-sm text-[var(--text-tertiary)] font-medium">크리에이터 통계 &amp; 업적 카드</p>
+            <p className="text-xs text-[var(--text-tertiary)] opacity-50 italic mt-2">각자의 캐릭터들은 모두 소중합니다</p>
           </div>
 
           <form onSubmit={handleSubmit} className="w-full max-w-md relative">
@@ -245,18 +247,28 @@ export default function App() {
           </div>
         )}
 
+        {/* 격려 메시지 */}
+        {(() => {
+          const score = calculateCreatorScore(data.stats, data.characters);
+          const tier = getCreatorTier(score);
+          return <EncouragementBanner tier={tier} characters={data.characters} stats={data.stats} />;
+        })()}
+
         <ProfileHeader profile={data.profile} stats={data.stats} characters={data.characters} />
 
         {/* 탭 */}
         <div className="flex gap-1 p-1 rounded-lg bg-[var(--bg-secondary)]">
           <TabButton active={tab === 'summary'} onClick={() => setTab('summary')}>요약</TabButton>
           <TabButton active={tab === 'detail'} onClick={() => setTab('detail')}>상세</TabButton>
+          <TabButton active={tab === 'achievements'} onClick={() => setTab('achievements')}>업적</TabButton>
         </div>
 
         <div className="animate-fade-in-up">
           {tab === 'summary'
             ? <SummaryTab characters={data.characters} />
-            : <DetailTab stats={data.stats} characters={data.characters} />
+            : tab === 'detail'
+              ? <DetailTab stats={data.stats} characters={data.characters} />
+              : <AchievementsTab stats={data.stats} characters={data.characters} />
           }
         </div>
       </main>
