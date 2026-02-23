@@ -1,0 +1,42 @@
+{
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist",
+    "framework": "vite",
+    "rewrites": [
+        {
+            "source": "/api/resolve-handle",
+            "destination": "/api/resolve-handle"
+        },
+        {
+            "source": "/api/zeta/:path*",
+            "destination": "https://api.zeta-ai.io/v1/:path*"
+        },
+        {
+            "source": "/zeta-image/:path*",
+            "destination": "https://image.zeta-ai.io/:path*"
+        },
+        {
+            "source": "/zeta-s3/:path*",
+            "destination": "https://zeta-image.s3.ap-northeast-2.amazonaws.com/:path*"
+        }
+    ],
+    "headers": [
+        {
+            "source": "/api/(.*)",
+            "headers": [
+                {
+                    "key": "Access-Control-Allow-Origin",
+                    "value": "*"
+                },
+                {
+                    "key": "Access-Control-Allow-Methods",
+                    "value": "GET, OPTIONS"
+                },
+                {
+                    "key": "Access-Control-Allow-Headers",
+                    "value": "Content-Type"
+                }
+            ]
+        }
+    ]
+}
