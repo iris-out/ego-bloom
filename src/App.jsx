@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Loader2, AlertCircle, Sun, Moon, Info, X, RefreshCw, ArrowLeftRight } from 'lucide-react';
+import { Search, Loader2, AlertCircle, Sun, Moon, Info, X, RefreshCw } from 'lucide-react';
 import { useTheme } from './contexts/ThemeContext';
 import ProfileHeader from './components/ProfileHeader';
 import SummaryTab from './components/SummaryTab';
 import DetailTab from './components/DetailTab';
-import CompareView from './components/CompareView';
+
 import SkeletonUI from './components/SkeletonUI';
 import { proxyImageUrl, getPlotImageUrl, getPlotImageUrls } from './utils/imageUtils';
 import { getRecentSearches, addRecentSearch, removeRecentSearch } from './utils/storage';
@@ -37,7 +37,7 @@ export default function App() {
   const [tab, setTab] = useState('summary');
   const [recentSearches, setRecentSearches] = useState([]);
   const [cacheInfo, setCacheInfo] = useState(null); // { cachedAt: timestamp }
-  const [compareMode, setCompareMode] = useState(false); // 비교 모드
+
   const [cacheRemaining, setCacheRemaining] = useState(null); // 남은 분
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function App() {
     setError(null);
     setData(null);
     setCacheInfo(null);
-    setCompareMode(false);
+
     setTab('summary');
 
     try {
@@ -138,7 +138,7 @@ export default function App() {
   };
 
   const handleSubmit = (e) => { e.preventDefault(); if (input.trim()) fetchData(input); };
-  const handleBack = () => { setData(null); setError(null); setLoading(false); setCacheInfo(null); setCompareMode(false); };
+  const handleBack = () => { setData(null); setError(null); setLoading(false); setCacheInfo(null); };
   const handleDeleteRecent = (term, e) => { e.stopPropagation(); setRecentSearches(removeRecentSearch(term)); };
 
   // ===== 검색 화면 =====
@@ -247,30 +247,16 @@ export default function App() {
 
         <ProfileHeader profile={data.profile} stats={data.stats} characters={data.characters} />
 
-        {/* 탭 + 비교 버튼 */}
-        <div className="flex gap-2 items-center">
-          <div className="flex gap-1 p-1 rounded-lg bg-[var(--bg-secondary)] flex-1">
-            <TabButton active={tab === 'summary' && !compareMode} onClick={() => { setTab('summary'); setCompareMode(false); }}>요약</TabButton>
-            <TabButton active={tab === 'detail' && !compareMode} onClick={() => { setTab('detail'); setCompareMode(false); }}>상세</TabButton>
-          </div>
-          <button
-            onClick={() => setCompareMode(prev => !prev)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-bold transition-all ${compareMode
-              ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
-              : 'bg-[var(--card)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)]'
-              }`}
-          >
-            <ArrowLeftRight size={14} />
-            비교
-          </button>
+        {/* 탭 */}
+        <div className="flex gap-1 p-1 rounded-lg bg-[var(--bg-secondary)]">
+          <TabButton active={tab === 'summary'} onClick={() => setTab('summary')}>요약</TabButton>
+          <TabButton active={tab === 'detail'} onClick={() => setTab('detail')}>상세</TabButton>
         </div>
 
         <div className="animate-fade-in-up">
-          {compareMode
-            ? <CompareView baseData={data} onClose={() => setCompareMode(false)} />
-            : tab === 'summary'
-              ? <SummaryTab characters={data.characters} />
-              : <DetailTab stats={data.stats} characters={data.characters} />
+          {tab === 'summary'
+            ? <SummaryTab characters={data.characters} />
+            : <DetailTab stats={data.stats} characters={data.characters} />
           }
         </div>
       </main>
