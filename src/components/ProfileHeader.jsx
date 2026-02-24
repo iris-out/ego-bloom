@@ -5,7 +5,7 @@ import { TierBadgeWithTooltip, TierBadge } from './TierBadge';
 import HoverNumber from './HoverNumber';
 import { Download, Loader2, Calendar, Sparkles, Crown, Landmark, Film } from 'lucide-react';
 import { toPng } from 'html-to-image';
-import mediaFranchises from '../data/mediaFranchises.json';
+import { computeEarnedPills, BADGE_DESCRIPTIONS, FIXED_BADGE_IDS } from '../data/badges';
 import ImageWithFallback from './ImageWithFallback';
 import { proxyImageUrl, getPlotImageUrls } from '../utils/imageUtils';
 import RecapModal from './RecapModal';
@@ -384,97 +384,14 @@ function StatItem({ label, value, sub, accentSub }) {
   );
 }
 
-// ===== 크리에이터 특성 Pill 뱃지 =====
-const MEDIA_SET = new Set([
-  ...mediaFranchises.mobileGames,
-  ...mediaFranchises.anime,
-  ...mediaFranchises.movies,
-  ...mediaFranchises.roblox,
-  ...mediaFranchises.tags,
-].map(t => t.toLowerCase()));
-
+// ===== 크리에이터 특성 Pill 뱃지 (단일 소스: src/data/badges.js) =====
 function CreatorPills({ characters, firstCharDate, stats }) {
-  const allPills = React.useMemo(() => {
-    if (!characters || characters.length === 0) return [];
-    const result = [];
-    const allTags = characters.flatMap(c => (c.hashtags || c.tags || []).map(t => t.toLowerCase()));
-    const tagSet = new Set(allTags);
-    const hasSunae = tagSet.has('순애');
-    const hasNtr = tagSet.has('ntr') || tagSet.has('ntl') || tagSet.has('뺏기') || tagSet.has('빼앗기');
-    const unlimitedCount = characters.filter(c => c.unlimitedAllowed).length;
-
-    if (hasSunae && !hasNtr) result.push({ id: 'sunae', label: '💕 순애보', bg: 'bg-pink-500/15', border: 'border-pink-400/30', text: 'text-pink-300' });
-    if (hasNtr) result.push({ id: 'ntr', label: '💔 사랑 파괴자', bg: 'bg-red-500/15', border: 'border-red-400/30', text: 'text-red-300' });
-    if (allTags.some(t => MEDIA_SET.has(t))) result.push({ id: '2nd', label: '🎨 2차창작', bg: 'bg-blue-500/15', border: 'border-blue-400/30', text: 'text-blue-300' });
-    if (['판타지', '마법', '기사', '마왕', '용사', '엘프', '드래곤'].some(t => tagSet.has(t))) result.push({ id: 'fantasy', label: '🗡️ 판타지', bg: 'bg-indigo-500/15', border: 'border-indigo-400/30', text: 'text-indigo-300' });
-
-    // 활동 기간 및 명성
-    const activityDays = firstCharDate ? Math.max(1, (Date.now() - firstCharDate.getTime()) / 86400000) : 0;
-    if (activityDays <= 90 && activityDays > 0) result.push({ id: 'newbie', label: '🌱 뉴비', bg: 'bg-emerald-500/15', border: 'border-emerald-400/30', text: 'text-emerald-300' });
-    if (activityDays >= 548) result.push({ id: 'military', label: '🎖️ 이병부터 병장까지', bg: 'bg-blue-500/15', border: 'border-blue-400/30', text: 'text-blue-300' });
-    else if (activityDays >= 365) result.push({ id: 'oneyear', label: '🎂 벌써 1년', bg: 'bg-emerald-500/15', border: 'border-emerald-400/30', text: 'text-emerald-300' });
-
-    if (tagSet.has('사이버펑크') || tagSet.has('cyberpunk')) result.push({ id: 'cyber', label: '⚡ 사펑', gradient: true });
-    if (tagSet.has('메스가키') || tagSet.has('도발')) result.push({ id: 'mesu', label: '🩷 허접', bg: 'bg-pink-500/15', border: 'border-pink-400/30', text: 'text-pink-300' });
-    if (unlimitedCount > 0) result.push({ id: 'unlimit', label: '🔮 언리밋', bg: 'bg-violet-500/15', border: 'border-violet-400/30', text: 'text-violet-300' });
-
-    // 수인 태그 (털)
-    if (['수인', '수인형', '퍼리', 'furry'].some(t => tagSet.has(t))) {
-      result.push({ id: 'furry', label: '🐾 털', bg: 'bg-amber-500/15', border: 'border-amber-400/30', text: 'text-amber-300' });
-    }
-
-    // 통계 기반
-    const totalInteractions = characters.reduce((s, c) => s + (c.interactionCount || 0), 0);
-    const hasMillionChar = characters.some(c => (c.interactionCount || 0) >= 1000000);
-    const hasHalfMillionChar = characters.some(c => (c.interactionCount || 0) >= 500000);
-    const hatTrick = characters.filter(c => (c.interactionCount || 0) >= 1000000).length >= 3;
-
-    if (hatTrick) result.push({ id: 'hattrick', label: '🎩 해트트릭', bg: 'bg-indigo-500/15', border: 'border-indigo-400/30', text: 'text-indigo-300' });
-    if (hasMillionChar) result.push({ id: 'platinum', label: '💿 플래티넘 디스크', bg: 'bg-slate-500/15', border: 'border-slate-400/30', text: 'text-slate-300' });
-    else if (hasHalfMillionChar) result.push({ id: 'gold_disc', label: '📀 골든 디스크', bg: 'bg-yellow-500/15', border: 'border-yellow-400/30', text: 'text-yellow-300' });
-
-    if (totalInteractions >= 10000000) result.push({ id: '10m', label: '🎬 천만관객', bg: 'bg-yellow-500/15', border: 'border-yellow-400/30', text: 'text-yellow-300' });
-    else if (totalInteractions >= 1000000) result.push({ id: '1m', label: '💬 밀리언', bg: 'bg-amber-500/15', border: 'border-amber-400/30', text: 'text-amber-300' });
-
-    if ((stats?.followerCount || 0) >= 10000) result.push({ id: 'superstar', label: '🌌 우주대스타', gradient: true });
-
-    // 새 칭호 (시간대 칭호 제거 후 추가)
-    if (characters.length >= 50) result.push({ id: 'family', label: '👨‍👩‍👧‍👦 또 하나의 가족', bg: 'bg-rose-500/15', border: 'border-rose-400/30', text: 'text-rose-300' });
-    if (characters.length >= 100) result.push({ id: 'fertile', label: '🌾 다산의 상징', bg: 'bg-lime-500/15', border: 'border-lime-400/30', text: 'text-lime-300' });
-    if (tagSet.has('일진')) result.push({ id: 'iljin', label: '🏀 야 체육 안가고 뭐해', bg: 'bg-orange-500/15', border: 'border-orange-400/30', text: 'text-orange-300' });
-    if (tagSet.has('찐따')) result.push({ id: 'jjindda', label: '🚶 니 애인 지나간다', bg: 'bg-slate-500/15', border: 'border-slate-400/30', text: 'text-slate-300' });
-    const hasNo2nd = !allTags.some(t => MEDIA_SET.has(t));
-    if (hasNo2nd && characters.length > 0) result.push({ id: 'original', label: '✨ 오리지널', bg: 'bg-sky-500/15', border: 'border-sky-400/30', text: 'text-sky-300' });
-
-    return result;
-  }, [characters, firstCharDate, stats]);
-
-  const fixedIds = ['sunae', 'ntr'];
-
-  const BADGE_DESCRIPTIONS = {
-    sunae: '순애 태그, NTR 없음',
-    ntr: 'NTR/NTL 등',
-    '2nd': '게임·애니·영화 2차창작',
-    fantasy: '판타지·마법·기사 등',
-    newbie: '활동 3개월 이하',
-    military: '활동 1년 6개월 이상',
-    oneyear: '활동 1년 이상',
-    cyber: '사이버펑크',
-    mesu: '메스가키·도발',
-    unlimit: 'Unlimited 설정',
-    furry: '수인·퍼리',
-    hattrick: '100만 대화 캐릭터 3개+',
-    platinum: '100만 대화 캐릭터',
-    gold_disc: '50만 대화 캐릭터',
-    '10m': '총 대화 1천만+',
-    '1m': '총 대화 100만+',
-    superstar: '팔로워 1만+',
-    family: '캐릭터 50명+',
-    fertile: '캐릭터 100명+',
-    iljin: '#일진 태그',
-    jjindda: '#찐따 태그',
-    original: '2차창작 태그 없음',
-  };
+  const activityDays = firstCharDate ? Math.max(1, (Date.now() - firstCharDate.getTime()) / 86400000) : 0;
+  const allPills = React.useMemo(
+    () => computeEarnedPills({ characters, stats, activityDays }, 'profile'),
+    [characters, stats, activityDays]
+  );
+  const fixedIds = FIXED_BADGE_IDS;
 
   const [selected, setSelected] = React.useState(null); // null = show all (up to 8)
   const [editing, setEditing] = React.useState(false);

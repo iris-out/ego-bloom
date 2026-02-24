@@ -3,15 +3,7 @@ import { X, Users, Moon, Sun, TrendingUp, Sparkles, Zap, Star, Award } from 'luc
 import { formatCompactNumber, formatNumber } from '../utils/tierCalculator';
 import CreatorTierBadge from './CreatorTierBadge';
 import { getPlotImageUrl, proxyImageUrl } from '../utils/imageUtils';
-import mediaFranchises from '../data/mediaFranchises.json';
-
-const MEDIA_SET = new Set([
-    ...mediaFranchises.mobileGames,
-    ...mediaFranchises.anime,
-    ...mediaFranchises.movies,
-    ...mediaFranchises.roblox,
-    ...mediaFranchises.tags,
-].map(t => t.toLowerCase()));
+import { computeEarnedPills } from '../data/badges';
 
 export default function RecapModal({ isOpen, onClose, characters, stats, profile, tier, score }) {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -68,55 +60,11 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
     const maxSlot = Object.entries(timeSlots).reduce((a, b) => a[1] > b[1] ? a : b)[0];
     const isNightOwl = maxSlot === 'night' || maxSlot === 'dawn';
 
-    // 칭호 로직
-    const allPills = useMemo(() => {
-        if (!characters || characters.length === 0) return [];
-        const result = [];
-        const allTags = characters.flatMap(c => (c.hashtags || c.tags || []).map(t => t.toLowerCase()));
-        const tagSet = new Set(allTags);
-        const hasSunae = tagSet.has('순애');
-        const hasNtr = tagSet.has('ntr') || tagSet.has('ntl') || tagSet.has('뺏기') || tagSet.has('빼앗기');
-        const unlimitedCount = characters.filter(c => c.unlimitedAllowed).length;
-        const interactionStats = characters.reduce((s, c) => s + (c.interactionCount || 0), 0);
-
-        if (hasSunae && !hasNtr) result.push({ id: 'sunae', label: '💕 순애보', text: 'text-pink-300', bg: 'bg-pink-500/20', border: 'border-pink-500/50' });
-        if (hasNtr) result.push({ id: 'ntr', label: '💔 사랑 파괴자', text: 'text-red-300', bg: 'bg-red-500/20', border: 'border-red-500/50' });
-        if (allTags.some(t => MEDIA_SET.has(t))) result.push({ id: '2nd', label: '🎨 2차창작', text: 'text-blue-300', bg: 'bg-blue-500/20', border: 'border-blue-500/50' });
-        if (['판타지', '마법', '기사', '마왕', '용사', '엘프', '드래곤'].some(t => tagSet.has(t))) result.push({ id: 'fantasy', label: '🗡️ 판타지', text: 'text-indigo-300', bg: 'bg-indigo-500/20', border: 'border-indigo-500/50' });
-
-        if (daysSince <= 90) result.push({ id: 'newbie', label: '🌱 뉴비', text: 'text-emerald-300', bg: 'bg-emerald-500/20', border: 'border-emerald-500/50' });
-        if (daysSince >= 548) result.push({ id: 'military', label: '🎖️ 이병부터 병장까지', text: 'text-blue-300', bg: 'bg-blue-500/20', border: 'border-blue-500/50' });
-        else if (daysSince >= 365) result.push({ id: 'oneyear', label: '🎂 벌써 1년', text: 'text-emerald-300', bg: 'bg-emerald-500/20', border: 'border-emerald-500/50' });
-
-        if (tagSet.has('사이버펑크') || tagSet.has('cyberpunk')) result.push({ id: 'cyber', label: '⚡ 사펑', gradient: true });
-        if (tagSet.has('메스가키') || tagSet.has('도발')) result.push({ id: 'mesu', label: '🩷 허접', text: 'text-pink-400', bg: 'bg-pink-600/20', border: 'border-pink-600/50' });
-        if (unlimitedCount > 0) result.push({ id: 'unlimit', label: '🔮 언리밋', text: 'text-violet-300', bg: 'bg-violet-500/20', border: 'border-violet-500/50' });
-        if (['수인', '수인형', '퍼리', 'furry'].some(t => tagSet.has(t))) result.push({ id: 'furry', label: '🐾 털', text: 'text-amber-300', bg: 'bg-amber-500/20', border: 'border-amber-500/50' });
-
-        const hasMillionChar = characters.some(c => (c.interactionCount || 0) >= 1000000);
-        const hasHalfMillionChar = characters.some(c => (c.interactionCount || 0) >= 500000);
-        const hatTrick = characters.filter(c => (c.interactionCount || 0) >= 1000000).length >= 3;
-
-        if (hatTrick) result.push({ id: 'hattrick', label: '🎩 해트트릭', text: 'text-indigo-300', bg: 'bg-indigo-500/20', border: 'border-indigo-500/50' });
-        if (hasMillionChar) result.push({ id: 'platinum', label: '💿 플래티넘 디스크', text: 'text-slate-300', bg: 'bg-slate-500/20', border: 'border-slate-500/50' });
-        else if (hasHalfMillionChar) result.push({ id: 'gold_disc', label: '📀 골든 디스크', text: 'text-yellow-300', bg: 'bg-yellow-500/20', border: 'border-yellow-500/50' });
-
-        const totalInteractionStats = characters.reduce((s, c) => s + (c.interactionCount || 0), 0);
-        if (totalInteractionStats >= 10000000) result.push({ id: '10m', label: '🎬 천만관객', text: 'text-yellow-300', bg: 'bg-yellow-500/20', border: 'border-yellow-500/50' });
-        else if (totalInteractionStats >= 1000000) result.push({ id: '1m', label: '💬 밀리언', text: 'text-amber-300', bg: 'bg-amber-500/20', border: 'border-amber-500/50' });
-
-        if ((stats.followerCount || 0) >= 10000) result.push({ id: 'superstar', label: '🌌 우주대스타', gradient: true });
-
-        // 새 칭호: 데이터 기반 (시간대 제거 후 추가)
-        if (characters.length >= 50) result.push({ id: 'family', label: '👨‍👩‍👧‍👦 또 하나의 가족', text: 'text-rose-300', bg: 'bg-rose-500/20', border: 'border-rose-500/50' });
-        if (characters.length >= 100) result.push({ id: 'fertile', label: '🌾 다산의 상징', text: 'text-lime-300', bg: 'bg-lime-500/20', border: 'border-lime-500/50' });
-        if (tagSet.has('일진')) result.push({ id: 'iljin', label: '🏀 야 체육 안가고 뭐해', text: 'text-orange-300', bg: 'bg-orange-500/20', border: 'border-orange-500/50' });
-        if (tagSet.has('찐따')) result.push({ id: 'jjindda', label: '🚶 니 애인 지나간다', text: 'text-slate-300', bg: 'bg-slate-500/20', border: 'border-slate-500/50' });
-        const hasNo2nd = !allTags.some(t => MEDIA_SET.has(t));
-        if (hasNo2nd && characters.length > 0) result.push({ id: 'original', label: '✨ 오리지널', text: 'text-sky-300', bg: 'bg-sky-500/20', border: 'border-sky-500/50' });
-
-        return result;
-    }, [characters, daysSince, stats]);
+    // 칭호 로직 (단일 소스: src/data/badges.js)
+    const allPills = useMemo(
+        () => computeEarnedPills({ characters, stats, activityDays: daysSince }, 'recap'),
+        [characters, daysSince, stats]
+    );
 
     // 배경 이미지 로드
     const getBackgroundForSlide = (index) => {
@@ -138,9 +86,9 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-fade-in transition-all duration-500">
-            {/* 메인 컨테이너 (PC에서는 화면 중앙 레터박스) */}
-            <div className="relative w-full h-full max-w-[480px] bg-stone-900 overflow-hidden shadow-2xl flex flex-col mx-auto">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-fade-in transition-all duration-500 p-0 sm:p-0 safe-area-recap">
+            {/* 모바일: 전체 화면 + 세이프영역, 스크롤 가능 컨테이너 */}
+            <div className="relative w-full h-full max-h-[100dvh] max-w-[480px] bg-stone-900 shadow-2xl flex flex-col mx-auto overflow-hidden rounded-none sm:rounded-xl">
 
                 {/* === 백그라운드 레이어 === */}
                 {bgUrl ? (
@@ -157,7 +105,7 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
                 )}
 
                 {/* === 상단 인디케이터 바 및 닫기 버튼 === */}
-                <div className="absolute top-0 inset-x-0 z-50 p-4 sm:p-5">
+                <div className="absolute top-0 inset-x-0 z-50 p-3 sm:p-5 pt-[env(safe-area-inset-top)]">
                     <div className="flex items-center gap-1.5 mb-5">
                         {Array.from({ length: totalSlides }).map((_, i) => (
                             <div key={i} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
@@ -178,12 +126,13 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
                     </div>
                 </div>
 
-                {/* === 좌우 이동용 클릭 액션 구역 === */}
-                <div className="absolute inset-x-0 bottom-[10%] top-[15%] z-40 cursor-pointer" onClick={handleAreaClick} />
+                {/* === 좌우만 터치 시 슬라이드 이동 (가운데는 스크롤 가능) === */}
+                <div className="absolute left-0 top-[12%] bottom-[12%] w-[28%] z-40 cursor-pointer" style={{ top: 'calc(12% + env(safe-area-inset-top, 0px))', bottom: 'calc(12% + env(safe-area-inset-bottom, 0px))' }} onClick={prevSlide} aria-hidden />
+                <div className="absolute right-0 top-[12%] bottom-[12%] w-[28%] z-40 cursor-pointer" style={{ top: 'calc(12% + env(safe-area-inset-top, 0px))', bottom: 'calc(12% + env(safe-area-inset-bottom, 0px))' }} onClick={nextSlide} aria-hidden />
 
-                {/* === 메인 슬라이드 컨텐츠 === */}
-                <div className="relative z-30 flex-1 flex flex-col items-center justify-center p-8 sm:p-10 text-center pointer-events-none">
-
+                {/* === 메인 슬라이드 컨텐츠 (모바일에서 스크롤 가능) === */}
+                <div className="relative z-30 flex-1 min-h-0 overflow-y-auto overflow-x-hidden text-center px-4 py-6 sm:p-8 sm:py-10 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+                    <div className="flex flex-col items-center justify-center min-h-full">
                     {/* [0] 종합 대화량 */}
                     {currentSlide === 0 && (
                         <div className="animate-slide-up space-y-6">
@@ -315,7 +264,7 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
                                 <Award size={32} className="text-yellow-400" />
                             </div>
                             <p className="text-sm md:text-base text-gray-300 font-medium mb-6">여정의 발자취가 새겨진 특별한 칭호들</p>
-                            <div className="flex flex-wrap justify-center gap-2.5 px-4 h-[250px] overflow-hidden content-center">
+                            <div className="flex flex-wrap justify-center gap-2.5 px-4 min-h-[140px] max-h-[40vh] sm:max-h-[250px] overflow-y-auto content-center">
                                 {allPills.slice(0, 10).map((pill, idx) => (
                                     pill.gradient ? (
                                         <div key={pill.id} className="px-5 py-2.5 rounded-full text-sm font-bold text-white shadow-xl transform hover:scale-110 transition-transform flex items-center gap-1.5"
@@ -338,11 +287,11 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
 
                     {/* [7] 피날레: 티어 */}
                     {currentSlide === 7 && (
-                        <div className="animate-slide-up space-y-6 flex flex-col items-center">
-                            <div className="mb-6 transform scale-[1.7] md:scale-[2.0] mt-8">
+                        <div className="animate-slide-up space-y-4 sm:space-y-6 flex flex-col items-center">
+                            <div className="mb-2 sm:mb-6 transform scale-[1.4] sm:scale-[1.7] md:scale-[2.0] mt-2 sm:mt-8">
                                 <CreatorTierBadge tier={tier} score={score} />
                             </div>
-                            <div className="mt-16 space-y-2">
+                            <div className="mt-8 sm:mt-16 space-y-2">
                                 <p className="text-sm md:text-base text-gray-300 font-medium tracking-wide">달성한 종합 티어</p>
                                 <h2 className="text-5xl md:text-6xl font-black leading-tight drop-shadow-md py-1" style={{ color: tier?.color ?? '#9ca3af' }}>
                                     {tier?.name || '티어 없음'}
@@ -353,10 +302,11 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
                                 </div>
                             </div>
 
-                            <p className="text-[10px] text-gray-500 uppercase tracking-[0.3em] mt-8">We Support Your Next Journey</p>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-[0.3em] mt-4 sm:mt-8">We Support Your Next Journey</p>
                         </div>
                     )}
 
+                    </div>
                 </div>
             </div>
         </div>
