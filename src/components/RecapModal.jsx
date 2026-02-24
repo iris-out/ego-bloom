@@ -86,9 +86,9 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-fade-in transition-all duration-500 p-0 sm:p-0 safe-area-recap">
-            {/* 모바일: 전체 화면 + 세이프영역, 스크롤 가능 컨테이너 */}
-            <div className="relative w-full h-full max-h-[100dvh] max-w-[480px] bg-stone-900 shadow-2xl flex flex-col mx-auto overflow-hidden rounded-none sm:rounded-xl">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-fade-in transition-all duration-500 p-0 min-h-[100dvh] safe-area-recap">
+            {/* 모바일: 전체 화면 (100dvh, 전체 너비) / 데스크톱: 중앙 카드 */}
+            <div className="relative w-full h-[100dvh] max-h-[100dvh] sm:h-full sm:max-w-[480px] bg-stone-900 shadow-2xl flex flex-col mx-auto overflow-hidden rounded-none sm:rounded-xl">
 
                 {/* === 백그라운드 레이어 === */}
                 {bgUrl ? (
