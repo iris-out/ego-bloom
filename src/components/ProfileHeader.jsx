@@ -1,52 +1,65 @@
 import React, { useState, useCallback } from 'react';
-import { formatNumber, getCreatorTier, getCharacterTier, calculateCreatorScore, calculateCreatorScoreRecent, calculatePercentile } from '../utils/tierCalculator';
+import { formatNumber, formatCompactNumber, getCreatorTier, getCharacterTier, calculateCreatorScore, calculatePercentile } from '../utils/tierCalculator';
 import CreatorTierBadge from './CreatorTierBadge';
-import { TierBadgeWithTooltip } from './TierBadge';
+import { TierBadgeWithTooltip, TierBadge } from './TierBadge';
 import HoverNumber from './HoverNumber';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, Calendar, Sparkles, Crown, Landmark, Film } from 'lucide-react';
 import { toPng } from 'html-to-image';
+import mediaFranchises from '../data/mediaFranchises.json';
+import ImageWithFallback from './ImageWithFallback';
+import { proxyImageUrl, getPlotImageUrls } from '../utils/imageUtils';
+import RecapModal from './RecapModal';
 
 export default function ProfileHeader({ profile, stats, characters }) {
   // ✅ 훅은 반드시 early return 이전에 선언해야 한다.
-  const [tierMode, setTierMode] = useState('total'); // 'total' | 'recent'
+  const [tierMode, setTierMode] = useState('total'); // 'total' | 'highlight'
   const [exporting, setExporting] = useState(false);
+  const [showRecap, setShowRecap] = useState(false);
   const cardRef = React.useRef(null);
+
+  // Hash Routing 기반 Recap Modal 열기/닫기 처리 (Browser Back 연동)
+  React.useEffect(() => {
+    const handleHashChange = () => {
+      setShowRecap(window.location.hash === '#recap');
+    };
+    handleHashChange(); // 초기 렌더 확인 시점
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  const openRecap = useCallback(() => {
+    window.location.hash = 'recap';
+  }, []);
+
+  const closeRecap = useCallback(() => {
+    if (window.location.hash === '#recap') {
+      history.back(); // 해시를 지우고 라우터 히스토리 롤백
+    } else {
+      setShowRecap(false);
+    }
+  }, []);
 
   const breakdown = React.useMemo(() => {
     if (!profile || !stats) return null;
-    if (tierMode === 'total') {
-      const sorted = (characters || []).sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0));
-      const top20Sum = sorted.slice(0, 20).reduce((acc, c) => acc + (c.interactionCount || 0), 0);
-      const charCount = characters?.length || (stats.plotCount || 1);
-      const totalInteractions = stats.plotInteractionCount || 0;
-      return {
-        mode: 'total',
-        interactions: totalInteractions,
-        followers: stats.followerCount || 0,
-        avgInteractions: charCount > 0 ? totalInteractions / charCount : 0,
-        voicePlays: stats.voicePlayCount || 0,
-        top20Sum
-      };
-    } else {
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setDate(sixMonthsAgo.getDate() - 180);
-      const recentChars = (characters || []).filter(c => {
-        const date = c.createdAt || c.createdDate;
-        return date && new Date(date) >= sixMonthsAgo;
-      });
-      const totalInteractions = recentChars.reduce((acc, c) => acc + (c.interactionCount || 0), 0);
-      const charCount = recentChars.length || 1;
-      const sorted = [...recentChars].sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0));
-      const top20Sum = sorted.slice(0, 20).reduce((acc, c) => acc + (c.interactionCount || 0), 0);
-      return {
-        mode: 'recent',
-        interactions: totalInteractions,
-        followers: stats.followerCount || 0,
-        avgInteractions: recentChars.length > 0 ? totalInteractions / charCount : 0,
-        voicePlays: stats.voicePlayCount || 0,
-        top20Sum
-      };
-    }
+    const sorted = (characters || []).sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0));
+    const top20Sum = sorted.slice(0, 20).reduce((acc, c) => acc + (c.interactionCount || 0), 0);
+    const charCount = characters?.length || (stats.plotCount || 1);
+    const totalInteractions = stats.plotInteractionCount || 0;
+
+    // Calculate activity days
+    const dates = (characters || []).map(c => c.createdAt || c.createdDate).filter(Boolean).map(d => new Date(d).getTime()).filter(t => !isNaN(t));
+    const activityDays = Math.max(1, dates.length > 0 ? (Date.now() - Math.min(...dates)) / 86400000 : 1);
+
+    return {
+      mode: tierMode,
+      interactions: totalInteractions,
+      followers: stats.followerCount || 0,
+      avgInteractions: charCount > 0 ? totalInteractions / charCount : 0,
+      dailyAvgInteractions: totalInteractions / activityDays,
+      activityDays: Math.floor(activityDays),
+      voicePlays: stats.voicePlayCount || 0,
+      top20Sum,
+    };
   }, [tierMode, stats, characters, profile]);
 
   // 첫 번째 캐릭터 제작 날짜 (가장 이른 createdAt)
@@ -91,20 +104,13 @@ export default function ProfileHeader({ profile, stats, characters }) {
 
   if (!profile || !stats) return null;
 
-  const score = tierMode === 'total'
-    ? calculateCreatorScore(stats, characters)
-    : calculateCreatorScoreRecent(stats, characters);
+  const score = calculateCreatorScore(stats, characters);
 
   const tier = getCreatorTier(score);
   const totalMessages = stats.plotInteractionCount || 0;
   const percentileLabel = calculatePercentile(totalMessages);
 
-  const displayCharacters = tierMode === 'total'
-    ? characters
-    : (characters || []).filter(c => {
-      const date = c.createdAt || c.createdDate;
-      return date && new Date(date) >= new Date(Date.now() - 180 * 24 * 60 * 60 * 1000);
-    });
+  const displayCharacters = characters; // 성장세 모드에서도 전체 캐릭터 표시
 
   const top20 = (displayCharacters || [])
     .sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0))
@@ -138,7 +144,7 @@ export default function ProfileHeader({ profile, stats, characters }) {
   return (
     <div className="card p-4 sm:p-6 relative" ref={cardRef}>
       {/* Tier Mode Selector */}
-      <div className="absolute top-4 left-4 sm:top-6 sm:left-6 flex bg-[var(--bg-secondary)] rounded-full p-1 border border-[var(--border)] z-10">
+      <div className="absolute top-2 left-4 sm:top-4 sm:left-6 flex items-center bg-[var(--bg-secondary)] rounded-full p-1 border border-[var(--border)] z-10">
         <button
           onClick={() => setTierMode('total')}
           className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${tierMode === 'total'
@@ -149,28 +155,55 @@ export default function ProfileHeader({ profile, stats, characters }) {
           전체
         </button>
         <button
-          onClick={() => setTierMode('recent')}
-          className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${tierMode === 'recent'
+          onClick={() => setTierMode('highlight')}
+          className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${tierMode === 'highlight'
             ? 'bg-[var(--card)] text-[var(--text-primary)] shadow-sm'
             : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
             }`}
         >
-          최근 6개월
+          하이라이트
         </button>
+        {/* 통합 툴팁 */}
+        <div className="relative group/tip ml-0.5 mr-1">
+          <span className="w-4 h-4 rounded-full bg-[var(--border)] text-[var(--text-tertiary)] text-[8px] font-black flex items-center justify-center cursor-help shrink-0 hover:bg-[var(--accent)]/30 hover:text-[var(--accent)] transition-colors">?</span>
+          <div className="absolute top-full left-0 sm:left-auto sm:right-0 mt-2 w-56 p-3 bg-[rgba(20,20,30,0.97)] border border-[var(--border)] rounded-xl shadow-xl z-50 text-white text-[10px] leading-relaxed invisible group-hover/tip:visible pointer-events-none">
+            <div className="font-bold text-[var(--accent)] mb-2">티어 카드 모드</div>
+            <div className="mb-2">
+              <div className="font-semibold text-white/90 mb-0.5">📊 전체</div>
+              <div className="text-gray-400">활동 내역 요약과 상위<br />캐릭터 20개의 분포 기록입니다.</div>
+            </div>
+            <div className="pt-2 border-t border-white/10">
+              <div className="font-semibold text-white/90 mb-0.5">✨ 하이라이트</div>
+              <div className="text-gray-400">크리에이터를 빛낸 첫 캐릭터, 최신,<br />최고 인기 캐릭터 시상대입니다.</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Export Button — 아이콘만 */}
-      <button
-        onClick={handleExport}
-        disabled={exporting}
-        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10 p-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all disabled:opacity-50"
-        title="카드 이미지로 저장"
-      >
-        {exporting
-          ? <Loader2 size={15} className="animate-spin" />
-          : <Download size={15} />
-        }
-      </button>
+      <div className="absolute top-2 right-4 sm:top-4 sm:right-6 z-10 flex items-center gap-1.5">
+        {/* Recap Fullscreen Button */}
+        <button
+          onClick={openRecap}
+          className="px-2.5 py-1.5 rounded-full bg-[var(--bg-secondary)] border border-purple-500/40 text-purple-400 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition-all shadow-[0_0_8px_rgba(168,85,247,0.2)] flex items-center gap-1.5"
+          title="연말결산 스토리 보기"
+        >
+          <Film size={13} />
+          <span className="text-[10px] font-black tracking-wide">RECAP</span>
+        </button>
+
+        {/* Export Button — 아이콘만 */}
+        <button
+          onClick={handleExport}
+          disabled={exporting}
+          className="w-7 h-7 flex items-center justify-center rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all disabled:opacity-50"
+          title="카드 이미지로 저장"
+        >
+          {exporting
+            ? <Loader2 size={14} className="animate-spin" />
+            : <Download size={14} />
+          }
+        </button>
+      </div>
 
       <div className="flex items-center gap-3 sm:gap-4 mt-12 sm:mt-10">
         {/* Avatar */}
@@ -189,33 +222,28 @@ export default function ProfileHeader({ profile, stats, characters }) {
             <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] truncate">
               {profile.nickname}
             </h2>
-            <div className="flex gap-1">
-              {topTags.map(tag => (
-                <span key={tag} className="px-1.5 py-0.5 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] text-[10px] text-[var(--text-tertiary)]">
-                  #{tag}
-                </span>
-              ))}
-            </div>
           </div>
           <p className="text-sm text-[var(--text-tertiary)]">@{profile.username}</p>
-          {/* 계정 활동 기간 배지 — 첫 캐릭터 제작일 ~ 오늘 */}
-          {firstCharDate !== null && (() => {
-            const now = new Date();
-            let years = now.getFullYear() - firstCharDate.getFullYear();
-            let months = now.getMonth() - firstCharDate.getMonth();
-            if (months < 0) { years--; months += 12; }
-            const label = years > 0
-              ? months > 0 ? `${years}년 ${months}개월째 활동 중` : `${years}년째 활동 중`
-              : months > 0
-                ? `${months}개월째 활동 중`
-                : `${Math.max(1, Math.floor((now - firstCharDate) / 86400000))}일째 활동 중`;
-            return (
-              <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--accent-soft)] border border-[var(--accent)]/20 text-[10px] font-semibold text-[var(--accent)]">
-                <span>🗓</span>
-                {label}
-              </div>
-            );
-          })()}
+          {/* 활동 기간 + 칭호 — 한 줄 */}
+          <div className="mt-1.5 flex flex-wrap items-center gap-1">
+            {firstCharDate !== null && (() => {
+              const now = new Date();
+              let years = now.getFullYear() - firstCharDate.getFullYear();
+              let months = now.getMonth() - firstCharDate.getMonth();
+              if (months < 0) { years--; months += 12; }
+              const label = years > 0
+                ? months > 0 ? `${years}년 ${months}개월째` : `${years}년째`
+                : months > 0
+                  ? `${months}개월째`
+                  : `${Math.max(1, Math.floor((now - firstCharDate) / 86400000))}일째`;
+              return (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--accent-soft)] border border-[var(--accent)]/20 text-[10px] font-semibold text-[var(--accent)]">
+                  🗓 {label}
+                </span>
+              );
+            })()}
+            <CreatorPills characters={characters} firstCharDate={firstCharDate} stats={stats} />
+          </div>
         </div>
 
         {/* Tier Badge */}
@@ -227,39 +255,60 @@ export default function ProfileHeader({ profile, stats, characters }) {
         </div>
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-4 pt-4 border-t border-[var(--border)]">
-        <StatItem label="총 대화량" value={totalMessages} />
-        <StatItem label="팔로워" value={stats.followerCount || 0} />
-        <StatItem label="캐릭터" value={stats.plotCount || 0} />
-      </div>
-
-      {/* Top 20 character tier badges */}
-      {(top20.length > 0 || tierMode === 'recent') && (
-        <div className="mt-4 pt-4 border-t border-[var(--border)]">
-          <div className="text-[10px] text-[var(--text-tertiary)] uppercase mb-2">
-            {tierMode === 'recent' ? '최근 캐릭터 20개 티어 (6개월)' : '최고 인기 20개 캐릭터 티어 (전체)'}
+      {/* 하이라이트 모드일 때 추가 지표 + 시상대 노출 */}
+      {tierMode === 'highlight' ? (
+        <div className="mt-4 animate-fade-in">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-4 border-t border-[var(--border)] mb-6">
+            <StatItem label="활동 일수" value={breakdown.activityDays} />
+            <StatItem label="일평균 대화수" value={Math.floor(breakdown.dailyAvgInteractions)} />
           </div>
-          {top20.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5">
-              {top20.map((char) => {
-                const charTier = getCharacterTier(char.interactionCount || 0);
-                return (
-                  <TierBadgeWithTooltip
-                    key={char.id}
-                    tierKey={charTier.key}
-                    size={22}
-                    className="shrink-0"
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-xs text-[var(--text-tertiary)] py-2 text-center bg-[var(--bg-secondary)] rounded-lg">
-              최근 6개월 내 제작된 캐릭터가 없습니다.
+          <PodiumHighlight characters={characters} />
+        </div>
+      ) : (
+        <>
+          {/* Stats row Calculation for TOTAL mode */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-4 pt-4 border-t border-[var(--border)] animate-fade-in">
+            <StatItem label="총 대화량" value={totalMessages} />
+            <StatItem label="팔로워" value={stats.followerCount || 0} />
+            <StatItem label="캐릭터" value={stats.plotCount || 0} />
+          </div>
+
+          {/* Top 20 character tier badges */}
+          {top20.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-[var(--border)] animate-fade-in">
+              <div className="text-[10px] text-[var(--text-tertiary)] uppercase mb-2">
+                최고 인기 20개 캐릭터 티어
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {top20.map((char) => {
+                  const charTier = getCharacterTier(char.interactionCount || 0);
+                  return (
+                    <TierBadgeWithTooltip
+                      key={char.id}
+                      tierKey={charTier.key}
+                      size={22}
+                      className="shrink-0"
+                    />
+                  );
+                })}
+              </div>
             </div>
           )}
-        </div>
+
+          {/* 주요 태그 (재배치) */}
+          <div className="mt-4 pt-4 border-t border-[var(--border)] animate-fade-in">
+            <div className="text-[10px] text-[var(--text-tertiary)] uppercase mb-2">
+              크리에이터 주요 장르
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {topTags.map(tag => (
+                <span key={tag} className="px-3 py-1.5 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] text-xs font-bold text-[var(--text-secondary)] shadow-sm hover:border-[var(--accent)] transition-all">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        </>
       )}
 
       {/* Progress bar */}
@@ -277,6 +326,17 @@ export default function ProfileHeader({ profile, stats, characters }) {
           </div>
         </div>
       )}
+
+      {/* Recap Modal 랜더링 (Z-index 오프셋 활용) */}
+      <RecapModal
+        isOpen={showRecap}
+        onClose={closeRecap}
+        characters={characters || []}
+        stats={stats}
+        profile={profile}
+        tier={tier}
+        score={score}
+      />
     </div>
   );
 }
@@ -321,5 +381,352 @@ function StatItem({ label, value, sub, accentSub }) {
         </div>
       )}
     </div>
+  );
+}
+
+// ===== 크리에이터 특성 Pill 뱃지 =====
+const MEDIA_SET = new Set([
+  ...mediaFranchises.mobileGames,
+  ...mediaFranchises.anime,
+  ...mediaFranchises.movies,
+  ...mediaFranchises.roblox,
+  ...mediaFranchises.tags,
+].map(t => t.toLowerCase()));
+
+function CreatorPills({ characters, firstCharDate, stats }) {
+  const allPills = React.useMemo(() => {
+    if (!characters || characters.length === 0) return [];
+    const result = [];
+    const allTags = characters.flatMap(c => (c.hashtags || c.tags || []).map(t => t.toLowerCase()));
+    const tagSet = new Set(allTags);
+    const hasSunae = tagSet.has('순애');
+    const hasNtr = tagSet.has('ntr') || tagSet.has('ntl') || tagSet.has('뺏기') || tagSet.has('빼앗기');
+    const unlimitedCount = characters.filter(c => c.unlimitedAllowed).length;
+
+    if (hasSunae && !hasNtr) result.push({ id: 'sunae', label: '💕 순애보', bg: 'bg-pink-500/15', border: 'border-pink-400/30', text: 'text-pink-300' });
+    if (hasNtr) result.push({ id: 'ntr', label: '💔 사랑 파괴자', bg: 'bg-red-500/15', border: 'border-red-400/30', text: 'text-red-300' });
+    if (allTags.some(t => MEDIA_SET.has(t))) result.push({ id: '2nd', label: '🎨 2차창작', bg: 'bg-blue-500/15', border: 'border-blue-400/30', text: 'text-blue-300' });
+    if (['판타지', '마법', '기사', '마왕', '용사', '엘프', '드래곤'].some(t => tagSet.has(t))) result.push({ id: 'fantasy', label: '🗡️ 판타지', bg: 'bg-indigo-500/15', border: 'border-indigo-400/30', text: 'text-indigo-300' });
+
+    // 활동 기간 및 명성
+    const activityDays = firstCharDate ? Math.max(1, (Date.now() - firstCharDate.getTime()) / 86400000) : 0;
+    if (activityDays <= 90 && activityDays > 0) result.push({ id: 'newbie', label: '🌱 뉴비', bg: 'bg-emerald-500/15', border: 'border-emerald-400/30', text: 'text-emerald-300' });
+    if (activityDays >= 548) result.push({ id: 'military', label: '🎖️ 이병부터 병장까지', bg: 'bg-blue-500/15', border: 'border-blue-400/30', text: 'text-blue-300' });
+    else if (activityDays >= 365) result.push({ id: 'oneyear', label: '🎂 벌써 1년', bg: 'bg-emerald-500/15', border: 'border-emerald-400/30', text: 'text-emerald-300' });
+
+    if (tagSet.has('사이버펑크') || tagSet.has('cyberpunk')) result.push({ id: 'cyber', label: '⚡ 사펑', gradient: true });
+    if (tagSet.has('메스가키') || tagSet.has('도발')) result.push({ id: 'mesu', label: '🩷 허접', bg: 'bg-pink-500/15', border: 'border-pink-400/30', text: 'text-pink-300' });
+    if (unlimitedCount > 0) result.push({ id: 'unlimit', label: '🔮 언리밋', bg: 'bg-violet-500/15', border: 'border-violet-400/30', text: 'text-violet-300' });
+
+    // 수인 태그 (털)
+    if (['수인', '수인형', '퍼리', 'furry'].some(t => tagSet.has(t))) {
+      result.push({ id: 'furry', label: '🐾 털', bg: 'bg-amber-500/15', border: 'border-amber-400/30', text: 'text-amber-300' });
+    }
+
+    // 통계 기반
+    const totalInteractions = characters.reduce((s, c) => s + (c.interactionCount || 0), 0);
+    const hasMillionChar = characters.some(c => (c.interactionCount || 0) >= 1000000);
+    const hasHalfMillionChar = characters.some(c => (c.interactionCount || 0) >= 500000);
+    const hatTrick = characters.filter(c => (c.interactionCount || 0) >= 1000000).length >= 3;
+
+    if (hatTrick) result.push({ id: 'hattrick', label: '🎩 해트트릭', bg: 'bg-indigo-500/15', border: 'border-indigo-400/30', text: 'text-indigo-300' });
+    if (hasMillionChar) result.push({ id: 'platinum', label: '💿 플래티넘 디스크', bg: 'bg-slate-500/15', border: 'border-slate-400/30', text: 'text-slate-300' });
+    else if (hasHalfMillionChar) result.push({ id: 'gold_disc', label: '📀 골든 디스크', bg: 'bg-yellow-500/15', border: 'border-yellow-400/30', text: 'text-yellow-300' });
+
+    if (totalInteractions >= 10000000) result.push({ id: '10m', label: '🎬 천만관객', bg: 'bg-yellow-500/15', border: 'border-yellow-400/30', text: 'text-yellow-300' });
+    else if (totalInteractions >= 1000000) result.push({ id: '1m', label: '💬 밀리언', bg: 'bg-amber-500/15', border: 'border-amber-400/30', text: 'text-amber-300' });
+
+    if ((stats?.followerCount || 0) >= 10000) result.push({ id: 'superstar', label: '🌌 우주대스타', gradient: true });
+
+    // 새 칭호 (시간대 칭호 제거 후 추가)
+    if (characters.length >= 50) result.push({ id: 'family', label: '👨‍👩‍👧‍👦 또 하나의 가족', bg: 'bg-rose-500/15', border: 'border-rose-400/30', text: 'text-rose-300' });
+    if (characters.length >= 100) result.push({ id: 'fertile', label: '🌾 다산의 상징', bg: 'bg-lime-500/15', border: 'border-lime-400/30', text: 'text-lime-300' });
+    if (tagSet.has('일진')) result.push({ id: 'iljin', label: '🏀 야 체육 안가고 뭐해', bg: 'bg-orange-500/15', border: 'border-orange-400/30', text: 'text-orange-300' });
+    if (tagSet.has('찐따')) result.push({ id: 'jjindda', label: '🚶 니 애인 지나간다', bg: 'bg-slate-500/15', border: 'border-slate-400/30', text: 'text-slate-300' });
+    const hasNo2nd = !allTags.some(t => MEDIA_SET.has(t));
+    if (hasNo2nd && characters.length > 0) result.push({ id: 'original', label: '✨ 오리지널', bg: 'bg-sky-500/15', border: 'border-sky-400/30', text: 'text-sky-300' });
+
+    return result;
+  }, [characters, firstCharDate, stats]);
+
+  const fixedIds = ['sunae', 'ntr'];
+
+  const BADGE_DESCRIPTIONS = {
+    sunae: '순애 태그, NTR 없음',
+    ntr: 'NTR/NTL 등',
+    '2nd': '게임·애니·영화 2차창작',
+    fantasy: '판타지·마법·기사 등',
+    newbie: '활동 3개월 이하',
+    military: '활동 1년 6개월 이상',
+    oneyear: '활동 1년 이상',
+    cyber: '사이버펑크',
+    mesu: '메스가키·도발',
+    unlimit: 'Unlimited 설정',
+    furry: '수인·퍼리',
+    hattrick: '100만 대화 캐릭터 3개+',
+    platinum: '100만 대화 캐릭터',
+    gold_disc: '50만 대화 캐릭터',
+    '10m': '총 대화 1천만+',
+    '1m': '총 대화 100만+',
+    superstar: '팔로워 1만+',
+    family: '캐릭터 50명+',
+    fertile: '캐릭터 100명+',
+    iljin: '#일진 태그',
+    jjindda: '#찐따 태그',
+    original: '2차창작 태그 없음',
+  };
+
+  const [selected, setSelected] = React.useState(null); // null = show all (up to 8)
+  const [editing, setEditing] = React.useState(false);
+  const dropRef = React.useRef(null);
+
+  // 모달: 외부 클릭 시 닫기
+  React.useEffect(() => {
+    if (!editing) return;
+    const handler = (e) => { if (dropRef.current && !dropRef.current.contains(e.target)) setEditing(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [editing]);
+
+  React.useEffect(() => {
+    if (editing) document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, [editing]);
+
+  // 초기값: 획득 칭호 전부 (최대 8개), 고정 칭호 우선
+  const activeIds = React.useMemo(() => {
+    const presentFixed = allPills.filter(p => fixedIds.includes(p.id)).map(p => p.id);
+    if (selected) {
+      const unified = Array.from(new Set([...presentFixed, ...selected]));
+      return unified.slice(0, 8);
+    }
+    return allPills.slice(0, 8).map(p => p.id);
+  }, [selected, allPills]);
+
+  const toggleId = (id) => {
+    if (fixedIds.includes(id)) return; // 고정 칭호는 토글 불가
+
+    setSelected(prev => {
+      const cur = prev || allPills.slice(0, 8).map(p => p.id);
+      if (cur.includes(id)) return cur.filter(x => x !== id);
+      if (cur.length >= 8) return cur;
+      return [...cur, id];
+    });
+  };
+
+  const visible = allPills.filter(p => activeIds.includes(p.id));
+
+  if (allPills.length === 0) return null;
+
+  return (
+    <>
+      {visible.map(p => {
+        return p.gradient ? (
+          <span key={p.id} className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white border border-purple-400/30" style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' }}>
+            {p.label}
+          </span>
+        ) : (
+          <span key={p.id} className={`flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${p.bg} border ${p.border} ${p.text}`}>
+            {p.label}
+          </span>
+        );
+      })}
+      {/* 연필 편집 버튼 */}
+      <div className="relative" ref={dropRef}>
+        <button
+          onClick={() => setEditing(true)}
+          className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-[var(--bg-secondary)] text-[var(--text-tertiary)] hover:text-[var(--accent)] transition-colors"
+          title="표시할 칭호 편집"
+        >
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+            <path d="m15 5 4 4" />
+          </svg>
+        </button>
+        {editing && (
+          <div
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+            onClick={(e) => e.target === e.currentTarget && setEditing(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="표시할 칭호 편집"
+          >
+            <div
+              className="w-full max-w-md max-h-[85vh] flex flex-col rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
+                <span className="text-sm font-bold text-[var(--text-primary)]">표시할 칭호</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-[var(--text-tertiary)]">{activeIds.length}/8</span>
+                  <button
+                    onClick={() => setEditing(false)}
+                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--bg-secondary)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
+                    aria-label="닫기"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                  </button>
+                </div>
+              </div>
+              <div className="overflow-y-auto flex-1 p-3 space-y-1 min-h-0">
+                {allPills.map(p => {
+                  const isFixed = fixedIds.includes(p.id);
+                  const checked = activeIds.includes(p.id);
+                  const disabled = isFixed || (!checked && activeIds.length >= 8);
+
+                  return (
+                    <label key={p.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-[var(--bg-secondary)] active:bg-white/10 transition-colors ${disabled ? 'opacity-50' : ''}`}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        disabled={disabled}
+                        onChange={() => toggleId(p.id)}
+                        className="w-4 h-4 rounded accent-[var(--accent)] shrink-0"
+                      />
+                      <span className="text-sm text-[var(--text-primary)] flex items-center gap-1.5 min-w-0 flex-1">
+                        {isFixed && <span className="text-xs opacity-80">📌</span>}
+                        {p.label}
+                      </span>
+                      {BADGE_DESCRIPTIONS[p.id] && (
+                        <span className="text-[10px] text-[var(--text-tertiary)] shrink-0 max-w-[120px] text-right leading-tight">
+                          {BADGE_DESCRIPTIONS[p.id]}
+                        </span>
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+
+
+// ===== 명예의 전당 (시상대 하이라이트) =====
+function PodiumHighlight({ characters }) {
+  const highlights = React.useMemo(() => {
+    if (!characters?.length) return null;
+
+    const withDate = characters.filter(c => c.createdAt || c.createdDate);
+    const sortedByDate = [...withDate].sort((a, b) =>
+      new Date(a.createdAt || a.createdDate) - new Date(b.createdAt || b.createdDate)
+    );
+    const sortedByInteraction = [...characters].sort((a, b) =>
+      (b.interactionCount || 0) - (a.interactionCount || 0)
+    );
+
+    if (!sortedByDate.length || !sortedByInteraction.length) return null;
+
+    const top = sortedByInteraction[0];
+    let newest = sortedByDate[sortedByDate.length - 1];
+    let oldest = sortedByDate[0];
+
+    if (newest.id === top.id && sortedByDate.length > 1) newest = sortedByDate[sortedByDate.length - 2];
+    if (oldest.id === top.id && sortedByDate.length > 1) oldest = sortedByDate[1];
+    if (oldest.id === newest.id && sortedByDate.length > 2) oldest = sortedByDate[0];
+
+    return [
+      { char: newest, label: '최신 캐릭터', icon: <Sparkles size={12} className="mr-1" />, color: 'from-blue-500/80', order: 2 },
+      { char: top, label: '최고 인기', icon: <Crown size={12} className="mr-1" />, color: 'from-amber-500/80', order: 1 },
+      { char: oldest, label: '첫 캐릭터', icon: <Landmark size={12} className="mr-1" />, color: 'from-emerald-500/80', order: 3 },
+    ].filter(item => item.char);
+  }, [characters]);
+
+  if (!highlights || highlights.length === 0) return null;
+
+  return (
+    <div className="mb-2 mt-4">
+      <div className="flex items-center justify-between mb-4 px-1">
+        <div className="flex items-center gap-2 text-[var(--accent)]">
+          <Sparkles size={18} />
+          <h3 className="text-sm font-bold text-[var(--text-primary)]">크리에이터 하이라이트</h3>
+        </div>
+      </div>
+      {/* items-stretch로 각 자식 카드의 높이를 완벽하게 동일하게 유지 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-4 lg:gap-5 items-stretch">
+        {highlights.map((item, idx) => (
+          <PodiumCard key={item.char.id || idx} {...item} desktopCenter={item.order === 1} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PodiumCard({ char, label, icon, color, desktopCenter }) {
+  if (!char) return null;
+  const tier = getCharacterTier(char.interactionCount || 0);
+
+  return (
+    <a
+      href={`https://zeta-ai.io/ko/plots/${char.id}/profile`}
+      target="_blank"
+      rel="noopener noreferrer"
+      // 높이를 flex-grow를 주거나 stretch 받도록 min-h 지정, Z-index 독립
+      className={`group relative flex flex-col min-h-[280px] md:min-h-[320px] w-full rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-lg hover:border-[var(--accent-bright)] hover:shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)] transition-all duration-300 transform md:hover:-translate-y-2 ${desktopCenter ? 'md:scale-105 z-10' : 'z-0'}`}
+    >
+      {/* 1. 이미지 컨테이너 - Z-index를 0으로 낮추고 이 안에서만 overflow-hidden 시킴으로써 테두리 호버 짤림 완벽 해결 */}
+      <div className="absolute inset-0 rounded-2xl overflow-hidden z-0 pointer-events-none border border-transparent bg-black">
+        <ImageWithFallback
+          src={proxyImageUrl(char.imageUrl)}
+          fallbackSrcs={getPlotImageUrls(char.imageUrls || []).slice(1)}
+          alt={char.name}
+          // 확대 대신 밝기를 살짝 올리고 채도를 강조하는 방식의 부드러운 피드백 적용
+          className="w-full h-full object-cover transition-all duration-500 ease-out group-hover:brightness-110 group-hover:saturate-110 group-hover:blur-[1px]"
+        />
+      </div>
+
+      {/* 2. 글래스모피즘 어두운 비네팅 오버레이 - 작위적이지 않게 더 부드럽고 자연스럽게 페이드 */}
+      <div className="absolute inset-0 rounded-2xl pointer-events-none z-10 bg-gradient-to-t from-black/95 via-black/20 to-transparent mix-blend-multiply opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+
+      {/* 부드러운 하단 블러 (Css maskImage로 경계선 스무스 처리) */}
+      <div
+        className="absolute inset-0 rounded-2xl pointer-events-none z-10 backdrop-blur-md"
+        style={{
+          maskImage: 'linear-gradient(to top, black 0%, black 15%, transparent 60%)',
+          WebkitMaskImage: 'linear-gradient(to top, black 0%, black 15%, transparent 60%)'
+        }}
+      />
+      <div className="absolute inset-x-0 bottom-0 h-[70%] rounded-b-2xl pointer-events-none z-10 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+      {/* 3. 데이터 컨텐츠 컨테이너 - Z-index를 최우선으로 앞당김 */}
+      <div className="relative z-20 flex flex-col h-full p-4 sm:p-5 justify-between flex-grow">
+
+        {/* 상단 뱃지 컨테이너 */}
+        <div className="flex justify-between items-start w-full drop-shadow-sm">
+          <div className={`flex items-center px-2.5 py-1 rounded-full text-[10px] md:text-xs font-bold tracking-wide text-white bg-gradient-to-r ${color} to-transparent backdrop-blur-sm border border-white/10`}>
+            {icon}
+            {label}
+          </div>
+          {/* 캐릭터 티어 뱃지 뒷배경(bg-black/40 둥근테두리 등) 완전 제거. 순수 뱃지만 배치 */}
+          <div className="shrink-0 pt-0.5">
+            <TierBadge tierKey={tier.key} size={22} />
+          </div>
+        </div>
+
+        {/* 하단 수치 타이포그래피 및 이름 */}
+        <div className="flex flex-col gap-1.5 mt-auto">
+          {/* 대화량 텍스트 더 굵게 강조, 연한 보라색, '대화' 라벨 제거 */}
+          <div className="flex items-baseline gap-1.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+            <span className="text-3xl md:text-4xl lg:text-4xl font-black text-purple-200 tracking-tight">
+              {formatCompactNumber(char.interactionCount || 0)}
+            </span>
+          </div>
+
+          {/* 캐릭터 이름 - 최대 2줄 제한 및 고정 높이 지원으로 카드 높이 불일치 방지 */}
+          <h4 className="font-bold text-base md:text-lg text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] line-clamp-2 min-h-[2.5rem] mt-1">
+            {char.name}
+          </h4>
+
+          <div className="flex items-center text-[10px] md:text-xs text-white/60 font-medium mt-1">
+            <Calendar size={12} className="mr-1.5 opacity-80" />
+            {char.createdAt ? new Date(char.createdAt).toISOString().split('T')[0] : '?'}
+          </div>
+        </div>
+      </div>
+    </a>
   );
 }

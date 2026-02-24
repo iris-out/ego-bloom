@@ -13,6 +13,7 @@ export function proxyImageUrl(url) {
 
 /** Collects all candidate image URLs from plot, in order of preference. All proxied. */
 function collectPlotImageUrls(plot) {
+  if (!plot) return [];
   const raw = [
     plot.imageUrl,
     plot.characters?.[0]?.imageUrl,

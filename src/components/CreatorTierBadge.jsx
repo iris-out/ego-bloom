@@ -232,9 +232,6 @@ export default function CreatorTierBadge({ tier, stats, score: propScore, breakd
                         <span className="font-bold text-base" style={{ color: style.stops[1].color }}>
                             {tierKoNames[tier.key]} {tier.subdivision || ''}
                         </span>
-                        <span className="text-xs text-gray-400 font-mono">
-                            {tierMode === 'recent' ? 'Recent (6M)' : 'Total'}
-                        </span>
                     </div>
 
                     {/* ELO 점수 강조 표시 */}
@@ -284,11 +281,8 @@ export default function CreatorTierBadge({ tier, stats, score: propScore, breakd
                     )}
 
                     <p className="text-[10px] text-gray-400 mt-2 border-t border-white/10 pt-2">
-                        <span className="font-bold text-[var(--accent)]">점수 산정 기준 ({tierMode === 'recent' ? '최근' : '전체'}):</span><br />
-                        (대화량x3) + (팔로워x300) + (Top20 50%) + (평균x20) + (음성x100)
-                    </p>
-                    <p className="text-[10px] text-gray-500 mt-1 italic">
-                        * 자세한 내용은 elo.md를 참고하세요.
+                        <span className="font-bold text-[var(--accent)]">점수 산정 기준:</span><br />
+                        '(대화량×3) + (팔로워×300) + (Top20 50%) + (평균×20) + (음성×100)'
                     </p>
                 </div>
             )}

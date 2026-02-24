@@ -184,11 +184,6 @@ function CharacterCard({ char, rank, onTagClick, activeTag }) {
         {/* Rank Badge */}
         <div className="absolute top-0 left-0 bg-[var(--bg-secondary)] text-[var(--text-tertiary)] text-[10px] font-mono px-2 py-0.5 rounded-br-lg border-b border-r border-[var(--border)] z-10 flex items-center gap-1">
           #{rank}
-          {isUnlimited && (
-            <span className="text-[var(--accent)]" title="Unlimited">
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" /></svg>
-            </span>
-          )}
         </div>
 
         {/* Zeta 링크 아이콘 */}
@@ -248,6 +243,12 @@ function CharacterCard({ char, rank, onTagClick, activeTag }) {
                   #{tag}
                 </button>
               ))}
+              {isUnlimited && (
+                <span className="text-[9px] px-1.5 py-0.5 rounded text-white font-semibold flex items-center gap-0.5" style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' }}>
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" /></svg>
+                  언리밋
+                </span>
+              )}
             </div>
           )}
 
