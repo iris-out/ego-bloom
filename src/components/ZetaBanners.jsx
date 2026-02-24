@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { proxyImageUrl } from '../utils/imageUtils';
 
+const BANNERS_CACHE_KEY = 'zeta_banners_v1';
+const BANNERS_TTL_MS = 60 * 60 * 1000; // 1시간
+
 export default function ZetaBanners() {
     const [banners, setBanners] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -8,10 +11,24 @@ export default function ZetaBanners() {
     useEffect(() => {
         const fetchBanners = async () => {
             try {
+                const cached = sessionStorage.getItem(BANNERS_CACHE_KEY);
+                if (cached) {
+                    const { data, ts } = JSON.parse(cached);
+                    if (Date.now() - ts < BANNERS_TTL_MS && Array.isArray(data)) {
+                        setBanners(data);
+                        setLoading(false);
+                        return;
+                    }
+                }
+
                 const res = await fetch('/api/zeta/banners');
                 if (res.ok) {
-                    const data = await res.json();
-                    setBanners(data.banners || []);
+                    const json = await res.json();
+                    const list = json.banners || [];
+                    setBanners(list);
+                    try {
+                        sessionStorage.setItem(BANNERS_CACHE_KEY, JSON.stringify({ data: list, ts: Date.now() }));
+                    } catch { /* ignore */ }
                 }
             } catch (e) {
                 console.error('Failed to fetch banners', e);

@@ -36,6 +36,7 @@ export default function ImageWithFallback({ src, fallbackSrcs = [], alt = '', cl
       alt={alt}
       className={className}
       crossOrigin="anonymous"
+      loading="lazy"
       onError={handleError}
       {...props}
     />

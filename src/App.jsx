@@ -33,9 +33,16 @@ function useServerStatus() {
         setStatus('error');
       }
     };
+
     check();
-    const intv = setInterval(check, 60000); // 1분마다
-    return () => clearInterval(intv);
+    const onVisible = () => { if (document.visibilityState === 'visible') check(); };
+    document.addEventListener('visibilitychange', onVisible);
+    const intervalMs = 2 * 60 * 1000; // 2분
+    const intv = setInterval(onVisible, intervalMs);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      clearInterval(intv);
+    };
   }, []);
 
   return status;
@@ -65,6 +72,25 @@ const parseRanking = async (res) => {
   return data.rankings || data.plots || [];
 };
 
+const RANKING_MAP_CACHE_KEY = 'zeta_ranking_map_v1';
+const RANKING_MAP_TTL_MS = 5 * 60 * 1000; // 5분
+
+function getCachedRankingMap() {
+  try {
+    const raw = sessionStorage.getItem(RANKING_MAP_CACHE_KEY);
+    if (!raw) return null;
+    const { map, ts } = JSON.parse(raw);
+    if (Date.now() - ts > RANKING_MAP_TTL_MS) return null;
+    return map;
+  } catch { return null; }
+}
+
+function setCachedRankingMap(map) {
+  try {
+    sessionStorage.setItem(RANKING_MAP_CACHE_KEY, JSON.stringify({ map, ts: Date.now() }));
+  } catch { /* ignore */ }
+}
+
 async function fetchAllPlots(creatorId) {
   const all = [];
   let offset = 0;
@@ -88,6 +114,9 @@ async function fetchAllPlots(creatorId) {
 }
 
 async function fetchRankingMap() {
+  const cached = getCachedRankingMap();
+  if (cached) return cached;
+
   try {
     const [tRes, bRes, nRes] = await Promise.all([
       fetch('/api/zeta/plots/ranking?type=TRENDING&limit=100&filterType=GENRE&filterValues=all'),
@@ -107,6 +136,7 @@ async function fetchRankingMap() {
       r.rankDiff = r.rankDiff ?? 0;
       r.isNew = r.isNew ?? false;
     });
+    setCachedRankingMap(map);
     return map;
   } catch { return {}; }
 }
