@@ -547,9 +547,33 @@ function PodiumHighlight({ characters }) {
     if (oldest.id === newest.id && sortedByDate.length > 2) oldest = sortedByDate[0];
 
     return [
-      { char: newest, label: '최신 캐릭터', icon: <Sparkles size={12} className="mr-1" />, color: 'from-blue-500/80', order: 2 },
-      { char: top, label: '최고 인기', icon: <Crown size={12} className="mr-1" />, color: 'from-amber-500/80', order: 1 },
-      { char: oldest, label: '첫 캐릭터', icon: <Landmark size={12} className="mr-1" />, color: 'from-emerald-500/80', order: 3 },
+      // 최근에 만든 캐릭터
+      {
+        char: newest,
+        label: '최근 제작',
+        icon: <Sparkles size={12} className="mr-1" />,
+        pillClass: 'bg-gradient-to-r from-sky-500/50 to-cyan-400/50',
+        borderClass: 'border-sky-400/70',
+        order: 2
+      },
+      // 대화량이 가장 많은 캐릭터
+      {
+        char: top,
+        label: '최다 대화량',
+        icon: <Crown size={12} className="mr-1" />,
+        pillClass: 'bg-gradient-to-r from-amber-400/50 to-orange-500/50',
+        borderClass: 'border-amber-400/70',
+        order: 1
+      },
+      // 가장 처음 만든 캐릭터
+      {
+        char: oldest,
+        label: '첫 제작',
+        icon: <Landmark size={12} className="mr-1" />,
+        pillClass: 'bg-gradient-to-r from-emerald-500/50 to-teal-400/50',
+        borderClass: 'border-emerald-400/70',
+        order: 3
+      },
     ].filter(item => item.char);
   }, [characters]);
 
@@ -573,7 +597,7 @@ function PodiumHighlight({ characters }) {
   );
 }
 
-function PodiumCard({ char, label, icon, color, desktopCenter }) {
+function PodiumCard({ char, label, icon, pillClass, borderClass, desktopCenter }) {
   if (!char) return null;
   const tier = getCharacterTier(char.interactionCount || 0);
 
@@ -582,8 +606,8 @@ function PodiumCard({ char, label, icon, color, desktopCenter }) {
       href={`https://zeta-ai.io/ko/plots/${char.id}/profile`}
       target="_blank"
       rel="noopener noreferrer"
-      // 높이를 flex-grow를 주거나 stretch 받도록 min-h 지정, Z-index 독립
-      className={`group relative flex flex-col min-h-[280px] md:min-h-[320px] w-full rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-lg hover:border-[var(--accent-bright)] hover:shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)] transition-all duration-300 transform md:hover:-translate-y-2 ${desktopCenter ? 'md:scale-105 z-10' : 'z-0'}`}
+      // 높이를 flex-grow를 주거나 stretch 받도록 min-h 지정, 세 카드 모두 동일 크기 유지 (중앙도 동일 스케일)
+      className={`group relative flex flex-col min-h-[280px] md:min-h-[320px] w-full rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-lg hover:border-[var(--accent-bright)] hover:shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)] transition-all duration-300 transform md:hover:-translate-y-2 ${desktopCenter ? 'z-10' : 'z-0'}`}
     >
       {/* 1. 이미지 컨테이너 - Z-index를 0으로 낮추고 이 안에서만 overflow-hidden 시킴으로써 테두리 호버 짤림 완벽 해결 */}
       <div className="absolute inset-0 rounded-2xl overflow-hidden z-0 pointer-events-none border border-transparent bg-black">
@@ -591,8 +615,8 @@ function PodiumCard({ char, label, icon, color, desktopCenter }) {
           src={proxyImageUrl(char.imageUrl)}
           fallbackSrcs={getPlotImageUrls(char.imageUrls || []).slice(1)}
           alt={char.name}
-          // 확대 대신 밝기를 살짝 올리고 채도를 강조하는 방식의 부드러운 피드백 적용
-          className="w-full h-full object-cover transition-all duration-500 ease-out group-hover:brightness-110 group-hover:saturate-110 group-hover:blur-[1px]"
+          // 확대/블러 대신 밝기·채도만 살짝 올려 선명도를 유지
+          className="w-full h-full object-cover transition-all duration-500 ease-out group-hover:brightness-110 group-hover:saturate-110"
         />
       </div>
 
@@ -612,13 +636,8 @@ function PodiumCard({ char, label, icon, color, desktopCenter }) {
       {/* 3. 데이터 컨텐츠 컨테이너 - Z-index를 최우선으로 앞당김 */}
       <div className="relative z-20 flex flex-col h-full p-4 sm:p-5 justify-between flex-grow">
 
-        {/* 상단 뱃지 컨테이너 */}
-        <div className="flex justify-between items-start w-full drop-shadow-sm">
-          <div className={`flex items-center px-2.5 py-1 rounded-full text-[10px] md:text-xs font-bold tracking-wide text-white bg-gradient-to-r ${color} to-transparent backdrop-blur-sm border border-white/10`}>
-            {icon}
-            {label}
-          </div>
-          {/* 캐릭터 티어 뱃지 뒷배경(bg-black/40 둥근테두리 등) 완전 제거. 순수 뱃지만 배치 */}
+        {/* 상단: 티어 뱃지만 우측 배치 */}
+        <div className="flex justify-end items-start w-full drop-shadow-sm">
           <div className="shrink-0 pt-0.5">
             <TierBadge tierKey={tier.key} size={22} />
           </div>
@@ -633,10 +652,16 @@ function PodiumCard({ char, label, icon, color, desktopCenter }) {
             </span>
           </div>
 
-          {/* 캐릭터 이름 - 최대 2줄 제한 및 고정 높이 지원으로 카드 높이 불일치 방지 */}
-          <h4 className="font-bold text-base md:text-lg text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] line-clamp-2 min-h-[2.5rem] mt-1">
+          {/* 캐릭터 이름 - 한 줄, 길면 가로 스크롤 */}
+          <h4 className="font-bold text-base md:text-lg text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] overflow-x-auto overflow-y-hidden whitespace-nowrap min-h-[1.5rem]">
             {char.name}
           </h4>
+
+          {/* pill: 캐릭터명과 날짜 사이, 배경 50% 투명, 테두리에 색 */}
+          <div className={`flex items-center gap-1 w-fit px-1.5 py-1 rounded-full text-[9px] font-bold tracking-wide text-white border ${pillClass || 'bg-gray-600/50'} ${borderClass || 'border-white/25'}`}>
+            {icon}
+            <span>{label}</span>
+          </div>
 
           <div className="flex items-center text-[10px] md:text-xs text-white/60 font-medium mt-1">
             <Calendar size={12} className="mr-1.5 opacity-80" />

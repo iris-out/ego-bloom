@@ -15,7 +15,6 @@ const MEDIA_SET = new Set([
 export const BADGE_DEFINITIONS = [
   { id: 'sunae', emoji: '💕', title: '순애보', description: '순애 태그, NTR 없음', desc: '#순애 태그가 있으며, NTR/NTL 태그 없음', color: 'pink' },
   { id: 'ntr', emoji: '💔', title: '사랑 파괴자', description: 'NTR/NTL 등', desc: '#NTR, #NTL, #뺏기, #빼앗기 태그 보유', color: 'red' },
-  { id: '2nd', emoji: '🎨', title: '2차창작', description: '게임·애니·영화 2차창작', desc: '게임, 애니, 영화 등 기존 IP 관련 태그 보유', color: 'blue' },
   { id: 'fantasy', emoji: '🗡️', title: '판타지', description: '판타지·마법·기사 등', desc: '#판타지, #마법, #기사, #마왕 등 태그 보유', color: 'indigo' },
   { id: 'newbie', emoji: '🌱', title: '뉴비', description: '활동 3개월 이하', desc: '활동 기간 3개월 이하', color: 'emerald' },
   { id: 'military', emoji: '🎖️', title: '이병부터 병장까지', description: '활동 1년 6개월 이상', desc: '활동 기간 1년 6개월(548일) 이상', color: 'blue' },
@@ -34,6 +33,12 @@ export const BADGE_DEFINITIONS = [
   { id: 'fertile', emoji: '🌾', title: '다산의 상징', description: '캐릭터 100명+', desc: '100명 이상의 캐릭터 제작', color: 'lime' },
   { id: 'iljin', emoji: '🏀', title: '야 체육 안가고 뭐해', description: '#일진 태그', desc: '캐릭터 중 #일진 태그 보유', color: 'orange' },
   { id: 'jjindda', emoji: '🚶', title: '니 애인 지나간다', description: '#찐따 태그', desc: '캐릭터 중 #찐따 태그 보유', color: 'slate' },
+  { id: 'hero', emoji: '🦸', title: '취미일 뿐', description: '#히어로 태그', desc: '캐릭터 중 #히어로 태그 보유', color: 'amber' },
+  { id: 'academy', emoji: '🎓', title: '아카데미', description: '#아카데미 태그', desc: '캐릭터 중 #아카데미 태그 보유', color: 'indigo' },
+  { id: 'hyeongwan', emoji: '🖤', title: '혐관', description: '#혐관 태그', desc: '캐릭터 중 #혐관 태그 보유', color: 'slate' },
+  { id: 'pipye', emoji: '😵', title: '피폐', description: '#피폐 태그', desc: '캐릭터 중 #피폐 태그 보유', color: 'violet' },
+  { id: 'sihanbu', emoji: '💧', title: '시한부', description: '#시한부 태그', desc: '캐릭터 중 #시한부 태그 보유', color: 'red' },
+  { id: 'guwon', emoji: '🩹', title: '구원', description: '#구원 태그', desc: '캐릭터 중 #구원 태그 보유', color: 'emerald' },
   { id: 'original', emoji: '✨', title: '오리지널', description: '2차창작 태그 없음', desc: '게임/애니/영화 등 2차창작 태그 없이 오리지널만 제작', color: 'sky' },
 ];
 
@@ -106,7 +111,6 @@ export function computeEarnedPills(input, variant = 'profile') {
 
   if (hasSunae && !hasNtr) result.push({ id: 'sunae', label: '💕 순애보', ...styleMap.pink });
   if (hasNtr) result.push({ id: 'ntr', label: '💔 사랑 파괴자', ...styleMap.red });
-  if (allTags.some(t => MEDIA_SET.has(t))) result.push({ id: '2nd', label: '🎨 2차창작', ...styleMap.blue });
   if (FANTASY_TAGS.some(t => tagSet.has(t))) result.push({ id: 'fantasy', label: '🗡️ 판타지', ...styleMap.indigo });
 
   if (activityDays <= 90 && activityDays > 0) result.push({ id: 'newbie', label: '🌱 뉴비', ...styleMap.emerald });
@@ -136,6 +140,12 @@ export function computeEarnedPills(input, variant = 'profile') {
   if (characters.length >= 100) result.push({ id: 'fertile', label: '🌾 다산의 상징', ...styleMap.lime });
   if (tagSet.has('일진')) result.push({ id: 'iljin', label: '🏀 야 체육 안가고 뭐해', ...styleMap.orange });
   if (tagSet.has('찐따')) result.push({ id: 'jjindda', label: '🚶 니 애인 지나간다', ...styleMap.slate });
+  if (tagSet.has('히어로')) result.push({ id: 'hero', label: '🦸 취미일 뿐', ...styleMap.amber });
+  if (tagSet.has('아카데미')) result.push({ id: 'academy', label: '🎓 아카데미', ...styleMap.indigo });
+  if (tagSet.has('혐관')) result.push({ id: 'hyeongwan', label: '🖤 혐관', ...styleMap.slate });
+  if (tagSet.has('피폐')) result.push({ id: 'pipye', label: '😵 피폐', ...styleMap.violet });
+  if (tagSet.has('시한부')) result.push({ id: 'sihanbu', label: '💧 시한부', ...styleMap.red });
+  if (tagSet.has('구원')) result.push({ id: 'guwon', label: '🩹 구원', ...styleMap.emerald });
   const hasNo2nd = !allTags.some(t => MEDIA_SET.has(t));
   if (hasNo2nd && characters.length > 0) result.push({ id: 'original', label: '✨ 오리지널', ...styleMap.sky });
 
@@ -176,8 +186,6 @@ export function computeEarnedTitles(input) {
 
   list.push({ id: 'sunae', emoji: '💕', title: '순애보', desc: BADGE_DEFINITIONS.find(b => b.id === 'sunae')?.desc ?? '', color: 'pink', earned: hasSunae && !hasNtr, chars: charsWithTag(characters, '순애') });
   list.push({ id: 'ntr', emoji: '💔', title: '사랑 파괴자', desc: BADGE_DEFINITIONS.find(b => b.id === 'ntr')?.desc ?? '', color: 'red', earned: hasNtr, chars: charsWithAnyTag(characters, ['ntr', 'ntl', '뺏기', '빼앗기', '뺏김', '빼앗김']) });
-  const mediaChars = characters.filter(c => (c.hashtags || c.tags || []).some(t => MEDIA_SET.has(t.toLowerCase()))).map(c => c.name);
-  list.push({ id: '2nd', emoji: '🎨', title: '2차창작', desc: BADGE_DEFINITIONS.find(b => b.id === '2nd')?.desc ?? '', color: 'blue', earned: mediaChars.length > 0, chars: mediaChars });
   const fantasyChars = charsWithAnyTag(characters, ['판타지', '마법', '기사', '마왕', '용사', '엘프', '드래곤']);
   list.push({ id: 'fantasy', emoji: '🗡️', title: '판타지', desc: BADGE_DEFINITIONS.find(b => b.id === 'fantasy')?.desc ?? '', color: 'indigo', earned: fantasyChars.length > 0, chars: fantasyChars });
   list.push({ id: 'newbie', emoji: '🌱', title: '뉴비', desc: BADGE_DEFINITIONS.find(b => b.id === 'newbie')?.desc ?? '', color: 'emerald', earned: activityMonths <= 3 && activityMonths > 0 });
@@ -204,6 +212,12 @@ export function computeEarnedTitles(input) {
   list.push({ id: 'fertile', emoji: '🌾', title: '다산의 상징', desc: BADGE_DEFINITIONS.find(b => b.id === 'fertile')?.desc ?? '', color: 'lime', earned: characters.length >= 100 });
   list.push({ id: 'iljin', emoji: '🏀', title: '야 체육 안가고 뭐해', desc: BADGE_DEFINITIONS.find(b => b.id === 'iljin')?.desc ?? '', color: 'orange', earned: tagSet.has('일진'), chars: charsWithTag(characters, '일진') });
   list.push({ id: 'jjindda', emoji: '🚶', title: '니 애인 지나간다', desc: BADGE_DEFINITIONS.find(b => b.id === 'jjindda')?.desc ?? '', color: 'slate', earned: tagSet.has('찐따'), chars: charsWithTag(characters, '찐따') });
+  list.push({ id: 'hero', emoji: '🦸', title: '취미일 뿐', desc: BADGE_DEFINITIONS.find(b => b.id === 'hero')?.desc ?? '', color: 'amber', earned: tagSet.has('히어로'), chars: charsWithTag(characters, '히어로') });
+  list.push({ id: 'academy', emoji: '🎓', title: '아카데미', desc: BADGE_DEFINITIONS.find(b => b.id === 'academy')?.desc ?? '', color: 'indigo', earned: tagSet.has('아카데미'), chars: charsWithTag(characters, '아카데미') });
+  list.push({ id: 'hyeongwan', emoji: '🖤', title: '혐관', desc: BADGE_DEFINITIONS.find(b => b.id === 'hyeongwan')?.desc ?? '', color: 'slate', earned: tagSet.has('혐관'), chars: charsWithTag(characters, '혐관') });
+  list.push({ id: 'pipye', emoji: '😵', title: '피폐', desc: BADGE_DEFINITIONS.find(b => b.id === 'pipye')?.desc ?? '', color: 'violet', earned: tagSet.has('피폐'), chars: charsWithTag(characters, '피폐') });
+  list.push({ id: 'sihanbu', emoji: '💧', title: '시한부', desc: BADGE_DEFINITIONS.find(b => b.id === 'sihanbu')?.desc ?? '', color: 'red', earned: tagSet.has('시한부'), chars: charsWithTag(characters, '시한부') });
+  list.push({ id: 'guwon', emoji: '🩹', title: '구원', desc: BADGE_DEFINITIONS.find(b => b.id === 'guwon')?.desc ?? '', color: 'emerald', earned: tagSet.has('구원'), chars: charsWithTag(characters, '구원') });
   const hasNo2nd = !characters.some(c => (c.hashtags || c.tags || []).some(t => MEDIA_SET.has(t.toLowerCase())));
   list.push({ id: 'original', emoji: '✨', title: '오리지널', desc: BADGE_DEFINITIONS.find(b => b.id === 'original')?.desc ?? '', color: 'sky', earned: hasNo2nd && characters.length > 0 });
 
