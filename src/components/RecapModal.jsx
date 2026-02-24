@@ -154,11 +154,11 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
                                 {isNightOwl ? <Moon size={48} className="text-indigo-400 animate-pulse" /> : <Sun size={48} className="text-amber-400 animate-pulse" />}
                             </div>
                             <div className="space-y-4">
-                                <p className="text-sm md:text-base text-gray-300 font-medium animate-fade-in-up delay-100">당신의 창작 뮤즈가 깨어나는 시간은</p>
+                                <p className="text-sm md:text-base text-gray-300 font-medium animate-fade-in-up delay-100">당신이 주로 활동하는 시간대는</p>
                                 <h2 className={`text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r animate-fade-in-up delay-200 ${isNightOwl ? 'from-indigo-400 to-purple-400' : 'from-amber-400 to-orange-400'} leading-tight drop-shadow-lg pb-1`}>
-                                    {isNightOwl ? '깊은 밤의 올빼미' : '이른 아침의 얼리버드'}
+                                    {isNightOwl ? '야행성' : '낮에 활동하는 타입'}
                                 </h2>
-                                <p className="text-xs text-gray-400 mt-2 px-6 leading-relaxed animate-fade-in-up delay-300">자정의 고요함, 혹은 햇살이 내리쬐는 오후, 당신의 창의력은 언제나 빛을 발했습니다.</p>
+                                <p className="text-xs text-gray-400 mt-2 px-6 leading-relaxed animate-fade-in-up delay-300"></p>
 
                                 <div className="mt-8 grid grid-cols-2 gap-3 w-full max-w-xs mx-auto animate-fade-in-up delay-500">
                                     {[
