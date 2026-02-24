@@ -51,6 +51,7 @@ export const CREATOR_TIERS = [
 ];
 
 // 새로운 ELO V4.1 점수 산정 방식이다. (팔로워 x300, 음성 x100, 기준 완화)
+// V4.2: 캐릭터 수가 적거나 활동 기간이 짧은데 대화량/팔로워가 많으면 효율 가산점 부여
 export function calculateCreatorScore(stats, characters) {
   if (!stats) return 0;
 
@@ -68,18 +69,44 @@ export function calculateCreatorScore(stats, characters) {
   }
 
   // 4. 평균 대화량 (가중치: 20.0)
-  // 0으로 나누는 것을 방지한다.
   const charCount = characters ? characters.length : (stats.plotCount || 1);
   const avgInteractions = charCount > 0 ? totalInteractions / charCount : 0;
 
   // 5. 음성 재생 수 (가중치: 100.0) - V4.1 상향
   const voicePlays = stats.voicePlayCount || 0;
 
-  const score = (totalInteractions * 3.0)
+  let score = (totalInteractions * 3.0)
     + (followers * 300.0)
     + (top20Sum * 0.5)
     + (avgInteractions * 20.0)
     + (voicePlays * 100.0);
+
+  // ===== 효율 가산점 (캐릭터 적거나 활동 기간 짧은데 성과가 좋은 경우) =====
+  const numChars = Math.max(1, charCount);
+  const hasChars = characters && characters.length > 0;
+
+  // 활동 일수: 가장 오래된 캐릭터 생성일 기준
+  let activityDays = 365;
+  if (hasChars) {
+    const dates = characters.map(c => c.createdAt || c.createdDate).filter(Boolean).map(d => new Date(d).getTime());
+    if (dates.length > 0) activityDays = Math.max(1, (Date.now() - Math.min(...dates)) / (1000 * 60 * 60 * 24));
+  }
+
+  // 1) 소수 캐릭터 가산: 캐릭터 수가 적은데 총 대화량 또는 팔로워가 많으면 보너스 (최대 15% 상한)
+  if (numChars <= 20 && (totalInteractions > 10000 || followers > 50)) {
+    const rosterFactor = (20 - numChars) / 20; // 0~1, 캐릭터 적을수록 큼
+    const impact = totalInteractions / 10000 + followers / 10;
+    const smallRosterBonus = Math.min(score * 0.15, rosterFactor * impact * 1200); // V4.2: 가산 강도 1.5배
+    score += smallRosterBonus;
+  }
+
+  // 2) 단기 집중 가산: 활동 기간이 1년 미만인데 성과가 좋으면 보너스 (최대 10% 상한)
+  if (activityDays < 365 && activityDays >= 7 && (totalInteractions > 5000 || followers > 30)) {
+    const tenureFactor = (365 - activityDays) / 365; // 활동 짧을수록 큼
+    const dailyImpact = totalInteractions / activityDays + followers * 2;
+    const shortTenureBonus = Math.min(score * 0.10, tenureFactor * dailyImpact * 75); // V4.2: 가산 강도 1.5배
+    score += shortTenureBonus;
+  }
 
   return Math.floor(score);
 }
@@ -121,11 +148,20 @@ export function calculateCreatorScoreRecent(stats, characters) {
   // 5. 음성 재생 수 (현재 기준 유지)
   const voicePlays = stats.voicePlayCount || 0;
 
-  const score = (totalInteractions * 3.0)
+  let score = (totalInteractions * 3.0)
     + (followers * 300.0)
     + (top20Sum * 0.5)
     + (avgInteractions * 20.0)
     + (voicePlays * 100.0);
+
+  // 효율 가산: 최근 캐릭터 수가 적은데 최근 대화량/팔로워가 많으면 보너스 (상한 12%)
+  const recentCount = recentChars.length;
+  if (recentCount <= 15 && recentCount >= 1 && (totalInteractions > 5000 || followers > 30)) {
+    const rosterFactor = (15 - recentCount) / 15;
+    const impact = totalInteractions / 5000 + followers / 20;
+    const bonus = Math.min(score * 0.12, rosterFactor * impact * 900); // V4.2: 가산 강도 1.5배
+    score += bonus;
+  }
 
   return Math.floor(score);
 }
