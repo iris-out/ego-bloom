@@ -36,7 +36,8 @@ function useServerStatus() {
         else if (s === 'yellow') status = 'warning';
 
         const message = mRes.trim();
-        setData({ status, message: message || null });
+        // status가 'green' (ok)일 경우 message가 있더라도 배너를 띄우지 않음
+        setData({ status, message: status === 'ok' ? null : (message || null) });
       } catch (err) {
         setData(prev => ({ ...prev, status: 'error' }));
       }
