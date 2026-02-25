@@ -1,6 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { formatNumber } from '../utils/tierCalculator';
 import { computeEarnedTitles } from '../data/badges';
+import { ChevronRight } from 'lucide-react';
+import { proxyImageUrl } from '../utils/imageUtils';
 
 // ===== 격려 메시지 (카드 위에 표시) =====
 export function EncouragementBanner({ tier, characters, stats }) {
@@ -41,6 +43,19 @@ export default function AchievementsTab({ stats, characters }) {
         () => computeEarnedTitles({ characters, stats }),
         [characters, stats]
     );
+
+    const [rankingUpdatedAt, setRankingUpdatedAt] = useState(null);
+
+    useEffect(() => {
+        fetch('/data/ranking_latest.json')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.updatedAt) {
+                    setRankingUpdatedAt(new Date(data.updatedAt));
+                }
+            })
+            .catch(err => console.error("Failed to fetch ranking updatedAt", err));
+    }, []);
 
     const earned = titles.filter(t => t.earned);
     const unearned = titles.filter(t => !t.earned);
@@ -111,42 +126,111 @@ export default function AchievementsTab({ stats, characters }) {
                         const br = Math.min(...[b.trendingRank, b.bestRank, b.newRank].filter(x => x != null));
                         return ar - br;
                     });
+
+                const top3 = ranked.slice(0, 3);
+                const rest = ranked.slice(3);
+
                 return (
                     <div className="card p-4">
-                        <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2 mb-3">
-                            🌐 <span>글로벌 랭킹</span>
-                        </h3>
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
+                                🌐 <span>글로벌 랭킹</span>
+                            </h3>
+                            {rankingUpdatedAt && (
+                                <div className="text-[9px] text-[var(--text-tertiary)] bg-[var(--bg-secondary)] px-1.5 py-0.5 rounded border border-[var(--border)]">
+                                    {rankingUpdatedAt.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 업데이트
+                                </div>
+                            )}
+                        </div>
                         {ranked.length > 0 ? (
-                            <div className="space-y-2">
-                                {ranked.map(char => (
-                                    <div key={char.id} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)]">
-                                        <div className="flex-1 min-w-0">
-                                            <div className="text-sm font-bold text-[var(--text-primary)] truncate mb-1">{char.name}</div>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {char.trendingRank != null && (
-                                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-violet-500/20 border border-violet-500/30 text-violet-300">
-                                                        트렌딩 #{char.trendingRank}
-                                                        {char.rankDiff !== 0 && <span className={char.rankDiff > 0 ? ' text-emerald-400' : ' text-red-400'}> {char.rankDiff > 0 ? '▲' : '▼'}{Math.abs(char.rankDiff)}</span>}
-                                                    </span>
-                                                )}
-                                                {char.bestRank != null && (
-                                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/30 text-amber-300">
-                                                        베스트 #{char.bestRank}
-                                                    </span>
-                                                )}
-                                                {char.newRank != null && (
-                                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/30 text-emerald-300">
-                                                        신작 #{char.newRank}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="text-right shrink-0">
-                                            <div className="text-sm font-bold text-[var(--accent-bright)]">{formatNumber(char.interactionCount || 0)}</div>
-                                            <div className="text-[10px] text-[var(--text-tertiary)]">대화</div>
-                                        </div>
+                            <div className="space-y-4">
+                                {/* Podium UI (Desktop/Mobile) */}
+                                {top3.length > 0 && (
+                                    <div className="flex justify-center items-end gap-2 sm:gap-4 mb-2 mt-8 h-44 sm:h-48 px-2 sm:px-4">
+                                        {[1, 0, 2].map((idx) => {
+                                            const char = top3[idx];
+                                            if (!char) return <div key={idx} className="flex-1 max-w-[120px]" />;
+                                            const rank = idx + 1;
+                                            const isFirst = rank === 1;
+                                            const podiumHeight = isFirst ? 'h-32 sm:h-40' : rank === 2 ? 'h-24 sm:h-32' : 'h-20 sm:h-24';
+                                            const podiumColor = isFirst ? 'bg-gradient-to-t from-yellow-500/20 to-yellow-300/40 border-yellow-400/50' : rank === 2 ? 'bg-gradient-to-t from-slate-400/20 to-slate-300/40 border-slate-300/50' : 'bg-gradient-to-t from-orange-500/20 to-orange-400/40 border-orange-400/50';
+                                            const medal = isFirst ? '👑' : rank === 2 ? '🥈' : '🥉';
+
+                                            return (
+                                                <a
+                                                    key={char.id}
+                                                    href={`https://zeta-ai.io/character/${char.id}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className={`flex-1 flex flex-col items-center max-w-[120px] group relative hover:-translate-y-2 transition-transform duration-300 cursor-pointer ${isFirst ? 'z-10' : 'z-0'}`}
+                                                    title="Zeta 채팅으로 이동"
+                                                >
+                                                    <div className="absolute bottom-full mb-2 w-max max-w-[140px] text-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                        <div className="text-[9px] sm:text-[10px] bg-[var(--card)] px-2 py-1 flex items-center gap-1 rounded shadow-lg border border-[var(--border)] text-[var(--text-secondary)] font-medium">대화 {formatNumber(char.interactionCount)} <ChevronRight size={10} className="text-[var(--accent)]" /></div>
+                                                    </div>
+
+                                                    <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 ${isFirst ? 'border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : rank === 2 ? 'border-slate-300' : 'border-orange-400'} mb-2 overflow-hidden bg-[var(--bg-secondary)] shrink-0 flex items-center justify-center relative shadow-sm`}>
+                                                        {char.image ? <img src={proxyImageUrl(char.image)} alt={char.name} className="w-full h-full object-cover" /> : <span className="text-xl">{medal}</span>}
+                                                    </div>
+                                                    <div className={`text-[10px] sm:text-xs font-black truncate w-full text-center mb-1 drop-shadow-sm ${isFirst ? 'text-amber-500' : 'text-[var(--text-primary)]'}`}>
+                                                        {char.name}
+                                                    </div>
+
+                                                    <div className={`w-full ${podiumHeight} ${podiumColor} border-t-2 rounded-t-lg flex flex-col items-center pt-2 sm:pt-3 shadow-inner relative overflow-hidden backdrop-blur-sm`}>
+                                                        {isFirst && <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />}
+                                                        <span className="text-lg sm:text-2xl drop-shadow-md z-10">{medal}</span>
+                                                        <span className={`text-[9px] sm:text-[10px] font-black mt-auto mb-2 opacity-60 z-10 tracking-widest ${isFirst ? 'text-yellow-600' : rank === 2 ? 'text-slate-500' : 'text-orange-700'}`}>TOP {rank}</span>
+                                                    </div>
+                                                </a>
+                                            );
+                                        })}
                                     </div>
-                                ))}
+                                )}
+
+                                {/* Remaining List UI */}
+                                {rest.length > 0 && (
+                                    <div className="space-y-2 mt-4">
+                                        {rest.map(char => (
+                                            <a
+                                                key={char.id}
+                                                href={`https://zeta-ai.io/character/${char.id}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] hover:bg-[var(--bg-secondary)]/80 hover:border-[var(--accent)]/50 transition-all group cursor-pointer"
+                                                title="Zeta 채팅으로 이동"
+                                            >
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="text-sm font-bold text-[var(--text-primary)] truncate mb-1 group-hover:text-[var(--accent-bright)] transition-colors">{char.name}</div>
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {char.trendingRank != null && (
+                                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-violet-500/10 border border-violet-500/20 text-violet-400">
+                                                                트렌딩 #{char.trendingRank}
+                                                                {char.rankDiff !== 0 && <span className={char.rankDiff > 0 ? ' text-emerald-400 ml-0.5' : ' text-red-400 ml-0.5'}> {char.rankDiff > 0 ? '▲' : '▼'}{Math.abs(char.rankDiff)}</span>}
+                                                            </span>
+                                                        )}
+                                                        {char.bestRank != null && (
+                                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-500">
+                                                                베스트 #{char.bestRank}
+                                                            </span>
+                                                        )}
+                                                        {char.newRank != null && (
+                                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
+                                                                신작 #{char.newRank}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="text-right shrink-0 flex flex-col items-end">
+                                                    <div className="text-sm font-bold text-[var(--accent-bright)]">{formatNumber(char.interactionCount || 0)}</div>
+                                                    <div className="text-[10px] text-[var(--text-tertiary)] flex items-center gap-0.5 group-hover:text-[var(--accent)] transition-colors">
+                                                        <span>대화</span>
+                                                        <ChevronRight size={10} className="translate-x-0 group-hover:translate-x-0.5 transition-transform" />
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <div className="text-center py-6">
@@ -188,7 +272,7 @@ export default function AchievementsTab({ stats, characters }) {
                     <h4 className="text-xs font-bold text-[var(--text-secondary)] mb-3 flex items-center gap-1.5">
                         ✅ 획득한 칭호 <span className="text-[var(--accent)]">({earned.length})</span>
                     </h4>
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {earned.map(renderTitle)}
                     </div>
                 </div>
@@ -200,7 +284,7 @@ export default function AchievementsTab({ stats, characters }) {
                     <h4 className="text-xs font-bold text-[var(--text-tertiary)] mb-3 flex items-center gap-1.5">
                         🔒 미획득 칭호 <span className="opacity-60">({unearned.length})</span>
                     </h4>
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {unearned.map(renderTitle)}
                     </div>
                 </div>

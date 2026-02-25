@@ -5,10 +5,13 @@ import { TierBadgeWithTooltip, TierBadge } from './TierBadge';
 import HoverNumber from './HoverNumber';
 import { Download, Loader2, Calendar, Sparkles, Crown, Landmark, Film } from 'lucide-react';
 import { toPng } from 'html-to-image';
-import { computeEarnedPills, BADGE_DESCRIPTIONS, FIXED_BADGE_IDS } from '../data/badges';
+import { computeEarnedTitles, BADGE_COLOR_MAP, BADGE_DEFINITIONS, FIXED_BADGE_IDS } from '../data/badges';
 import ImageWithFallback from './ImageWithFallback';
 import { proxyImageUrl, getPlotImageUrls } from '../utils/imageUtils';
 import RecapModal from './RecapModal';
+import Confetti from 'react-confetti';
+import { useWindowSize } from 'react-use';
+import CreatorRadarChart from './CreatorRadarChart';
 
 export default function ProfileHeader({ profile, stats, characters }) {
   // ✅ 훅은 반드시 early return 이전에 선언해야 한다.
@@ -242,7 +245,7 @@ export default function ProfileHeader({ profile, stats, characters }) {
                 </span>
               );
             })()}
-            <CreatorPills characters={characters} firstCharDate={firstCharDate} stats={stats} />
+            <CreatorPills characters={characters} stats={stats} />
           </div>
         </div>
 
@@ -272,6 +275,9 @@ export default function ProfileHeader({ profile, stats, characters }) {
             <StatItem label="팔로워" value={stats.followerCount || 0} />
             <StatItem label="캐릭터" value={stats.plotCount || 0} />
           </div>
+
+
+
 
           {/* Top 20 character tier badges */}
           {top20.length > 0 && (
@@ -368,13 +374,13 @@ function AvatarImage({ src, alt, fallback, tierColor }) {
   );
 }
 
-function StatItem({ label, value, sub, accentSub }) {
+function StatItem({ label, value, textValue, sub, accentSub }) {
   return (
     <div className="text-center p-2 rounded-lg bg-[var(--bg-secondary)]/50">
       <div className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">
-        <HoverNumber value={value} />
+        {textValue ? textValue : <HoverNumber value={value} />}
       </div>
-      <div className="text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase">{label}</div>
+      <div className="text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase mt-0.5">{label}</div>
       {sub && (
         <div className={`text-[9px] font-semibold mt-0.5 ${accentSub ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)]'}`}>
           {sub}
@@ -385,12 +391,14 @@ function StatItem({ label, value, sub, accentSub }) {
 }
 
 // ===== 크리에이터 특성 Pill 뱃지 (단일 소스: src/data/badges.js) =====
-function CreatorPills({ characters, firstCharDate, stats }) {
-  const activityDays = firstCharDate ? Math.max(1, (Date.now() - firstCharDate.getTime()) / 86400000) : 0;
-  const allPills = React.useMemo(
-    () => computeEarnedPills({ characters, stats, activityDays }, 'profile'),
-    [characters, stats, activityDays]
+function CreatorPills({ characters, stats }) {
+  const allTitles = React.useMemo(
+    () => computeEarnedTitles({ characters, stats }),
+    [characters, stats]
   );
+
+  // 획득한 것만 필터링
+  const allEarned = allTitles.filter(t => t.earned);
   const fixedIds = FIXED_BADGE_IDS;
 
   const [selected, setSelected] = React.useState(null); // null = show all (up to 8)
@@ -412,40 +420,55 @@ function CreatorPills({ characters, firstCharDate, stats }) {
 
   // 초기값: 획득 칭호 전부 (최대 8개), 고정 칭호 우선
   const activeIds = React.useMemo(() => {
-    const presentFixed = allPills.filter(p => fixedIds.includes(p.id)).map(p => p.id);
+    const presentFixed = allEarned.filter(p => fixedIds.includes(p.id)).map(p => p.id);
     if (selected) {
       const unified = Array.from(new Set([...presentFixed, ...selected]));
       return unified.slice(0, 8);
     }
-    return allPills.slice(0, 8).map(p => p.id);
-  }, [selected, allPills]);
+    return allEarned.slice(0, 8).map(p => p.id);
+  }, [selected, allEarned]);
 
   const toggleId = (id) => {
     if (fixedIds.includes(id)) return; // 고정 칭호는 토글 불가
 
     setSelected(prev => {
-      const cur = prev || allPills.slice(0, 8).map(p => p.id);
+      const cur = prev || allEarned.slice(0, 8).map(p => p.id);
       if (cur.includes(id)) return cur.filter(x => x !== id);
       if (cur.length >= 8) return cur;
       return [...cur, id];
     });
   };
 
-  const visible = allPills.filter(p => activeIds.includes(p.id));
+  const visible = allEarned.filter(p => activeIds.includes(p.id));
 
-  if (allPills.length === 0) return null;
+  if (allEarned.length === 0) return null;
 
   return (
     <>
       {visible.map(p => {
-        return p.gradient ? (
-          <span key={p.id} className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white border border-purple-400/30" style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' }}>
-            {p.label}
-          </span>
+        const style = BADGE_COLOR_MAP[p.color] || BADGE_COLOR_MAP.slate;
+        const isGradient = p.color === 'gradient';
+        const label = `${p.emoji} ${p.title}`;
+        const desc = p.desc || '';
+
+        return isGradient ? (
+          <div key={p.id} className="relative group/pill">
+            <span className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white border border-purple-400/30 cursor-default shadow-sm" style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' }}>
+              {label}
+            </span>
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 px-2.5 py-1.5 bg-[rgba(20,20,30,0.95)] border border-[var(--border)] rounded-lg shadow-lg text-[10px] text-white/90 font-medium whitespace-nowrap opacity-0 group-hover/pill:opacity-100 transition-opacity pointer-events-none z-50">
+              {desc}
+            </div>
+          </div>
         ) : (
-          <span key={p.id} className={`flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${p.bg} border ${p.border} ${p.text}`}>
-            {p.label}
-          </span>
+          <div key={p.id} className="relative group/pill">
+            <span className={`flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${style.bg} border ${style.border} ${style.text} cursor-default shadow-sm`}>
+              {label}
+            </span>
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 px-2.5 py-1.5 bg-[rgba(20,20,30,0.95)] border border-[var(--border)] rounded-lg shadow-lg text-[10px] text-white/90 font-medium whitespace-nowrap opacity-0 group-hover/pill:opacity-100 transition-opacity pointer-events-none z-50">
+              {desc}
+            </div>
+          </div>
         );
       })}
       {/* 연필 편집 버튼 */}
@@ -486,10 +509,12 @@ function CreatorPills({ characters, firstCharDate, stats }) {
                 </div>
               </div>
               <div className="overflow-y-auto flex-1 p-3 space-y-1 min-h-0">
-                {allPills.map(p => {
+                {allEarned.map(p => {
                   const isFixed = fixedIds.includes(p.id);
                   const checked = activeIds.includes(p.id);
                   const disabled = isFixed || (!checked && activeIds.length >= 8);
+                  const label = `${p.emoji} ${p.title}`;
+                  const desc = p.desc || '';
 
                   return (
                     <label key={p.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-[var(--bg-secondary)] active:bg-white/10 transition-colors ${disabled ? 'opacity-50' : ''}`}>
@@ -502,11 +527,11 @@ function CreatorPills({ characters, firstCharDate, stats }) {
                       />
                       <span className="text-sm text-[var(--text-primary)] flex items-center gap-1.5 min-w-0 flex-1">
                         {isFixed && <span className="text-xs opacity-80">📌</span>}
-                        {p.label}
+                        {label}
                       </span>
-                      {BADGE_DESCRIPTIONS[p.id] && (
+                      {desc && (
                         <span className="text-[10px] text-[var(--text-tertiary)] shrink-0 max-w-[120px] text-right leading-tight">
-                          {BADGE_DESCRIPTIONS[p.id]}
+                          {desc}
                         </span>
                       )}
                     </label>
@@ -588,7 +613,7 @@ function PodiumHighlight({ characters }) {
         </div>
       </div>
       {/* items-stretch로 각 자식 카드의 높이를 완벽하게 동일하게 유지 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-4 lg:gap-5 items-stretch">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 items-stretch">
         {highlights.map((item, idx) => (
           <PodiumCard key={item.char.id || idx} {...item} desktopCenter={item.order === 1} />
         ))}
@@ -607,7 +632,7 @@ function PodiumCard({ char, label, icon, pillClass, borderClass, desktopCenter }
       target="_blank"
       rel="noopener noreferrer"
       // 높이를 flex-grow를 주거나 stretch 받도록 min-h 지정, 세 카드 모두 동일 크기 유지 (중앙도 동일 스케일)
-      className={`group relative flex flex-col min-h-[280px] md:min-h-[320px] w-full rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-lg hover:border-[var(--accent-bright)] hover:shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)] transition-all duration-300 transform md:hover:-translate-y-2 ${desktopCenter ? 'z-10' : 'z-0'}`}
+      className={`group relative flex flex-col aspect-[3/4] w-full rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-md hover:border-[var(--accent-bright)] hover:shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)] transition-all duration-300 transform md:hover:-translate-y-1 ${desktopCenter ? 'z-10' : 'z-0'}`}
     >
       {/* 1. 이미지 컨테이너 - Z-index를 0으로 낮추고 이 안에서만 overflow-hidden 시킴으로써 테두리 호버 짤림 완벽 해결 */}
       <div className="absolute inset-0 rounded-2xl overflow-hidden z-0 pointer-events-none border border-transparent bg-black">
@@ -634,38 +659,33 @@ function PodiumCard({ char, label, icon, pillClass, borderClass, desktopCenter }
       <div className="absolute inset-x-0 bottom-0 h-[70%] rounded-b-2xl pointer-events-none z-10 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
       {/* 3. 데이터 컨텐츠 컨테이너 - Z-index를 최우선으로 앞당김 */}
-      <div className="relative z-20 flex flex-col h-full p-4 sm:p-5 justify-between flex-grow">
+      <div className="relative z-20 flex flex-col h-full p-2 sm:p-3 justify-between flex-grow">
 
         {/* 상단: 티어 뱃지만 우측 배치 */}
         <div className="flex justify-end items-start w-full drop-shadow-sm">
           <div className="shrink-0 pt-0.5">
-            <TierBadge tierKey={tier.key} size={22} />
+            <TierBadge tierKey={tier.key} size={18} />
           </div>
         </div>
 
         {/* 하단 수치 타이포그래피 및 이름 */}
-        <div className="flex flex-col gap-1.5 mt-auto">
+        <div className="flex flex-col gap-1 mt-auto">
           {/* 대화량 텍스트 더 굵게 강조, 연한 보라색, '대화' 라벨 제거 */}
-          <div className="flex items-baseline gap-1.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-            <span className="text-3xl md:text-4xl lg:text-4xl font-black text-purple-200 tracking-tight">
+          <div className="flex items-baseline drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+            <span className="text-xl sm:text-2xl font-black text-purple-200 tracking-tight leading-none">
               {formatCompactNumber(char.interactionCount || 0)}
             </span>
           </div>
 
           {/* 캐릭터 이름 - 한 줄, 길면 가로 스크롤 */}
-          <h4 className="font-bold text-base md:text-lg text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] overflow-x-auto overflow-y-hidden whitespace-nowrap min-h-[1.5rem]">
+          <h4 className="font-bold text-xs text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] line-clamp-2 min-h-[1.5rem] mt-1">
             {char.name}
           </h4>
 
           {/* pill: 캐릭터명과 날짜 사이, 배경 50% 투명, 테두리에 색 */}
-          <div className={`flex items-center gap-1 w-fit px-1.5 py-1 rounded-full text-[9px] font-bold tracking-wide text-white border ${pillClass || 'bg-gray-600/50'} ${borderClass || 'border-white/25'}`}>
+          <div className={`flex items-center gap-0.5 w-fit px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wide text-white border ${pillClass || 'bg-gray-600/50'} ${borderClass || 'border-white/25'}`}>
             {icon}
-            <span>{label}</span>
-          </div>
-
-          <div className="flex items-center text-[10px] md:text-xs text-white/60 font-medium mt-1">
-            <Calendar size={12} className="mr-1.5 opacity-80" />
-            {char.createdAt ? new Date(char.createdAt).toISOString().split('T')[0] : '?'}
+            <span className="truncate">{label}</span>
           </div>
         </div>
       </div>

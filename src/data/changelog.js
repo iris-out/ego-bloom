@@ -1,7 +1,19 @@
-export const APP_VERSION = '1.1.0';
+export const APP_VERSION = '1.2.0';
 
 // 체인지로그
 export const CHANGELOG = [
+    {
+        version: '1.2.0',
+        date: '2026-02-26',
+        label: 'UX 개선 및 UI 안정화',
+        changes: [
+            '긴급 공지사항 배너 연동 및 서버 트래픽 상태 (Warning) 추가',
+            'Recap 뷰에서 상단 메뉴바가 겹치지 않도록 숨김 처리 적용',
+            '칭호 및 뱃지 처리 로직을 단일 소스로 통합 및 안정성 개선',
+            '트리맵 렌더링 비정상 표기 이슈 수정 및 클라우드 뷰 제거',
+            '랭킹 업데이트 타이머를 KST (UTC 15:00) 기준으로 타이머 정확도 개선'
+        ]
+    },
     {
         version: '1.1.0',
         date: '2026-02-24',

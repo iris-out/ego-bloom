@@ -17,20 +17,28 @@ import { proxyImageUrl, getPlotImageUrl, getPlotImageUrls } from './utils/imageU
 import { getRecentSearches, addRecentSearch, removeRecentSearch } from './utils/storage';
 import { getCreatorTier, calculateCreatorScore, formatNumber } from './utils/tierCalculator';
 import { APP_VERSION } from './data/changelog';
-
+import { ResponsiveContainer, Treemap, Tooltip as RechartsTooltip } from 'recharts';
 // 서버 상태 훅
 function useServerStatus() {
-  const [status, setStatus] = useState('checking'); // checking, ok, error
+  const [data, setData] = useState({ status: 'checking', message: null });
 
   useEffect(() => {
     const check = async () => {
       try {
-        const res = await fetch('https://emergency.zeta-ai.io/ko/status', { method: 'GET' });
-        const text = await res.text();
-        if (text.trim() === 'green') setStatus('ok');
-        else setStatus('error');
+        const [sRes, mRes] = await Promise.all([
+          fetch('https://emergency.zeta-ai.io/ko/status').then(r => r.text()),
+          fetch('https://emergency.zeta-ai.io/ko/message').then(r => r.text())
+        ]);
+
+        let status = 'error';
+        const s = sRes.trim();
+        if (s === 'green') status = 'ok';
+        else if (s === 'yellow') status = 'warning';
+
+        const message = mRes.trim();
+        setData({ status, message: message || null });
       } catch (err) {
-        setStatus('error');
+        setData(prev => ({ ...prev, status: 'error' }));
       }
     };
 
@@ -45,7 +53,7 @@ function useServerStatus() {
     };
   }, []);
 
-  return status;
+  return data;
 }
 
 // 서버 상태 인디케이터 UI
@@ -53,14 +61,40 @@ function ServerStatusIndicator({ status }) {
   const colors = {
     checking: 'bg-gray-400',
     ok: 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]',
+    warning: 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]',
     error: 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
   };
-  const labels = { checking: '확인 중...', ok: '제타 서비스 정상', error: '제타 서비스 이상 의심' };
+  const labels = {
+    checking: '확인 중...',
+    ok: '제타 서비스 정상',
+    warning: '제타 지연/불안정',
+    error: '제타 서비스 이상 의심'
+  };
 
   return (
-    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] text-[9px] font-bold tracking-wider uppercase text-[var(--text-secondary)]">
-      <span className={`w-2 h-2 rounded-full ${colors[status]} ${status === 'checking' ? 'animate-pulse' : ''}`} />
-      <span className="hidden sm:inline">{labels[status]}</span>
+    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] text-[9px] font-bold tracking-wider uppercase text-[var(--text-secondary)] shrink-0">
+      <span className={`w-2 h-2 rounded-full ${colors[status] || colors.error} ${status === 'checking' ? 'animate-pulse' : ''}`} />
+      <span className="hidden sm:inline">{labels[status] || labels.error}</span>
+    </div>
+  );
+}
+
+// 긴급 공지 배너 (Floating)
+function EmergencyBanner({ message }) {
+  if (!message) return null;
+  return (
+    <div className="fixed top-4 inset-x-4 z-[60] flex justify-center pointer-events-none animate-slide-down">
+      <div className="max-w-xl w-full bg-[rgba(20,20,30,0.95)] border border-amber-500/30 rounded-2xl p-4 shadow-2xl shadow-amber-500/10 backdrop-blur-md pointer-events-auto flex items-start gap-3 ring-1 ring-white/10">
+        <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 shrink-0">
+          <AlertCircle size={18} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1">Zeta Official Notice</div>
+          <p className="text-sm text-gray-200 font-medium leading-relaxed break-words whitespace-pre-wrap">
+            {message}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -104,6 +138,7 @@ async function fetchAllPlots(creatorId) {
     const data = await res.json();
     const plots = (data.plots || []).map(p => ({
       ...p,
+      originalInteractionCount: p.interactionCount ?? 0,
       interactionCount: p.interactionCountWithRegen ?? p.interactionCount ?? 0,
     }));
     all.push(...plots);
@@ -227,22 +262,98 @@ function GenreDistribution({ genres }) {
   );
 }
 
+
+// ─── Treemap Helpers ──────────────────────────────────────────────
+function TagTreemap({ tags }) {
+  if (!tags || tags.length === 0) return null;
+  const data = tags.slice(0, 30).map(t => ({ name: t.tag, size: t.score }));
+
+  const CustomContent = (props) => {
+    const { x, y, width, height, index, name, depth } = props;
+    if (!height || !width) return null;
+    if (depth === 0 || name === 'root') return null; // Handle Recharts root grouping
+
+    const isTopTag = index === 0;
+    return (
+      <g>
+        <rect
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          style={{
+            fill: index < 3 ? 'var(--accent)' : 'var(--bg-secondary)',
+            fillOpacity: index < 3 ? (1 - index * 0.2) : 0.6,
+            stroke: 'var(--bg-primary)',
+            strokeWidth: 2,
+            transition: 'all 0.3s ease',
+            cursor: 'pointer'
+          }}
+          className={`${isTopTag ? 'drop-shadow-[0_0_8px_rgba(139,92,246,0.6)]' : ''} hover:opacity-80`}
+        />
+        {width > 40 && height > 30 && (
+          <text
+            x={x + width / 2}
+            y={y + height / 2}
+            textAnchor="middle"
+            fill={index < 3 ? '#ffffff' : 'var(--text-secondary)'}
+            fontSize={width > 80 && height > 60 ? 16 : 10}
+            fontWeight={index < 3 ? "bold" : "normal"}
+          >
+            {name}
+          </text>
+        )}
+      </g>
+    );
+  };
+
+  return (
+    <div className="w-full h-[400px] animate-fade-in mt-4 bg-[var(--bg-secondary)]/20 p-2 rounded-xl border border-[var(--border)]">
+      <ResponsiveContainer width="100%" height="100%">
+        <Treemap
+          data={data}
+          dataKey="size"
+          stroke="#fff"
+          fill="var(--accent)"
+          content={<CustomContent />}
+        >
+          <RechartsTooltip
+            formatter={(value) => value.toLocaleString()}
+            contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px' }}
+            itemStyle={{ color: 'var(--text-primary)' }}
+          />
+        </Treemap>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 // ─── Ranking Trend Views ──────────────────────────────────────────────────────
 function TogetherView({ data }) {
+  const [viewType, setViewType] = useState('list');
   return (
     <div className="card p-5 animate-fade-in">
       <GenreDistribution genres={data?.genres} />
 
-      <div className="mb-4 pt-4 border-t border-[var(--border)]">
-        <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2 mb-1">
-          <TrendingUp size={14} className="text-[var(--accent)]" />
-          랭킹 종합 해시태그 트렌드 TOP 30
-        </h3>
-        <p className="text-[10px] text-[var(--text-tertiary)] opacity-60">
-          트렌딩×3 · 베스트×2 · 신작×1 가중치 적용 (각 최고 TOP 100 기준)
-        </p>
+      <div className="mb-4 pt-4 border-t border-[var(--border)] flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3">
+        <div>
+          <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2 mb-1">
+            <TrendingUp size={14} className="text-[var(--accent)]" />
+            랭킹 종합 해시태그 트렌드 TOP 30
+          </h3>
+          <p className="text-[10px] text-[var(--text-tertiary)] opacity-60">
+            트렌딩×3 · 베스트×2 · 신작×1 가중치 적용 (각 최고 TOP 100 기준)
+          </p>
+        </div>
+
+        <div className="flex bg-[var(--bg-secondary)] rounded-lg p-1 self-start sm:self-auto shrink-0 border border-[var(--border)]">
+          <button onClick={() => setViewType('list')} className={`px-3 py-1.5 text-[11px] font-bold rounded-md transition-all ${viewType === 'list' ? 'bg-[var(--card)] shadow text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}>리스트</button>
+          <button onClick={() => setViewType('treemap')} className={`px-3 py-1.5 text-[11px] font-bold rounded-md transition-all ${viewType === 'treemap' ? 'bg-[var(--card)] shadow text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}>트리맵</button>
+        </div>
       </div>
-      <TagBarList tags={data?.combined} />
+
+      {viewType === 'list' && <TagBarList tags={data?.combined} />}
+      {viewType === 'treemap' && <TagTreemap tags={data?.combined} />}
     </div>
   );
 }
@@ -259,9 +370,6 @@ function InteractionView({ data }) {
           <p className="text-[10px] text-[var(--text-tertiary)] opacity-60">
             현재 차트에 랭크된 모든 캐릭터들의 원본 대화 수치를 태그별로 합산
           </p>
-        </div>
-        <div className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 text-[10px] font-bold border border-blue-500/20">
-          HOT TRAFFIC
         </div>
       </div>
       <TagBarList tags={data?.interaction} />
@@ -299,7 +407,18 @@ export default function App() {
   const [cacheInfo, setCacheInfo] = useState(null);
   const [cacheRemaining, setCacheRemaining] = useState(null);
   const [showChangelog, setShowChangelog] = useState(false);
-  const serverStatus = useServerStatus();
+  const serverData = useServerStatus();
+  const serverStatus = serverData.status;
+  const emergencyMessage = serverData.message;
+  const [isRecapMode, setIsRecapMode] = useState(false);
+
+  // RECAP 모드 감지 (해시 기반)
+  useEffect(() => {
+    const checkHash = () => setIsRecapMode(window.location.hash === '#recap');
+    checkHash();
+    window.addEventListener('hashchange', checkHash);
+    return () => window.removeEventListener('hashchange', checkHash);
+  }, []);
 
   // 랭킹 트렌드 뷰
   const [showTrendView, setShowTrendView] = useState(false);
@@ -543,10 +662,18 @@ export default function App() {
   const RankingPreview = memo(({ openAction, data }) => {
     const [topTags, setTopTags] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [updatedAt, setUpdatedAt] = useState(null);
+    const [progressPct, setProgressPct] = useState(0);
+    const [timeLeftStr, setTimeLeftStr] = useState('');
 
     useEffect(() => {
+      const handleData = (d) => {
+        if (d && d.combined) setTopTags(d.combined.slice(0, 5));
+        if (d && d.updatedAt) setUpdatedAt(new Date(d.updatedAt));
+      };
+
       if (data && data.combined) {
-        setTopTags(data.combined.slice(0, 5));
+        handleData(data);
         setLoading(false);
         return;
       }
@@ -554,28 +681,76 @@ export default function App() {
       setLoading(true);
       fetch('/data/ranking_latest.json')
         .then(res => res.json())
-        .then(d => {
-          if (d && d.combined) setTopTags(d.combined.slice(0, 5));
-        })
+        .then(handleData)
         .catch(err => console.error("Ranking fetch failed:", err))
         .finally(() => setLoading(false));
     }, [data]);
+
+    useEffect(() => {
+      if (!updatedAt) return;
+      const interval = setInterval(() => {
+        const now = new Date();
+
+        // UTC 15:00 = KST 00:00 (Next update target)
+        const nextUpdate = new Date(now);
+        nextUpdate.setUTCHours(15, 0, 0, 0);
+        if (nextUpdate < now) {
+          nextUpdate.setUTCDate(nextUpdate.getUTCDate() + 1);
+        }
+
+        const remaining = nextUpdate.getTime() - now.getTime();
+        const TOTAL_DAY_MS = 24 * 60 * 60 * 1000;
+        const elapsed = TOTAL_DAY_MS - remaining;
+
+        const pct = Math.min(100, Math.max(0, (elapsed / TOTAL_DAY_MS) * 100));
+        setProgressPct(pct);
+
+        if (remaining > 0) {
+          const h = Math.floor(remaining / 3600000);
+          const m = Math.floor((remaining % 3600000) / 60000);
+          const s = Math.floor((remaining % 60000) / 1000);
+          setTimeLeftStr(`${h}시간 ${m}분 ${s}초 후 갱신`);
+        } else {
+          setTimeLeftStr('업데이트 갱신중...');
+        }
+      }, 1000);
+      return () => clearInterval(interval);
+    }, [updatedAt]);
 
     return (
       <div className="card p-5 relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[var(--accent)] to-purple-500 opacity-[0.03] rounded-bl-full pointer-events-none" />
 
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 relative z-10">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-[var(--accent-soft)] text-[var(--accent)]">
               <TrendingUp size={16} />
             </div>
-            <h3 className="text-sm font-bold text-[var(--text-primary)]">현재 제타 트렌딩 주제</h3>
+            <div>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">현재 제타 트렌딩 주제</h3>
+              {updatedAt && (
+                <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5 tracking-tight">
+                  {updatedAt.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 기준
+                </p>
+              )}
+            </div>
           </div>
-          <p className="text-[10px] text-[var(--text-tertiary)] bg-[var(--bg-secondary)] px-2 py-0.5 rounded-full border border-[var(--border)]">
+          <p className="text-[10px] text-[var(--text-tertiary)] bg-[var(--bg-secondary)] px-2 py-0.5 rounded-full border border-[var(--border)] shrink-0">
             이번 주 TOP 5
           </p>
         </div>
+
+        {updatedAt && (
+          <div className="mb-4 relative z-10 w-full bg-[var(--bg-secondary)]/50 rounded-lg p-2.5 border border-[var(--border)]">
+            <div className="flex justify-between items-center text-[10px] text-[var(--text-tertiary)] mb-1.5 px-0.5">
+              <span className="flex items-center gap-1.5"><Loader2 size={10} className={progressPct < 100 ? "animate-spin" : ""} /> 랭킹 데이터 캐시 유효</span>
+              <span className="font-mono font-medium">{timeLeftStr}</span>
+            </div>
+            <div className="h-1.5 bg-[var(--bg-primary)] rounded-full overflow-hidden shadow-inner">
+              <div className="h-full bg-gradient-to-r from-purple-500 to-[var(--accent)] transition-all ease-linear duration-1000" style={{ width: `${progressPct}%` }} />
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="h-[150px] flex items-center justify-center">
@@ -584,17 +759,19 @@ export default function App() {
         ) : (
           <div className="space-y-2 mb-4 relative z-10">
             {topTags.map((t, i) => (
-              <div key={t.tag} className="flex items-center justify-between py-1.5 px-3 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors group/item">
+              <div key={t.tag} className={`flex items-center justify-between py-1.5 px-3 rounded-lg hover:bg-[var(--bg-secondary)] transition-all group/item ${i === 0 ? 'bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/10' : ''}`}>
                 <div className="flex items-center gap-2.5">
-                  <span className={`text-xs font-bold w-4 text-center ${i < 3 ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)]'}`}>
-                    {i + 1}
+                  <span className={`text-xs font-bold w-5 text-center shrink-0 ${i === 0 ? 'text-lg drop-shadow-[0_0_5px_rgba(250,204,21,0.6)]' : i < 3 ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)]'}`}>
+                    {i === 0 ? '👑' : i + 1}
                   </span>
-                  <span className="text-sm text-[var(--text-secondary)] group-hover/item:text-[var(--text-primary)] transition-colors">
-                    <Hash size={12} className="inline mr-0.5 opacity-50" />
-                    {t.tag}
-                  </span>
+                  <div className="flex items-center gap-1 group-hover/item:text-[var(--text-primary)] transition-colors">
+                    <Hash size={12} className={`opacity-50 shrink-0 ${i === 0 ? 'text-amber-500' : 'text-[var(--text-tertiary)]'}`} />
+                    <span className={`text-sm ${i === 0 ? 'font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-amber-600 drop-shadow-[0_0_8px_rgba(252,211,77,0.4)]' : 'text-[var(--text-secondary)] font-medium'}`}>
+                      {t.tag}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-[10px] text-[var(--text-tertiary)] font-mono bg-[var(--bg-primary)] px-1.5 py-0.5 rounded">
+                <div className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${i === 0 ? 'bg-amber-500/10 text-amber-600 font-bold' : 'text-[var(--text-tertiary)] bg-[var(--bg-primary)]'}`}>
                   {t.score.toLocaleString()}
                 </div>
               </div>
@@ -617,6 +794,8 @@ export default function App() {
   if (!data && !loading) {
     return (
       <div className="page-bg min-h-screen flex flex-col relative overflow-hidden">
+        <EmergencyBanner message={emergencyMessage} />
+
         {/* 우상단 시스템 제어 */}
         <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2">
           <ChangelogBtn onClick={() => setShowChangelog(true)} />
@@ -722,7 +901,7 @@ export default function App() {
 
           {/* Footer */}
           <div className="mt-auto pt-20 pb-4 text-center text-xs text-[var(--text-tertiary)] opacity-60">
-            zeta : @_leo 제작 / 문의는 <a href="https://github.com/iris-out/ego-bloom/issues" target="_blank" rel="noopener noreferrer" className="underline hover:text-[var(--accent)] hover:opacity-100 transition-all">https://github.com/iris-out/ego-bloom의 Issue 탭</a>에 부탁드립니다.
+            문의는 <a href="https://github.com/iris-out/ego-bloom/issues" target="_blank" rel="noopener noreferrer" className="underline hover:text-[var(--accent)] hover:opacity-100 transition-all">https://github.com/iris-out/ego-bloom의 Issue 탭</a>에 부탁드립니다.
           </div>
         </div>
         <ChangelogModal isOpen={showChangelog} onClose={() => setShowChangelog(false)} />
@@ -734,10 +913,12 @@ export default function App() {
   if (loading) {
     return (
       <div className="page-bg min-h-screen">
-        <TopBar theme={theme} toggleTheme={toggleTheme} onBack={handleBack} input={input}
-          onInputChange={setInput} onSubmit={handleSubmit} loading={loading}
-          onChangelogOpen={() => setShowChangelog(true)} serverStatus={serverStatus} />
-        <main className="max-w-3xl mx-auto px-4 pt-4 pb-12"><SkeletonUI /></main>
+        {!isRecapMode && (
+          <TopBar theme={theme} toggleTheme={toggleTheme} onBack={handleBack} input={input}
+            onInputChange={setInput} onSubmit={handleSubmit} loading={loading}
+            onChangelogOpen={() => setShowChangelog(true)} serverStatus={serverStatus} />
+        )}
+        <main className="max-w-7xl mx-auto px-4 pt-4 pb-12"><SkeletonUI /></main>
         <ChangelogModal isOpen={showChangelog} onClose={() => setShowChangelog(false)} />
       </div>
     );
@@ -749,11 +930,13 @@ export default function App() {
 
   return (
     <div className="page-bg min-h-screen">
-      <TopBar theme={theme} toggleTheme={toggleTheme} onBack={handleBack} input={input}
-        onInputChange={setInput} onSubmit={handleSubmit} loading={loading}
-        onChangelogOpen={() => setShowChangelog(true)} serverStatus={serverStatus} />
+      {!isRecapMode && (
+        <TopBar theme={theme} toggleTheme={toggleTheme} onBack={handleBack} input={input}
+          onInputChange={setInput} onSubmit={handleSubmit} loading={loading}
+          onChangelogOpen={() => setShowChangelog(true)} serverStatus={serverStatus} />
+      )}
 
-      <main className="max-w-3xl mx-auto px-4 pt-4 pb-12 space-y-4">
+      <main className="max-w-7xl mx-auto px-4 pt-4 pb-12 space-y-4">
         {cacheInfo && cacheRemaining !== null && (
           <div className="animate-slide-down flex items-center justify-between px-4 py-2.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] text-xs text-[var(--text-tertiary)]">
             <span className="flex flex-col gap-0.5">
@@ -772,21 +955,32 @@ export default function App() {
         )}
 
         <EncouragementBanner tier={tier} characters={data.characters} stats={data.stats} />
-        <ProfileHeader profile={data.profile} stats={data.stats} characters={data.characters} />
 
-        <div className="flex gap-1 p-1 rounded-lg bg-[var(--bg-secondary)]">
-          <TabButton active={tab === 'summary'} onClick={() => setTab('summary')}>요약</TabButton>
-          <TabButton active={tab === 'detail'} onClick={() => setTab('detail')}>상세</TabButton>
-          <TabButton active={tab === 'achievements'} onClick={() => setTab('achievements')}>칭호/랭킹</TabButton>
-        </div>
+        {/* 2-Column Layout Container */}
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
 
-        <div className="animate-fade-in-up">
-          {tab === 'summary'
-            ? <SummaryTab characters={data.characters} />
-            : tab === 'detail'
-              ? <DetailTab stats={data.stats} characters={data.characters} />
-              : <AchievementsTab stats={data.stats} characters={data.characters} />
-          }
+          {/* Left Sidebar (Profile Header) */}
+          <div className="w-full lg:w-[380px] shrink-0 lg:sticky lg:top-20 z-10">
+            <ProfileHeader profile={data.profile} stats={data.stats} characters={data.characters} />
+          </div>
+
+          {/* Right Main Content (Tabs) */}
+          <div className="flex-1 w-full min-w-0 flex flex-col gap-4">
+            <div className="flex gap-1 p-1 rounded-lg bg-[var(--bg-secondary)]">
+              <TabButton active={tab === 'summary'} onClick={() => setTab('summary')}>요약</TabButton>
+              <TabButton active={tab === 'detail'} onClick={() => setTab('detail')}>상세</TabButton>
+              <TabButton active={tab === 'achievements'} onClick={() => setTab('achievements')}>칭호/랭킹</TabButton>
+            </div>
+
+            <div className="animate-fade-in-up">
+              {tab === 'summary'
+                ? <SummaryTab characters={data.characters} />
+                : tab === 'detail'
+                  ? <DetailTab stats={data.stats} characters={data.characters} />
+                  : <AchievementsTab stats={data.stats} characters={data.characters} />
+              }
+            </div>
+          </div>
         </div>
       </main>
 
@@ -820,7 +1014,7 @@ function ChangelogBtn({ onClick }) {
 function TopBar({ theme, toggleTheme, onBack, input, onInputChange, onSubmit, loading, onChangelogOpen, serverStatus }) {
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-[var(--bg-primary)]/80 border-b border-[var(--border)]">
-      <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">
+      <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-3">
         <button onClick={onBack}
           className="shrink-0 p-1.5 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-secondary)]">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

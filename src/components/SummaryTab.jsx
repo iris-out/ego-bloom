@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { TierBadge } from './TierBadge';
 import ImageWithFallback from './ImageWithFallback';
 import { getCharacterTier, formatNumber, formatDate } from '../utils/tierCalculator';
-import { ChevronLeft, ChevronRight, MessageCircle, Calendar, ArrowUpAZ, X, ExternalLink, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MessageCircle, Calendar, ArrowUpAZ, X, ExternalLink, Star, RefreshCw, BookOpen, MessageSquareText } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -251,6 +251,8 @@ function CharacterCard({ char, rank, onTagClick, activeTag }) {
               )}
             </div>
           )}
+
+
 
           <div className="flex items-center text-[9px] text-[var(--text-tertiary)] border-t border-[var(--border)] pt-1.5 border-dashed">
             <Calendar size={9} className="mr-1" />

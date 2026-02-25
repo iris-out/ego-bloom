@@ -37,14 +37,26 @@ function CharRow({ char, showRank }) {
                         #{char.globalRank}
                     </span>
                     {char.rankDiff != null && char.rankDiff !== 0 && (
-                        <span className={`text-[9px] font-bold ${char.rankDiff > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {char.rankDiff > 0 ? '▲' : '▼'}{Math.abs(char.rankDiff)}
-                        </span>
+                        <div className="flex items-center gap-1 mt-0.5" title={`어제 대비 ${Math.abs(char.rankDiff)}순위 ${char.rankDiff > 0 ? '상승' : '하락'}`}>
+                            <span className={`text-[9px] font-bold ${char.rankDiff > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {char.rankDiff > 0 ? '▲' : '▼'}{Math.abs(char.rankDiff)}
+                            </span>
+                            <svg width="18" height="10" viewBox="0 0 20 10" className="opacity-70">
+                                <polyline
+                                    points={`0,${char.rankDiff > 0 ? 8 : 2} 10,5 20,${char.rankDiff > 0 ? 2 : 8}`}
+                                    fill="none"
+                                    stroke={char.rankDiff > 0 ? '#10b981' : '#ef4444'}
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            </svg>
+                        </div>
                     )}
                 </div>
             )}
             {showRank && char.isNew && (
-                <span className="text-[9px] font-black text-orange-400 shrink-0 animate-pulse">NEW</span>
+                <span className="text-[9px] font-black text-orange-400 shrink-0 animate-pulse ml-1">NEW</span>
             )}
             <ExternalLink size={10} className="text-[var(--text-tertiary)] opacity-0 group-hover:opacity-60 shrink-0" />
         </a>

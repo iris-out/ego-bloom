@@ -40,11 +40,40 @@ export const BADGE_DEFINITIONS = [
   { id: 'sihanbu', emoji: '💧', title: '시한부', description: '#시한부 태그', desc: '캐릭터 중 #시한부 태그 보유', color: 'red' },
   { id: 'guwon', emoji: '🩹', title: '구원', description: '#구원 태그', desc: '캐릭터 중 #구원 태그 보유', color: 'emerald' },
   { id: 'original', emoji: '✨', title: '오리지널', description: '2차창작 태그 없음', desc: '게임/애니/영화 등 2차창작 태그 없이 오리지널만 제작', color: 'sky' },
+
+  // 개그/재미 신규 종
+  { id: 'factory', emoji: '🏭', title: '공장장', description: '캐릭터 150명+', desc: '150명 이상의 수많은 캐릭터를 찍어낸 진정한 공장장', color: 'slate' },
+  { id: 'obsessive', emoji: '👀', title: '집착광', description: '집착 태그 비율 높음', desc: '#집착 태그 캐릭터를 5개 이상 제작', color: 'violet' },
+  { id: 'purelove', emoji: '💘', title: '오직 순애만', description: '순애 태그 비중 높음', desc: '#순애 태그 캐릭터를 5개 이상 제작', color: 'pink' },
+  { id: 'lonely', emoji: '🗣️', title: '말상대 구함', description: '대화량 높으나 팔로워 없음', desc: '총 대화수 1,000 이상이나 팔로워가 0명인 고독한 영혼', color: 'slate' },
+  { id: 'secret', emoji: '🤫', title: '신비주의', description: '비공개율 80% 이상', desc: '캐릭터 5개 이상이면서 상세 설정 비공개 비율이 80% 이상', color: 'slate' },
+  { id: 'expensive', emoji: '💸', title: '비싼 몸', description: '대화/팔로워 비율 10,000 이상', desc: '팔로워수 대비 대화량이 압도적으로 높음 (비율 1만 이상)', color: 'gradient' },
+  { id: '100m_zeta', emoji: '🌟', title: '1억제타', description: '대화수 1억 돌파', desc: '단일 캐릭터 대화수가 1억 회를 돌파한 경이로운 기록', color: 'rose' },
 ];
 
 export const BADGE_DESCRIPTIONS = Object.fromEntries(
   BADGE_DEFINITIONS.map(b => [b.id, b.description])
 );
+
+export const BADGE_COLOR_MAP = {
+  pink: { bg: 'bg-pink-500/15', border: 'border-pink-400/30', text: 'text-pink-300', dot: 'bg-pink-400' },
+  red: { bg: 'bg-red-500/15', border: 'border-red-400/30', text: 'text-red-300', dot: 'bg-red-400' },
+  blue: { bg: 'bg-blue-500/15', border: 'border-blue-400/30', text: 'text-blue-300', dot: 'bg-blue-400' },
+  emerald: { bg: 'bg-emerald-500/15', border: 'border-emerald-400/30', text: 'text-emerald-300', dot: 'bg-emerald-400' },
+  yellow: { bg: 'bg-yellow-500/15', border: 'border-yellow-400/30', text: 'text-yellow-300', dot: 'bg-yellow-400' },
+  amber: { bg: 'bg-amber-500/15', border: 'border-amber-400/30', text: 'text-amber-300', dot: 'bg-amber-400' },
+  cyan: { bg: 'bg-cyan-500/15', border: 'border-cyan-400/30', text: 'text-cyan-300', dot: 'bg-cyan-400' },
+  violet: { bg: 'bg-violet-500/15', border: 'border-violet-400/30', text: 'text-violet-300', dot: 'bg-violet-400' },
+  indigo: { bg: 'bg-indigo-500/15', border: 'border-indigo-400/30', text: 'text-indigo-300', dot: 'bg-indigo-400' },
+  purple: { bg: 'bg-purple-500/15', border: 'border-purple-400/30', text: 'text-purple-300', dot: 'bg-purple-400' },
+  slate: { bg: 'bg-slate-500/15', border: 'border-slate-400/30', text: 'text-slate-300', dot: 'bg-slate-400' },
+  teal: { bg: 'bg-teal-500/15', border: 'border-teal-400/30', text: 'text-teal-300', dot: 'bg-teal-400' },
+  orange: { bg: 'bg-orange-500/15', border: 'border-orange-400/30', text: 'text-orange-300', dot: 'bg-orange-400' },
+  sky: { bg: 'bg-sky-500/15', border: 'border-sky-400/30', text: 'text-sky-300', dot: 'bg-sky-400' },
+  rose: { bg: 'bg-rose-500/15', border: 'border-rose-400/30', text: 'text-rose-300', dot: 'bg-rose-400' },
+  lime: { bg: 'bg-lime-500/15', border: 'border-lime-400/30', text: 'text-lime-300', dot: 'bg-lime-400' },
+  pink_dark: { bg: 'bg-pink-500/10', border: 'border-pink-500/20', text: 'text-pink-400', dot: 'bg-pink-500' }
+};
 
 /** 표시할 칭호 편집에서 고정(토글 불가)인 칭호 id */
 export const FIXED_BADGE_IDS = ['sunae', 'ntr'];
@@ -52,104 +81,8 @@ export const FIXED_BADGE_IDS = ['sunae', 'ntr'];
 const FANTASY_TAGS = ['판타지', '마법', '기사', '마왕', '용사', '엘프', '드래곤'];
 
 /** Pill 스타일: recap(진하게) / profile(연하게) */
-const STYLES = {
-  recap: {
-    pink: { text: 'text-pink-300', bg: 'bg-pink-500/20', border: 'border-pink-500/50' },
-    red: { text: 'text-red-300', bg: 'bg-red-500/20', border: 'border-red-500/50' },
-    blue: { text: 'text-blue-300', bg: 'bg-blue-500/20', border: 'border-blue-500/50' },
-    indigo: { text: 'text-indigo-300', bg: 'bg-indigo-500/20', border: 'border-indigo-500/50' },
-    emerald: { text: 'text-emerald-300', bg: 'bg-emerald-500/20', border: 'border-emerald-500/50' },
-    yellow: { text: 'text-yellow-300', bg: 'bg-yellow-500/20', border: 'border-yellow-500/50' },
-    amber: { text: 'text-amber-300', bg: 'bg-amber-500/20', border: 'border-amber-500/50' },
-    violet: { text: 'text-violet-300', bg: 'bg-violet-500/20', border: 'border-violet-500/50' },
-    slate: { text: 'text-slate-300', bg: 'bg-slate-500/20', border: 'border-slate-500/50' },
-    orange: { text: 'text-orange-300', bg: 'bg-orange-500/20', border: 'border-orange-500/50' },
-    sky: { text: 'text-sky-300', bg: 'bg-sky-500/20', border: 'border-sky-500/50' },
-    rose: { text: 'text-rose-300', bg: 'bg-rose-500/20', border: 'border-rose-500/50' },
-    lime: { text: 'text-lime-300', bg: 'bg-lime-500/20', border: 'border-lime-500/50' },
-    pink_dark: { text: 'text-pink-400', bg: 'bg-pink-600/20', border: 'border-pink-600/50' },
-  },
-  profile: {
-    pink: { text: 'text-pink-300', bg: 'bg-pink-500/15', border: 'border-pink-400/30' },
-    red: { text: 'text-red-300', bg: 'bg-red-500/15', border: 'border-red-400/30' },
-    blue: { text: 'text-blue-300', bg: 'bg-blue-500/15', border: 'border-blue-400/30' },
-    indigo: { text: 'text-indigo-300', bg: 'bg-indigo-500/15', border: 'border-indigo-400/30' },
-    emerald: { text: 'text-emerald-300', bg: 'bg-emerald-500/15', border: 'border-emerald-400/30' },
-    yellow: { text: 'text-yellow-300', bg: 'bg-yellow-500/15', border: 'border-yellow-400/30' },
-    amber: { text: 'text-amber-300', bg: 'bg-amber-500/15', border: 'border-amber-400/30' },
-    violet: { text: 'text-violet-300', bg: 'bg-violet-500/15', border: 'border-violet-400/30' },
-    slate: { text: 'text-slate-300', bg: 'bg-slate-500/15', border: 'border-slate-400/30' },
-    orange: { text: 'text-orange-300', bg: 'bg-orange-500/15', border: 'border-orange-400/30' },
-    sky: { text: 'text-sky-300', bg: 'bg-sky-500/15', border: 'border-sky-400/30' },
-    rose: { text: 'text-rose-300', bg: 'bg-rose-500/15', border: 'border-rose-400/30' },
-    lime: { text: 'text-lime-300', bg: 'bg-lime-500/15', border: 'border-lime-400/30' },
-    pink_dark: { text: 'text-pink-300', bg: 'bg-pink-500/15', border: 'border-pink-400/30' },
-  },
-};
-
 export function getMediaSet() {
   return MEDIA_SET;
-}
-
-/**
- * 획득한 칭호 Pill 목록 계산 (Recap, 프로필 카드용)
- * @param {{ characters: Array, stats?: { followerCount?: number }, activityDays: number }} input
- * @param {'recap'|'profile'} variant
- * @returns {{ id, label, text, bg, border, gradient? }[]}
- */
-export function computeEarnedPills(input, variant = 'profile') {
-  const { characters, stats = {}, activityDays } = input;
-  if (!characters?.length) return [];
-
-  const result = [];
-  const styleMap = STYLES[variant] || STYLES.profile;
-  const allTags = characters.flatMap(c => (c.hashtags || c.tags || []).map(t => t.toLowerCase()));
-  const tagSet = new Set(allTags);
-  const hasSunae = tagSet.has('순애');
-  const hasNtr = tagSet.has('ntr') || tagSet.has('ntl') || tagSet.has('뺏기') || tagSet.has('빼앗기');
-  const unlimitedCount = characters.filter(c => c.unlimitedAllowed).length;
-
-  if (hasSunae && !hasNtr) result.push({ id: 'sunae', label: '💕 순애보', ...styleMap.pink });
-  if (hasNtr) result.push({ id: 'ntr', label: '💔 사랑 파괴자', ...styleMap.red });
-  if (FANTASY_TAGS.some(t => tagSet.has(t))) result.push({ id: 'fantasy', label: '🗡️ 판타지', ...styleMap.indigo });
-
-  if (activityDays <= 90 && activityDays > 0) result.push({ id: 'newbie', label: '🌱 뉴비', ...styleMap.emerald });
-  if (activityDays >= 548) result.push({ id: 'military', label: '🎖️ 이병부터 병장까지', ...styleMap.blue });
-  else if (activityDays >= 365) result.push({ id: 'oneyear', label: '🎂 벌써 1년', ...styleMap.emerald });
-
-  if (tagSet.has('사이버펑크') || tagSet.has('cyberpunk')) result.push({ id: 'cyber', label: '⚡ 사펑', gradient: true });
-  if (tagSet.has('메스가키') || tagSet.has('도발')) result.push({ id: 'mesu', label: '🩷 허접', ...styleMap.pink_dark });
-  if (unlimitedCount > 0) result.push({ id: 'unlimit', label: '🔮 언리밋', ...styleMap.violet });
-  if (['수인', '수인형', '퍼리', 'furry'].some(t => tagSet.has(t))) result.push({ id: 'furry', label: '🐾 털', ...styleMap.amber });
-
-  const totalInteractions = characters.reduce((s, c) => s + (c.interactionCount || 0), 0);
-  const hasMillionChar = characters.some(c => (c.interactionCount || 0) >= 1000000);
-  const hasHalfMillionChar = characters.some(c => (c.interactionCount || 0) >= 500000);
-  const hatTrick = characters.filter(c => (c.interactionCount || 0) >= 1000000).length >= 3;
-
-  if (hatTrick) result.push({ id: 'hattrick', label: '🎩 해트트릭', ...styleMap.indigo });
-  if (hasMillionChar) result.push({ id: 'platinum', label: '💿 플래티넘 디스크', ...styleMap.slate });
-  else if (hasHalfMillionChar) result.push({ id: 'gold_disc', label: '📀 골든 디스크', ...styleMap.yellow });
-
-  if (totalInteractions >= 10000000) result.push({ id: '10m', label: '🎬 천만관객', ...styleMap.yellow });
-  else if (totalInteractions >= 1000000) result.push({ id: '1m', label: '💬 밀리언', ...styleMap.amber });
-
-  if ((stats.followerCount || 0) >= 10000) result.push({ id: 'superstar', label: '🌌 우주대스타', gradient: true });
-
-  if (characters.length >= 50) result.push({ id: 'family', label: '👨‍👩‍👧‍👦 또 하나의 가족', ...styleMap.rose });
-  if (characters.length >= 100) result.push({ id: 'fertile', label: '🌾 다산의 상징', ...styleMap.lime });
-  if (tagSet.has('일진')) result.push({ id: 'iljin', label: '🏀 야 체육 안가고 뭐해', ...styleMap.orange });
-  if (tagSet.has('찐따')) result.push({ id: 'jjindda', label: '🚶 니 애인 지나간다', ...styleMap.slate });
-  if (tagSet.has('히어로')) result.push({ id: 'hero', label: '🦸 취미일 뿐', ...styleMap.amber });
-  if (tagSet.has('아카데미')) result.push({ id: 'academy', label: '🎓 아카데미', ...styleMap.indigo });
-  if (tagSet.has('혐관')) result.push({ id: 'hyeongwan', label: '🖤 혐관', ...styleMap.slate });
-  if (tagSet.has('피폐')) result.push({ id: 'pipye', label: '😵 피폐', ...styleMap.violet });
-  if (tagSet.has('시한부')) result.push({ id: 'sihanbu', label: '💧 시한부', ...styleMap.red });
-  if (tagSet.has('구원')) result.push({ id: 'guwon', label: '🩹 구원', ...styleMap.emerald });
-  const hasNo2nd = !allTags.some(t => MEDIA_SET.has(t));
-  if (hasNo2nd && characters.length > 0) result.push({ id: 'original', label: '✨ 오리지널', ...styleMap.sky });
-
-  return result;
 }
 
 /** 캐릭터 중 특정 태그 보유 여부 */
@@ -210,6 +143,23 @@ export function computeEarnedTitles(input) {
 
   list.push({ id: 'family', emoji: '👨‍👩‍👧‍👦', title: '또 하나의 가족', desc: BADGE_DEFINITIONS.find(b => b.id === 'family')?.desc ?? '', color: 'rose', earned: characters.length >= 50 });
   list.push({ id: 'fertile', emoji: '🌾', title: '다산의 상징', desc: BADGE_DEFINITIONS.find(b => b.id === 'fertile')?.desc ?? '', color: 'lime', earned: characters.length >= 100 });
+  list.push({ id: 'factory', emoji: '🏭', title: '공장장', desc: BADGE_DEFINITIONS.find(b => b.id === 'factory')?.desc ?? '', color: 'slate', earned: characters.length >= 150 });
+  list.push({ id: 'obsessive', emoji: '👀', title: '집착광', desc: BADGE_DEFINITIONS.find(b => b.id === 'obsessive')?.desc ?? '', color: 'violet', earned: tagSet.has('집착') && charsWithTag(characters, '집착').length >= 5, chars: charsWithTag(characters, '집착') });
+  list.push({ id: 'purelove', emoji: '💘', title: '오직 순애만', desc: BADGE_DEFINITIONS.find(b => b.id === 'purelove')?.desc ?? '', color: 'pink', earned: tagSet.has('순애') && charsWithTag(characters, '순애').length >= 5, chars: charsWithTag(characters, '순애') });
+  list.push({ id: 'lonely', emoji: '🗣️', title: '말상대 구함', desc: BADGE_DEFINITIONS.find(b => b.id === 'lonely')?.desc ?? '', color: 'slate', earned: totalInteractions >= 1000 && followers === 0 });
+
+
+
+  const privateCount = characters.filter(c => !c.isLongDescriptionPublic).length;
+  const isSecret = characters.length >= 5 && (privateCount / characters.length) >= 0.8;
+  list.push({ id: 'secret', emoji: '🤫', title: '신비주의', desc: BADGE_DEFINITIONS.find(b => b.id === 'secret')?.desc ?? '', color: 'slate', earned: isSecret });
+
+  const followRatio = followers > 0 ? totalInteractions / followers : 0;
+  list.push({ id: 'expensive', emoji: '💸', title: '비싼 몸', desc: BADGE_DEFINITIONS.find(b => b.id === 'expensive')?.desc ?? '', color: 'gradient', earned: followRatio >= 10000 });
+
+  const zeta100MChars = characters.filter(c => (c.interactionCount || 0) >= 100000000);
+  list.push({ id: '100m_zeta', emoji: '🌟', title: '1억제타', desc: BADGE_DEFINITIONS.find(b => b.id === '100m_zeta')?.desc ?? '', color: 'rose', earned: zeta100MChars.length > 0, chars: zeta100MChars.map(c => c.name) });
+
   list.push({ id: 'iljin', emoji: '🏀', title: '야 체육 안가고 뭐해', desc: BADGE_DEFINITIONS.find(b => b.id === 'iljin')?.desc ?? '', color: 'orange', earned: tagSet.has('일진'), chars: charsWithTag(characters, '일진') });
   list.push({ id: 'jjindda', emoji: '🚶', title: '니 애인 지나간다', desc: BADGE_DEFINITIONS.find(b => b.id === 'jjindda')?.desc ?? '', color: 'slate', earned: tagSet.has('찐따'), chars: charsWithTag(characters, '찐따') });
   list.push({ id: 'hero', emoji: '🦸', title: '취미일 뿐', desc: BADGE_DEFINITIONS.find(b => b.id === 'hero')?.desc ?? '', color: 'amber', earned: tagSet.has('히어로'), chars: charsWithTag(characters, '히어로') });
@@ -218,6 +168,12 @@ export function computeEarnedTitles(input) {
   list.push({ id: 'pipye', emoji: '😵', title: '피폐', desc: BADGE_DEFINITIONS.find(b => b.id === 'pipye')?.desc ?? '', color: 'violet', earned: tagSet.has('피폐'), chars: charsWithTag(characters, '피폐') });
   list.push({ id: 'sihanbu', emoji: '💧', title: '시한부', desc: BADGE_DEFINITIONS.find(b => b.id === 'sihanbu')?.desc ?? '', color: 'red', earned: tagSet.has('시한부'), chars: charsWithTag(characters, '시한부') });
   list.push({ id: 'guwon', emoji: '🩹', title: '구원', desc: BADGE_DEFINITIONS.find(b => b.id === 'guwon')?.desc ?? '', color: 'emerald', earned: tagSet.has('구원'), chars: charsWithTag(characters, '구원') });
+
+  const MEDIA_SET = new Set([
+    '블루아카이브', '원신', '명일방주', '붕괴', '페이트', '우마무스메', '명조', '니케',
+    '블루아카', '롤', '리그오브레전드', '코난', '주술회전', '하이큐', '귀멸의칼날',
+    '해리포터', '마블', '디시', 'dc'
+  ]);
   const hasNo2nd = !characters.some(c => (c.hashtags || c.tags || []).some(t => MEDIA_SET.has(t.toLowerCase())));
   list.push({ id: 'original', emoji: '✨', title: '오리지널', desc: BADGE_DEFINITIONS.find(b => b.id === 'original')?.desc ?? '', color: 'sky', earned: hasNo2nd && characters.length > 0 });
 
