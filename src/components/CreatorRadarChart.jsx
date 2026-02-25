@@ -47,9 +47,9 @@ export default function CreatorRadarChart({ stats, characters }) {
         const regenRatio = totalOriginal > 0 ? (totalWithRegen / totalOriginal) : 1.0;
         const scoreRegen = normalize(regenRatio, 1.0, 1.30);
 
-        // 3. 소통 규모 (Traffic)
+        // 3. 대화량 (Traffic)
         const interactions = stats.plotInteractionCount || 0;
-        const scoreTraffic = normalize(interactions, 10000, 10000000);
+        const scoreTraffic = normalize(interactions, 7000, 7000000);
 
         // 4. 오픈소스 (Openness)
         let openCount = 0;
@@ -78,7 +78,7 @@ export default function CreatorRadarChart({ stats, characters }) {
 
         return [
             { subject: '다작 성실', A: Math.round(scoreDiligence), raw: `작품당 ${daysPerCharStr}` },
-            { subject: '소통 규모', A: Math.round(scoreTraffic), raw: `${interactions.toLocaleString()}회` },
+            { subject: '대화량', A: Math.round(scoreTraffic), raw: `${interactions.toLocaleString()}회` },
             { subject: '유저 몰입', A: Math.round(scoreRegen), raw: `${((regenRatio - 1) * 100).toFixed(1)}% 리롤` },
             { subject: '오픈소스', A: Math.round(scoreOpenness), raw: `${(openRatio * 100).toFixed(1)}% 공개` },
             { subject: '정성', A: Math.round(scoreDedication), raw: `평균 ${Math.round(avgTextLen)}자` },
@@ -92,7 +92,7 @@ export default function CreatorRadarChart({ stats, characters }) {
             const { subject, A, raw } = payload[0].payload;
             let desc = '';
             if (subject === '다작 성실') desc = '활동 기간 내 캐릭터를 업로드하는 평균 페이스입니다.';
-            if (subject === '소통 규모') desc = '유저들과 나눈 대화의 압도적인 규모입니다.';
+            if (subject === '대화량') desc = '유저들과 나눈 대화의 압도적인 규모입니다.';
             if (subject === '유저 몰입') desc = '유저가 답변을 리롤(Regen)하며 몰입하는 비율입니다.';
             if (subject === '오픈소스') desc = '세부 설정 및 대화 예시를 공개한 열린 생태계 기여도입니다.';
             if (subject === '정성') desc = '캐릭터 프로필과 인사말의 텍스트 밀도와 디테일입니다.';
