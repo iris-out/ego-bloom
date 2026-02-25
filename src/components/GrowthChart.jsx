@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { formatNumber } from '../utils/tierCalculator';
+import { formatNumber, toKST } from '../utils/tierCalculator';
 
 export default function GrowthChart({ characters }) {
     const yearlyData = useMemo(() => {
@@ -10,7 +10,7 @@ export default function GrowthChart({ characters }) {
         characters.forEach(c => {
             const date = c.createdAt || c.createdDate;
             if (!date) return;
-            const year = new Date(date).getFullYear();
+            const year = toKST(date).getFullYear();
             if (!byYear[year]) byYear[year] = { count: 0, interactions: 0 };
             byYear[year].count += 1;
             byYear[year].interactions += c.interactionCount || 0;

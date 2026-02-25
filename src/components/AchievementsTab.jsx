@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { formatNumber } from '../utils/tierCalculator';
+import { formatNumber, toKST } from '../utils/tierCalculator';
 import { computeEarnedTitles } from '../data/badges';
 import { ChevronRight } from 'lucide-react';
 import { proxyImageUrl } from '../utils/imageUtils';
@@ -51,7 +51,7 @@ export default function AchievementsTab({ stats, characters }) {
             .then(res => res.json())
             .then(data => {
                 if (data && data.updatedAt) {
-                    setRankingUpdatedAt(new Date(data.updatedAt));
+                    setRankingUpdatedAt(toKST(data.updatedAt));
                 }
             })
             .catch(err => console.error("Failed to fetch ranking updatedAt", err));
@@ -138,7 +138,7 @@ export default function AchievementsTab({ stats, characters }) {
                             </h3>
                             {rankingUpdatedAt && (
                                 <div className="text-[9px] text-[var(--text-tertiary)] bg-[var(--bg-secondary)] px-1.5 py-0.5 rounded border border-[var(--border)]">
-                                    {rankingUpdatedAt.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 업데이트
+                                    {rankingUpdatedAt.getFullYear()}년 {rankingUpdatedAt.getMonth() + 1}월 {rankingUpdatedAt.getDate()}일 {String(rankingUpdatedAt.getHours()).padStart(2, '0')}:{String(rankingUpdatedAt.getMinutes()).padStart(2, '0')} 업데이트
                                 </div>
                             )}
                         </div>

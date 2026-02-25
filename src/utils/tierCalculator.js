@@ -88,8 +88,8 @@ export function calculateCreatorScore(stats, characters) {
   // 활동 일수: 가장 오래된 캐릭터 생성일 기준
   let activityDays = 365;
   if (hasChars) {
-    const dates = characters.map(c => c.createdAt || c.createdDate).filter(Boolean).map(d => new Date(d).getTime());
-    if (dates.length > 0) activityDays = Math.max(1, (Date.now() - Math.min(...dates)) / (1000 * 60 * 60 * 24));
+    const dates = characters.map(c => c.createdAt || c.createdDate).filter(Boolean).map(d => toKST(d).getTime());
+    if (dates.length > 0) activityDays = Math.max(1, (toKST().getTime() - Math.min(...dates)) / (1000 * 60 * 60 * 24));
   }
 
   // 1) 소수 캐릭터 가산: 캐릭터 수가 적은데 총 대화량 또는 팔로워가 많으면 보너스 (최대 15% 상한)
@@ -115,14 +115,14 @@ export function calculateCreatorScore(stats, characters) {
 export function calculateCreatorScoreRecent(stats, characters) {
   if (!stats) return -1; // Stats missing implies unranked or error
 
-  const sixMonthsAgo = new Date();
+  const sixMonthsAgo = toKST();
   sixMonthsAgo.setDate(sixMonthsAgo.getDate() - 180);
 
   // 최근 6개월 내 생성된 캐릭터 필터링
   const recentChars = (characters || []).filter(c => {
     const date = c.createdAt || c.createdDate;
     if (!date) return false;
-    return new Date(date) >= sixMonthsAgo;
+    return toKST(date) >= sixMonthsAgo;
   });
 
   // 캐릭터가 없으면 Unranked (-1)
@@ -259,9 +259,15 @@ export function formatNumber(num) {
   return new Intl.NumberFormat('ko-KR').format(num);
 }
 
+export function toKST(dateInput) {
+  const d = dateInput ? new Date(dateInput) : new Date();
+  const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+  return new Date(utc + (9 * 60 * 60 * 1000));
+}
+
 export function formatDate(dateStr) {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
+  const d = toKST(dateStr);
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
 }
 

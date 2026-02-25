@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { TierBadge } from './TierBadge';
 import ImageWithFallback from './ImageWithFallback';
-import { getCharacterTier, formatNumber, formatDate } from '../utils/tierCalculator';
+import { getCharacterTier, formatNumber, formatDate, toKST } from '../utils/tierCalculator';
 import { ChevronLeft, ChevronRight, MessageCircle, Calendar, ArrowUpAZ, X, ExternalLink, Star, RefreshCw, BookOpen, MessageSquareText } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 20;
@@ -35,7 +35,7 @@ export default function SummaryTab({ characters }) {
     if (sortKey === 'interactions') {
       data.sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0));
     } else if (sortKey === 'newest') {
-      data.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      data.sort((a, b) => toKST(b.createdAt || 0) - toKST(a.createdAt || 0));
     } else if (sortKey === 'name') {
       data.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'));
     }

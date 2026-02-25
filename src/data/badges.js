@@ -1,6 +1,4 @@
-/**
- * 칭호(배지) 단일 소스 — Recap, 프로필 카드, 칭호/랭킹 탭에서 공통 사용
- */
+import { toKST } from '../utils/tierCalculator';
 import mediaFranchises from './mediaFranchises.json';
 
 const MEDIA_SET = new Set([
@@ -105,9 +103,9 @@ export function computeEarnedTitles(input) {
   const { characters = [], stats = {} } = input;
   const totalInteractions = stats.plotInteractionCount || 0;
   const followers = stats.followerCount || 0;
-  const dates = characters.map(c => c.createdAt || c.createdDate).filter(Boolean).map(d => new Date(d));
+  const dates = characters.map(c => c.createdAt || c.createdDate).filter(Boolean).map(d => toKST(d));
   const earliest = dates.length > 0 ? new Date(Math.min(...dates)) : null;
-  const activityDays = earliest ? (Date.now() - earliest.getTime()) / (1000 * 60 * 60 * 24) : 0;
+  const activityDays = earliest ? (toKST().getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24) : 0;
   const activityMonths = activityDays / 30;
 
   const list = [];

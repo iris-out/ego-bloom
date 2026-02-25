@@ -1,5 +1,5 @@
-
 import React, { useMemo } from 'react';
+import { toKST } from '../utils/tierCalculator';
 
 // 1. Keyword Cloud (Hashtags)
 export function WordCloud({ characters }) {
@@ -200,7 +200,7 @@ export function ActivityHourChart({ characters }) {
         const counts = new Array(24).fill(0);
         characters.forEach(c => {
             if (!c.createdAt) return;
-            const h = new Date(c.createdAt).getHours();
+            const h = toKST(c.createdAt).getHours();
             counts[h]++;
         });
         return counts;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X, Users, Moon, Sun, TrendingUp, Sparkles, Zap, Star, Award } from 'lucide-react';
-import { formatCompactNumber, formatNumber } from '../utils/tierCalculator';
+import { formatCompactNumber, formatNumber, toKST } from '../utils/tierCalculator';
 import CreatorTierBadge from './CreatorTierBadge';
 import { getPlotImageUrl, proxyImageUrl } from '../utils/imageUtils';
 import { computeEarnedTitles, BADGE_COLOR_MAP } from '../data/badges';
@@ -32,15 +32,15 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
 
     // 캐릭터 정렬 캐싱
     const sortedByInteraction = [...characters].sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0));
-    const sortedByDate = [...characters].sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+    const sortedByDate = [...characters].sort((a, b) => toKST(a.createdAt || 0) - toKST(b.createdAt || 0));
 
     const topChar = sortedByInteraction[0] || characters[0];
     const oldestChar = sortedByDate[0] || characters[0];
     const newestChar = sortedByDate[sortedByDate.length - 1] || characters[characters.length - 1];
 
     // 활동일수 계산
-    const firstDate = new Date(oldestChar?.createdAt || Date.now());
-    const daysSince = Math.max(1, Math.floor((Date.now() - firstDate.getTime()) / (1000 * 60 * 60 * 24)));
+    const firstDate = toKST(oldestChar?.createdAt || Date.now());
+    const daysSince = Math.max(1, Math.floor((toKST().getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)));
 
     // 총 대화 수: API는 plotInteractionCount 사용, 없으면 캐릭터 합계로 폴백
     const totalInteractionCount = (stats?.plotInteractionCount ?? stats?.totalInteractionCount) ?? (characters?.reduce((s, c) => s + (c.interactionCount || 0), 0) || 0);
@@ -50,7 +50,7 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
     characters.forEach(c => {
         const d = c.createdAt || c.createdDate || c.updatedAt;
         if (!d) return;
-        const h = new Date(d).getHours();
+        const h = toKST(d).getHours();
         if (h >= 0 && h < 6) timeSlots.dawn++;
         else if (h >= 6 && h < 12) timeSlots.morning++;
         else if (h >= 12 && h < 18) timeSlots.afternoon++;

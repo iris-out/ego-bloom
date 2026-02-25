@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { formatNumber, formatCompactNumber, getCreatorTier, getCharacterTier, calculateCreatorScore, calculatePercentile } from '../utils/tierCalculator';
+import { formatNumber, formatCompactNumber, getCreatorTier, getCharacterTier, calculateCreatorScore, calculatePercentile, toKST } from '../utils/tierCalculator';
 import CreatorTierBadge from './CreatorTierBadge';
 import { TierBadgeWithTooltip, TierBadge } from './TierBadge';
 import HoverNumber from './HoverNumber';
@@ -50,8 +50,8 @@ export default function ProfileHeader({ profile, stats, characters }) {
     const totalInteractions = stats.plotInteractionCount || 0;
 
     // Calculate activity days
-    const dates = (characters || []).map(c => c.createdAt || c.createdDate).filter(Boolean).map(d => new Date(d).getTime()).filter(t => !isNaN(t));
-    const activityDays = Math.max(1, dates.length > 0 ? (Date.now() - Math.min(...dates)) / 86400000 : 1);
+    const dates = (characters || []).map(c => c.createdAt || c.createdDate).filter(Boolean).map(d => toKST(d).getTime()).filter(t => !isNaN(t));
+    const activityDays = Math.max(1, dates.length > 0 ? (toKST().getTime() - Math.min(...dates)) / 86400000 : 1);
 
     return {
       mode: tierMode,
@@ -71,7 +71,7 @@ export default function ProfileHeader({ profile, stats, characters }) {
     const dates = characters
       .map(c => c.createdAt || c.createdDate)
       .filter(Boolean)
-      .map(d => new Date(d));
+      .map(d => toKST(d));
     if (dates.length === 0) return null;
     return new Date(Math.min(...dates));
   }, [characters]);
@@ -230,7 +230,7 @@ export default function ProfileHeader({ profile, stats, characters }) {
           {/* 활동 기간 + 칭호 — 한 줄 */}
           <div className="mt-1.5 flex flex-wrap items-center gap-1">
             {firstCharDate !== null && (() => {
-              const now = new Date();
+              const now = toKST();
               let years = now.getFullYear() - firstCharDate.getFullYear();
               let months = now.getMonth() - firstCharDate.getMonth();
               if (months < 0) { years--; months += 12; }
@@ -555,7 +555,7 @@ function PodiumHighlight({ characters }) {
 
     const withDate = characters.filter(c => c.createdAt || c.createdDate);
     const sortedByDate = [...withDate].sort((a, b) =>
-      new Date(a.createdAt || a.createdDate) - new Date(b.createdAt || b.createdDate)
+      toKST(a.createdAt || a.createdDate) - toKST(b.createdAt || b.createdDate)
     );
     const sortedByInteraction = [...characters].sort((a, b) =>
       (b.interactionCount || 0) - (a.interactionCount || 0)

@@ -15,7 +15,7 @@ import SkeletonUI from './components/SkeletonUI';
 import ChangelogModal from './components/ChangelogModal';
 import { proxyImageUrl, getPlotImageUrl, getPlotImageUrls } from './utils/imageUtils';
 import { getRecentSearches, addRecentSearch, removeRecentSearch } from './utils/storage';
-import { getCreatorTier, calculateCreatorScore, formatNumber } from './utils/tierCalculator';
+import { getCreatorTier, calculateCreatorScore, formatNumber, toKST } from './utils/tierCalculator';
 import { APP_VERSION } from './data/changelog';
 import { ResponsiveContainer, Treemap, Tooltip as RechartsTooltip } from 'recharts';
 // 서버 상태 훅
@@ -670,7 +670,7 @@ export default function App() {
     useEffect(() => {
       const handleData = (d) => {
         if (d && d.combined) setTopTags(d.combined.slice(0, 5));
-        if (d && d.updatedAt) setUpdatedAt(new Date(d.updatedAt));
+        if (d && d.updatedAt) setUpdatedAt(toKST(d.updatedAt));
       };
 
       if (data && data.combined) {
@@ -690,14 +690,14 @@ export default function App() {
     useEffect(() => {
       if (!updatedAt) return;
       const interval = setInterval(() => {
-        const now = new Date();
+        const now = toKST();
 
-        // UTC 15:00 = KST 00:00 (Next update target)
+        // Target: KST 00:00 (which is UTC 15:00 previous day or same day)
+        // Since toKST() returns a date shifted to KST "fake local",
+        // we can just target 00:00:00 of the "next day" in this fake local.
         const nextUpdate = new Date(now);
-        nextUpdate.setUTCHours(15, 0, 0, 0);
-        if (nextUpdate < now) {
-          nextUpdate.setUTCDate(nextUpdate.getUTCDate() + 1);
-        }
+        nextUpdate.setHours(24, 0, 0, 0);
+        // 24,0,0,0 on a Date object automatically rolls over to 00:00 of next day.
 
         const remaining = nextUpdate.getTime() - now.getTime();
         const TOTAL_DAY_MS = 24 * 60 * 60 * 1000;
@@ -731,7 +731,7 @@ export default function App() {
               <h3 className="text-sm font-bold text-[var(--text-primary)]">현재 제타 트렌딩 주제</h3>
               {updatedAt && (
                 <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5 tracking-tight">
-                  {updatedAt.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 기준
+                  {updatedAt.getFullYear()}년 {updatedAt.getMonth() + 1}월 {updatedAt.getDate()}일 {String(updatedAt.getHours()).padStart(2, '0')}:{String(updatedAt.getMinutes()).padStart(2, '0')} 기준
                 </p>
               )}
             </div>

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
+import { toKST } from '../utils/tierCalculator';
 
 const DAY_SIZE = 11;
 const DAY_GAP = 2;
@@ -35,7 +36,7 @@ function getLevel(count, maxCount) {
 export default function ContributionGraph({ characters }) {
   const { theme } = useTheme();
   const [tooltip, setTooltip] = useState(null);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedYear, setSelectedYear] = useState(toKST().getFullYear());
   const colors = theme === 'dark' ? COLORS_DARK : COLORS_LIGHT;
   const containerRef = React.useRef(null);
 
@@ -47,24 +48,24 @@ export default function ContributionGraph({ characters }) {
     // 1. Extract Years
     const yearsSet = new Set();
     characters.forEach(c => {
-      if (c.createdAt) yearsSet.add(new Date(c.createdAt).getFullYear());
+      if (c.createdAt) yearsSet.add(toKST(c.createdAt).getFullYear());
     });
     const years = Array.from(yearsSet).sort((a, b) => b - a);
-    if (!years.includes(new Date().getFullYear())) years.unshift(new Date().getFullYear());
+    if (!years.includes(toKST().getFullYear())) years.unshift(toKST().getFullYear());
 
     // 2. Filter by Year
-    const filteredChars = characters.filter(c => c.createdAt && new Date(c.createdAt).getFullYear() === selectedYear);
+    const filteredChars = characters.filter(c => c.createdAt && toKST(c.createdAt).getFullYear() === selectedYear);
 
     const dateMap = {};
     filteredChars.forEach(c => {
-      const d = new Date(c.createdAt);
+      const d = toKST(c.createdAt);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       if (!dateMap[key]) dateMap[key] = [];
       dateMap[key].push(c);
     });
 
-    const startOfYear = new Date(selectedYear, 0, 1);
-    const endOfYear = new Date(selectedYear, 11, 31);
+    const startOfYear = toKST(new Date(selectedYear, 0, 1));
+    const endOfYear = toKST(new Date(selectedYear, 11, 31, 23, 59, 59));
 
     const startDate = new Date(startOfYear);
     startDate.setDate(startDate.getDate() - startDate.getDay());
@@ -202,7 +203,7 @@ export default function ContributionGraph({ characters }) {
                   <span className="font-semibold">{c.name}</span>
                   {c.updatedAt && (
                     <span className="text-[10px] text-gray-300">
-                      수정: {new Date(c.updatedAt).toLocaleDateString()}
+                      수정: {toKST(c.updatedAt).toLocaleDateString()}
                     </span>
                   )}
                 </div>

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import { toKST } from '../utils/tierCalculator';
 
 export default function CreatorRadarChart({ stats, characters }) {
     const data = useMemo(() => {
@@ -18,7 +19,7 @@ export default function CreatorRadarChart({ stats, characters }) {
         let daysPerCharStr = "N/A";
         if (characters.length > 0) {
             // Find earliest and latest dates
-            const dates = characters.map(c => new Date(c.createdAt || c.createdDate)).filter(d => !isNaN(d));
+            const dates = characters.map(c => toKST(c.createdAt || c.createdDate)).filter(d => !isNaN(d));
             if (dates.length > 0) {
                 const earliest = new Date(Math.min(...dates));
                 const latest = new Date(Math.max(...dates));
