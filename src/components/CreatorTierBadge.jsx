@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function CreatorTierBadge({ tier, stats, score: propScore, breakdown, tierMode }) {
     const [showTooltip, setShowTooltip] = useState(false);
@@ -214,7 +215,10 @@ export default function CreatorTierBadge({ tier, stats, score: propScore, breakd
                 </div>
             )}
 
-            {showModal && <TierInfoModal isOpen={showModal} onClose={() => setShowModal(false)} currentTier={tier} score={score} />}
+            {showModal && createPortal(
+                <TierInfoModal isOpen={showModal} onClose={() => setShowModal(false)} currentTier={tier} score={score} />,
+                document.body
+            )}
         </div>
     );
 }
@@ -222,43 +226,54 @@ export default function CreatorTierBadge({ tier, stats, score: propScore, breakd
 function TierInfoModal({ isOpen, onClose, currentTier, score }) {
     if (!isOpen) return null;
     const TIER_GUIDE = [
-        { key: 'unranked', name: 'Unranked', range: '0 ~ 99', color: '#718096' },
-        { key: 'bronze', name: '브론즈', range: '100 ~ 999', color: '#CD7F32' },
-        { key: 'silver', name: '실버', range: '1,000 ~ 2,999', color: '#C0C0C0' },
-        { key: 'gold', name: '골드', range: '3,000 ~ 9,999', color: '#FFD700' },
-        { key: 'platinum', name: '플래티넘', range: '10,000 ~ 29,999', color: '#26C6DA' },
-        { key: 'diamond', name: '다이아몬드', range: '30,000 ~ 99,999', color: '#9575CD' },
-        { key: 'master', name: '마스터', range: '100,000 ~ 499,999', color: '#FFB74D' },
-        { key: 'champion', name: '챔피언', range: '500,000 이상', color: '#FF5252' },
+        { key: 'unranked', name: 'Unranked', range: '랭크 없음 (0 미만)', color: '#718096' },
+        { key: 'bronze', name: '브론즈', range: '0 ~ 40,499', color: '#CD7F32' },
+        { key: 'silver', name: '실버', range: '40,500 ~ 182,249', color: '#C0C0C0' },
+        { key: 'gold', name: '골드', range: '182,250 ~ 899,999', color: '#FFD700' },
+        { key: 'platinum', name: '플래티넘', range: '900,000 ~ 4,049,999', color: '#26C6DA' },
+        { key: 'diamond', name: '다이아몬드', range: '4,050,000 ~ 17,999,999', color: '#9575CD' },
+        { key: 'master', name: '마스터', range: '18,000,000 ~ 80,999,999', color: '#FFB74D' },
+        { key: 'champion', name: '챔피언', range: '81,000,000 이상', color: '#FF5252' },
     ];
 
     return (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in" onClick={onClose}>
-            <div className="w-full max-w-lg bg-[rgba(25,25,35,0.95)] border border-white/10 rounded-3xl shadow-2xl overflow-hidden animate-zoom-in" onClick={e => e.stopPropagation()}>
+            <div className="w-full max-w-3xl bg-[rgba(25,25,35,0.95)] border border-white/10 rounded-3xl shadow-2xl overflow-hidden animate-zoom-in" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between px-6 py-5 border-b border-white/5 bg-white/5">
                     <h3 className="text-xl font-black text-white flex items-center gap-2"><span className="text-[var(--accent)]">🛡️</span> 크리에이터 티어 가이드</h3>
                     <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></button>
                 </div>
-                <div className="p-6 overflow-y-auto max-h-[60vh] custom-scrollbar">
-                    <div className="space-y-3">
+                <div className="p-6 overflow-y-auto max-h-[65vh] custom-scrollbar">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
                         {[...TIER_GUIDE].reverse().map((t) => {
                             const isCurrent = currentTier?.key === t.key;
                             const romanMap = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV' };
                             const currentSubRoman = romanMap[currentTier?.subdivision] || '';
 
                             return (
-                                <div key={t.key} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${isCurrent ? 'bg-white/10 border-[var(--accent)]' : 'bg-white/5 border-transparent'}`}>
-                                    <div className="shrink-0 scale-75"><StaticBadge tierKey={t.key} subdivision={isCurrent ? currentTier?.subdivision : null} /></div>
+                                <div
+                                    key={t.key}
+                                    className={`flex items-center gap-3 p-3 rounded-2xl border transition-all min-w-0 ${
+                                        isCurrent ? 'bg-white/10 border-[var(--accent)]' : 'bg-white/5 border-transparent'
+                                    }`}
+                                >
+                                    <div className="shrink-0 scale-75">
+                                        <StaticBadge tierKey={t.key} subdivision={isCurrent ? currentTier?.subdivision : null} />
+                                    </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-0.5">
-                                            <span className="font-black text-lg" style={{ color: t.color }}>
+                                        <div className="flex items-center justify-between gap-2 mb-0.5">
+                                            <span className="font-black text-sm truncate" style={{ color: t.color }}>
                                                 {t.name} {isCurrent && currentSubRoman}
                                             </span>
-                                            {isCurrent && <span className="px-2 py-0.5 rounded-full bg-[var(--accent)] text-[8px] font-black text-white uppercase tracking-tighter">Current</span>}
                                         </div>
-                                        <div className="text-xs text-gray-400 font-mono tracking-tight">ELO Range: {t.range}</div>
+                                        <div className="text-[11px] text-gray-400 font-mono tracking-tight">ELO {t.range}</div>
+                                        {isCurrent && (
+                                            <div className="mt-1">
+                                                <div className="text-[9px] text-gray-500 font-bold uppercase mb-0.5">My Score</div>
+                                                <div className="text-sm font-black font-mono text-[var(--accent)]">{(score != null ? score : 0).toLocaleString()}</div>
+                                            </div>
+                                        )}
                                     </div>
-                                    {isCurrent && <div className="text-right"><div className="text-[10px] text-gray-500 font-bold uppercase mb-0.5">My Score</div><div className="text-lg font-black font-mono text-[var(--accent)]">{score.toLocaleString()}</div></div>}
                                 </div>
                             );
                         })}
