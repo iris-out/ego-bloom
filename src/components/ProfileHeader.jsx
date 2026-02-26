@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { formatNumber, formatCompactNumber, getCreatorTier, getCharacterTier, calculateCreatorScore, calculatePercentile, toKST } from '../utils/tierCalculator';
 import CreatorTierBadge from './CreatorTierBadge';
 import { TierBadgeWithTooltip, TierBadge } from './TierBadge';
@@ -525,32 +526,32 @@ function CreatorPills({ characters, stats, creatorId }) {
             <path d="m15 5 4 4" />
           </svg>
         </button>
-        {editing && (
+        {editing && createPortal(
           <div
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+            className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
             onClick={(e) => e.target === e.currentTarget && setEditing(false)}
             role="dialog"
             aria-modal="true"
             aria-label="표시할 칭호 편집"
           >
             <div
-              className="w-full max-w-md max-h-[85vh] flex flex-col rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-2xl overflow-hidden"
+              className="w-full max-w-xl max-h-[90vh] flex flex-col rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
-                <span className="text-sm font-bold text-[var(--text-primary)]">표시할 칭호</span>
+              <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)] shrink-0">
+                <span className="text-base font-bold text-[var(--text-primary)]">표시할 칭호</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-[var(--text-tertiary)]">{activeIds.length}/8</span>
+                  <span className="text-sm text-[var(--text-tertiary)]">{activeIds.length}/8</span>
                   <button
                     onClick={() => setEditing(false)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--bg-secondary)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
+                    className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--bg-secondary)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
                     aria-label="닫기"
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                   </button>
                 </div>
               </div>
-              <div className="overflow-y-auto flex-1 p-3 space-y-1 min-h-0">
+              <div className="overflow-y-auto flex-1 p-4 space-y-1 min-h-0 custom-scrollbar">
                 {allEarned.map(p => {
                   const isFixed = fixedIds.includes(p.id);
                   const checked = activeIds.includes(p.id);
@@ -559,7 +560,7 @@ function CreatorPills({ characters, stats, creatorId }) {
                   const desc = p.desc || '';
 
                   return (
-                    <label key={p.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-[var(--bg-secondary)] active:bg-white/10 transition-colors ${disabled ? 'opacity-50' : ''}`}>
+                    <label key={p.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer hover:bg-[var(--bg-secondary)] active:bg-white/10 transition-colors ${disabled ? 'opacity-50' : ''}`}>
                       <input
                         type="checkbox"
                         checked={checked}
@@ -572,7 +573,7 @@ function CreatorPills({ characters, stats, creatorId }) {
                         {label}
                       </span>
                       {desc && (
-                        <span className="text-[10px] text-[var(--text-tertiary)] shrink-0 max-w-[120px] text-right leading-tight">
+                        <span className="text-[10px] text-[var(--text-tertiary)] shrink-0 max-w-[140px] text-right leading-tight">
                           {desc}
                         </span>
                       )}
@@ -581,7 +582,8 @@ function CreatorPills({ characters, stats, creatorId }) {
                 })}
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </>
