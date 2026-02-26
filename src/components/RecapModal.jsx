@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Users, Moon, Sun, TrendingUp, Sparkles, Zap, Star, Award } from 'lucide-react';
+import { X, Users, Moon, Sun, TrendingUp, Sparkles, Zap, Star, Award, Lightbulb } from 'lucide-react';
 import { formatCompactNumber, formatNumber, toKST } from '../utils/tierCalculator';
 import CreatorTierBadge from './CreatorTierBadge';
 import { getPlotImageUrl, proxyImageUrl } from '../utils/imageUtils';
@@ -209,8 +209,8 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
                                 <h3 className="text-xl md:text-2xl font-bold text-gray-100 animate-fade-in-up delay-300">
                                     무려 <span className="text-cyan-300 text-3xl font-black">{characters.length}</span>개의 스토리를 탄생시켰습니다.
                                 </h3>
-                                <p className="text-[11px] text-gray-400 mt-4 animate-fade-in-up delay-500 max-w-xs mx-auto px-4 bg-white/5 py-2.5 rounded-full border border-white/10">
-                                    💡 평균적으로 <strong>{Math.max(1, Math.round(daysSince / characters.length))}</strong>일에 1번씩 꾸준히 업데이트 되었습니다!
+                                <p className="text-[11px] text-gray-400 mt-4 animate-fade-in-up delay-500 max-w-xs mx-auto px-4 bg-white/5 py-2.5 rounded-full border border-white/10 flex items-center justify-center gap-1">
+                                    <Lightbulb size={12} className="text-yellow-400" /> 평균적으로 <strong>{Math.max(1, Math.round(daysSince / characters.length))}</strong>일에 1번씩 꾸준히 업데이트 되었습니다!
                                 </p>
                             </div>
                         )}

@@ -208,7 +208,7 @@ function CharacterCard({ char, rank, onTagClick, activeTag }) {
 
         {/* Content */}
         <div className="flex-1 min-w-0 pt-2">
-          <h4 className="font-bold text-[var(--text-primary)] text-sm sm:text-base truncate mb-0.5 leading-tight">
+          <h4 className="font-bold text-[var(--text-primary)] text-sm sm:text-base truncate mb-0.5 leading-tight group-hover:text-[var(--accent)] transition-colors">
             {char.name}
           </h4>
 

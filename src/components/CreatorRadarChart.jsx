@@ -54,34 +54,31 @@ export default function CreatorRadarChart({ stats, characters }) {
         // 4. 오픈소스 (Openness)
         let openCount = 0;
         characters.forEach(c => {
-            if (c.isLongDescriptionPublic || c.isExampleConversationPublic || c.isAboutPublic) {
+            if (c.isLongDescriptionPublic) {
                 openCount++;
             }
         });
         const openRatio = plotCount > 0 ? (openCount / plotCount) : 0;
-        const scoreOpenness = normalize(openRatio, 0, 0.5); // 50% 이상 공개면 만점
+        const scoreOpenness = normalize(openRatio, 0, 0.75); // 75% 이상 공개면 만점
 
-        // 5. 정성 (Dedication)
-        let totalTextLen = 0;
+        // 5. 다양성 (Genre Diversity)
+        const uniqueHashtags = new Set();
         characters.forEach(c => {
-            totalTextLen += (c.shortDescription || '').length;
-            totalTextLen += (c.longDescription || '').length;
-            totalTextLen += (c.creatorComment || '').length;
-            if (c.intros && c.intros[0] && Array.isArray(c.intros[0].conversation)) {
-                c.intros[0].conversation.forEach(msg => {
-                    totalTextLen += (msg.text || '').length;
-                });
+            if (c.hashtags) {
+                c.hashtags.forEach(tag => uniqueHashtags.add(tag));
+            } else if (c.tags) {
+                c.tags.forEach(tag => uniqueHashtags.add(tag));
             }
         });
-        const avgTextLen = plotCount > 0 ? (totalTextLen / plotCount) : 0;
-        const scoreDedication = normalize(avgTextLen, 50, 600); // 평균 600자면 만점
+        const tagCount = uniqueHashtags.size;
+        const scoreDiversity = normalize(tagCount, 1, 15); // 해시태그 15개 이상 사용 시 만점
 
         return [
             { subject: '다작 성실', A: Math.round(scoreDiligence), raw: `작품당 ${daysPerCharStr}` },
             { subject: '대화량', A: Math.round(scoreTraffic), raw: `${interactions.toLocaleString()}회` },
             { subject: '유저 몰입', A: Math.round(scoreRegen), raw: `${((regenRatio - 1) * 100).toFixed(1)}% 리롤` },
             { subject: '오픈소스', A: Math.round(scoreOpenness), raw: `${(openRatio * 100).toFixed(1)}% 공개` },
-            { subject: '정성', A: Math.round(scoreDedication), raw: `평균 ${Math.round(avgTextLen)}자` },
+            { subject: '다양성', A: Math.round(scoreDiversity), raw: `${tagCount}개 장르` },
         ];
     }, [stats, characters]);
 
@@ -91,11 +88,11 @@ export default function CreatorRadarChart({ stats, characters }) {
         if (active && payload && payload.length) {
             const { subject, A, raw } = payload[0].payload;
             let desc = '';
-            if (subject === '다작 성실') desc = '활동 기간 내 캐릭터를 업로드하는 평균 페이스입니다.';
-            if (subject === '대화량') desc = '유저들과 나눈 대화의 압도적인 규모입니다.';
-            if (subject === '유저 몰입') desc = '유저가 답변을 리롤(Regen)하며 몰입하는 비율입니다.';
-            if (subject === '오픈소스') desc = '세부 설정 및 대화 예시를 공개한 열린 생태계 기여도입니다.';
-            if (subject === '정성') desc = '캐릭터 프로필과 인사말의 텍스트 밀도와 디테일입니다.';
+            if (subject === '다작 성실') desc = '업로드 평균 페이스입니다.';
+            if (subject === '대화량') desc = '발생한 총 대화 규모입니다.';
+            if (subject === '유저 몰입') desc = '답변 리롤(Regen) 비율입니다.';
+            if (subject === '오픈소스') desc = '상세 설정 공개 비율입니다.';
+            if (subject === '다양성') desc = '다루는 장르(해시태그) 스펙트럼입니다.';
 
             return (
                 <div className="bg-[var(--card)] border border-[var(--border)] p-2.5 rounded-lg shadow-xl text-xs z-50 min-w-[140px]">

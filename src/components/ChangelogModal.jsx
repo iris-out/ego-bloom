@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, ClipboardList } from 'lucide-react';
 import { CHANGELOG, APP_VERSION } from '../data/changelog';
 
 export default function ChangelogModal({ isOpen, onClose }) {
@@ -14,7 +14,7 @@ export default function ChangelogModal({ isOpen, onClose }) {
                 {/* Header */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)] shrink-0">
                     <h2 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
-                        📋 업데이트 내역
+                        <ClipboardList size={16} className="text-[var(--text-secondary)]" /> 업데이트 내역
                     </h2>
                     <button
                         onClick={onClose}

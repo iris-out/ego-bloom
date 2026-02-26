@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { formatNumber } from '../utils/tierCalculator';
 import ImageWithFallback from './ImageWithFallback';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Globe, Star } from 'lucide-react';
 
 function CharRow({ char, showRank }) {
     const url = `https://zeta-ai.io/ko/plots/${char.id}/profile`;
@@ -83,7 +83,7 @@ export default function RankingHighlights({ characters }) {
             {ranked.length > 0 && (
                 <div className="card p-4">
                     <h3 className="text-xs font-bold text-[var(--text-secondary)] mb-1 flex items-center gap-1.5">
-                        <span>🌐</span> 글로벌 트렌딩
+                        <Globe size={13} className="text-violet-400" /> 글로벌 트렌딩
                         <span className="ml-auto text-[10px] font-normal text-[var(--text-tertiary)] opacity-60">
                             TOP {ranked[ranked.length - 1]?.globalRank}↑
                         </span>
@@ -98,8 +98,8 @@ export default function RankingHighlights({ characters }) {
 
             {/* TOP 5 인기 캐릭터 — 항상 표시 */}
             <div className="card p-4">
-                <h3 className="text-xs font-bold text-[var(--text-secondary)] mb-1">
-                    ⭐ 인기 TOP 5
+                <h3 className="text-xs font-bold text-[var(--text-secondary)] mb-1 flex items-center gap-1.5">
+                    <Star size={13} className="text-yellow-400 fill-yellow-400" /> 인기 TOP 5
                 </h3>
                 <div className="mt-2">
                     {top5.map((char, i) => (

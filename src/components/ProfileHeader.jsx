@@ -3,11 +3,12 @@ import { formatNumber, formatCompactNumber, getCreatorTier, getCharacterTier, ca
 import CreatorTierBadge from './CreatorTierBadge';
 import { TierBadgeWithTooltip, TierBadge } from './TierBadge';
 import HoverNumber from './HoverNumber';
-import { Download, Loader2, Calendar, Sparkles, Crown, Landmark, Film } from 'lucide-react';
+import { Heart, Hash, ArrowUpRight, Target, Flame, Users, Calendar, Crown, Film, Download, Loader2, Sparkles, BarChart3, Pin, Landmark } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { computeEarnedTitles, BADGE_COLOR_MAP, BADGE_DEFINITIONS, FIXED_BADGE_IDS } from '../data/badges';
 import ImageWithFallback from './ImageWithFallback';
 import { proxyImageUrl, getPlotImageUrls } from '../utils/imageUtils';
+import { getCreatorBadge, saveCreatorBadge } from '../utils/storage';
 import RecapModal from './RecapModal';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
@@ -95,7 +96,7 @@ export default function ProfileHeader({ profile, stats, characters }) {
         height: Math.round(rect.height),
       });
       const link = document.createElement('a');
-      link.download = `zeta-${profile?.username || 'card'}.png`;
+      link.download = `zeta - ${profile?.username || 'card'}.png`;
       link.href = dataUrl;
       link.click();
     } catch (e) {
@@ -150,7 +151,7 @@ export default function ProfileHeader({ profile, stats, characters }) {
       <div className="absolute top-2 left-4 sm:top-4 sm:left-6 flex items-center bg-[var(--bg-secondary)] rounded-full p-1 border border-[var(--border)] z-10">
         <button
           onClick={() => setTierMode('total')}
-          className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${tierMode === 'total'
+          className={`px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-full transition-all ${tierMode === 'total'
             ? 'bg-[var(--card)] text-[var(--text-primary)] shadow-sm'
             : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
             }`}
@@ -159,7 +160,7 @@ export default function ProfileHeader({ profile, stats, characters }) {
         </button>
         <button
           onClick={() => setTierMode('highlight')}
-          className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${tierMode === 'highlight'
+          className={`px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-full transition-all ${tierMode === 'highlight'
             ? 'bg-[var(--card)] text-[var(--text-primary)] shadow-sm'
             : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
             }`}
@@ -172,11 +173,11 @@ export default function ProfileHeader({ profile, stats, characters }) {
           <div className="absolute top-full left-0 sm:left-auto sm:right-0 mt-2 w-56 p-3 bg-[rgba(20,20,30,0.97)] border border-[var(--border)] rounded-xl shadow-xl z-50 text-white text-[10px] leading-relaxed invisible group-hover/tip:visible pointer-events-none">
             <div className="font-bold text-[var(--accent)] mb-2">티어 카드 모드</div>
             <div className="mb-2">
-              <div className="font-semibold text-white/90 mb-0.5">📊 전체</div>
+              <div className="font-semibold text-white/90 mb-0.5 flex items-center gap-1.5"><BarChart3 size={12} /> 전체</div>
               <div className="text-gray-400">활동 내역 요약과 상위<br />캐릭터 20개의 분포 기록입니다.</div>
             </div>
             <div className="pt-2 border-t border-white/10">
-              <div className="font-semibold text-white/90 mb-0.5">✨ 하이라이트</div>
+              <div className="font-semibold text-white/90 mb-0.5 flex items-center gap-1.5"><Sparkles size={12} /> 하이라이트</div>
               <div className="text-gray-400">크리에이터를 빛낸 첫 캐릭터, 최신,<br />최고 인기 캐릭터 시상대입니다.</div>
             </div>
           </div>
@@ -235,17 +236,17 @@ export default function ProfileHeader({ profile, stats, characters }) {
               let months = now.getMonth() - firstCharDate.getMonth();
               if (months < 0) { years--; months += 12; }
               const label = years > 0
-                ? months > 0 ? `${years}년 ${months}개월째` : `${years}년째`
+                ? months > 0 ? `${years}년 ${months} 개월째` : `${years} 년째`
                 : months > 0
-                  ? `${months}개월째`
-                  : `${Math.max(1, Math.floor((now - firstCharDate) / 86400000))}일째`;
+                  ? `${months} 개월째`
+                  : `${Math.max(1, Math.floor((now - firstCharDate) / 86400000))} 일째`;
               return (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--accent-soft)] border border-[var(--accent)]/20 text-[10px] font-semibold text-[var(--accent)]">
-                  🗓 {label}
+                  <Calendar size={11} className="mr-0.5" /> {label}
                 </span>
               );
             })()}
-            <CreatorPills characters={characters} stats={stats} />
+            <CreatorPills characters={characters} stats={stats} creatorId={profile.id || profile.username || 'unknown'} />
           </div>
         </div>
 
@@ -253,7 +254,7 @@ export default function ProfileHeader({ profile, stats, characters }) {
         <div className="text-right shrink-0 flex flex-col items-center">
           <CreatorTierBadge tier={tier} stats={stats} score={score} tierMode={tierMode} breakdown={breakdown} />
           <div className="text-sm font-bold mt-2" style={{ color: tier.color }}>
-            {tier.subdivision ? `${tierKoNames[tier.key] || tier.name} ${tier.subdivision}` : (tierKoNames[tier.key] || tier.name)}
+            {tier.subdivision ? `${tierKoNames[tier.key] || tier.name} ${tier.subdivision} ` : (tierKoNames[tier.key] || tier.name)}
           </div>
         </div>
       </div>
@@ -391,19 +392,38 @@ function StatItem({ label, value, textValue, sub, accentSub }) {
 }
 
 // ===== 크리에이터 특성 Pill 뱃지 (단일 소스: src/data/badges.js) =====
-function CreatorPills({ characters, stats }) {
+function CreatorPills({ characters, stats, creatorId }) {
   const allTitles = React.useMemo(
     () => computeEarnedTitles({ characters, stats }),
     [characters, stats]
   );
 
-  // 획득한 것만 필터링
-  const allEarned = allTitles.filter(t => t.earned);
+  // 획득한 것만 필터링 (메모이제이션 적용으로 무한 루프 방지)
+  const allEarned = React.useMemo(() => allTitles.filter(t => t.earned), [allTitles]);
   const fixedIds = FIXED_BADGE_IDS;
 
-  const [selected, setSelected] = React.useState(null); // null = show all (up to 8)
+  const [selected, setSelected] = React.useState(null); // null = show default/stored
   const [editing, setEditing] = React.useState(false);
   const dropRef = React.useRef(null);
+
+  React.useEffect(() => {
+    // 마운트 시 저장소에서 불러오기
+    if (creatorId) {
+      const storedIds = getCreatorBadge(creatorId);
+      if (storedIds && Array.isArray(storedIds)) {
+        // 유효한 ID만 필터링 (새로운 배지가 추가/삭제됐을 수 있으므로)
+        const validIds = storedIds.filter(id => allEarned.some(e => e.id === id));
+        if (validIds.length > 0) {
+          // 배열 내용이 다를 때만 업데이트 (무한 업데이트 방지)
+          setSelected(prev => {
+            if (!prev) return validIds;
+            if (prev.length === validIds.length && prev.every((v, i) => v === validIds[i])) return prev;
+            return validIds;
+          });
+        }
+      }
+    }
+  }, [creatorId, allEarned]);
 
   // 모달: 외부 클릭 시 닫기
   React.useEffect(() => {
@@ -418,7 +438,7 @@ function CreatorPills({ characters, stats }) {
     return () => { document.body.style.overflow = ''; };
   }, [editing]);
 
-  // 초기값: 획득 칭호 전부 (최대 8개), 고정 칭호 우선
+  // 구동: 획득 칭호 전부 (최대 8개), 고정 칭호 우선
   const activeIds = React.useMemo(() => {
     const presentFixed = allEarned.filter(p => fixedIds.includes(p.id)).map(p => p.id);
     if (selected) {
@@ -433,9 +453,21 @@ function CreatorPills({ characters, stats }) {
 
     setSelected(prev => {
       const cur = prev || allEarned.slice(0, 8).map(p => p.id);
-      if (cur.includes(id)) return cur.filter(x => x !== id);
-      if (cur.length >= 8) return cur;
-      return [...cur, id];
+      let newSelection;
+
+      if (cur.includes(id)) {
+        newSelection = cur.filter(x => x !== id);
+      } else if (cur.length >= 8) {
+        newSelection = cur;
+      } else {
+        newSelection = [...cur, id];
+      }
+
+      // 스토리지에 새 선택 목록 저장
+      if (creatorId) {
+        saveCreatorBadge(creatorId, newSelection);
+      }
+      return newSelection;
     });
   };
 
@@ -448,7 +480,7 @@ function CreatorPills({ characters, stats }) {
       {visible.map(p => {
         const style = BADGE_COLOR_MAP[p.color] || BADGE_COLOR_MAP.slate;
         const isGradient = p.color === 'gradient';
-        const label = `${p.emoji} ${p.title}`;
+        const label = `${p.emoji} ${p.title} `;
         const desc = p.desc || '';
 
         return isGradient ? (
@@ -513,7 +545,7 @@ function CreatorPills({ characters, stats }) {
                   const isFixed = fixedIds.includes(p.id);
                   const checked = activeIds.includes(p.id);
                   const disabled = isFixed || (!checked && activeIds.length >= 8);
-                  const label = `${p.emoji} ${p.title}`;
+                  const label = `${p.emoji} ${p.title} `;
                   const desc = p.desc || '';
 
                   return (
@@ -526,7 +558,7 @@ function CreatorPills({ characters, stats }) {
                         className="w-4 h-4 rounded accent-[var(--accent)] shrink-0"
                       />
                       <span className="text-sm text-[var(--text-primary)] flex items-center gap-1.5 min-w-0 flex-1">
-                        {isFixed && <span className="text-xs opacity-80">📌</span>}
+                        {isFixed && <span className="opacity-80"><Pin size={12} className="transition-transform group-hover:rotate-45" /></span>}
                         {label}
                       </span>
                       {desc && (
@@ -635,7 +667,7 @@ function PodiumCard({ char, label, icon, pillClass, borderClass, desktopCenter }
       className={`group relative flex flex-col aspect-[3/4] w-full rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-md hover:border-[var(--accent-bright)] hover:shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)] transition-all duration-300 transform md:hover:-translate-y-1 ${desktopCenter ? 'z-10' : 'z-0'}`}
     >
       {/* 1. 이미지 컨테이너 - Z-index를 0으로 낮추고 이 안에서만 overflow-hidden 시킴으로써 테두리 호버 짤림 완벽 해결 */}
-      <div className="absolute inset-0 rounded-2xl overflow-hidden z-0 pointer-events-none border border-transparent bg-black">
+      < div className="absolute inset-0 rounded-2xl overflow-hidden z-0 pointer-events-none border border-transparent bg-black" >
         <ImageWithFallback
           src={proxyImageUrl(char.imageUrl)}
           fallbackSrcs={getPlotImageUrls(char.imageUrls || []).slice(1)}
@@ -643,52 +675,52 @@ function PodiumCard({ char, label, icon, pillClass, borderClass, desktopCenter }
           // 확대/블러 대신 밝기·채도만 살짝 올려 선명도를 유지
           className="w-full h-full object-cover transition-all duration-500 ease-out group-hover:brightness-110 group-hover:saturate-110"
         />
-      </div>
+      </div >
 
       {/* 2. 글래스모피즘 어두운 비네팅 오버레이 - 작위적이지 않게 더 부드럽고 자연스럽게 페이드 */}
-      <div className="absolute inset-0 rounded-2xl pointer-events-none z-10 bg-gradient-to-t from-black/95 via-black/20 to-transparent mix-blend-multiply opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+      < div className="absolute inset-0 rounded-2xl pointer-events-none z-10 bg-gradient-to-t from-black/95 via-black/20 to-transparent mix-blend-multiply opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
 
       {/* 부드러운 하단 블러 (Css maskImage로 경계선 스무스 처리) */}
-      <div
+      < div
         className="absolute inset-0 rounded-2xl pointer-events-none z-10 backdrop-blur-md"
         style={{
           maskImage: 'linear-gradient(to top, black 0%, black 15%, transparent 60%)',
           WebkitMaskImage: 'linear-gradient(to top, black 0%, black 15%, transparent 60%)'
         }}
       />
-      <div className="absolute inset-x-0 bottom-0 h-[70%] rounded-b-2xl pointer-events-none z-10 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+      < div className="absolute inset-x-0 bottom-0 h-[70%] rounded-b-2xl pointer-events-none z-10 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
       {/* 3. 데이터 컨텐츠 컨테이너 - Z-index를 최우선으로 앞당김 */}
-      <div className="relative z-20 flex flex-col h-full p-2 sm:p-3 justify-between flex-grow">
+      < div className="relative z-20 flex flex-col h-full p-2 sm:p-3 justify-between flex-grow" >
 
         {/* 상단: 티어 뱃지만 우측 배치 */}
-        <div className="flex justify-end items-start w-full drop-shadow-sm">
+        < div className="flex justify-end items-start w-full drop-shadow-sm" >
           <div className="shrink-0 pt-0.5">
             <TierBadge tierKey={tier.key} size={18} />
           </div>
-        </div>
+        </div >
 
         {/* 하단 수치 타이포그래피 및 이름 */}
-        <div className="flex flex-col gap-1 mt-auto">
-          {/* 대화량 텍스트 더 굵게 강조, 연한 보라색, '대화' 라벨 제거 */}
-          <div className="flex items-baseline drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-            <span className="text-xl sm:text-2xl font-black text-purple-200 tracking-tight leading-none">
+        < div className="flex flex-col gap-0.5 sm:gap-1 mt-auto min-w-0" >
+          {/* 대화량 텍스트: 사이즈 약간 줄이고 한 줄로 말줄임 처리하여 레이아웃 방어 */}
+          < div className="flex items-baseline drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] min-w-0" >
+            <span className="text-lg sm:text-xl font-black text-purple-200 tracking-tight leading-none truncate w-full" title={formatNumber(char.interactionCount || 0)}>
               {formatCompactNumber(char.interactionCount || 0)}
             </span>
-          </div>
+          </div >
 
-          {/* 캐릭터 이름 - 한 줄, 길면 가로 스크롤 */}
-          <h4 className="font-bold text-xs text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] line-clamp-2 min-h-[1.5rem] mt-1">
+          {/* 캐릭터 이름 - 한 줄 고정 */}
+          < h4 className="font-bold text-[10px] sm:text-[11px] md:text-xs text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] truncate w-full mt-0.5" title={char.name} >
             {char.name}
-          </h4>
+          </h4 >
 
           {/* pill: 캐릭터명과 날짜 사이, 배경 50% 투명, 테두리에 색 */}
-          <div className={`flex items-center gap-0.5 w-fit px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wide text-white border ${pillClass || 'bg-gray-600/50'} ${borderClass || 'border-white/25'}`}>
+          < div className={`flex items-center gap-0.5 w-fit px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wide text-white border ${pillClass || 'bg-gray-600/50'} ${borderClass || 'border-white/25'}`}>
             {icon}
-            <span className="truncate">{label}</span>
-          </div>
-        </div>
-      </div>
-    </a>
+            < span className="truncate" > {label}</span >
+          </div >
+        </div >
+      </div >
+    </a >
   );
 }

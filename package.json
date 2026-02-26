@@ -12,6 +12,8 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "framer-motion": "^12.34.0",
+    "highcharts": "^12.5.0",
+    "highcharts-react-official": "^3.2.3",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.564.0",

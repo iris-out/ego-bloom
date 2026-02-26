@@ -17,6 +17,9 @@ export default function DetailTab({ stats, characters }) {
         <CreatorRadarChart stats={stats} characters={characters} />
       </div>
 
+      {/* 2-5. 기타 스탯카드 (stat.md 14, 21, 3번) */}
+      <AdditionalStats stats={stats} characters={characters} />
+
       {/* 3. 생성 히스토리 (GitHub style) */}
       <ContributionGraph characters={characters} />
 
@@ -93,3 +96,51 @@ function StatCard({ label, value, sub }) {
   );
 }
 
+// ===== 추가 스탯 카드 =====
+function AdditionalStats({ stats, characters }) {
+  const data = useMemo(() => {
+    if (!stats || !characters || characters.length === 0) return null;
+
+    // 14. 자유도의 수호자 (Freedom Advocate)
+    const unlimitedCount = characters.filter(c => c.unlimitedAllowed).length;
+    const freedomRatio = (unlimitedCount / characters.length) * 100;
+
+    // 21. 충성도 (Loyalty Ratio)
+    const followers = stats.followerCount || 0;
+    const loyaltyRatio = followers / characters.length;
+
+    // 3. 히트 쏠림도 (Blockbuster Ratio)
+    const totalInteractions = stats.plotInteractionCount || 0;
+    let blockbusterRatio = 0;
+
+    if (totalInteractions > 0) {
+      const sortedByInteraction = [...characters].sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0));
+      const top2Interactions = (sortedByInteraction[0]?.interactionCount || 0) + (sortedByInteraction[1]?.interactionCount || 0);
+      blockbusterRatio = (top2Interactions / totalInteractions) * 100;
+    }
+
+    return { freedomRatio, loyaltyRatio, blockbusterRatio };
+  }, [stats, characters]);
+
+  if (!data) return null;
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <StatCard
+        label="언리밋 비율"
+        value={`${data.freedomRatio.toFixed(1)}%`}
+        sub="무제한 대화 허용 캐릭터 비율"
+      />
+      <StatCard
+        label="매혹도"
+        value={data.loyaltyRatio.toFixed(1)}
+        sub="캐릭터 1개당 유입되는 팔로워 수"
+      />
+      <StatCard
+        label="히트 쏠림도"
+        value={`${data.blockbusterRatio.toFixed(1)}%`}
+        sub="상위 2개 캐릭터의 대화량 지분"
+      />
+    </div>
+  );
+}

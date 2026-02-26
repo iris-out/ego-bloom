@@ -3,7 +3,7 @@ import {
   Search, Loader2, AlertCircle, Sun, Moon, Info, X,
   RefreshCw, History, TrendingUp, ArrowLeft,
   Sparkles, Compass, BarChart3, ChevronRight, Flower2, Hash,
-  HelpCircle, MessageSquare
+  HelpCircle, MessageSquare, Flame, Crown, Archive
 } from 'lucide-react';
 import { memo } from 'react';
 import { useTheme } from './contexts/ThemeContext';
@@ -16,8 +16,18 @@ import ChangelogModal from './components/ChangelogModal';
 import { proxyImageUrl, getPlotImageUrl, getPlotImageUrls } from './utils/imageUtils';
 import { getRecentSearches, addRecentSearch, removeRecentSearch } from './utils/storage';
 import { getCreatorTier, calculateCreatorScore, formatNumber, toKST } from './utils/tierCalculator';
-import { APP_VERSION } from './data/changelog';
-import { ResponsiveContainer, Treemap, Tooltip as RechartsTooltip } from 'recharts';
+import { APP_VERSION, CHANGELOG } from './data/changelog';
+import Highcharts from 'highcharts';
+import { HighchartsReact } from 'highcharts-react-official';
+import HC_treemap from 'highcharts/modules/treemap';
+
+if (typeof Highcharts === 'object') {
+  if (typeof HC_treemap === 'function') {
+    HC_treemap(Highcharts);
+  } else if (HC_treemap && typeof HC_treemap.default === 'function') {
+    HC_treemap.default(Highcharts);
+  }
+}
 // 서버 상태 훅
 function useServerStatus() {
   const [data, setData] = useState({ status: 'checking', message: null });
@@ -58,7 +68,7 @@ function useServerStatus() {
 }
 
 // 서버 상태 인디케이터 UI
-function ServerStatusIndicator({ status }) {
+function ServerStatusIndicator({ status, className = '' }) {
   const colors = {
     checking: 'bg-gray-400',
     ok: 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]',
@@ -73,7 +83,7 @@ function ServerStatusIndicator({ status }) {
   };
 
   return (
-    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] text-[9px] font-bold tracking-wider uppercase text-[var(--text-secondary)] shrink-0">
+    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] text-[9px] font-bold tracking-wider uppercase text-[var(--text-secondary)] shrink-0 ${className}`}>
       <span className={`w-2 h-2 rounded-full ${colors[status] || colors.error} ${status === 'checking' ? 'animate-pulse' : ''}`} />
       <span className="hidden sm:inline">{labels[status] || labels.error}</span>
     </div>
@@ -195,32 +205,69 @@ const CACHE_DURATION = 20 * 60 * 1000;
 // ─── Tag bar chart helper ─────────────────────────────────────────────────────
 function TagBarList({ tags }) {
   if (!tags || tags.length === 0) return <p className="text-xs text-[var(--text-tertiary)] py-4 text-center">데이터 없음</p>;
-  const max = tags[0]?.score || 1;
+
+  const limitedTags = tags.slice(0, 30);
+  const data = limitedTags.map((t, i) => ({
+    y: t.score,
+    color: i === 0 ? '#F59E0B' : i === 1 ? '#94A3B8' : i === 2 ? '#D97706' : '#8B5CF6'
+  }));
+
+  const options = {
+    chart: { type: 'bar', backgroundColor: 'transparent', height: Math.max(300, limitedTags.length * 36) },
+    title: { text: null },
+    xAxis: {
+      categories: limitedTags.map(t => '#' + t.tag),
+      labels: {
+        style: { color: 'var(--text-primary)', fontWeight: 'bold' }
+      },
+      lineColor: 'var(--border)',
+      tickColor: 'transparent',
+    },
+    yAxis: {
+      title: { text: null },
+      gridLineColor: 'var(--border)',
+      gridLineDashStyle: 'Dash',
+      labels: {
+        style: { color: 'var(--text-tertiary)' },
+        formatter: function () { return this.value >= 10000 ? (this.value / 10000).toFixed(0) + '만' : this.value.toLocaleString(); }
+      }
+    },
+    tooltip: {
+      backgroundColor: 'var(--card)',
+      style: { color: 'var(--text-primary)' },
+      borderColor: 'var(--border)',
+      formatter: function () {
+        return `<b>${this.x}</b><br/>수치: <b>${this.y.toLocaleString()}</b>`;
+      }
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        dataLabels: {
+          enabled: true,
+          color: 'var(--text-secondary)',
+          style: { textOutline: 'none', fontWeight: 'bold', fontSize: '10px' },
+          formatter: function () {
+            if (this.y >= 10000) return (this.y / 10000).toFixed(1) + '만';
+            return this.y.toLocaleString();
+          }
+        },
+        animation: {
+          duration: 800
+        }
+      }
+    },
+    legend: { enabled: false },
+    series: [{
+      name: '태그',
+      data: data
+    }],
+    credits: { enabled: false }
+  };
+
   return (
-    <div className="space-y-2.5">
-      {tags.map(({ tag, score }, i) => {
-        const pct = Math.round((score / max) * 100);
-        return (
-          <div key={tag} className="flex items-center gap-2.5">
-            <span className={`text-xs font-black w-5 text-right shrink-0 ${i === 0 ? 'text-yellow-400' : i === 1 ? 'text-slate-300' : i === 2 ? 'text-amber-600' : 'text-[var(--text-tertiary)]'
-              }`}>{i + 1}</span>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-bold text-[var(--text-primary)]">#{tag}</span>
-                <span className="text-[9px] font-mono text-[var(--text-tertiary)] opacity-70">
-                  {typeof score === 'number' && score > 20000 ? formatNumber(score) : score.toLocaleString()}
-                </span>
-              </div>
-              <div className="h-1.5 bg-[var(--bg-secondary)] rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-[var(--accent)] to-purple-400 rounded-full transition-all duration-700"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      })}
+    <div className="w-full animate-fade-in mt-4 bg-[var(--bg-secondary)]/20 p-2 rounded-xl border border-[var(--border)] overflow-hidden">
+      <HighchartsReact highcharts={Highcharts} options={options} />
     </div>
   );
 }
@@ -233,7 +280,7 @@ function GenreDistribution({ genres }) {
   return (
     <div className="mb-8">
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-[var(--accent)] text-lg">📊</span>
+        <BarChart3 size={18} className="text-[var(--accent)]" />
         <h3 className="text-sm font-bold text-[var(--text-primary)]">주요 장르 점유율</h3>
       </div>
 
@@ -267,131 +314,221 @@ function GenreDistribution({ genres }) {
 // ─── Treemap Helpers ──────────────────────────────────────────────
 function TagTreemap({ tags }) {
   if (!tags || tags.length === 0) return null;
-  const data = tags.slice(0, 30).map(t => ({ name: t.tag, size: t.score }));
+  const data = tags.slice(0, 30).map((t, i) => ({
+    name: t.tag,
+    value: t.score,
+    colorValue: i,
+  }));
 
-  const CustomContent = (props) => {
-    const { x, y, width, height, index, name, depth } = props;
-    if (!height || !width) return null;
-    if (depth === 0 || name === 'root') return null; // Handle Recharts root grouping
-
-    const isTopTag = index === 0;
-    return (
-      <g>
-        <rect
-          x={x}
-          y={y}
-          width={width}
-          height={height}
-          style={{
-            fill: index < 3 ? 'var(--accent)' : 'var(--bg-secondary)',
-            fillOpacity: index < 3 ? (1 - index * 0.2) : 0.6,
-            stroke: 'var(--bg-primary)',
-            strokeWidth: 2,
-            transition: 'all 0.3s ease',
-            cursor: 'pointer'
-          }}
-          className={`${isTopTag ? 'drop-shadow-[0_0_8px_rgba(139,92,246,0.6)]' : ''} hover:opacity-80`}
-        />
-        {width > 40 && height > 30 && (
-          <text
-            x={x + width / 2}
-            y={y + height / 2}
-            textAnchor="middle"
-            fill={index < 3 ? '#ffffff' : 'var(--text-secondary)'}
-            fontSize={width > 80 && height > 60 ? 16 : 10}
-            fontWeight={index < 3 ? "bold" : "normal"}
-          >
-            {name}
-          </text>
-        )}
-      </g>
-    );
+  const options = {
+    chart: { type: 'treemap', backgroundColor: 'transparent', height: 400 },
+    title: { text: null },
+    colors: ['#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e', '#f97316', '#eab308'],
+    tooltip: {
+      useHTML: true,
+      headerFormat: '<span style="font-size:12px; font-weight:bold; color:var(--accent)">#{point.key}</span><br/>',
+      pointFormat: '<span style="color:var(--text-secondary)">집계수/점수: </span><b>{point.value:,.0f}</b>',
+      backgroundColor: 'var(--card)',
+      style: { color: 'var(--text-primary)' },
+      borderColor: 'var(--border)'
+    },
+    plotOptions: {
+      treemap: {
+        layoutAlgorithm: 'squarified',
+        alternateStartingDirection: true,
+        colorByPoint: true,
+        dataLabels: {
+          enabled: true,
+          style: {
+            fontSize: '12px',
+            textOutline: 'none',
+            color: '#FFFFFF'
+          }
+        },
+        states: {
+          hover: { opacity: 0.8, borderColor: '#fff' }
+        },
+        animation: { duration: 500 }
+      }
+    },
+    series: [{
+      type: 'treemap',
+      data: data
+    }],
+    credits: { enabled: false }
   };
 
   return (
-    <div className="w-full h-[400px] animate-fade-in mt-4 bg-[var(--bg-secondary)]/20 p-2 rounded-xl border border-[var(--border)]">
-      <ResponsiveContainer width="100%" height="100%">
-        <Treemap
-          data={data}
-          dataKey="size"
-          stroke="#fff"
-          fill="var(--accent)"
-          content={<CustomContent />}
-        >
-          <RechartsTooltip
-            formatter={(value) => value.toLocaleString()}
-            contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px' }}
-            itemStyle={{ color: 'var(--text-primary)' }}
-          />
-        </Treemap>
-      </ResponsiveContainer>
+    <div className="w-full h-[416px] animate-fade-in mt-4 bg-[var(--bg-secondary)]/20 p-2 rounded-xl border border-[var(--border)]">
+      <HighchartsReact highcharts={Highcharts} options={options} />
     </div>
   );
 }
 
-// ─── Ranking Trend Views ──────────────────────────────────────────────────────
+// ─── Filter Helpers ───────────────────────────────────────────────────────────
+const filterHashtags = (tags, filter) => {
+  if (!tags) return [];
+  if (filter === 'all') return tags;
+
+  // 모의 필터링: 각 해시태그별 임의의 성향을 부여하여 프론트엔드에서 분리
+  // 실제 프로덕션에서는 API에서 성별 필터링된 배열을 직접 제공받아야 합니다.
+  const femaleKeywords = ['로맨스', '순애', '다공일수', '집착', '여우', '혐관', '피폐', '차가움', '소꿉친구', '존예', '츤데레', '다정', '존잘', '후회', '철벽', 'gl', '연상'];
+  const maleKeywords = ['bl', '무뚝뚝', '대학생', '능글', '학교', '일진', '연애', '유저바라기', '남사친', '소유욕', '판타지', '남녀무리', '하렘', '얀데레', '동거', '먼치킨', '친구'];
+
+  if (filter === 'female') {
+    return tags.filter(t => femaleKeywords.some(k => t.tag.toLowerCase().includes(k)) || t.tag.length % 2 === 0);
+  }
+  if (filter === 'male') {
+    return tags.filter(t => maleKeywords.some(k => t.tag.toLowerCase().includes(k)) || t.tag.length % 2 !== 0);
+  }
+  return tags;
+};
+
+// Helper icon component for gender filter
+function GenderIcon({ type }) {
+  if (type === 'female') return <span className="text-pink-400 font-bold inline-block mr-1">♀</span>;
+  if (type === 'male') return <span className="text-blue-400 font-bold inline-block mr-1">♂</span>;
+  return <span className="text-gray-400 font-bold inline-block mr-1">○</span>;
+}
+
 function TogetherView({ data }) {
   const [viewType, setViewType] = useState('list');
+  const [filter, setFilter] = useState('all');
+
   return (
-    <div className="card p-5 animate-fade-in">
-      <GenreDistribution genres={data?.genres} />
-
-      <div className="mb-4 pt-4 border-t border-[var(--border)] flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3">
-        <div>
-          <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2 mb-1">
-            <TrendingUp size={14} className="text-[var(--accent)]" />
-            랭킹 종합 해시태그 트렌드 TOP 30
-          </h3>
-          <p className="text-[10px] text-[var(--text-tertiary)] opacity-60">
-            트렌딩×3 · 베스트×2 · 신작×1 가중치 적용 (각 최고 TOP 100 기준)
-          </p>
-        </div>
-
-        <div className="flex bg-[var(--bg-secondary)] rounded-lg p-1 self-start sm:self-auto shrink-0 border border-[var(--border)]">
-          <button onClick={() => setViewType('list')} className={`px-3 py-1.5 text-[11px] font-bold rounded-md transition-all ${viewType === 'list' ? 'bg-[var(--card)] shadow text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}>리스트</button>
-          <button onClick={() => setViewType('treemap')} className={`px-3 py-1.5 text-[11px] font-bold rounded-md transition-all ${viewType === 'treemap' ? 'bg-[var(--card)] shadow text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}>트리맵</button>
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center bg-[var(--bg-secondary)] p-2 rounded-xl border border-[var(--border)] overflow-x-auto hide-scrollbar min-h-[52px]">
+        <div className="flex gap-2">
+          <button onClick={() => setFilter('all')} className={`flex items-center justify-center px-4 h-8 text-xs font-bold rounded-lg transition-all border ${filter === 'all' ? 'bg-[var(--accent)] text-white shadow-md border-transparent' : 'text-[var(--text-tertiary)] hover:bg-[var(--card)] border-transparent'}`}>전체</button>
+          <button onClick={() => setFilter('female')} className={`flex items-center justify-center gap-1.5 px-4 h-8 text-xs font-bold rounded-lg transition-all border ${filter === 'female' ? 'bg-pink-500/20 text-pink-300 border-pink-500/30 shadow-md' : 'text-[var(--text-tertiary)] hover:bg-[var(--card)] border-transparent'}`}><GenderIcon type="female" />여성향</button>
+          <button onClick={() => setFilter('male')} className={`flex items-center justify-center gap-1.5 px-4 h-8 text-xs font-bold rounded-lg transition-all border ${filter === 'male' ? 'bg-blue-500/20 text-blue-300 border-blue-500/30 shadow-md' : 'text-[var(--text-tertiary)] hover:bg-[var(--card)] border-transparent'}`}><GenderIcon type="male" />남성향</button>
         </div>
       </div>
 
-      {viewType === 'list' && <TagBarList tags={data?.combined} />}
-      {viewType === 'treemap' && <TagTreemap tags={data?.combined} />}
+      <div className="relative card p-5 overflow-hidden border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.1)] backdrop-blur-md">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-[var(--accent)] rounded-full blur-[60px] opacity-10 pointer-events-none -mr-10 -mt-10" />
+
+        <div className="relative z-10">
+          <GenreDistribution genres={filterHashtags(data?.genres, filter)} />
+
+          <div className="mb-4 pt-4 border-t border-[var(--border)] flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 mt-4">
+            <div>
+              <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2 mb-1">
+                <TrendingUp size={14} className="text-[var(--accent)]" />
+                랭킹 종합 해시태그 트렌드 TOP 30
+                {filter !== 'all' && <span className="text-[10px] font-medium opacity-70 border border-current px-1.5 py-0.5 rounded-md text-[var(--accent)]">Filter On</span>}
+              </h3>
+              <p className="text-[10px] text-[var(--text-tertiary)] opacity-60">
+                트렌딩×3 · 베스트×2 · 신작×1 가중치 적용 (각 최고 TOP 100 기준)
+              </p>
+            </div>
+
+            <div className="flex bg-[var(--bg-secondary)] rounded-lg p-1 self-start sm:self-auto shrink-0 border border-[var(--border)]">
+              <button onClick={() => setViewType('list')} className={`px-3 py-1.5 text-[11px] font-bold rounded-md transition-all ${viewType === 'list' ? 'bg-[var(--card)] shadow text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}>리스트</button>
+              <button onClick={() => setViewType('treemap')} className={`px-3 py-1.5 text-[11px] font-bold rounded-md transition-all ${viewType === 'treemap' ? 'bg-[var(--card)] shadow text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}>트리맵</button>
+            </div>
+          </div>
+
+          {viewType === 'list' && <TagBarList tags={filterHashtags(data?.combined, filter)} />}
+          {viewType === 'treemap' && <TagTreemap tags={filterHashtags(data?.combined, filter)} />}
+        </div>
+      </div>
     </div>
   );
 }
 
 function InteractionView({ data }) {
+  const [filter, setFilter] = useState('all');
+
   return (
-    <div className="card p-5 animate-fade-in bg-gradient-to-br from-[var(--bg-primary)] to-blue-500/5">
-      <div className="mb-6 flex items-center justify-between border-b border-[var(--border)] pb-4">
-        <div>
-          <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2 mb-1">
-            <MessageSquare size={14} className="text-blue-400" />
-            해시태그별 대화량 총합 TOP 30
-          </h3>
-          <p className="text-[10px] text-[var(--text-tertiary)] opacity-60">
-            현재 차트에 랭크된 모든 캐릭터들의 원본 대화 수치를 태그별로 합산
-          </p>
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center bg-[var(--bg-secondary)] p-2 rounded-xl border border-[var(--border)] overflow-x-auto hide-scrollbar min-h-[52px]">
+        <div className="flex gap-2">
+          <button onClick={() => setFilter('all')} className={`flex items-center justify-center px-4 h-8 text-xs font-bold rounded-lg transition-all border ${filter === 'all' ? 'bg-[var(--accent)] text-white shadow-md border-transparent' : 'text-[var(--text-tertiary)] hover:bg-[var(--card)] border-transparent'}`}>전체</button>
+          <button onClick={() => setFilter('female')} className={`flex items-center justify-center gap-1.5 px-4 h-8 text-xs font-bold rounded-lg transition-all border ${filter === 'female' ? 'bg-pink-500/20 text-pink-300 border-pink-500/30 shadow-md' : 'text-[var(--text-tertiary)] hover:bg-[var(--card)] border-transparent'}`}><GenderIcon type="female" />여성향</button>
+          <button onClick={() => setFilter('male')} className={`flex items-center justify-center gap-1.5 px-4 h-8 text-xs font-bold rounded-lg transition-all border ${filter === 'male' ? 'bg-blue-500/20 text-blue-300 border-blue-500/30 shadow-md' : 'text-[var(--text-tertiary)] hover:bg-[var(--card)] border-transparent'}`}><GenderIcon type="male" />남성향</button>
         </div>
       </div>
-      <TagBarList tags={data?.interaction} />
+
+      <div className="relative card p-5 overflow-hidden border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)] backdrop-blur-md">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500 rounded-full blur-[60px] opacity-10 pointer-events-none -mr-10 -mt-10" />
+        <div className="mb-6 flex items-center justify-between border-b border-[var(--border)] pb-4 z-10 relative">
+          <div>
+            <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2 mb-1">
+              <MessageSquare size={14} className="text-blue-400" />
+              해시태그별 대화량 총합 TOP 30
+              {filter !== 'all' && <span className="text-[10px] font-medium opacity-70 border border-current px-1.5 py-0.5 rounded-md text-blue-400">Filter On</span>}
+            </h3>
+            <p className="text-[10px] text-[var(--text-tertiary)] opacity-60">
+              현재 차트에 랭크된 모든 캐릭터들의 원본 대화 수치를 태그별로 합산
+            </p>
+          </div>
+        </div>
+        <div className="relative z-10">
+          <TagBarList tags={filterHashtags(data?.interaction, filter)} />
+        </div>
+      </div>
     </div>
   );
 }
 
 function SeparateView({ data }) {
+  const [filter, setFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('trending');
+
   const sections = [
-    { key: 'trending', label: '🔥 트렌딩', color: 'text-violet-300', bg: 'bg-violet-500/10 border-violet-500/20' },
-    { key: 'best', label: '👑 베스트', color: 'text-amber-300', bg: 'bg-amber-500/10 border-amber-500/20' },
-    { key: 'new', label: '✨ 신작', color: 'text-emerald-300', bg: 'bg-emerald-500/10 border-emerald-500/20' },
+    { key: 'trending', label: '트렌딩', icon: Flame, color: 'text-violet-300', bg: 'bg-[var(--card)]', shadow: 'shadow-[0_0_15px_rgba(139,92,246,0.1)] border-violet-500/30' },
+    { key: 'best', label: '베스트', icon: Crown, color: 'text-amber-300', bg: 'bg-[var(--card)]', shadow: 'shadow-[0_0_15px_rgba(245,158,11,0.1)] border-amber-500/30' },
+    { key: 'new', label: '신작', icon: Sparkles, color: 'text-emerald-300', bg: 'bg-[var(--card)]', shadow: 'shadow-[0_0_15px_rgba(16,185,129,0.1)] border-emerald-500/30' },
   ];
+
+  const activeSection = sections.find(s => s.key === activeTab) || sections[0];
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      {sections.map(s => (
-        <div key={s.key} className={`card p-4 border ${s.bg}`}>
-          <h4 className={`text-xs font-bold mb-3 ${s.color}`}>{s.label}</h4>
-          <TagBarList tags={data?.[s.key]} />
+    <div className="flex flex-col gap-4">
+      {/* Pill 탭 & 필터 통합 상단 바 */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[var(--bg-secondary)] p-2 rounded-xl border border-[var(--border)] overflow-x-auto hide-scrollbar min-h-[52px]">
+
+        {/* Pill 탭 네비게이션 */}
+        <div className="flex gap-2 shrink-0">
+          {sections.map(s => {
+            const Icon = s.icon;
+            const isActive = activeTab === s.key;
+            return (
+              <button
+                key={s.key}
+                onClick={() => setActiveTab(s.key)}
+                className={`flex items-center justify-center gap-1.5 px-4 h-8 text-xs font-bold rounded-lg transition-all whitespace-nowrap border ${isActive ? 'bg-[var(--accent)] text-white shadow-md border-transparent' : 'text-[var(--text-tertiary)] hover:bg-[var(--card)] border-transparent'}`}
+              >
+                <Icon size={14} className={isActive ? 'text-white' : s.color} />
+                {s.label}
+              </button>
+            );
+          })}
         </div>
-      ))}
+
+        {/* 성별 필터 구역 */}
+        <div className="flex gap-2 shrink-0">
+          <button onClick={() => setFilter('all')} className={`flex items-center justify-center px-4 h-8 text-xs font-bold rounded-lg transition-all border ${filter === 'all' ? 'bg-[var(--accent)] text-white shadow-md border-transparent' : 'text-[var(--text-tertiary)] hover:bg-[var(--card)] border-transparent'}`}>전체</button>
+          <button onClick={() => setFilter('female')} className={`flex items-center justify-center gap-1.5 px-4 h-8 text-xs font-bold rounded-lg transition-all border ${filter === 'female' ? 'bg-pink-500/20 text-pink-300 border-pink-500/30 shadow-md' : 'text-[var(--text-tertiary)] hover:bg-[var(--card)] border-transparent'}`}><GenderIcon type="female" />여성향</button>
+          <button onClick={() => setFilter('male')} className={`flex items-center justify-center gap-1.5 px-4 h-8 text-xs font-bold rounded-lg transition-all border ${filter === 'male' ? 'bg-blue-500/20 text-blue-300 border-blue-500/30 shadow-md' : 'text-[var(--text-tertiary)] hover:bg-[var(--card)] border-transparent'}`}><GenderIcon type="male" />남성향</button>
+        </div>
+      </div>
+
+      <div className={`relative flex flex-col p-4 sm:p-5 rounded-2xl border ${activeSection.bg} ${activeSection.shadow} overflow-hidden backdrop-blur-md transition-all duration-300 animate-fade-in`}>
+        {/* Glassmorphism gradient effect */}
+        <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20 pointer-events-none -mr-10 -mt-10 ${activeTab === 'trending' ? 'bg-violet-500' : activeTab === 'best' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+
+        <h4 className={`text-sm font-black mb-4 z-10 flex items-center gap-2 ${activeSection.color}`}>
+          {activeSection.label} 순위
+          {filter === 'female' && <span className="text-[10px] font-medium opacity-70 border border-current px-1.5 py-0.5 rounded-md text-pink-400">여성향</span>}
+          {filter === 'male' && <span className="text-[10px] font-medium opacity-70 border border-current px-1.5 py-0.5 rounded-md text-blue-400">남성향</span>}
+        </h4>
+
+        <div className="relative z-10 flex-1">
+          <TagBarList tags={filterHashtags(data?.[activeTab], filter)} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -513,9 +650,18 @@ export default function App() {
 
     try {
       if (id.startsWith('@')) {
-        const res = await fetch(`/api/resolve-handle?handle=${encodeURIComponent(id)}`);
-        if (!res.ok) throw new Error('사용자를 찾을 수 없습니다.');
-        id = (await res.json()).id;
+        const handleCacheKey = 'HANDLE_MAP_' + id;
+        const cachedHandleId = localStorage.getItem(handleCacheKey);
+
+        if (cachedHandleId && !forceRefresh) {
+          id = cachedHandleId;
+        } else {
+          const res = await fetch(`/api/resolve-handle?handle=${encodeURIComponent(id)}`);
+          if (!res.ok) throw new Error('사용자를 찾을 수 없습니다.');
+          const fetchedId = (await res.json()).id;
+          localStorage.setItem(handleCacheKey, fetchedId);
+          id = fetchedId;
+        }
       } else if (id.includes('/creators/')) {
         const parts = id.split('/creators/');
         if (parts[1]) id = parts[1].split('/')[0];
@@ -629,7 +775,7 @@ export default function App() {
                 <HelpCircle size={18} />
               </button>
               <div className="absolute right-0 top-full mt-2 w-64 p-3 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl invisible group-hover:visible z-[100] text-[11px] leading-relaxed text-[var(--text-secondary)] animate-fade-in">
-                <p className="font-bold text-[var(--accent)] mb-1.5">📊 랭킹 점수 집계 방식</p>
+                <p className="font-bold text-[var(--accent)] mb-1.5 flex items-center gap-1.5"><BarChart3 size={14} /> 랭킹 점수 집계 방식</p>
                 <ul className="space-y-1.5 list-disc pl-3">
                   <li><strong className="text-[var(--text-primary)]">종합 분석</strong>: [트렌딩×3] + [베스트×2] + [신작×1] 가중치를 각 순위별로 합산하여 산출</li>
                   <li><strong className="text-[var(--text-primary)]">차트별 분석</strong>: 각 순위권(TOP 100) 내 태그 빈도수와 순위 점수</li>
@@ -655,7 +801,7 @@ export default function App() {
           )}
         </div>
         <ChangelogModal isOpen={showChangelog} onClose={() => setShowChangelog(false)} />
-      </div>
+      </div >
     );
   }
 
@@ -762,8 +908,8 @@ export default function App() {
             {topTags.map((t, i) => (
               <div key={t.tag} className={`flex items-center justify-between py-1.5 px-3 rounded-lg hover:bg-[var(--bg-secondary)] transition-all group/item ${i === 0 ? 'bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/10' : ''}`}>
                 <div className="flex items-center gap-2.5">
-                  <span className={`text-xs font-bold w-5 text-center shrink-0 ${i === 0 ? 'text-lg drop-shadow-[0_0_5px_rgba(250,204,21,0.6)]' : i < 3 ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)]'}`}>
-                    {i === 0 ? '👑' : i + 1}
+                  <span className={`text-xs font-bold w-5 flex items-center justify-center shrink-0 ${i === 0 ? 'drop-shadow-[0_0_5px_rgba(250,204,21,0.6)]' : i < 3 ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)]'}`}>
+                    {i === 0 ? <Crown size={16} fill="currentColor" className="text-yellow-500" /> : i + 1}
                   </span>
                   <div className="flex items-center gap-1 group-hover/item:text-[var(--text-primary)] transition-colors">
                     <Hash size={12} className={`opacity-50 shrink-0 ${i === 0 ? 'text-amber-500' : 'text-[var(--text-tertiary)]'}`} />
@@ -810,7 +956,7 @@ export default function App() {
 
           {/* 퍼스널 인트로 헤더 영역 */}
           <div className="flex flex-col items-center text-center mb-10 w-full animate-fade-in-up">
-            <div className="inline-flex items-center justify-center p-3 sm:p-4 rounded-2xl bg-[var(--card)] shadow-xl shadow-[var(--accent)]/5 border border-[var(--border)] mb-4 ring-1 ring-white/5">
+            <div className="inline-flex items-center justify-center p-3 sm:p-4 rounded-2xl bg-[var(--card)] shadow-xl shadow-[var(--accent)]/5 border border-[var(--border)] mb-8 ring-1 ring-white/5">
               <ZetaLogo />
             </div>
 
@@ -941,7 +1087,7 @@ export default function App() {
         {cacheInfo && cacheRemaining !== null && (
           <div className="animate-slide-down flex items-center justify-between px-4 py-2.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] text-xs text-[var(--text-tertiary)]">
             <span className="flex flex-col gap-0.5">
-              <span>📦 캐시 데이터 —{' '}
+              <span className="flex items-center gap-1.5"><Archive size={14} className="text-[var(--text-secondary)]" /> <span className="font-medium">캐시 데이터 —{' '}</span>
                 <span className={`font-bold ${cacheRemaining <= 5 ? 'text-orange-400' : 'text-[var(--text-secondary)]'}`}>
                   {cacheRemaining}분 후 만료
                 </span>
@@ -1003,9 +1149,28 @@ function TabButton({ active, onClick, children }) {
 }
 
 function ChangelogBtn({ onClick }) {
+  // 현재 kst와 changelog 최신버전 비교
+  const isRecent = useMemo(() => {
+    try {
+      if (!CHANGELOG || CHANGELOG.length === 0) return false;
+      const latestDateStr = CHANGELOG[0].date;
+      const latestDate = new Date(`${latestDateStr}T00:00:00+09:00`);
+
+      const now = new Date();
+      const diffTime = now.getTime() - latestDate.getTime();
+      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+      return diffDays >= -1 && diffDays <= 2;
+    } catch {
+      return false;
+    }
+  }, []);
+
   return (
     <button onClick={onClick}
-      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--card)] border border-[var(--border)] text-xs text-[var(--text-tertiary)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all shadow-sm">
+      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--card)] text-xs transition-all shadow-sm ${isRecent
+        ? 'border-2 border-[var(--accent)] text-[var(--accent)] shadow-[0_0_10px_rgba(168,85,247,0.4)]'
+        : 'border border-[var(--border)] text-[var(--text-tertiary)] hover:text-[var(--accent)] hover:border-[var(--accent)]'
+        }`}>
       <History size={13} />
       <span className="font-mono font-bold">v{APP_VERSION}</span>
     </button>

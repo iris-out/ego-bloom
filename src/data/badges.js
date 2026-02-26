@@ -23,7 +23,6 @@ export const BADGE_DEFINITIONS = [
   { id: 'furry', emoji: '🐾', title: '털', description: '수인·퍼리', desc: '#수인, #수인형, #퍼리 태그 보유', color: 'amber' },
   { id: 'hattrick', emoji: '🎩', title: '해트트릭', description: '100만 대화 캐릭터 3개+', desc: '100만 이상 대화량 캐릭터 3개 이상 보유', color: 'indigo' },
   { id: 'platinum', emoji: '💿', title: '플래티넘 디스크', description: '100만 대화 캐릭터', desc: '100만 이상 대화량 캐릭터 보유', color: 'slate' },
-  { id: 'gold_disc', emoji: '📀', title: '골든 디스크', description: '50만 대화 캐릭터', desc: '50만 이상 대화량 캐릭터 보유', color: 'yellow' },
   { id: '10m', emoji: '🎬', title: '천만관객', description: '총 대화 1천만+', desc: '총 대화수 1,000만 이상', color: 'yellow' },
   { id: '1m', emoji: '💬', title: '밀리언', description: '총 대화 100만+', desc: '총 대화수 100만 이상', color: 'amber' },
   { id: 'superstar', emoji: '🌌', title: '우주대스타', description: '팔로워 1만+', desc: '팔로워 10,000명 이상', color: 'gradient' },
@@ -133,8 +132,6 @@ export function computeEarnedTitles(input) {
   list.push({ id: 'hattrick', emoji: '🎩', title: '해트트릭', desc: BADGE_DEFINITIONS.find(b => b.id === 'hattrick')?.desc ?? '', color: 'indigo', earned: hattrickChars.length >= 3, chars: hattrickChars.map(c => c.name) });
   const platinumChars = charactersWithInteraction(characters, 1000000);
   list.push({ id: 'platinum', emoji: '💿', title: '플래티넘 디스크', desc: BADGE_DEFINITIONS.find(b => b.id === 'platinum')?.desc ?? '', color: 'slate', earned: platinumChars.length > 0, chars: platinumChars.map(c => c.name) });
-  const goldChars = charactersWithInteraction(characters, 500000);
-  list.push({ id: 'gold_disc', emoji: '📀', title: '골든 디스크', desc: BADGE_DEFINITIONS.find(b => b.id === 'gold_disc')?.desc ?? '', color: 'yellow', earned: goldChars.length > 0, chars: goldChars.map(c => c.name) });
   list.push({ id: 'furry', emoji: '🐾', title: '털', desc: BADGE_DEFINITIONS.find(b => b.id === 'furry')?.desc ?? '', color: 'amber', earned: ['수인', '수인형', '퍼리', 'furry'].some(t => tagSet.has(t)), chars: charsWithAnyTag(characters, ['수인', '수인형', '퍼리', 'furry']) });
   list.push({ id: 'oneyear', emoji: '🎂', title: '벌써 1년', desc: BADGE_DEFINITIONS.find(b => b.id === 'oneyear')?.desc ?? '', color: 'emerald', earned: activityDays >= 365 });
   list.push({ id: 'military', emoji: '🎖️', title: '이병부터 병장까지', desc: BADGE_DEFINITIONS.find(b => b.id === 'military')?.desc ?? '', color: 'blue', earned: activityDays >= 548 });

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Globe } from 'lucide-react';
 
 /**
  * 글로벌 트렌딩 랭킹 배지
@@ -12,8 +13,8 @@ export default function RankBadge({ globalRank, rankDiff, isNew, className = '' 
             {globalRank != null && (
                 <span className="text-[10px] font-black px-1.5 py-0.5 rounded
           bg-gradient-to-r from-violet-500/20 to-indigo-500/20
-          border border-violet-500/30 text-violet-300 leading-none">
-                    🌐 #{globalRank}
+          border border-violet-500/30 text-violet-300 leading-none flex items-center gap-1">
+                    <Globe size={10} className="text-violet-400" /> #{globalRank}
                 </span>
             )}
             {rankDiff != null && rankDiff !== 0 && (

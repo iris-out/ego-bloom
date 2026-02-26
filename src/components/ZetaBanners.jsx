@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { proxyImageUrl } from '../utils/imageUtils';
+import { Megaphone, MessageCircle } from 'lucide-react';
 
 const BANNERS_CACHE_KEY = 'zeta_banners_v1';
 const BANNERS_TTL_MS = 60 * 60 * 1000; // 1시간
@@ -44,8 +45,8 @@ export default function ZetaBanners() {
     return (
         <div className="w-full max-w-md mt-6 animate-fade-in-up">
             <div className="flex items-center justify-between mb-3 px-1">
-                <h3 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
-                    📣 Zeta 소식 & 공지사항
+                <h3 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider flex items-center gap-1.5">
+                    <Megaphone size={14} className="text-[var(--accent)]" /> Zeta 소식 & 공지사항
                 </h3>
             </div>
             <div className="flex overflow-x-auto gap-3 pb-2 snap-x snap-mandatory custom-scrollbar">
@@ -73,7 +74,7 @@ export default function ZetaBanners() {
                                 </>
                             ) : (
                                 <div className="absolute inset-0 bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--bg-tertiary)] flex items-center justify-center">
-                                    <span className="text-4xl opacity-10">💬</span>
+                                    <MessageCircle size={36} className="opacity-10" />
                                 </div>
                             )}
 

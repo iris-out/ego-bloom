@@ -50,3 +50,38 @@ export const removeRecentSearch = (query) => {
 export const clearRecentSearches = () => {
     localStorage.removeItem(STORAGE_KEY);
 };
+
+// ─── Creator Badge Preference ──────────────────────────────────
+const BADGE_STORAGE_KEY = 'zeta_creator_badges';
+
+export const getCreatorBadge = (creatorId) => {
+    if (!creatorId) return null;
+    try {
+        const stored = localStorage.getItem(BADGE_STORAGE_KEY);
+        if (!stored) return null;
+        const badges = JSON.parse(stored);
+        return badges[creatorId] || null;
+    } catch (e) {
+        console.error('Failed to load creator badge', e);
+        return null;
+    }
+};
+
+export const saveCreatorBadge = (creatorId, badgeId) => {
+    if (!creatorId || !badgeId) return;
+    try {
+        const stored = localStorage.getItem(BADGE_STORAGE_KEY);
+        const badges = stored ? JSON.parse(stored) : {};
+
+        // LRU-like limit to prevent unbounded growth (e.g. max 50 creators cached)
+        const keys = Object.keys(badges);
+        if (keys.length > 50 && !badges[creatorId]) {
+            delete badges[keys[0]]; // Remove oldest
+        }
+
+        badges[creatorId] = badgeId;
+        localStorage.setItem(BADGE_STORAGE_KEY, JSON.stringify(badges));
+    } catch (e) {
+        console.error('Failed to save creator badge', e);
+    }
+};

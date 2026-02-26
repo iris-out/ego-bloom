@@ -1,40 +1,12 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { formatNumber, toKST } from '../utils/tierCalculator';
 import { computeEarnedTitles } from '../data/badges';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Globe, Crown, Medal, BarChart3, Tag, PartyPopper, CheckCircle2, Lock } from 'lucide-react';
 import { proxyImageUrl } from '../utils/imageUtils';
 
 // ===== 격려 메시지 (카드 위에 표시) =====
 export function EncouragementBanner({ tier, characters, stats }) {
-    const totalInteractions = stats?.plotInteractionCount || 0;
-    const followers = stats?.followerCount || 0;
-
-    const title = tier.key === 'champion' || tier.key === 'master'
-        ? '🏆 돼지 합격!'
-        : tier.key === 'diamond' || tier.key === 'platinum'
-            ? '🌟 대화량이 돈이었으면 좋겠네요 :3'
-            : tier.key === 'gold'
-                ? '✨ 점점 많은 사람들이 당신의 캐릭터를 만나고 있습니다!'
-                : tier.key === 'silver'
-                    ? '🌿 착실하게 성장하고 있어요!'
-                    : '🌱 모든 제작자들도, 여기서 시작했습니다. 무한한 가능성이 있어요.';
-
-    const isHighTier = ['diamond', 'master', 'champion'].includes(tier.key);
-    const formattedInt = formatNumber(totalInteractions);
-    const formattedFollowers = formatNumber(followers);
-
-    const message = isHighTier
-        ? `지금까지 ${formattedInt}회의 대화와 ${formattedFollowers}명의 팔로워를 기록하며 엄청난 영향력을 보여주고 계시네요!`
-        : `지금까지 총 ${formattedInt}회의 대화를 통해 많은 사람들에게 즐거움을 전해주셨습니다.`;
-
-    return (
-        <div className="px-3 py-2.5 rounded-xl bg-[var(--accent-soft)] border border-[var(--accent)]/15">
-            <p className="text-xs text-[var(--accent)] font-bold">{title}</p>
-            <p className="text-[11px] text-[var(--text-secondary)] mt-1.5 leading-relaxed font-medium">
-                {message}
-            </p>
-        </div>
-    );
+    return null;
 }
 
 // ===== 칭호/랭킹 탭 (단일 소스: src/data/badges.js) =====
@@ -134,7 +106,7 @@ export default function AchievementsTab({ stats, characters }) {
                     <div className="card p-4">
                         <div className="flex items-center justify-between mb-3">
                             <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
-                                🌐 <span>글로벌 랭킹</span>
+                                <Globe size={14} className="text-violet-400" /> <span>글로벌 랭킹</span>
                             </h3>
                             {rankingUpdatedAt && (
                                 <div className="text-[9px] text-[var(--text-tertiary)] bg-[var(--bg-secondary)] px-1.5 py-0.5 rounded border border-[var(--border)]">
@@ -154,7 +126,7 @@ export default function AchievementsTab({ stats, characters }) {
                                             const isFirst = rank === 1;
                                             const podiumHeight = isFirst ? 'h-32 sm:h-40' : rank === 2 ? 'h-24 sm:h-32' : 'h-20 sm:h-24';
                                             const podiumColor = isFirst ? 'bg-gradient-to-t from-yellow-500/20 to-yellow-300/40 border-yellow-400/50' : rank === 2 ? 'bg-gradient-to-t from-slate-400/20 to-slate-300/40 border-slate-300/50' : 'bg-gradient-to-t from-orange-500/20 to-orange-400/40 border-orange-400/50';
-                                            const medal = isFirst ? '👑' : rank === 2 ? '🥈' : '🥉';
+                                            const medalIcon = isFirst ? <Crown size={22} fill="currentColor" className="text-yellow-500" /> : rank === 2 ? <Medal size={22} fill="currentColor" className="text-slate-400" /> : <Medal size={22} fill="currentColor" className="text-orange-600" />;
 
                                             return (
                                                 <a
@@ -170,7 +142,7 @@ export default function AchievementsTab({ stats, characters }) {
                                                     </div>
 
                                                     <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 ${isFirst ? 'border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : rank === 2 ? 'border-slate-300' : 'border-orange-400'} mb-2 overflow-hidden bg-[var(--bg-secondary)] shrink-0 flex items-center justify-center relative shadow-sm`}>
-                                                        {char.image ? <img src={proxyImageUrl(char.image)} alt={char.name} className="w-full h-full object-cover" /> : <span className="text-xl">{medal}</span>}
+                                                        {char.image ? <img src={proxyImageUrl(char.image)} alt={char.name} className="w-full h-full object-cover" /> : <div className="scale-75 sm:scale-100">{medalIcon}</div>}
                                                     </div>
                                                     <div className={`text-[10px] sm:text-xs font-black truncate w-full text-center mb-1 drop-shadow-sm ${isFirst ? 'text-amber-500' : 'text-[var(--text-primary)]'}`}>
                                                         {char.name}
@@ -178,7 +150,7 @@ export default function AchievementsTab({ stats, characters }) {
 
                                                     <div className={`w-full ${podiumHeight} ${podiumColor} border-t-2 rounded-t-lg flex flex-col items-center pt-2 sm:pt-3 shadow-inner relative overflow-hidden backdrop-blur-sm`}>
                                                         {isFirst && <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />}
-                                                        <span className="text-lg sm:text-2xl drop-shadow-md z-10">{medal}</span>
+                                                        <div className="z-10 drop-shadow-md scale-90 sm:scale-110">{medalIcon}</div>
                                                         <span className={`text-[9px] sm:text-[10px] font-black mt-auto mb-2 opacity-60 z-10 tracking-widest ${isFirst ? 'text-yellow-600' : rank === 2 ? 'text-slate-500' : 'text-orange-700'}`}>TOP {rank}</span>
                                                     </div>
                                                 </a>
@@ -234,7 +206,7 @@ export default function AchievementsTab({ stats, characters }) {
                             </div>
                         ) : (
                             <div className="text-center py-6">
-                                <p className="text-3xl mb-2">📊</p>
+                                <BarChart3 size={32} className="mx-auto mb-3 text-[var(--accent)] opacity-40" />
                                 <p className="text-xs text-[var(--text-tertiary)] leading-relaxed">
                                     현재 트렌딩 · 베스트 · 신작<br />랭킹에 진입한 캐릭터가 없습니다
                                 </p>
@@ -248,7 +220,7 @@ export default function AchievementsTab({ stats, characters }) {
             <div className="card p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
-                        🏷️ <span>칭호</span>
+                        <Tag size={14} className="text-[var(--text-tertiary)]" /> <span>칭호</span>
                     </h3>
                     <span className="text-xs font-mono text-[var(--accent)] font-bold">{earned.length} / {titles.length}</span>
                 </div>
@@ -258,9 +230,9 @@ export default function AchievementsTab({ stats, characters }) {
                         style={{ width: `${titles.length > 0 ? (earned.length / titles.length) * 100 : 0}%` }}
                     />
                 </div>
-                <p className="text-[10px] text-[var(--text-tertiary)] mt-1.5 font-medium">
+                <p className="text-[10px] text-[var(--text-tertiary)] mt-1.5 font-medium flex items-center gap-1.5">
                     {earned.length === titles.length && titles.length > 0
-                        ? '🎉 모든 칭호를 획득하셨습니다!'
+                        ? <><PartyPopper size={12} className="text-yellow-400" /> 모든 칭호를 획득하셨습니다!</>
                         : `${titles.length - earned.length}개의 칭호를 더 획득할 수 있습니다.`
                     }
                 </p>
@@ -270,7 +242,7 @@ export default function AchievementsTab({ stats, characters }) {
             {earned.length > 0 && (
                 <div className="card p-4 sm:p-5">
                     <h4 className="text-xs font-bold text-[var(--text-secondary)] mb-3 flex items-center gap-1.5">
-                        ✅ 획득한 칭호 <span className="text-[var(--accent)]">({earned.length})</span>
+                        <CheckCircle2 size={14} className="text-emerald-400" /> 획득한 칭호 <span className="text-[var(--accent)]">({earned.length})</span>
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {earned.map(renderTitle)}
@@ -282,7 +254,7 @@ export default function AchievementsTab({ stats, characters }) {
             {unearned.length > 0 && (
                 <div className="card p-4 sm:p-5">
                     <h4 className="text-xs font-bold text-[var(--text-tertiary)] mb-3 flex items-center gap-1.5">
-                        🔒 미획득 칭호 <span className="opacity-60">({unearned.length})</span>
+                        <Lock size={14} className="text-[var(--text-tertiary)]" /> 미획득 칭호 <span className="opacity-60">({unearned.length})</span>
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {unearned.map(renderTitle)}
