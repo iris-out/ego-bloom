@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   Search, Loader2, AlertCircle, Sun, Moon, Info, X,
   RefreshCw, History, TrendingUp, ArrowLeft,
-  Sparkles, Compass, BarChart3, ChevronRight, Flower2, Hash,
+  Sparkles, Compass, BarChart3, ChevronLeft, ChevronRight, Flower2, Hash,
   HelpCircle, MessageSquare, Flame, Crown, Archive
 } from 'lucide-react';
 import { memo } from 'react';
@@ -94,7 +94,7 @@ function ServerStatusIndicator({ status, className = '' }) {
 function EmergencyBanner({ message }) {
   if (!message) return null;
   return (
-    <div className="fixed top-4 inset-x-4 z-[60] flex justify-center pointer-events-none animate-slide-down">
+    <div className="fixed top-16 inset-x-4 z-[60] flex justify-center pointer-events-none animate-slide-down">
       <div className="max-w-xl w-full bg-[rgba(20,20,30,0.95)] border border-amber-500/30 rounded-2xl p-4 shadow-2xl shadow-amber-500/10 backdrop-blur-md pointer-events-auto flex items-start gap-3 ring-1 ring-white/10">
         <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 shrink-0">
           <AlertCircle size={18} />
@@ -549,6 +549,8 @@ export default function App() {
   const serverStatus = serverData.status;
   const emergencyMessage = serverData.message;
   const [isRecapMode, setIsRecapMode] = useState(false);
+  const [suggestions, setSuggestions] = useState([]); // 검색 제안
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // RECAP 모드 감지 (해시 기반)
   useEffect(() => {
@@ -582,10 +584,8 @@ export default function App() {
       } else if (creator) {
         setShowTrendView(false);
         setInput(creator);
-        // data가 없을 때만 fetch (무한루프 방지)
-        if (!data || data?.profile?.id !== creator && data?.profile?.handle !== creator) {
-          fetchData(creator, false, true); // true = 라우터에 의한 호춤 구분 플래그 추가
-        }
+        // URL에 creator가 있으면 항상 해당 값으로 최초 데이터 로드만 수행
+        fetchData(creator, false, true); // true = 라우터에 의한 호출 구분 플래그
       } else {
         // 홈 화면
         setShowTrendView(false);
@@ -599,9 +599,21 @@ export default function App() {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []); // 의도적으로 빈 배열을 주고, fetchData 내부에서 pushState 로직을 따로 관리합니다.
+  }, []); // data에 의존하지 않도록 고정 (무한 루프 방지)
 
   useEffect(() => { setRecentSearches(getRecentSearches()); }, []);
+
+  // 검색 제안 필터링 로직
+  useEffect(() => {
+    if (!input.trim()) {
+      setSuggestions([]);
+      return;
+    }
+    const filtered = recentSearches
+      .filter(term => term.toLowerCase().includes(input.toLowerCase()))
+      .slice(0, 5);
+    setSuggestions(filtered);
+  }, [input, recentSearches]);
 
   useEffect(() => {
     if (!cacheInfo) { setCacheRemaining(null); return; }
@@ -980,14 +992,35 @@ export default function App() {
                 <div className="pl-4 sm:pl-5 pr-2 text-[var(--text-tertiary)]">
                   <Search size={22} className="opacity-70 group-focus-within/search:text-[var(--accent)] transition-colors" />
                 </div>
-                <input
-                  type="text"
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  placeholder="@핸들, 크리에이터 ID, 혹은 프로필 URL"
-                  className="w-full bg-transparent border-none text-base sm:text-lg text-[var(--text-primary)] placeholder-[var(--text-tertiary)]/70 py-3 sm:py-4 px-2 focus:outline-none"
-                  autoFocus
-                />
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    placeholder="@핸들, 크리에이터 ID, 혹은 프로필 URL"
+                    className="w-full bg-transparent border-none text-base sm:text-lg text-[var(--text-primary)] placeholder-[var(--text-tertiary)]/70 py-3 sm:py-4 px-2 focus:outline-none"
+                    autoFocus
+                  />
+                  {/* 검색 제안 드롭다운 */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in-up">
+                      <div className="p-2 border-b border-[var(--border)] text-[10px] font-bold text-[var(--text-tertiary)] bg-[var(--bg-secondary)] px-4">최근 검색어 추천</div>
+                      {suggestions.map((s, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => { setInput(s); fetchData(s); setShowSuggestions(false); }}
+                          className="w-full text-left px-4 py-3 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--accent)] transition-colors flex items-center gap-2"
+                        >
+                          <History size={14} className="opacity-50" />
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <button
                   type="submit"
                   disabled={loading || !input.trim()}
@@ -1063,9 +1096,10 @@ export default function App() {
         {!isRecapMode && (
           <TopBar theme={theme} toggleTheme={toggleTheme} onBack={handleBack} input={input}
             onInputChange={setInput} onSubmit={handleSubmit} loading={loading}
-            onChangelogOpen={() => setShowChangelog(true)} serverStatus={serverStatus} />
+            onChangelogOpen={() => setShowChangelog(true)} serverStatus={serverStatus}
+            suggestions={suggestions} showSuggestions={showSuggestions} setShowSuggestions={setShowSuggestions} />
         )}
-        <main className="max-w-7xl mx-auto px-4 pt-4 pb-12"><SkeletonUI /></main>
+        <main className="max-w-[1440px] mx-auto px-4 pt-4 pb-12"><SkeletonUI /></main>
         <ChangelogModal isOpen={showChangelog} onClose={() => setShowChangelog(false)} />
       </div>
     );
@@ -1083,7 +1117,7 @@ export default function App() {
           onChangelogOpen={() => setShowChangelog(true)} serverStatus={serverStatus} />
       )}
 
-      <main className="max-w-7xl mx-auto px-4 pt-4 pb-12 space-y-4">
+      <main className="max-w-[1440px] mx-auto px-4 pt-4 pb-32 space-y-4">
         {cacheInfo && cacheRemaining !== null && (
           <div className="animate-slide-down flex items-center justify-between px-4 py-2.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] text-xs text-[var(--text-tertiary)]">
             <span className="flex flex-col gap-0.5">
@@ -1107,7 +1141,7 @@ export default function App() {
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
 
           {/* Left Sidebar (Profile Header) */}
-          <div className="w-full lg:w-[380px] shrink-0 lg:sticky lg:top-20 z-10">
+          <div className="w-full lg:w-[420px] transition-all duration-300 shrink-0 lg:sticky lg:top-20 z-30 relative">
             <ProfileHeader profile={data.profile} stats={data.stats} characters={data.characters} />
           </div>
 
@@ -1140,10 +1174,11 @@ export default function App() {
 function TabButton({ active, onClick, children }) {
   return (
     <button onClick={onClick}
-      className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${active
-        ? 'bg-[var(--card)] text-[var(--text-primary)] shadow-sm'
+      className={`flex-1 py-2 text-sm font-bold rounded-md transition-all relative ${active
+        ? 'bg-[var(--card)] text-[var(--accent-bright)] shadow-sm'
         : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}>
       {children}
+      {active && <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-[var(--accent)] rounded-full" />}
     </button>
   );
 }
@@ -1177,22 +1212,47 @@ function ChangelogBtn({ onClick }) {
   );
 }
 
-function TopBar({ theme, toggleTheme, onBack, input, onInputChange, onSubmit, loading, onChangelogOpen, serverStatus }) {
+function TopBar({ theme, toggleTheme, onBack, input, onInputChange, onSubmit, loading, onChangelogOpen, serverStatus, suggestions, showSuggestions, setShowSuggestions }) {
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-[var(--bg-primary)]/80 border-b border-[var(--border)]">
-      <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-3">
+      <div className="max-w-[1440px] mx-auto px-4 h-14 flex items-center gap-3">
         <button onClick={onBack}
           className="shrink-0 p-1.5 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-secondary)]">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
-        <form onSubmit={onSubmit} className="flex-1 relative">
-          <input type="text" value={input} onChange={e => onInputChange(e.target.value)} placeholder="검색..."
-            className="search-input w-full pl-4 pr-10 py-2 rounded-lg text-sm" />
+        <form onSubmit={onSubmit} className="flex-1 relative flex items-center">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={input}
+              onChange={e => onInputChange(e.target.value)}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              placeholder="검색..."
+              className="search-input w-full pl-4 pr-10 h-9 rounded-lg text-sm bg-[var(--bg-secondary)] border border-[var(--border)] focus:ring-1 focus:ring-[var(--accent)] transition-all"
+            />
+            {/* 상단바 검색 제안 */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in">
+                {suggestions.map((s, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => { onInputChange(s); onSubmit({ preventDefault: () => { } }, s); setShowSuggestions(false); }}
+                    className="w-full text-left px-3 py-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--accent)] transition-colors flex items-center gap-2"
+                  >
+                    <History size={12} className="opacity-50" />
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button type="submit" disabled={loading}
-            className="absolute right-1 top-1 bottom-1 px-2 rounded-md text-[var(--text-tertiary)] hover:text-[var(--accent)] transition-colors disabled:opacity-50">
-            {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+            className="absolute right-0 top-0 bottom-0 px-3 flex items-center justify-center rounded-r-lg text-[var(--text-tertiary)] hover:text-[var(--accent)] transition-colors disabled:opacity-50">
+            {loading ? <Loader2 size={15} className="animate-spin" /> : <Search size={15} />}
           </button>
         </form>
         <ServerStatusIndicator status={serverStatus} />

@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { getTierTooltip } from '../utils/tierCalculator';
 
-// Colors per tier (User Request: X, SR, R, S, A, B)
+// Colors and Gradients per tier (X, SR, R, S, A, B)
 const TIER_STYLES = {
-  b: { fill: '#A0AEC0', text: '#FFFFFF', initial: 'B' },
-  a: { fill: '#48BB78', text: '#FFFFFF', initial: 'A' },
-  s: { fill: '#4299E1', text: '#FFFFFF', initial: 'S' },
-  r: { fill: '#9F7AEA', text: '#FFFFFF', initial: 'R' },
-  sr: { fill: '#ED8936', text: '#FFFFFF', initial: 'SR', fontSizeRatio: 0.4 },
-  x: { fill: '#F56565', text: '#FFFFFF', initial: 'X' },
+  b: { fill: '#A0AEC0', grad: 'from-gray-400 to-gray-500', text: '#FFFFFF', initial: 'B' },
+  a: { fill: '#48BB78', grad: 'from-emerald-400 to-green-600', text: '#FFFFFF', initial: 'A' },
+  s: { fill: '#4299E1', grad: 'from-blue-400 to-blue-600', text: '#FFFFFF', initial: 'S' },
+  r: { fill: '#9F7AEA', grad: 'from-purple-400 to-indigo-600', text: '#FFFFFF', initial: 'R' },
+  sr: { fill: '#ED8936', grad: 'from-orange-400 to-red-500', text: '#FFFFFF', initial: 'SR', fontSizeRatio: 0.45 },
+  x: { fill: '#F56565', grad: 'from-red-400 to-rose-700', text: '#FFFFFF', initial: 'X' },
 };
 
 /** Badge with tooltip showing tier criteria on hover */
@@ -21,11 +21,10 @@ export function TierBadgeWithTooltip({ tierKey, size = 32, className = '' }) {
       className={`relative inline-block ${className}`}
       onMouseEnter={() => setShow(true)}
       onMouseLeave={() => setShow(false)}
-      title={tooltip}
     >
       <TierBadge tierKey={tierKey} size={size} />
       {show && (
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 px-2.5 py-1.5 text-[10px] font-medium rounded-lg shadow-xl border border-[var(--border)] bg-[var(--card)] text-[var(--text-primary)] whitespace-nowrap z-50 pointer-events-none">
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-1.5 text-[10px] font-bold rounded-lg shadow-2xl border border-white/10 bg-[rgba(20,20,30,0.95)] backdrop-blur-md text-white whitespace-nowrap z-50 pointer-events-none animate-fade-in">
           {tooltip}
         </div>
       )}
@@ -33,84 +32,98 @@ export function TierBadgeWithTooltip({ tierKey, size = 32, className = '' }) {
   );
 }
 
-/** Flat Initial Tier Badge */
+/** Enhanced Tier Badge with Gradient and Depth */
 export function TierBadge({ tierKey, size = 32, className = '' }) {
-  const style = TIER_STYLES[tierKey] || TIER_STYLES.b; // Default to B
+  const style = TIER_STYLES[tierKey] || TIER_STYLES.b;
   const fontSize = size * (style.fontSizeRatio || 0.6);
 
   return (
     <div
-      className={`flex items-center justify-center rounded-lg font-bold shadow-sm ${className}`}
+      className={`flex items-center justify-center font-black shadow-lg overflow-hidden relative group/tier ${className}`}
       style={{
         width: size,
         height: size,
-        backgroundColor: style.fill,
-        color: style.text,
         fontSize: fontSize,
         fontFamily: 'var(--font-heading, sans-serif)',
+        borderRadius: '6px',
+        border: '1px solid rgba(255,255,255,0.2)',
       }}
       role="img"
       aria-label={`${tierKey} tier`}
     >
-      {style.initial}
+      {/* Background Gradient */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${style.grad}`} />
+
+      {/* Shine Effect */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-50" />
+
+      {/* Dynamic Border */}
+      <div className="absolute inset-0 border border-white/20 rounded-lg" />
+
+      <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
+        {style.initial}
+      </span>
     </div>
   );
 }
 
 /** Tier label with badge + text (for cards) */
 export function TierLabel({ tierKey, tierName, size = 'sm', className = '' }) {
-  const style = TIER_STYLES[tierKey] || TIER_STYLES.b; // Default to B
+  const style = TIER_STYLES[tierKey] || TIER_STYLES.b;
 
-  // Adjusted sizes for "bigger" look
   const badgeSize = size === 'sm' ? 18 : 24;
-  const fontSize = size === 'sm' ? 'text-xs' : 'text-sm';
+  const fontSize = size === 'sm' ? 'text-[10px]' : 'text-xs';
   const padding = size === 'sm' ? 'px-2 py-1 gap-1.5' : 'px-3 py-1.5 gap-2';
 
   return (
     <span
-      className={`inline-flex items-center font-bold rounded-lg ${fontSize} ${padding} ${className}`}
+      className={`inline-flex items-center font-black rounded-full ${fontSize} ${padding} ${className} backdrop-blur-sm border shadow-sm transition-all hover:brightness-110`}
       style={{
-        backgroundColor: `${style.fill}15`, // Very transparent background
+        backgroundColor: `${style.fill}20`,
         color: style.fill,
-        border: `1px solid ${style.fill}30`,
+        borderColor: `${style.fill}40`,
       }}
       title={getTierTooltip(tierKey)}
     >
       <TierBadge tierKey={tierKey} size={badgeSize} />
-      <span className="opacity-90">{tierName}</span>
+      <span className="tracking-tight uppercase">{tierName}</span>
     </span>
   );
 }
 
-/** Creator tier icon (Also updated to flat style for consistency) */
+/** Creator tier icon - used in smaller lists */
 export function CreatorTierIcon({ tierKey, size = 32, className = '' }) {
-  // Mapping for creator tiers (which differ from character tiers)
   const CREATOR_STYLES = {
-    beginner: { fill: '#CBD5E0', initial: 'B' },
-    apprentice: { fill: '#68D391', initial: 'A' },
-    skilled: { fill: '#4FD1C5', initial: 'S' },
-    expert: { fill: '#B794F4', initial: 'E' },
-    master: { fill: '#FC8181', initial: 'M' },
-    grandmaster: { fill: '#F6E05E', initial: 'G' },
-    legend: { fill: '#ED64A6', initial: 'L' },
+    beginner: { grad: 'from-gray-300 to-gray-500', initial: 'B' },
+    apprentice: { grad: 'from-green-300 to-green-600', initial: 'A' },
+    skilled: { grad: 'from-cyan-300 to-cyan-600', initial: 'S' },
+    expert: { grad: 'from-purple-300 to-purple-600', initial: 'P' },
+    diamond: { grad: 'from-blue-300 to-blue-600', initial: 'D' },
+    master: { grad: 'from-amber-300 to-orange-600', initial: 'M' },
+    champion: { grad: 'from-red-400 to-rose-700', initial: 'C' },
   };
 
   const style = CREATOR_STYLES[tierKey] || CREATOR_STYLES.beginner;
 
   return (
     <div
-      className={`flex items-center justify-center rounded-xl font-bold uppercase shadow-sm ${className}`}
+      className={`flex items-center justify-center font-black uppercase shadow-lg overflow-hidden relative ${className}`}
       style={{
         width: size,
         height: size,
-        backgroundColor: style.fill,
-        color: '#FFFFFF',
         fontSize: size * 0.55,
+        clipPath: 'polygon(0% 0%, 100% 0%, 100% 75%, 50% 100%, 0% 75%)',
       }}
     >
-      {style.initial}
+      <div className={`absolute inset-0 bg-gradient-to-br ${style.grad}`} />
+      <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 opacity-40" />
+      <div className="absolute inset-0 border border-white/20" />
+      <span className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+        {style.initial}
+      </span>
     </div>
   );
 }
 
 export default TierBadge;
+

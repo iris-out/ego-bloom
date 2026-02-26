@@ -18,17 +18,22 @@ export default function CreatorRadarChart({ stats, characters }) {
         let scoreDiligence = 20;
         let daysPerCharStr = "N/A";
         if (characters.length > 0) {
-            // Find earliest and latest dates
-            const dates = characters.map(c => toKST(c.createdAt || c.createdDate)).filter(d => !isNaN(d));
-            if (dates.length > 0) {
-                const earliest = new Date(Math.min(...dates));
-                const latest = new Date(Math.max(...dates));
-                const activityDays = Math.max(1, (latest - earliest) / (1000 * 60 * 60 * 24));
+            // 가장 이른 생성일 기준으로 "지금까지의" 활동 일수 계산 (ProfileHeader와 동일한 기준)
+            const timestamps = characters
+                .map(c => c.createdAt || c.createdDate)
+                .filter(Boolean)
+                .map(d => toKST(d).getTime())
+                .filter(t => !isNaN(t));
+
+            if (timestamps.length > 0 && plotCount > 0) {
+                const earliest = Math.min(...timestamps);
+                const now = toKST().getTime();
+                const activityDays = Math.max(1, (now - earliest) / (1000 * 60 * 60 * 24));
                 const daysPerChar = activityDays / plotCount;
                 daysPerCharStr = `${daysPerChar.toFixed(1)}일`;
 
-                // 14 days = 50 pts, 3 days = 100 pts. 
-                // score = 100 - (daysPerChar - 3) * (50 / 11)
+                // 14 days = 50 pts, 3 days = 100 pts.
+                // score = 100 - (daysPerChar - 3) * (50 / 11) ≈ 4.545점/일 감소
                 if (daysPerChar <= 3) scoreDiligence = 100;
                 else if (daysPerChar >= 25) scoreDiligence = 20;
                 else scoreDiligence = 100 - ((daysPerChar - 3) * 4.545);
@@ -47,9 +52,11 @@ export default function CreatorRadarChart({ stats, characters }) {
         const regenRatio = totalOriginal > 0 ? (totalWithRegen / totalOriginal) : 1.0;
         const scoreRegen = normalize(regenRatio, 1.0, 1.30);
 
-        // 3. 대화량 (Traffic)
-        const interactions = stats.plotInteractionCount || 0;
-        const scoreTraffic = normalize(interactions, 7000, 7000000);
+        // 3. 캐릭터 평균 대화 (평균 트래픽)
+        const totalInteractions = stats.plotInteractionCount || 0;
+        const avgInteractions = plotCount > 0 ? totalInteractions / plotCount : 0;
+        // 10,000회 이하 → 20점, 200,000회 이상 → 100점
+        const scoreTraffic = normalize(avgInteractions, 10000, 200000);
 
         // 4. 오픈소스 (Openness)
         let openCount = 0;
@@ -75,7 +82,7 @@ export default function CreatorRadarChart({ stats, characters }) {
 
         return [
             { subject: '다작 성실', A: Math.round(scoreDiligence), raw: `작품당 ${daysPerCharStr}` },
-            { subject: '대화량', A: Math.round(scoreTraffic), raw: `${interactions.toLocaleString()}회` },
+            { subject: '캐릭터 평균 대화', A: Math.round(scoreTraffic), raw: `${Math.round(avgInteractions).toLocaleString()}회` },
             { subject: '유저 몰입', A: Math.round(scoreRegen), raw: `${((regenRatio - 1) * 100).toFixed(1)}% 리롤` },
             { subject: '오픈소스', A: Math.round(scoreOpenness), raw: `${(openRatio * 100).toFixed(1)}% 공개` },
             { subject: '다양성', A: Math.round(scoreDiversity), raw: `${tagCount}개 장르` },
@@ -89,7 +96,7 @@ export default function CreatorRadarChart({ stats, characters }) {
             const { subject, A, raw } = payload[0].payload;
             let desc = '';
             if (subject === '다작 성실') desc = '업로드 평균 페이스입니다.';
-            if (subject === '대화량') desc = '발생한 총 대화 규모입니다.';
+            if (subject === '캐릭터 평균 대화') desc = '캐릭터 1개당 평균 대화량입니다.';
             if (subject === '유저 몰입') desc = '답변 리롤(Regen) 비율입니다.';
             if (subject === '오픈소스') desc = '상세 설정 공개 비율입니다.';
             if (subject === '다양성') desc = '다루는 장르(해시태그) 스펙트럼입니다.';

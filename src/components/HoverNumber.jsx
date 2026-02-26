@@ -8,24 +8,24 @@ export default function HoverNumber({ value, className = '' }) {
 
     const shortVer = formatNumber(value);
     const longVer = value.toLocaleString();
-
-    // If short and long are same (e.g. small numbers), no need for effect
-    if (shortVer === longVer) {
-        return <span className={className}>{longVer}</span>;
-    }
+    const hasHover = shortVer !== longVer;
 
     return (
         <span
-            className={`cursor-help inline-flex items-baseline transition-all duration-300 ${className}`}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            title={isHovered ? '' : longVer}
+            className={`relative cursor-help inline-flex items-baseline justify-center transition-all duration-300 ${className}`}
+            onMouseEnter={() => hasHover && setIsHovered(true)}
+            onMouseLeave={() => hasHover && setIsHovered(false)}
+            title={longVer}
         >
-            <span className={`transition-all duration-300 whitespace-nowrap ${isHovered ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'}`}>
-                {shortVer}
-            </span>
-            <span className={`transition-all duration-300 whitespace-nowrap ${isHovered ? 'opacity-100 w-auto' : 'opacity-0 w-0 overflow-hidden'}`}>
+            {/* 레이아웃을 고정하기 위한 보이지 않는 자리표시자 */}
+            <span className="invisible whitespace-nowrap">
                 {longVer}
+            </span>
+
+            <span
+                className="absolute inset-0 flex items-baseline justify-center whitespace-nowrap"
+            >
+                {hasHover && !isHovered ? shortVer : longVer}
             </span>
         </span>
     );

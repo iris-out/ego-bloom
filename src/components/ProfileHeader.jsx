@@ -146,30 +146,31 @@ export default function ProfileHeader({ profile, stats, characters }) {
   }, [characters]);
 
   return (
-    <div className="card p-4 sm:p-6 relative" ref={cardRef}>
+    <div className="relative p-5 sm:p-8 rounded-2xl border border-[var(--border)] shadow-xl bg-[rgba(25,25,35,0.7)] backdrop-blur-xl" ref={cardRef}>
+
       {/* Tier Mode Selector */}
-      <div className="absolute top-2 left-4 sm:top-4 sm:left-6 flex items-center bg-[var(--bg-secondary)] rounded-full p-1 border border-[var(--border)] z-10">
+      <div className="absolute top-3 left-4 sm:top-5 sm:left-6 flex items-center bg-black/40 backdrop-blur-md rounded-full p-1 border border-white/10 z-20 shadow-sm">
         <button
           onClick={() => setTierMode('total')}
-          className={`px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-full transition-all ${tierMode === 'total'
-            ? 'bg-[var(--card)] text-[var(--text-primary)] shadow-sm'
-            : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
+          className={`px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-full transition-all ${tierMode === 'total'
+            ? 'bg-[var(--accent)] text-white shadow-sm'
+            : 'text-[var(--text-tertiary)] hover:text-white'
             }`}
         >
           전체
         </button>
         <button
           onClick={() => setTierMode('highlight')}
-          className={`px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-full transition-all ${tierMode === 'highlight'
-            ? 'bg-[var(--card)] text-[var(--text-primary)] shadow-sm'
-            : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
+          className={`px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-full transition-all ${tierMode === 'highlight'
+            ? 'bg-[var(--accent)] text-white shadow-sm'
+            : 'text-[var(--text-tertiary)] hover:text-white'
             }`}
         >
           하이라이트
         </button>
         {/* 통합 툴팁 */}
-        <div className="relative group/tip ml-0.5 mr-1">
-          <span className="w-4 h-4 rounded-full bg-[var(--border)] text-[var(--text-tertiary)] text-[8px] font-black flex items-center justify-center cursor-help shrink-0 hover:bg-[var(--accent)]/30 hover:text-[var(--accent)] transition-colors">?</span>
+        <div className="relative group/tip ml-1 mr-1.5">
+          <span className="w-4 h-4 rounded-full bg-white/10 text-white/70 text-[8px] font-black flex items-center justify-center cursor-help shrink-0 hover:bg-[var(--accent)] hover:text-white transition-colors">?</span>
           <div className="absolute top-full left-0 sm:left-auto sm:right-0 mt-2 w-56 p-3 bg-[rgba(20,20,30,0.97)] border border-[var(--border)] rounded-xl shadow-xl z-50 text-white text-[10px] leading-relaxed invisible group-hover/tip:visible pointer-events-none">
             <div className="font-bold text-[var(--accent)] mb-2">티어 카드 모드</div>
             <div className="mb-2">
@@ -184,11 +185,11 @@ export default function ProfileHeader({ profile, stats, characters }) {
         </div>
       </div>
 
-      <div className="absolute top-2 right-4 sm:top-4 sm:right-6 z-10 flex items-center gap-1.5">
+      <div className="absolute top-3 right-4 sm:top-5 sm:right-6 z-20 flex items-center gap-2">
         {/* Recap Fullscreen Button */}
         <button
           onClick={openRecap}
-          className="px-2.5 py-1.5 rounded-full bg-[var(--bg-secondary)] border border-purple-500/40 text-purple-400 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition-all shadow-[0_0_8px_rgba(168,85,247,0.2)] flex items-center gap-1.5"
+          className="px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-purple-500/40 text-purple-400 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition-all shadow-[0_0_8px_rgba(168,85,247,0.2)] flex items-center gap-1.5"
           title="연말결산 스토리 보기"
         >
           <Film size={13} />
@@ -199,70 +200,79 @@ export default function ProfileHeader({ profile, stats, characters }) {
         <button
           onClick={handleExport}
           disabled={exporting}
-          className="w-7 h-7 flex items-center justify-center rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all disabled:opacity-50"
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[var(--text-secondary)] hover:text-white hover:border-white/30 transition-all disabled:opacity-50 shadow-sm"
           title="카드 이미지로 저장"
         >
           {exporting
-            ? <Loader2 size={14} className="animate-spin" />
-            : <Download size={14} />
+            ? <Loader2 size={15} className="animate-spin" />
+            : <Download size={15} />
           }
         </button>
       </div>
 
-      <div className="flex items-center gap-3 sm:gap-4 mt-12 sm:mt-10">
-        {/* Avatar */}
-        <div className="relative shrink-0">
-          <AvatarImage
-            src={profile.profileImageUrl}
-            alt={profile.nickname}
-            fallback={(profile.nickname || '?')[0]}
-            tierColor={tier.color}
-          />
-        </div>
+      {/* Main Profile Info Area */}
+      <div className="flex flex-col gap-4 mt-16 sm:mt-14 relative z-20 w-full">
 
-        {/* Name & handle & Tags */}
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] truncate">
-              {profile.nickname}
-            </h2>
-          </div>
-          <p className="text-sm text-[var(--text-tertiary)]">@{profile.username}</p>
-          {/* 활동 기간 + 칭호 — 한 줄 */}
-          <div className="mt-1.5 flex flex-wrap items-center gap-1">
-            {firstCharDate !== null && (() => {
-              const now = toKST();
-              let years = now.getFullYear() - firstCharDate.getFullYear();
-              let months = now.getMonth() - firstCharDate.getMonth();
-              if (months < 0) { years--; months += 12; }
-              const label = years > 0
-                ? months > 0 ? `${years}년 ${months} 개월째` : `${years} 년째`
-                : months > 0
-                  ? `${months} 개월째`
-                  : `${Math.max(1, Math.floor((now - firstCharDate) / 86400000))} 일째`;
-              return (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--accent-soft)] border border-[var(--accent)]/20 text-[10px] font-semibold text-[var(--accent)]">
-                  <Calendar size={11} className="mr-0.5" /> {label}
-                </span>
-              );
-            })()}
-            <CreatorPills characters={characters} stats={stats} creatorId={profile.id || profile.username || 'unknown'} />
-          </div>
-        </div>
+        {/* 상단 행: 아바타 / 이름 / 티어 */}
+        <div className="flex items-center justify-between gap-4 sm:gap-6">
+          <div className="flex items-center gap-4 sm:gap-5 flex-1 min-w-0">
+            <AvatarImage
+              src={profile.profileImageUrl}
+              alt={profile.nickname}
+              fallback={(profile.nickname || '?')[0]}
+              tierColor={tier.color}
+            />
 
-        {/* Tier Badge */}
-        <div className="text-right shrink-0 flex flex-col items-center">
-          <CreatorTierBadge tier={tier} stats={stats} score={score} tierMode={tierMode} breakdown={breakdown} />
-          <div className="text-sm font-bold mt-2" style={{ color: tier.color }}>
+            <div className="flex flex-col min-w-0">
+              <h2 className="text-[19px] sm:text-[29px] font-black text-[var(--text-primary)] tracking-tight drop-shadow-sm mb-0.5 truncate">
+                {profile.nickname}
+              </h2>
+              <p className="text-[13px] font-medium text-[var(--text-tertiary)] tracking-wide truncate">
+                @{profile.username}
+              </p>
+            </div>
+          </div>
+
+        {/* Right Side: Tier Badge */}
+        <div className="flex flex-col items-center shrink-0 xl:mr-4">
+          <div className="transform scale-[0.8]">
+            <CreatorTierBadge tier={tier} stats={stats} score={score} tierMode={tierMode} breakdown={breakdown} />
+          </div>
+          <div className="text-[11px] font-black mt-1.5 tracking-wide uppercase drop-shadow-md text-center" style={{ color: tier.color }}>
             {tier.subdivision ? `${tierKoNames[tier.key] || tier.name} ${tier.subdivision} ` : (tierKoNames[tier.key] || tier.name)}
           </div>
+          <div className="text-[8px] text-gray-400 mt-0.5 font-mono">
+            SCORE: {formatCompactNumber(score)}
+          </div>
+        </div>
+        </div>
+
+        {/* 하단 행: 활동 기간 + 칭호 */}
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
+          {firstCharDate !== null && (() => {
+            const now = toKST();
+            let years = now.getFullYear() - firstCharDate.getFullYear();
+            let months = now.getMonth() - firstCharDate.getMonth();
+            if (months < 0) { years--; months += 12; }
+            const label = years > 0
+              ? months > 0 ? `${years}년${months}개월` : `${years}년`
+              : months > 0
+                ? `${months}개월`
+                : `${Math.max(1, Math.floor((now - firstCharDate) / 86400000))}일`;
+            return (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/40 border border-white/10 text-[10px] font-semibold text-gray-300 backdrop-blur-sm shadow-sm">
+                <Calendar size={11} className="text-gray-400" />{label} 활동
+              </span>
+            );
+          })()}
+          <CreatorPills characters={characters} stats={stats} creatorId={profile.id || profile.username || 'unknown'} />
         </div>
       </div>
 
       {/* 하이라이트 모드일 때 추가 지표 + 시상대 노출 */}
       {tierMode === 'highlight' ? (
-        <div className="mt-4 animate-fade-in">
-          <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-4 border-t border-[var(--border)] mb-6">
+        <div className="mt-8 animate-fade-in relative z-10">
+          <div className="grid grid-cols-2 gap-3 pt-6 border-t border-white/10 mb-6">
             <StatItem label="활동 일수" value={breakdown.activityDays} />
             <StatItem label="일평균 대화수" value={Math.floor(breakdown.dailyAvgInteractions)} />
           </div>
@@ -271,7 +281,7 @@ export default function ProfileHeader({ profile, stats, characters }) {
       ) : (
         <>
           {/* Stats row Calculation for TOTAL mode */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-4 pt-4 border-t border-[var(--border)] animate-fade-in">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-8 pt-6 border-t border-white/10 animate-fade-in relative z-10">
             <StatItem label="총 대화량" value={totalMessages} />
             <StatItem label="팔로워" value={stats.followerCount || 0} />
             <StatItem label="캐릭터" value={stats.plotCount || 0} />
@@ -282,19 +292,19 @@ export default function ProfileHeader({ profile, stats, characters }) {
 
           {/* Top 20 character tier badges */}
           {top20.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-[var(--border)] animate-fade-in">
-              <div className="text-[10px] text-[var(--text-tertiary)] uppercase mb-2">
+            <div className="mt-6 pt-6 border-t border-white/10 animate-fade-in relative z-10">
+              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">
                 최고 인기 20개 캐릭터 티어
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1.5 p-3 rounded-xl bg-black/20 border border-white/5 shadow-inner">
                 {top20.map((char) => {
                   const charTier = getCharacterTier(char.interactionCount || 0);
                   return (
                     <TierBadgeWithTooltip
                       key={char.id}
                       tierKey={charTier.key}
-                      size={22}
-                      className="shrink-0"
+                      size={24}
+                      className="shrink-0 transition-transform hover:scale-110"
                     />
                   );
                 })}
@@ -303,13 +313,13 @@ export default function ProfileHeader({ profile, stats, characters }) {
           )}
 
           {/* 주요 태그 (재배치) */}
-          <div className="mt-4 pt-4 border-t border-[var(--border)] animate-fade-in">
-            <div className="text-[10px] text-[var(--text-tertiary)] uppercase mb-2">
+          <div className="mt-6 pt-6 border-t border-white/10 animate-fade-in relative z-10">
+            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">
               크리에이터 주요 장르
             </div>
             <div className="flex flex-wrap gap-2">
               {topTags.map(tag => (
-                <span key={tag} className="px-3 py-1.5 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] text-xs font-bold text-[var(--text-secondary)] shadow-sm hover:border-[var(--accent)] transition-all">
+                <span key={tag} className="px-3 py-1.5 rounded-full bg-black/30 border border-white/10 text-xs font-bold text-gray-300 shadow-sm hover:border-[var(--accent)] hover:text-white transition-all cursor-default">
                   #{tag}
                 </span>
               ))}
@@ -320,14 +330,14 @@ export default function ProfileHeader({ profile, stats, characters }) {
 
       {/* Progress bar */}
       {tier.nextTier && (
-        <div className="mt-4">
-          <div className="flex justify-between text-xs text-[var(--text-tertiary)] mb-1.5">
-            <span>{tier.nextGoalLabel || tier.nextTier.name}까지</span>
-            <span>{Math.floor(tier.subProgress ?? tier.progress)}%</span>
+        <div className="mt-6 pt-6 border-t border-white/10 relative z-10">
+          <div className="flex justify-between items-end text-xs font-bold text-gray-400 mb-2 px-1">
+            <span className="tracking-wide">다음 티어 <span className="text-white">{tier.nextGoalLabel || tier.nextTier.name}</span></span>
+            <span className="text-white">{Math.floor(tier.subProgress ?? tier.progress)}<span className="text-[10px] text-gray-500">%</span></span>
           </div>
-          <div className="w-full h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
+          <div className="w-full h-2 rounded-full bg-black/50 border border-white/10 overflow-hidden shadow-inner">
             <div
-              className={`h-full rounded-full bg-gradient-to-r ${tier.gradient} transition-all duration-500`}
+              className={`h-full rounded-full bg-gradient-to-r ${tier.gradient} transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(255,255,255,0.3)]`}
               style={{ width: `${tier.subProgress ?? tier.progress}%` }}
             />
           </div>
@@ -354,20 +364,20 @@ function AvatarImage({ src, alt, fallback, tierColor }) {
 
   return (
     <div
-      className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-[var(--card)] transition-all duration-300"
-      style={{ boxShadow: `0 0 0 2.5px ${tierColor || 'var(--border)'}` }}
+      className="w-[3.6rem] h-[3.6rem] sm:w-[4.5rem] sm:h-[4.5rem] md:w-[5.4rem] md:h-[5.4rem] rounded-full overflow-hidden bg-black/50 backdrop-blur-md transition-all duration-500 shadow-2xl flex-none aspect-square"
+      style={{ boxShadow: `0 0 0 3px rgba(255,255,255,0.05), 0 0 25px ${tierColor}33`, border: `2.5px solid ${tierColor}` }}
     >
       {showImg && (
         <img
           src={src}
           alt={alt}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
           crossOrigin="anonymous"
           onError={() => setErr(true)}
         />
       )}
       {(!showImg) && (
-        <div className="w-full h-full flex items-center justify-center text-xl font-bold text-[var(--text-secondary)]">
+        <div className="w-full h-full flex items-center justify-center text-2xl font-black text-gray-400">
           {fallback}
         </div>
       )}
@@ -377,13 +387,13 @@ function AvatarImage({ src, alt, fallback, tierColor }) {
 
 function StatItem({ label, value, textValue, sub, accentSub }) {
   return (
-    <div className="text-center p-2 rounded-lg bg-[var(--bg-secondary)]/50">
-      <div className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">
+    <div className="flex flex-col items-center justify-center text-center p-3 sm:p-4 rounded-xl bg-black/30 backdrop-blur-md border border-white/5 hover:border-white/10 transition-colors shadow-inner">
+      <div className="text-xl sm:text-2xl font-black text-white tracking-tight drop-shadow-sm">
         {textValue ? textValue : <HoverNumber value={value} />}
       </div>
-      <div className="text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase mt-0.5">{label}</div>
+      <div className="text-[10px] sm:text-[11px] font-bold text-gray-400 mt-1 uppercase tracking-widest">{label}</div>
       {sub && (
-        <div className={`text-[9px] font-semibold mt-0.5 ${accentSub ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)]'}`}>
+        <div className={`text-[10px] font-bold mt-1 ${accentSub ? 'text-[var(--accent)]' : 'text-gray-500'}`}>
           {sub}
         </div>
       )}

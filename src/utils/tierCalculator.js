@@ -254,8 +254,21 @@ export function calculatePercentile(messageCount) {
 
 export function formatNumber(num) {
   if (num == null) return '0';
-  if (num >= 100000000) return (num / 100000000).toFixed(1) + '억';
-  if (num >= 10000) return (num / 10000).toFixed(1) + '만';
+  const abs = Math.abs(num);
+
+  // Billion 단위 이상은 B, Million은 M, Thousand는 K로 표기
+  if (abs >= 1000000000) {
+    const v = (num / 1000000000).toFixed(1);
+    return `${v.endsWith('.0') ? v.slice(0, -2) : v}B`;
+  }
+  if (abs >= 1000000) {
+    const v = (num / 1000000).toFixed(1);
+    return `${v.endsWith('.0') ? v.slice(0, -2) : v}M`;
+  }
+  if (abs >= 1000) {
+    const v = (num / 1000).toFixed(1);
+    return `${v.endsWith('.0') ? v.slice(0, -2) : v}K`;
+  }
   return new Intl.NumberFormat('ko-KR').format(num);
 }
 
@@ -272,9 +285,5 @@ export function formatDate(dateStr) {
 }
 
 export function formatCompactNumber(number) {
-  if (!number) return '0';
-  return Intl.NumberFormat('ko-KR', {
-    notation: 'compact',
-    maximumFractionDigits: 1
-  }).format(number);
+  return formatNumber(number);
 }

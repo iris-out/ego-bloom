@@ -77,9 +77,9 @@ function TopStats({ stats, characters }) {
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-      <StatCard label="캐릭터 평균 대화" value={formatNumber(avgPerChar)} />
+      <StatCard label="캐릭터 평균 대화" value={avgPerChar.toLocaleString('ko-KR')} />
       <StatCard label="대화/팔로워 비율" value={followers > 0 ? (totalInteractions / followers).toFixed(2) : '-'} />
-      <StatCard label="팔로워" value={formatNumber(followers)} />
+      <StatCard label="팔로워" value={followers.toLocaleString('ko-KR')} />
       <StatCard label="팔로잉" value={formatNumber(following)} />
       <StatCard label="팔로워/팔로잉 비율" value={following === 0 && followers === 0 ? '-' : FF_Ratio} />
     </div>

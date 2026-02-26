@@ -110,7 +110,7 @@ export default function AchievementsTab({ stats, characters }) {
                             </h3>
                             {rankingUpdatedAt && (
                                 <div className="text-[9px] text-[var(--text-tertiary)] bg-[var(--bg-secondary)] px-1.5 py-0.5 rounded border border-[var(--border)]">
-                                    {rankingUpdatedAt.getFullYear()}년 {rankingUpdatedAt.getMonth() + 1}월 {rankingUpdatedAt.getDate()}일 {String(rankingUpdatedAt.getHours()).padStart(2, '0')}:{String(rankingUpdatedAt.getMinutes()).padStart(2, '0')} 업데이트
+                                    {rankingUpdatedAt.getFullYear()}년{rankingUpdatedAt.getMonth() + 1}월{rankingUpdatedAt.getDate()}일 {String(rankingUpdatedAt.getHours()).padStart(2, '0')}:{String(rankingUpdatedAt.getMinutes()).padStart(2, '0')} 업데이트
                                 </div>
                             )}
                         </div>
@@ -131,7 +131,7 @@ export default function AchievementsTab({ stats, characters }) {
                                             return (
                                                 <a
                                                     key={char.id}
-                                                    href={`https://zeta-ai.io/character/${char.id}`}
+                                                    href={`https://zeta-ai.io/ko/plots/${char.id}/profile`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className={`flex-1 flex flex-col items-center max-w-[120px] group relative hover:-translate-y-2 transition-transform duration-300 cursor-pointer ${isFirst ? 'z-10' : 'z-0'}`}
@@ -165,7 +165,7 @@ export default function AchievementsTab({ stats, characters }) {
                                         {rest.map(char => (
                                             <a
                                                 key={char.id}
-                                                href={`https://zeta-ai.io/character/${char.id}`}
+                                                href={`https://zeta-ai.io/ko/plots/${char.id}/profile`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] hover:bg-[var(--bg-secondary)]/80 hover:border-[var(--accent)]/50 transition-all group cursor-pointer"

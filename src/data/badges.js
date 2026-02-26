@@ -41,7 +41,7 @@ export const BADGE_DEFINITIONS = [
   // 개그/재미 신규 종
   { id: 'factory', emoji: '🏭', title: '공장장', description: '캐릭터 150명+', desc: '150명 이상의 수많은 캐릭터를 찍어낸 진정한 공장장', color: 'slate' },
   { id: 'obsessive', emoji: '👀', title: '집착광', description: '집착 태그 비율 높음', desc: '#집착 태그 캐릭터를 5개 이상 제작', color: 'violet' },
-  { id: 'purelove', emoji: '💘', title: '오직 순애만', description: '순애 태그 비중 높음', desc: '#순애 태그 캐릭터를 5개 이상 제작', color: 'pink' },
+  { id: 'purelove', emoji: '💘', title: '오직 순애만', description: 'NTR 없이 순애 5개+', desc: 'NTR/NTL 관련 태그가 없으면서 #순애 태그 캐릭터를 5개 이상 제작', color: 'pink' },
   { id: 'lonely', emoji: '🗣️', title: '말상대 구함', description: '대화량 높으나 팔로워 없음', desc: '총 대화수 1,000 이상이나 팔로워가 0명인 고독한 영혼', color: 'slate' },
   { id: 'secret', emoji: '🤫', title: '신비주의', description: '비공개율 80% 이상', desc: '캐릭터 5개 이상이면서 상세 설정 비공개 비율이 80% 이상', color: 'slate' },
   { id: 'expensive', emoji: '💸', title: '비싼 몸', description: '대화/팔로워 비율 10,000 이상', desc: '팔로워수 대비 대화량이 압도적으로 높음 (비율 1만 이상)', color: 'gradient' },
@@ -111,11 +111,14 @@ export function computeEarnedTitles(input) {
   const allTags = characters.flatMap(c => (c.hashtags || c.tags || []).map(t => t.toLowerCase()));
   const tagSet = new Set(allTags);
   const hasSunae = tagSet.has('순애');
-  const hasNtr = tagSet.has('ntr') || tagSet.has('ntl') || tagSet.has('뺏기') || tagSet.has('빼앗기');
+  const ntrTags = ['ntr', 'ntl', '뺏기', '빼앗기', '뺏김', '빼앗김'];
+  const hasNtr = ntrTags.some(t => tagSet.has(t));
   const unlimitedChars = characters.filter(c => c.unlimitedAllowed);
 
-  list.push({ id: 'sunae', emoji: '💕', title: '순애보', desc: BADGE_DEFINITIONS.find(b => b.id === 'sunae')?.desc ?? '', color: 'pink', earned: hasSunae && !hasNtr, chars: charsWithTag(characters, '순애') });
-  list.push({ id: 'ntr', emoji: '💔', title: '사랑 파괴자', desc: BADGE_DEFINITIONS.find(b => b.id === 'ntr')?.desc ?? '', color: 'red', earned: hasNtr, chars: charsWithAnyTag(characters, ['ntr', 'ntl', '뺏기', '빼앗기', '뺏김', '빼앗김']) });
+  const sunaeChars = charsWithTag(characters, '순애');
+
+  list.push({ id: 'sunae', emoji: '💕', title: '순애보', desc: BADGE_DEFINITIONS.find(b => b.id === 'sunae')?.desc ?? '', color: 'pink', earned: hasSunae && !hasNtr, chars: sunaeChars });
+  list.push({ id: 'ntr', emoji: '💔', title: '사랑 파괴자', desc: BADGE_DEFINITIONS.find(b => b.id === 'ntr')?.desc ?? '', color: 'red', earned: hasNtr, chars: charsWithAnyTag(characters, ntrTags) });
   const fantasyChars = charsWithAnyTag(characters, ['판타지', '마법', '기사', '마왕', '용사', '엘프', '드래곤']);
   list.push({ id: 'fantasy', emoji: '🗡️', title: '판타지', desc: BADGE_DEFINITIONS.find(b => b.id === 'fantasy')?.desc ?? '', color: 'indigo', earned: fantasyChars.length > 0, chars: fantasyChars });
   list.push({ id: 'newbie', emoji: '🌱', title: '뉴비', desc: BADGE_DEFINITIONS.find(b => b.id === 'newbie')?.desc ?? '', color: 'emerald', earned: activityMonths <= 3 && activityMonths > 0 });
@@ -140,7 +143,7 @@ export function computeEarnedTitles(input) {
   list.push({ id: 'fertile', emoji: '🌾', title: '다산의 상징', desc: BADGE_DEFINITIONS.find(b => b.id === 'fertile')?.desc ?? '', color: 'lime', earned: characters.length >= 100 });
   list.push({ id: 'factory', emoji: '🏭', title: '공장장', desc: BADGE_DEFINITIONS.find(b => b.id === 'factory')?.desc ?? '', color: 'slate', earned: characters.length >= 150 });
   list.push({ id: 'obsessive', emoji: '👀', title: '집착광', desc: BADGE_DEFINITIONS.find(b => b.id === 'obsessive')?.desc ?? '', color: 'violet', earned: tagSet.has('집착') && charsWithTag(characters, '집착').length >= 5, chars: charsWithTag(characters, '집착') });
-  list.push({ id: 'purelove', emoji: '💘', title: '오직 순애만', desc: BADGE_DEFINITIONS.find(b => b.id === 'purelove')?.desc ?? '', color: 'pink', earned: tagSet.has('순애') && charsWithTag(characters, '순애').length >= 5, chars: charsWithTag(characters, '순애') });
+  list.push({ id: 'purelove', emoji: '💘', title: '오직 순애만', desc: BADGE_DEFINITIONS.find(b => b.id === 'purelove')?.desc ?? '', color: 'pink', earned: !hasNtr && sunaeChars.length >= 5, chars: sunaeChars });
   list.push({ id: 'lonely', emoji: '🗣️', title: '말상대 구함', desc: BADGE_DEFINITIONS.find(b => b.id === 'lonely')?.desc ?? '', color: 'slate', earned: totalInteractions >= 1000 && followers === 0 });
 
 
