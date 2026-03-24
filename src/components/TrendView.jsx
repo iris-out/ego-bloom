@@ -326,29 +326,49 @@ export default function TrendRankingPage({
   const content = (
     <>
       {/* Header (임베드 모드에서는 간소화) */}
-      <div className="flex flex-wrap items-center gap-3 mb-6 pt-4">
-        {!embedded && onClose && (
-          <button
-            onClick={onClose}
-            className="w-10 h-10 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all shrink-0 text-[var(--text-secondary)] shadow-sm"
-          >
-            <ArrowLeft size={17} />
-          </button>
-        )}
+      <div className="flex flex-col gap-2 mb-6 pt-4">
+        {/* 첫 번째 행: 뒤로가기 + 제목 + 도움말 + 테마 */}
+        <div className="flex items-center gap-2">
+          {!embedded && onClose && (
+            <button
+              onClick={onClose}
+              className="w-10 h-10 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all shrink-0 text-[var(--text-secondary)] shadow-sm"
+            >
+              <ArrowLeft size={17} />
+            </button>
+          )}
 
-        <div className="flex-1 min-w-0">
-          <h2 className="text-base font-bold text-[var(--text-primary)] leading-tight">랭킹 트렌드 분석</h2>
-          <p className="text-[10px] text-[var(--text-tertiary)] opacity-70">트렌딩 · 베스트 · 신작 TOP 50 기준</p>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-base font-bold text-[var(--text-primary)] leading-tight">랭킹 트렌드 분석</h2>
+            <p className="text-[10px] text-[var(--text-tertiary)] opacity-70">트렌딩 · 베스트 · 신작 TOP 50 기준</p>
+          </div>
+
+          <div className="relative group shrink-0">
+            <button className="p-2 rounded-full hover:bg-[var(--bg-secondary)] text-[var(--text-tertiary)] transition-colors">
+              <HelpCircle size={18} />
+            </button>
+            <div className="absolute right-0 top-full mt-2 w-64 p-3 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl invisible group-hover:visible z-[100] text-[11px] leading-relaxed text-[var(--text-secondary)] animate-fade-in">
+              <p className="font-bold text-[var(--accent)] mb-1.5 flex items-center gap-1.5"><BarChart3 size={14} /> 랭킹 점수 집계 방식</p>
+              <ul className="space-y-1.5 list-disc pl-3">
+                <li><strong className="text-[var(--text-primary)]">종합 분석</strong>: [트렌딩×3] + [베스트×2] + [신작×1] 가중치를 각 순위별로 합산하여 산출</li>
+                <li><strong className="text-[var(--text-primary)]">차트별 분석</strong>: 각 순위권(TOP 100) 내 태그 빈도수와 순위 점수</li>
+                <li><strong className="text-[var(--text-primary)]">대화량 순위</strong>: 현재 차트인 된 모든 캐릭터의 원본 대화 수(Interaction)를 태그별로 단순 합계 (트래픽 규모 중심)</li>
+              </ul>
+            </div>
+          </div>
+
+          {!embedded && toggleTheme && <ThemeToggle theme={theme} toggle={toggleTheme} />}
         </div>
 
-        <div className="flex gap-1 p-1 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] shrink-0 overflow-x-auto no-scrollbar">
+        {/* 두 번째 행: 탭 선택 */}
+        <div className="flex gap-1 p-1 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] overflow-x-auto no-scrollbar">
           {[
             ['together', '종합 분석'],
             ['separate', '차트별 분석'],
             ['interaction', '대화량 순위']
           ].map(([key, label]) => (
             <button key={key} onClick={() => setTrendViewMode(key)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-full transition-all whitespace-nowrap ${trendViewMode === key
+              className={`flex-1 px-3 py-1.5 text-xs font-semibold rounded-full transition-all whitespace-nowrap ${trendViewMode === key
                 ? 'bg-[var(--accent)] text-white shadow-sm'
                 : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
                 }`}>
@@ -356,22 +376,6 @@ export default function TrendRankingPage({
             </button>
           ))}
         </div>
-
-        <div className="relative group">
-          <button className="p-2 rounded-full hover:bg-[var(--bg-secondary)] text-[var(--text-tertiary)] transition-colors">
-            <HelpCircle size={18} />
-          </button>
-          <div className="absolute right-0 top-full mt-2 w-64 p-3 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl invisible group-hover:visible z-[100] text-[11px] leading-relaxed text-[var(--text-secondary)] animate-fade-in">
-            <p className="font-bold text-[var(--accent)] mb-1.5 flex items-center gap-1.5"><BarChart3 size={14} /> 랭킹 점수 집계 방식</p>
-            <ul className="space-y-1.5 list-disc pl-3">
-              <li><strong className="text-[var(--text-primary)]">종합 분석</strong>: [트렌딩×3] + [베스트×2] + [신작×1] 가중치를 각 순위별로 합산하여 산출</li>
-              <li><strong className="text-[var(--text-primary)]">차트별 분석</strong>: 각 순위권(TOP 100) 내 태그 빈도수와 순위 점수</li>
-              <li><strong className="text-[var(--text-primary)]">대화량 순위</strong>: 현재 차트인 된 모든 캐릭터의 원본 대화 수(Interaction)를 태그별로 단순 합계 (트래픽 규모 중심)</li>
-            </ul>
-          </div>
-        </div>
-
-        {!embedded && toggleTheme && <ThemeToggle theme={theme} toggle={toggleTheme} />}
       </div>
 
       {/* Content */}

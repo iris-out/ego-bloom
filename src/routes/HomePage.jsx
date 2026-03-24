@@ -23,10 +23,17 @@ export default function HomePage() {
   const { status: serverStatus, message: emergencyMessage } = useServerStatus();
   const [topTags, setTopTags] = useState([]);
   const [showStatusBanner, setShowStatusBanner] = useState(false);
+  const statusBannerTimerRef = useRef(null);
 
   const handleStatusClick = () => {
+    if (statusBannerTimerRef.current) clearTimeout(statusBannerTimerRef.current);
     setShowStatusBanner(true);
-    setTimeout(() => setShowStatusBanner(false), 3000);
+    statusBannerTimerRef.current = setTimeout(() => setShowStatusBanner(false), 10000);
+  };
+
+  const handleStatusBannerClose = () => {
+    if (statusBannerTimerRef.current) clearTimeout(statusBannerTimerRef.current);
+    setShowStatusBanner(false);
   };
 
   // 꽃 이스터에그: rAF 기반 각도 직접 제어
@@ -149,7 +156,7 @@ export default function HomePage() {
         return (
           <div className="fixed top-[calc(var(--nav-height,54px)+8px)] inset-x-0 z-[60] flex justify-center pointer-events-none px-4">
             <div
-              className="animate-di-expand pointer-events-none"
+              className="animate-di-expand pointer-events-auto"
               style={{
                 background: 'rgba(10,8,16,0.96)',
                 border: `1px solid ${c.border}`,
@@ -166,11 +173,17 @@ export default function HomePage() {
               }}
             >
               <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${c.dot}`} />
-              <div>
+              <div className="flex-1">
                 <div className="text-[11px] font-black text-white/50 uppercase tracking-[0.12em] leading-none mb-1">Zeta 서버 상태</div>
                 <div className="text-[14px] font-bold text-white/90 leading-none">{c.label}</div>
                 <div className="text-[11px] text-white/45 mt-1 leading-tight">{c.sub}</div>
               </div>
+              <button
+                onClick={handleStatusBannerClose}
+                className="ml-1 p-1 rounded-full hover:bg-white/10 text-white/30 hover:text-white/60 transition-colors flex-shrink-0"
+              >
+                <X size={13} />
+              </button>
             </div>
           </div>
         );
