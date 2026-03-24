@@ -1,17 +1,15 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { TierBadge } from './TierBadge';
+import React, { useState, useMemo } from 'react';
 import ImageWithFallback from './ImageWithFallback';
 import RankBadge from './RankBadge';
-import { getCharacterTier, formatNumber, formatDate, toKST } from '../utils/tierCalculator';
-import { ChevronLeft, ChevronRight, MessageCircle, Calendar, ArrowUpAZ, X, ExternalLink, Star, RefreshCw, BookOpen, MessageSquareText, Loader2 } from 'lucide-react';
+import { getCharacterTier, toKST } from '../utils/tierCalculator';
+import { MessageCircle, Calendar, ArrowUpAZ, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 20;
 
-export default function SummaryTab({ characters }) {
+export default function SummaryTab({ characters, stats }) {
   const [sortKey, setSortKey] = useState('interactions');
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
-  const [activeTags, setActiveTags] = useState([]); // 멀티 태그 필터
-  const loaderRef = useRef(null);
+  const [page, setPage] = useState(1);
+  const [activeTags, setActiveTags] = useState([]);
 
   // 모든 태그 집계
   const topTags = useMemo(() => {
@@ -49,26 +47,23 @@ export default function SummaryTab({ characters }) {
     return data;
   }, [characters, sortKey, activeTags]);
 
-  // 무한 스크롤 관찰자
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && filtered.length > visibleCount) {
-        setVisibleCount(prev => prev + ITEMS_PER_PAGE);
-      }
-    }, { threshold: 0.1, rootMargin: '100px' });
+  const tagCount = useMemo(() => {
+    const s = new Set();
+    (characters || []).forEach(c => (c.hashtags || c.tags || []).forEach(t => t && s.add(t)));
+    return s.size;
+  }, [characters]);
 
-    if (loaderRef.current) observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [filtered.length, visibleCount]);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
 
   if (!characters || characters.length === 0) return null;
 
-  const currentData = filtered.slice(0, visibleCount);
+  const safePage = Math.min(page, totalPages);
+  const currentData = filtered.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
 
-  const handleSortChange = (key) => { setSortKey(key); setVisibleCount(ITEMS_PER_PAGE); };
+  const handleSortChange = (key) => { setSortKey(key); setPage(1); };
   const handleTagClick = (tag) => {
     setActiveTags(prev => (prev[0] === tag ? [] : [tag]));
-    setVisibleCount(ITEMS_PER_PAGE);
+    setPage(1);
   };
 
   const sortOptions = [
@@ -143,171 +138,128 @@ export default function SummaryTab({ characters }) {
       {filtered.length === 0 && (
         <div className="text-center py-16 bg-[var(--bg-secondary)]/30 rounded-2xl border border-dashed border-[var(--border)] animate-fade-in">
           <div className="flex flex-col items-center gap-3">
-            <Search size={32} className="text-[var(--text-tertiary)] opacity-30" />
+            <MessageCircle size={32} className="text-[var(--text-tertiary)] opacity-30" />
             <p className="text-sm text-[var(--text-tertiary)]">선택한 태그를 가진 캐릭터가 없습니다.</p>
             <button onClick={() => setActiveTags([])} className="text-xs text-[var(--accent)] font-bold hover:underline">필터 초기화하기</button>
           </div>
         </div>
       )}
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {/* 페이지 인디케이터 + 캐릭터 목록 */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-1">
+          <span className="text-[11px] text-[var(--text-tertiary)]">
+            {(safePage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(safePage * ITEMS_PER_PAGE, filtered.length)} / {filtered.length}개
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={safePage <= 1}
+              className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text-tertiary)] hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              <ChevronLeft size={14} />
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+              .reduce((acc, p, idx, arr) => {
+                if (idx > 0 && p - arr[idx - 1] > 1) acc.push('…');
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, i) =>
+                p === '…'
+                  ? <span key={`ellipsis-${i}`} className="text-xs text-[var(--text-tertiary)] px-1">…</span>
+                  : <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${safePage === p ? 'bg-[var(--accent)] text-white' : 'border border-[var(--border)] text-[var(--text-tertiary)] hover:border-[var(--accent)] hover:text-[var(--accent)]'}`}
+                  >
+                    {p}
+                  </button>
+              )}
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage >= totalPages}
+              className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text-tertiary)] hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="card char-list">
         {currentData.map((char, i) => (
-          <CharacterCard
+          <CharacterRow
             key={char.id}
             char={char}
-            rank={i + 1}
+            rank={(safePage - 1) * ITEMS_PER_PAGE + i + 1}
             onTagClick={handleTagClick}
             activeTags={activeTags}
           />
         ))}
       </div>
-
-      {/* Loader for Infinite Scroll */}
-      {filtered.length > visibleCount && (
-        <div ref={loaderRef} className="py-10 flex justify-center w-full">
-          <div className="flex flex-col items-center gap-2">
-            <Loader2 className="animate-spin text-[var(--accent)]" size={24} />
-            <span className="text-[10px] text-[var(--text-tertiary)] font-bold tracking-widest uppercase">더 불러오는 중...</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-function CharacterCard({ char, rank, onTagClick, activeTags }) {
+const TIER_COLORS_CHAR = {
+  b: '#A0AEC0', a: '#48BB78', s: '#4299E1', r: '#9F7AEA', sr: '#ED8936', x: '#F56565',
+};
+
+function CharacterRow({ char, rank, onTagClick, activeTags }) {
   const tier = getCharacterTier(char.interactionCount || 0);
-  const isUnlimited = char.unlimitedAllowed;
-  const tags = char.hashtags || char.tags || [];
+  const tags = (char.hashtags || char.tags || []).slice(0, 2);
   const zetaUrl = char.id ? `https://zeta-ai.io/ko/plots/${char.id}/profile` : null;
-  const interaction = char.interactionCount || 0;
-  const interactionDisplay = interaction.toLocaleString('ko-KR');
-  const shortDescription = char.shortDescription || '';
+  const tierColor = TIER_COLORS_CHAR[tier.key] || '#A0AEC0';
 
-  const activeTagSet = new Set(activeTags);
-  const prioritizedTags = tags.filter(t => activeTagSet.has(t));
-  const remainingTags = tags.filter(t => !activeTagSet.has(t));
-  const visibleTags = [...prioritizedTags, ...remainingTags].slice(0, 3);
-  const hiddenTagCount = Math.max(0, tags.length - visibleTags.length);
-
-  const CardWrapper = zetaUrl
-    ? ({ children }) => (
-      <a href={zetaUrl} target="_blank" rel="noopener noreferrer"
-        className="group relative overflow-hidden rounded-xl border border-[var(--border)] transition-all duration-300 hover:-translate-y-1 block bg-[rgba(25,25,35,0.7)] backdrop-blur-md hover:shadow-[0_0_20px_rgba(var(--accent-rgb),0.2)] hover:border-[var(--accent)]">
-        <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none transform -translate-x-full group-hover:translate-x-full" />
-        {children}
-      </a>
-    )
-    : ({ children }) => (
-      <div className="group relative overflow-hidden rounded-xl border border-[var(--border)] transition-all duration-300 block bg-[rgba(25,25,35,0.7)] backdrop-blur-md">
-        {children}
+  const inner = (
+    <div className="char-item">
+      <span className="char-rank">{rank}</span>
+      <div className="char-thumb">
+        <ImageWithFallback
+          src={char.imageUrl}
+          fallbackSrcs={(char.imageUrls || []).slice(1)}
+          alt={char.name}
+          className="w-full h-full object-cover"
+        />
       </div>
-    );
-
-  return (
-    <CardWrapper>
-      <div className="flex flex-col h-full bg-gradient-to-b from-transparent to-black/20">
-        {/* 상단: 랭크 표시 */}
-        <div className="flex justify-between items-start p-3 pb-0 relative z-10">
-          <div className="bg-black/60 text-white text-[10px] font-mono px-2 py-0.5 rounded-md border border-white/10 flex items-center gap-1 shadow-sm backdrop-blur-sm">
-            #{rank}
-          </div>
-        </div>
-
-        {/* 중앙: 썸네일 이미지 */}
-        <div className="relative px-3 pt-4 pb-2 z-0 flex items-center justify-start">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_left,rgba(var(--accent-rgb),0.12)_0%,transparent_65%)] pointer-events-none" />
-          <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden shrink-0 border border-white/10 shadow-lg relative bg-black/40 group-hover:border-[var(--accent)] transition-colors duration-300 group-hover:shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)]">
-            <ImageWithFallback
-              src={char.imageUrl}
-              fallbackSrcs={(char.imageUrls || []).slice(1)}
-              alt={char.name}
-              className="w-full h-full object-contain group-hover:scale-105 group-hover:saturate-110 transition-all duration-500 ease-out"
-            />
-            {/* 등급 뱃지 */}
-            <div className="absolute bottom-1.5 right-1.5 drop-shadow-md">
-              <TierBadge tierKey={tier.key} size={22} className="opacity-95 shadow-none" />
-            </div>
-          </div>
-        </div>
-
-        {/* 하단: 데이터 */}
-        <div className="px-3 pb-3 pt-1 flex-1 flex flex-col items-start text-left z-10">
-          <h4 className="font-bold text-[var(--text-primary)] text-sm sm:text-base truncate w-full mb-1 leading-tight group-hover:text-[var(--accent)] transition-colors drop-shadow-sm">
-            {char.name}
-          </h4>
-
-          {shortDescription && (
-            <div className="w-full mb-2 overflow-hidden">
-              {shortDescription.length > 40 ? (
-                <div className="marquee-track text-[11px] text-[var(--text-tertiary)]">
-                  <span className="marquee-item">{shortDescription}</span>
-                  <span className="marquee-item" aria-hidden="true">{shortDescription}</span>
-                </div>
-              ) : (
-                <p className="text-[11px] text-[var(--text-tertiary)] truncate">
-                  {shortDescription}
-                </p>
-              )}
-            </div>
+      <div className="char-details">
+        <div className="char-name flex items-center gap-1.5">
+          {char.name}
+          {char.unlimitedAllowed && (
+            <span className="text-[9px] px-1.5 py-0.5 rounded font-bold text-white border border-purple-400/30 leading-none" style={{ background: 'linear-gradient(135deg,#8B5CF6,#3B82F6)' }}>언리밋</span>
           )}
-
-          <div className="flex items-center justify-between gap-2 mb-2 w-full">
-            <div className="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tight drop-shadow-sm">
-              {interactionDisplay}
-            </div>
-            <RankBadge
-              globalRank={char.globalRank}
-              rankDiff={char.rankDiff}
-              isNew={char.isNew}
-              className="justify-end"
-            />
-          </div>
-
-          <div className="flex flex-wrap justify-start gap-1.5 mb-2 max-w-full">
-            {isUnlimited && (
-              <span className="text-[11px] px-2 py-0.5 rounded text-white font-bold flex items-center gap-1 shadow-sm border border-purple-400/30" style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' }}>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" /></svg>
-                언리밋
-              </span>
-            )}
-            {visibleTags.length > 0 && visibleTags.map((tag, i) => {
-              const isSelected = activeTags.includes(tag);
-              return (
-                <button
-                  key={i}
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); onTagClick(tag); }}
-                  className={`text-[11px] px-2 py-0.5 rounded border transition-all ${isSelected
-                    ? 'bg-[var(--accent)] text-white border-[var(--accent)] font-bold'
-                    : 'bg-black/30 text-[var(--text-tertiary)] border-white/5 hover:border-[var(--accent)] hover:text-[var(--accent)] backdrop-blur-sm'
-                    }`}
-                >
-                  #{tag}
-                </button>
-              );
-            })}
-            {hiddenTagCount > 0 && (
-              <span className="text-[10px] px-1 py-0.5 text-[var(--text-tertiary)] border border-transparent">
-                +{hiddenTagCount}
-              </span>
-            )}
-          </div>
-
-          <div className="flex w-full items-center justify-between text-[10px] text-[var(--text-secondary)] mt-auto pt-2 border-t border-white/10">
-            <div className="flex items-center">
-              <Calendar size={9} className="mr-1" />
-              {formatDate(char.createdAt)}
-            </div>
-            {(char.starCount || 0) > 0 && (
-              <div className="flex items-center gap-0.5">
-                <Star size={9} className="text-yellow-500 fill-yellow-500" />
-                {formatNumber(char.starCount)}
-              </div>
-            )}
-          </div>
+        </div>
+        <div className="char-meta">
+          {/* 티어 배지 — 컬러 배경 강조 */}
+          <span
+            className="text-[10px] font-black px-2 py-0.5 rounded-md text-white shrink-0"
+            style={{ background: tierColor, fontSize: '11px' }}
+          >
+            {tier.key?.toUpperCase()}
+          </span>
+          {tags.map(tag => (
+            <button
+              key={tag}
+              onClick={e => { e.preventDefault(); e.stopPropagation(); onTagClick(tag); }}
+              className={`text-[10px] px-1.5 rounded border transition-all ${activeTags.includes(tag) ? 'bg-[var(--accent)] text-white border-[var(--accent)]' : 'border-[var(--border)] text-[var(--text-tertiary)] hover:border-[var(--accent)] hover:text-[var(--accent)]'}`}
+            >
+              #{tag}
+            </button>
+          ))}
         </div>
       </div>
-    </CardWrapper>
+      <div className="flex flex-col items-end gap-0.5 shrink-0">
+        <span className="text-[14px] font-black tabular-nums" style={{ color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
+          {(char.interactionCount || 0).toLocaleString('ko-KR')}
+        </span>
+        <RankBadge globalRank={char.globalRank} rankDiff={char.rankDiff} isNew={char.isNew} />
+      </div>
+    </div>
   );
+
+  return zetaUrl
+    ? <a href={zetaUrl} target="_blank" rel="noopener noreferrer">{inner}</a>
+    : inner;
 }

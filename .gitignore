@@ -25,3 +25,10 @@ dist-ssr
 api.md
 feedback.md
 stat.md
+
+# ai agent
+.plan/
+CLAUDE.md
+
+# prototype
+prototype/

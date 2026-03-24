@@ -15,12 +15,12 @@
     "highcharts": "^12.5.0",
     "highcharts-react-official": "^3.2.3",
     "html-to-image": "^1.11.13",
-    "html2canvas": "^1.4.1",
     "lucide-react": "^0.564.0",
     "node-fetch": "^3.3.2",
     "react": "^19.2.0",
     "react-confetti": "^6.4.0",
     "react-dom": "^19.2.0",
+    "react-router-dom": "^7.13.2",
     "react-use": "^17.6.0",
     "recharts": "^3.7.0"
   },

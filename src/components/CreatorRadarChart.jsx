@@ -118,8 +118,8 @@ export default function CreatorRadarChart({ stats, characters }) {
     };
 
     return (
-        <div className="w-full h-[220px] sm:h-[260px] animate-fade-in relative z-10" style={{ pointerEvents: 'auto' }}>
-            <ResponsiveContainer width="100%" height="100%">
+        <div className="w-full h-[154px] sm:h-[182px] animate-fade-in relative z-10" style={{ pointerEvents: 'auto' }}>
+            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                 <RadarChart cx="50%" cy="50%" outerRadius="65%" data={data}>
                     <PolarGrid stroke="var(--border)" strokeDasharray="3 3" />
                     <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontWeight: 700 }} />

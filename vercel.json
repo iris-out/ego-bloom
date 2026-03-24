@@ -26,7 +26,7 @@
             "headers": [
                 {
                     "key": "Access-Control-Allow-Origin",
-                    "value": "*"
+                    "value": "https://ego-bloom.vercel.app"
                 },
                 {
                     "key": "Access-Control-Allow-Methods",

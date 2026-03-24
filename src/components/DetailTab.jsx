@@ -1,19 +1,20 @@
 import React, { useMemo } from 'react';
 import ContributionGraph from './ContributionGraph';
-import { getCharacterTier, CHARACTER_TIERS, formatNumber, formatDate } from '../utils/tierCalculator';
+import { getCharacterTier, CHARACTER_TIERS, formatNumber, formatCompactNumber, formatDate } from '../utils/tierCalculator';
 import { WordCloud } from './ExtraCharts';
 import CreatorRadarChart from './CreatorRadarChart';
 import { TierBadge } from './TierBadge';
+import { MessageCircle, Users, BarChart3 } from 'lucide-react';
 
 export default function DetailTab({ stats, characters }) {
   return (
     <div className="space-y-4 animate-fade-in-up">
-      {/* 1. Top Stats */}
-      <TopStats stats={stats} characters={characters} />
+      {/* 0. 요약 스탯 그리드 */}
+      <SummaryStatGrid stats={stats} characters={characters} />
 
       {/* 2. 크리에이터 스탯 레이더 (ProfileHeader에서 이동됨) */}
-      <div className="card p-4 sm:p-5">
-        <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-4">크리에이터 스탯 레이더</h3>
+      <div className="card px-4 sm:px-5 py-3 sm:py-3.5">
+        <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-3">크리에이터 스탯 레이더</h3>
         <CreatorRadarChart stats={stats} characters={characters} />
       </div>
 
@@ -67,21 +68,27 @@ function TierDistribution({ characters }) {
   );
 }
 
-// ===== 상단 스탯 카드 =====
-function TopStats({ stats, characters }) {
-  const totalInteractions = stats?.plotInteractionCount || 0;
-  const avgPerChar = characters?.length ? Math.round(totalInteractions / characters.length) : 0;
+// ===== 통합 스탯 그리드 =====
+function SummaryStatGrid({ stats, characters }) {
+  const totalInteractions = stats?.plotInteractionCount || (characters || []).reduce((s, c) => s + (c.interactionCount || 0), 0);
+  const avgInteractions = characters?.length > 0 ? Math.round(totalInteractions / characters.length) : 0;
   const followers = stats?.followerCount || 0;
-  const following = stats?.followingCount || 0; // Zeta API의 프로필 응답에 따라 다를 수 있으나 일반적인 형태 가정
-  const FF_Ratio = following > 0 ? (followers / following).toFixed(2) : followers;
+  const following = stats?.followingCount || 0;
+  const cards = [
+    { label: '캐릭터 수',       value: formatNumber(stats?.plotCount || characters?.length || 0), icon: <BarChart3 size={14} /> },
+    { label: '팔로워/팔로잉',   value: following === 0 && followers === 0 ? '-' : (following > 0 ? (followers / following).toFixed(2) : followers.toLocaleString('ko-KR')), icon: <Users size={14} /> },
+    { label: '평균 대화',       value: formatCompactNumber(avgInteractions),                       icon: <BarChart3 size={14} /> },
+    { label: '대화/팔로워',     value: followers > 0 ? (totalInteractions / followers).toFixed(2) : '-', icon: <MessageCircle size={14} /> },
+  ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-      <StatCard label="캐릭터 평균 대화" value={avgPerChar.toLocaleString('ko-KR')} />
-      <StatCard label="대화/팔로워 비율" value={followers > 0 ? (totalInteractions / followers).toFixed(2) : '-'} />
-      <StatCard label="팔로워" value={followers.toLocaleString('ko-KR')} />
-      <StatCard label="팔로잉" value={formatNumber(following)} />
-      <StatCard label="팔로워/팔로잉 비율" value={following === 0 && followers === 0 ? '-' : FF_Ratio} />
+    <div className="stat-grid">
+      {cards.map(({ label, value, icon }) => (
+        <div key={label} className="stat-card">
+          <div className="flex items-center gap-1.5 text-[var(--text-tertiary)] mb-1">{icon}<span className="text-[10px] uppercase tracking-wider font-semibold">{label}</span></div>
+          <div className="text-lg font-black text-[var(--text-primary)]">{value}</div>
+        </div>
+      ))}
     </div>
   );
 }

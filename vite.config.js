@@ -27,6 +27,7 @@ function handleResolverPlugin() {
             method: 'GET',
             redirect: 'follow',
             headers: {
+              // Warning: User-Agent spoofing may violate Zeta-AI ToS or cause blocks.
               'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
             }
           });
@@ -74,19 +75,19 @@ export default defineConfig({
         target: 'https://api.zeta-ai.io/v1',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/zeta/, ''),
-        secure: false,
+        secure: process.env.NODE_ENV === 'production',
       },
       '/zeta-image': {
         target: 'https://image.zeta-ai.io',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/zeta-image/, ''),
-        secure: false,
+        secure: process.env.NODE_ENV === 'production',
       },
       '/zeta-s3': {
         target: 'https://zeta-image.s3.ap-northeast-2.amazonaws.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/zeta-s3/, ''),
-        secure: false,
+        secure: process.env.NODE_ENV === 'production',
       }
     }
   }

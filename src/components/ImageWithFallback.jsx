@@ -6,6 +6,8 @@ export default function ImageWithFallback({ src, fallbackSrcs = [], alt = '', cl
   const [failed, setFailed] = useState(false);
 
   const currentSrc = sources[currentIndex];
+  // 프록시 도메인인지 확인 (zeta-image, zeta-s3)
+  const isProxy = currentSrc?.startsWith('/zeta-image') || currentSrc?.startsWith('/zeta-s3');
 
   const handleError = () => {
     if (currentIndex < sources.length - 1) {
@@ -34,8 +36,8 @@ export default function ImageWithFallback({ src, fallbackSrcs = [], alt = '', cl
     <img
       src={currentSrc}
       alt={alt}
-      className={className}
-      crossOrigin="anonymous"
+      className={`${className} transition-opacity duration-500`}
+      {...(isProxy ? {} : { crossOrigin: "anonymous" })}
       loading="lazy"
       onError={handleError}
       {...props}

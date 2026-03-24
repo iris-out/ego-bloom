@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X, Users, Moon, Sun, TrendingUp, Sparkles, Zap, Star, Award, Lightbulb } from 'lucide-react';
 import { formatCompactNumber, formatNumber, toKST } from '../utils/tierCalculator';
-import CreatorTierBadge from './CreatorTierBadge';
+import GemTierBadge from './GemTierBadge';
 import { getPlotImageUrl, proxyImageUrl } from '../utils/imageUtils';
 import { computeEarnedTitles, BADGE_COLOR_MAP } from '../data/badges';
 
@@ -88,7 +88,7 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-fade-in transition-all duration-500 p-0 min-h-[100dvh] safe-area-recap">
             {/* 모바일: 전체 화면 (100dvh, 전체 너비) / 데스크톱: 중앙 카드 */}
-            <div className="relative w-full h-[100dvh] max-h-[100dvh] sm:h-full sm:max-w-[480px] bg-stone-900 shadow-2xl flex flex-col mx-auto overflow-hidden rounded-none sm:rounded-xl">
+            <div className="relative w-full h-[100dvh] max-h-[100dvh] bg-[var(--card)] shadow-2xl flex flex-col mx-auto overflow-hidden rounded-none">
 
                 {/* === 백그라운드 레이어 === */}
                 {bgUrl ? (
@@ -241,7 +241,7 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
                         {/* [5] 커뮤니티 파워 (팔로워) */}
                         {currentSlide === 5 && (
                             <div className="animate-slide-up space-y-8">
-                                <div className="w-36 h-36 mx-auto rounded-full overflow-hidden shadow-2xl ring-4 ring-blue-500/40 bg-stone-800 drop-shadow-[0_0_30px_rgba(59,130,246,0.3)] animate-fade-in">
+                                <div className="w-36 h-36 mx-auto rounded-full overflow-hidden shadow-2xl ring-4 ring-blue-500/40 bg-[var(--bg-secondary)] drop-shadow-[0_0_30px_rgba(59,130,246,0.3)] animate-fade-in">
                                     <img src={proxyImageUrl(profile?.profileImageUrl || getPlotImageUrl(topChar))} alt="Profile" className="w-full h-full object-cover" />
                                 </div>
                                 <div className="space-y-4">
@@ -293,7 +293,7 @@ export default function RecapModal({ isOpen, onClose, characters, stats, profile
                         {currentSlide === 7 && (
                             <div className="animate-slide-up space-y-4 sm:space-y-6 flex flex-col items-center">
                                 <div className="mb-2 sm:mb-6 transform scale-[1.4] sm:scale-[1.7] md:scale-[2.0] mt-2 sm:mt-8">
-                                    <CreatorTierBadge tier={tier} score={score} />
+                                    <GemTierBadge tier={tier} score={score} size="lg" />
                                 </div>
                                 <div className="mt-8 sm:mt-16 space-y-2">
                                     <p className="text-sm md:text-base text-gray-300 font-medium tracking-wide">달성한 종합 티어</p>
