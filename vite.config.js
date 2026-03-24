@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // Vite plugin: @handle → UUID resolver middleware
 function handleResolverPlugin() {
@@ -68,7 +69,42 @@ function handleResolverPlugin() {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), handleResolverPlugin()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    handleResolverPlugin(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['icons/apple-touch-icon.png', 'icons/icon.svg'],
+      manifest: {
+        name: 'EgoBloom',
+        short_name: 'EgoBloom',
+        description: '제타 AI 제작자 통계 대시보드',
+        theme_color: '#0a0a0f',
+        background_color: '#0a0a0f',
+        display: 'standalone',
+        start_url: '/',
+        icons: [
+          { src: '/icons/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icons/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: '/icons/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/api\.zeta-ai\.io\//,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'zeta-api',
+              expiration: { maxEntries: 50, maxAgeSeconds: 300 },
+            },
+          },
+        ],
+      },
+    }),
+  ],
   server: {
     proxy: {
       '/api/zeta': {

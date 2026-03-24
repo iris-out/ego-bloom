@@ -30,6 +30,12 @@ const TIER_COLORS = {
 
 export default function ProfileHeader({ profile, stats, characters }) {
   const [showRecap, setShowRecap] = useState(false);
+  const [editing, setEditing] = useState(false);
+
+  const hasEarnedTitles = useMemo(
+    () => computeEarnedTitles({ characters, stats }).some(t => t.earned),
+    [characters, stats]
+  );
 
   // Hash 기반 Recap 열기/닫기
   React.useEffect(() => {
@@ -93,9 +99,23 @@ export default function ProfileHeader({ profile, stats, characters }) {
 
   return (
     <>
-      <div className="profile-header-wrap">
+      <div className="profile-header-wrap relative">
+        {/* 우상단 편집 버튼 */}
+        {hasEarnedTitles && (
+          <button
+            onClick={() => setEditing(true)}
+            className="absolute top-3 right-0 chip"
+            title="칭호 편집"
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+              <path d="m15 5 4 4" />
+            </svg>
+          </button>
+        )}
+
         {/* 아바타 + 이름/핸들 (좌) + 칭호 (우) */}
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-4 pr-8">
           {/* 좌: 아바타 + 이름/핸들 */}
           <div className="flex items-center gap-2.5 shrink-0">
             <div className="profile-avatar-wrap">
@@ -121,6 +141,8 @@ export default function ProfileHeader({ profile, stats, characters }) {
               characters={characters}
               stats={stats}
               creatorId={profile.id || profile.username || 'unknown'}
+              editing={editing}
+              setEditing={setEditing}
             />
           </div>
         </div>
@@ -245,13 +267,12 @@ export default function ProfileHeader({ profile, stats, characters }) {
 }
 
 // ===== 크리에이터 특성 Pill 뱃지 =====
-function CreatorPills({ characters, stats, creatorId }) {
+function CreatorPills({ characters, stats, creatorId, editing, setEditing }) {
   const allTitles = useMemo(() => computeEarnedTitles({ characters, stats }), [characters, stats]);
   const allEarned = useMemo(() => allTitles.filter(t => t.earned), [allTitles]);
   const fixedIds = FIXED_BADGE_IDS;
 
   const [selected, setSelected] = useState(null);
-  const [editing, setEditing] = useState(false);
 
   React.useEffect(() => {
     if (creatorId) {
@@ -327,19 +348,8 @@ function CreatorPills({ characters, stats, creatorId }) {
     <div className="flex flex-wrap gap-1.5">
       {pillNodes}
 
-      {/* 편집 버튼 */}
-      <div className="relative">
-        <button
-          onClick={() => setEditing(true)}
-          className="chip"
-          title="칭호 편집"
-        >
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-            <path d="m15 5 4 4" />
-          </svg>
-        </button>
-        {editing && createPortal(
+      {/* 편집 모달 */}
+      {editing && createPortal(
           <div
             className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
             onClick={e => e.target === e.currentTarget && setEditing(false)}
@@ -370,7 +380,6 @@ function CreatorPills({ characters, stats, creatorId }) {
           </div>,
           document.body
         )}
-      </div>
     </div>
   );
 }
