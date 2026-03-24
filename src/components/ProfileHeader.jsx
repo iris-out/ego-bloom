@@ -94,28 +94,29 @@ export default function ProfileHeader({ profile, stats, characters }) {
   return (
     <>
       <div className="profile-header-wrap">
-        {/* 아바타 */}
-        <div className="profile-hero">
-          <div className="profile-avatar-wrap">
-            <div className="profile-avatar">
-              {profile.profileImageUrl ? (
-                <img src={profile.profileImageUrl} alt={profile.nickname} crossOrigin="anonymous" loading="eager" />
-              ) : (
-                <span className="text-3xl font-black text-[var(--text-tertiary)]">
-                  {(profile.nickname || '?')[0]}
-                </span>
-              )}
+        {/* 아바타 + 이름/핸들 (좌) + 칭호 (우) */}
+        <div className="flex items-center gap-3 mb-4">
+          {/* 좌: 아바타 + 이름/핸들 */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <div className="profile-avatar-wrap">
+              <div className="profile-avatar">
+                {profile.profileImageUrl ? (
+                  <img src={profile.profileImageUrl} alt={profile.nickname} crossOrigin="anonymous" loading="eager" />
+                ) : (
+                  <span className="text-3xl font-black text-[var(--text-tertiary)]">
+                    {(profile.nickname || '?')[0]}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="min-w-0">
+              <div className="profile-name truncate">{profile.nickname}</div>
+              <div className="profile-handle truncate">@{profile.username}</div>
             </div>
           </div>
 
-          {/* 이름 & 핸들 */}
-          <div>
-            <div className="profile-name">{profile.nickname}</div>
-            <div className="profile-handle">@{profile.username}</div>
-          </div>
-
-          {/* 칭호 pills */}
-          <div className="w-full overflow-hidden">
+          {/* 우: 칭호 pills */}
+          <div className="flex-1 min-w-0">
             <CreatorPills
               characters={characters}
               stats={stats}
@@ -165,23 +166,26 @@ export default function ProfileHeader({ profile, stats, characters }) {
           </div>
         </div>
 
-        {/* 상위 캐릭터 티어 아이콘 */}
+        {/* 상위 캐릭터 티어 카드 */}
         {topCharTiers.length > 0 && (
-          <div className="flex items-center gap-1.5 px-1 py-1 mb-1">
-            {topCharTiers.map((item, i) => (
-              <div
-                key={i}
-                title={`${item.name} (${item.tier.name})`}
-                className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black shrink-0 border cursor-default"
-                style={{
-                  color: item.tier.color,
-                  borderColor: item.tier.color + '60',
-                  background: item.tier.color + '18',
-                }}
-              >
-                {item.tier.name}
-              </div>
-            ))}
+          <div className="card p-3 mb-3">
+            <div className="text-[10px] font-semibold text-[var(--text-tertiary)] mb-2">상위 10개 캐릭터 티어</div>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {topCharTiers.map((item, i) => (
+                <div
+                  key={i}
+                  title={`${item.name} (${item.tier.name})`}
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black shrink-0 border cursor-default"
+                  style={{
+                    color: item.tier.color,
+                    borderColor: item.tier.color + '60',
+                    background: item.tier.color + '18',
+                  }}
+                >
+                  {item.tier.name}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -319,22 +323,9 @@ function CreatorPills({ characters, stats, creatorId }) {
     );
   });
 
-  const needsMarquee = visible.length > 2;
-
   return (
     <div className="flex items-center gap-1.5 w-full">
-      <div className="flex-1 overflow-hidden">
-        {needsMarquee ? (
-          <div className="flex gap-1.5 pills-marquee">
-            {pillNodes}
-            {pillNodes.map((p, i) => React.cloneElement(p, { key: `dup-${i}` }))}
-          </div>
-        ) : (
-          <div className="flex gap-1.5">
-            {pillNodes}
-          </div>
-        )}
-      </div>
+      <div className="flex-1 flex flex-wrap gap-1.5 overflow-hidden">
 
       {/* 편집 버튼 */}
       <div className="relative shrink-0">

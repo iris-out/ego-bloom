@@ -37,7 +37,7 @@ export default function NavBar({ variant = 'home', onBack, serverStatus, onStatu
         {/* 왼쪽 영역 */}
         {variant === 'home' && (
           <span className="nav-logo">
-            <em>Ego</em> Bloom
+            <em>Ego</em>Bloom
           </span>
         )}
         {variant === 'profile' && (
@@ -76,11 +76,11 @@ export default function NavBar({ variant = 'home', onBack, serverStatus, onStatu
           </button>
         )}
 
-        {/* 중간 spacer (profile 일 때 로고 표시) */}
+        {/* 중간 spacer (profile 일 때 로고 표시 + 홈으로 이동) */}
         {variant === 'profile' && (
-          <span className="nav-logo text-center" style={{ textAlign: 'center' }}>
-            <em>Ego</em> Bloom
-          </span>
+          <button className="nav-logo text-center" style={{ textAlign: 'center', background: 'none', border: 'none', cursor: 'pointer' }} onClick={handleBack}>
+            <em>Ego</em>Bloom
+          </button>
         )}
 
         {/* 오른쪽 액션들 */}

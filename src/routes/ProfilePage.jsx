@@ -135,6 +135,10 @@ export default function ProfilePage({ initialCreator, onBack, serverStatus }) {
   }, [cacheInfo]);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [initialCreator]);
+
+  useEffect(() => {
     if (initialCreator) fetchData(initialCreator);
   }, [initialCreator]); // eslint-disable-line react-hooks/exhaustive-deps
 

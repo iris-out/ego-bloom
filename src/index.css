@@ -808,19 +808,6 @@ img { display: block; }
   transition: box-shadow 0.4s ease, border-color 0.4s ease;
 }
 
-@keyframes pills-marquee {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.pills-marquee {
-  animation: pills-marquee 14s linear infinite;
-  width: max-content;
-}
-
-.pills-marquee:hover {
-  animation-play-state: paused;
-}
 
 @keyframes elo-shimmer {
   0%   { background-position: 0% 50%; }
