@@ -1,7 +1,18 @@
-export const APP_VERSION = '1.3.0';
+export const APP_VERSION = '1.4.0';
 
 // 체인지로그
 export const CHANGELOG = [
+    {
+        version: '1.4.0',
+        date: '2026-03-24',
+        label: '디자인 · 기능 개선',
+        changes: [
+            '프로필 UI 전면 개편 — ELO 카드 고티어 그라데이션 애니메이션, 상위 캐릭터 티어 카드, 통계 탭 신설',
+            'Recap 슬라이드 확장 및 Framer Motion 전환 애니메이션 적용',
+            '칭호 표시 최대 4개 제한 및 레이아웃 개선, 배지 이름 정비',
+            '제작 히스토리 연속 스트릭 표시 추가',
+        ]
+    },
     {
         version: '1.3.0',
         date: '2026-02-26',

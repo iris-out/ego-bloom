@@ -326,6 +326,8 @@ function CreatorPills({ characters, stats, creatorId }) {
   return (
     <div className="flex items-center gap-1.5 w-full">
       <div className="flex-1 flex flex-wrap gap-1.5 overflow-hidden">
+        {pillNodes}
+      </div>
 
       {/* 편집 버튼 */}
       <div className="relative shrink-0">
