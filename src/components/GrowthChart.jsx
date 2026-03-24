@@ -82,7 +82,7 @@ export default function GrowthChart({ characters }) {
             </div>
 
             <div className="overflow-x-auto scrollbar-hide">
-                <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ minWidth: 320 }}>
+                <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
                     {/* 배경 격자 */}
                     {[0.25, 0.5, 0.75, 1].map(r => (
                         <line

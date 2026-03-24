@@ -21,9 +21,19 @@ export default function HomePage() {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const { status: serverStatus, message: emergencyMessage } = useServerStatus();
+  const [noticeDismissed, setNoticeDismissed] = useState(false);
+  const noticeDismissTimerRef = useRef(null);
   const [topTags, setTopTags] = useState([]);
   const [showStatusBanner, setShowStatusBanner] = useState(false);
   const statusBannerTimerRef = useRef(null);
+
+  useEffect(() => {
+    if (!emergencyMessage) { setNoticeDismissed(false); return; }
+    setNoticeDismissed(false);
+    if (noticeDismissTimerRef.current) clearTimeout(noticeDismissTimerRef.current);
+    noticeDismissTimerRef.current = setTimeout(() => setNoticeDismissed(true), 10000);
+    return () => clearTimeout(noticeDismissTimerRef.current);
+  }, [emergencyMessage]);
 
   const handleStatusClick = () => {
     if (statusBannerTimerRef.current) clearTimeout(statusBannerTimerRef.current);
@@ -116,7 +126,7 @@ export default function HomePage() {
   return (
     <div className="page-bg min-h-[100dvh] flex flex-col relative overflow-hidden">
       {/* 긴급 공지 배너 — Dynamic Island */}
-      {emergencyMessage && (
+      {emergencyMessage && !noticeDismissed && (
         <div className="fixed top-[calc(var(--nav-height,54px)+8px)] inset-x-0 z-[60] flex justify-center pointer-events-none px-4">
           <div
             className="max-w-md w-full pointer-events-auto animate-di-expand"
@@ -137,6 +147,13 @@ export default function HomePage() {
                 <div className="text-[9px] font-black text-amber-500/70 uppercase tracking-[0.15em] mb-1">Zeta Official Notice</div>
                 <p className="text-[13px] text-white/85 font-medium leading-relaxed break-words">{emergencyMessage}</p>
               </div>
+              <button
+                onClick={() => { clearTimeout(noticeDismissTimerRef.current); setNoticeDismissed(true); }}
+                className="mt-0.5 shrink-0 w-5 h-5 flex items-center justify-center rounded-full text-white/40 hover:text-white/70 hover:bg-white/10 transition-colors"
+                aria-label="닫기"
+              >
+                <X size={12} />
+              </button>
             </div>
           </div>
         </div>

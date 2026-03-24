@@ -185,7 +185,7 @@ function TierInfoModal({ onClose, currentTier, score, breakdown }) {
           </button>
         </div>
 
-        <div className="p-4 overflow-y-auto max-h-[60vh]">
+        <div className="p-4 overflow-y-auto overflow-x-hidden max-h-[60vh]">
           <div className="flex flex-col gap-2">
             {TIER_GUIDE.map((t) => {
               const isCurrent = currentTier?.key === t.key;

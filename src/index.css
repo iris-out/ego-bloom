@@ -68,6 +68,7 @@
 html {
   font-size: 16.8px;
   -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -84,6 +85,7 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.2s, color 0.2s;
+  overflow-x: hidden;
 }
 
 a { color: inherit; text-decoration: none; }
