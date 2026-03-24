@@ -37,6 +37,28 @@ export default function ContributionGraph({ characters }) {
   const { theme } = useTheme();
   const [tooltip, setTooltip] = useState(null);
   const [selectedYear, setSelectedYear] = useState(toKST().getFullYear());
+
+  const currentStreak = useMemo(() => {
+    if (!characters?.length) return 0;
+    const daySet = new Set(
+      characters
+        .map(c => c.createdAt || c.createdDate)
+        .filter(Boolean)
+        .map(d => {
+          const kst = toKST(d);
+          return `${kst.getFullYear()}-${kst.getMonth()}-${kst.getDate()}`;
+        })
+    );
+    let streak = 0;
+    const now = toKST();
+    for (let i = 0; i < 3650; i++) {
+      const d = new Date(now.getTime() - i * 86400000);
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      if (daySet.has(key)) streak++;
+      else break;
+    }
+    return streak;
+  }, [characters]);
   const colors = theme === 'dark' ? COLORS_DARK : COLORS_LIGHT;
   const containerRef = React.useRef(null);
 
@@ -120,6 +142,11 @@ export default function ContributionGraph({ characters }) {
         <h3 className="text-sm font-semibold text-[var(--text-secondary)]">제작 히스토리</h3>
 
         <div className="flex items-center gap-3">
+          {currentStreak > 0 && (
+            <span className="text-xs font-bold text-orange-400 flex items-center gap-1">
+              🔥 스트릭 {currentStreak}일
+            </span>
+          )}
           <span className="text-xs text-[var(--text-tertiary)]">
             <span className="font-semibold text-[var(--accent)]">{totalCount}</span>개 제작
           </span>

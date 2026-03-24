@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import {
   formatCompactNumber, getCreatorTier,
-  calculateCreatorScore, toKST
+  calculateCreatorScore, toKST, getCharacterTier
 } from '../utils/tierCalculator';
 import GemTierBadge from './GemTierBadge';
 import HoverNumber from './HoverNumber';
@@ -68,9 +68,17 @@ export default function ProfileHeader({ profile, stats, characters }) {
     if (!characters) return [];
     const counts = {};
     characters.forEach(c => (c.hashtags || c.tags || []).forEach(t => { if (t) counts[t] = (counts[t] || 0) + 1; }));
-    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([tag]) => tag);
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([tag]) => tag);
   }, [characters]);
 
+  // 상위 캐릭터 티어 10개
+  const topCharTiers = useMemo(() => {
+    if (!characters?.length) return [];
+    return [...characters]
+      .sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0))
+      .slice(0, 10)
+      .map(c => ({ name: c.name, tier: getCharacterTier(c.interactionCount || 0) }));
+  }, [characters]);
 
   if (!profile || !stats) return null;
 
@@ -107,7 +115,7 @@ export default function ProfileHeader({ profile, stats, characters }) {
           </div>
 
           {/* 칭호 pills */}
-          <div className="flex flex-wrap justify-center lg:justify-start gap-1.5 lg:w-full">
+          <div className="w-full overflow-hidden">
             <CreatorPills
               characters={characters}
               stats={stats}
@@ -117,7 +125,7 @@ export default function ProfileHeader({ profile, stats, characters }) {
         </div>
 
         {/* ELO / 티어 카드 — 계급장 스타일 */}
-        <div className="elo-card">
+        <div className={`elo-card${['diamond','master','champion'].includes(tier.key) ? ` elo-card-animated elo-card-${tier.key}` : ''}`}>
           {/* 티어명 헤더 — 계급장 */}
           <div className="flex items-center justify-center gap-2 mb-3">
             <div className="h-px flex-1" style={{ background: `linear-gradient(to right, transparent, ${tierColor}60)` }} />
@@ -157,6 +165,26 @@ export default function ProfileHeader({ profile, stats, characters }) {
           </div>
         </div>
 
+        {/* 상위 캐릭터 티어 아이콘 */}
+        {topCharTiers.length > 0 && (
+          <div className="flex items-center gap-1.5 px-1 py-1 mb-1">
+            {topCharTiers.map((item, i) => (
+              <div
+                key={i}
+                title={`${item.name} (${item.tier.name})`}
+                className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black shrink-0 border cursor-default"
+                style={{
+                  color: item.tier.color,
+                  borderColor: item.tier.color + '60',
+                  background: item.tier.color + '18',
+                }}
+              >
+                {item.tier.name}
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* 스탯 row */}
         <div className="profile-stats-row">
           <div className="profile-stat">
@@ -180,9 +208,9 @@ export default function ProfileHeader({ profile, stats, characters }) {
         {/* 프로필 태그 + RECAP 버튼 */}
         {topTags.length > 0 && (
           <div className="profile-tags" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-nowrap gap-1.5 overflow-hidden">
               {topTags.map(tag => (
-                <span key={tag} className="chip">#{tag}</span>
+                <span key={tag} className="chip shrink-0">#{tag}</span>
               ))}
             </div>
             <button
@@ -247,9 +275,9 @@ function CreatorPills({ characters, stats, creatorId }) {
     const presentFixed = allEarned.filter(p => fixedIds.includes(p.id)).map(p => p.id);
     if (selected) {
       const unified = Array.from(new Set([...presentFixed, ...selected]));
-      return unified.slice(0, 8);
+      return unified.slice(0, 4);
     }
-    return allEarned.slice(0, 8).map(p => p.id);
+    return allEarned.slice(0, 4).map(p => p.id);
   }, [selected, allEarned, fixedIds]);
 
   const toggleId = (id) => {
@@ -258,7 +286,7 @@ function CreatorPills({ characters, stats, creatorId }) {
       const cur = prev || allEarned.slice(0, 8).map(p => p.id);
       let newSelection;
       if (cur.includes(id)) newSelection = cur.filter(x => x !== id);
-      else if (cur.length >= 8) newSelection = cur;
+      else if (cur.length >= 4) newSelection = cur;
       else newSelection = [...cur, id];
       if (creatorId) saveCreatorBadge(creatorId, newSelection);
       return newSelection;
@@ -268,33 +296,48 @@ function CreatorPills({ characters, stats, creatorId }) {
   const visible = allEarned.filter(p => activeIds.includes(p.id));
   if (allEarned.length === 0) return null;
 
+  const pillNodes = visible.map(p => {
+    const style = BADGE_COLOR_MAP[p.color] || BADGE_COLOR_MAP.slate;
+    const isGradient = p.color === 'gradient';
+    const label = `${p.emoji} ${p.title}`;
+    return isGradient ? (
+      <div key={p.id} className="relative group/pill shrink-0">
+        <span className="chip text-white border-purple-400/30" style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' }}>
+          {label}
+        </span>
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 px-2 py-1 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-lg text-[10px] text-[var(--text-secondary)] whitespace-nowrap opacity-0 group-hover/pill:opacity-100 transition-opacity pointer-events-none z-50">
+          {p.desc}
+        </div>
+      </div>
+    ) : (
+      <div key={p.id} className="relative group/pill shrink-0">
+        <span className={`chip ${style.bg} border-0 ${style.text}`}>{label}</span>
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 px-2 py-1 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-lg text-[10px] text-[var(--text-secondary)] whitespace-nowrap opacity-0 group-hover/pill:opacity-100 transition-opacity pointer-events-none z-50">
+          {p.desc}
+        </div>
+      </div>
+    );
+  });
+
+  const needsMarquee = visible.length > 2;
+
   return (
-    <>
-      {visible.map(p => {
-        const style = BADGE_COLOR_MAP[p.color] || BADGE_COLOR_MAP.slate;
-        const isGradient = p.color === 'gradient';
-        const label = `${p.emoji} ${p.title}`;
-        return isGradient ? (
-          <div key={p.id} className="relative group/pill">
-            <span className="chip text-white border-purple-400/30" style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' }}>
-              {label}
-            </span>
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 px-2 py-1 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-lg text-[10px] text-[var(--text-secondary)] whitespace-nowrap opacity-0 group-hover/pill:opacity-100 transition-opacity pointer-events-none z-50">
-              {p.desc}
-            </div>
+    <div className="flex items-center gap-1.5 w-full">
+      <div className="flex-1 overflow-hidden">
+        {needsMarquee ? (
+          <div className="flex gap-1.5 pills-marquee">
+            {pillNodes}
+            {pillNodes.map((p, i) => React.cloneElement(p, { key: `dup-${i}` }))}
           </div>
         ) : (
-          <div key={p.id} className="relative group/pill">
-            <span className={`chip ${style.bg} border-0 ${style.text}`}>{label}</span>
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 px-2 py-1 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-lg text-[10px] text-[var(--text-secondary)] whitespace-nowrap opacity-0 group-hover/pill:opacity-100 transition-opacity pointer-events-none z-50">
-              {p.desc}
-            </div>
+          <div className="flex gap-1.5">
+            {pillNodes}
           </div>
-        );
-      })}
+        )}
+      </div>
 
       {/* 편집 버튼 */}
-      <div className="relative">
+      <div className="relative shrink-0">
         <button
           onClick={() => setEditing(true)}
           className="chip"
@@ -312,14 +355,14 @@ function CreatorPills({ characters, stats, creatorId }) {
           >
             <div className="w-full max-w-lg max-h-[85dvh] flex flex-col rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
-                <span className="font-bold text-[var(--text-primary)]">표시할 칭호 ({activeIds.length}/8)</span>
+                <span className="font-bold text-[var(--text-primary)]">표시할 칭호 ({activeIds.length}/4)</span>
                 <button onClick={() => setEditing(false)} className="nav-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></button>
               </div>
               <div className="overflow-y-auto flex-1 p-3 space-y-1">
                 {allEarned.map(p => {
                   const isFixed = fixedIds.includes(p.id);
                   const checked = activeIds.includes(p.id);
-                  const disabled = isFixed || (!checked && activeIds.length >= 8);
+                  const disabled = isFixed || (!checked && activeIds.length >= 4);
                   return (
                     <label key={p.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-[var(--bg-secondary)] transition-colors ${disabled ? 'opacity-50' : ''}`}>
                       <input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggleId(p.id)} className="w-4 h-4 rounded accent-[var(--accent)]" />
@@ -337,6 +380,6 @@ function CreatorPills({ characters, stats, creatorId }) {
           document.body
         )}
       </div>
-    </>
+    </div>
   );
 }

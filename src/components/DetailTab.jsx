@@ -18,9 +18,6 @@ export default function DetailTab({ stats, characters }) {
         <CreatorRadarChart stats={stats} characters={characters} />
       </div>
 
-      {/* 2-5. 기타 스탯카드 (stat.md 14, 21, 3번) */}
-      <AdditionalStats stats={stats} characters={characters} />
-
       {/* 3. 생성 히스토리 (GitHub style) */}
       <ContributionGraph characters={characters} />
 

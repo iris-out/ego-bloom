@@ -10,6 +10,7 @@ import { getCreatorTier, calculateCreatorScore } from '../utils/tierCalculator';
 
 const DetailTab = lazy(() => import('../components/DetailTab'));
 const AchievementsTab = lazy(() => import('../components/AchievementsTab'));
+const StatsTab = lazy(() => import('../components/StatsTab'));
 
 const CACHE_KEY_PREFIX = 'zeta_cache_v2_';
 const CACHE_DURATION = 20 * 60 * 1000;
@@ -110,6 +111,7 @@ const TABS = [
   { key: 'summary',      label: '요약' },
   { key: 'characters',   label: '캐릭터' },
   { key: 'achievements', label: '업적' },
+  { key: 'stats',        label: '통계' },
 ];
 
 export default function ProfilePage({ initialCreator, onBack, serverStatus }) {
@@ -331,6 +333,11 @@ export default function ProfilePage({ initialCreator, onBack, serverStatus }) {
               {tab === 'achievements' && (
                 <div className="animate-enter">
                   <AchievementsTab stats={data.stats} characters={data.characters} />
+                </div>
+              )}
+              {tab === 'stats' && (
+                <div className="animate-enter">
+                  <StatsTab stats={data.stats} characters={data.characters} />
                 </div>
               )}
             </Suspense>

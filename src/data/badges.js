@@ -15,7 +15,7 @@ export const BADGE_DEFINITIONS = [
   { id: 'ntr', emoji: '💔', title: '사랑 파괴자', description: 'NTR/NTL 등', desc: '#NTR, #NTL, #뺏기, #빼앗기 태그 보유', color: 'red' },
   { id: 'fantasy', emoji: '🗡️', title: '판타지', description: '판타지·마법·기사 등', desc: '#판타지, #마법, #기사, #마왕 등 태그 보유', color: 'indigo' },
   { id: 'newbie', emoji: '🌱', title: '뉴비', description: '활동 3개월 이하', desc: '활동 기간 3개월 이하', color: 'emerald' },
-  { id: 'military', emoji: '🎖️', title: '이병부터 병장까지', description: '활동 1년 6개월 이상', desc: '활동 기간 1년 6개월(548일) 이상', color: 'blue' },
+  { id: 'military', emoji: '🎖️', title: '고인물', description: '활동 1년 6개월 이상', desc: '활동 기간 1년 6개월(548일) 이상', color: 'blue' },
   { id: 'oneyear', emoji: '🎂', title: '벌써 1년', description: '활동 1년 이상', desc: '활동 기간 1년(365일) 이상', color: 'emerald' },
   { id: 'cyber', emoji: '⚡', title: '사펑', description: '사이버펑크', desc: '#사이버펑크 태그 보유', color: 'gradient' },
   { id: 'mesu', emoji: '🩷', title: '허접', description: '메스가키·도발', desc: '#메스가키 또는 #도발 태그 보유', color: 'pink' },
@@ -26,10 +26,9 @@ export const BADGE_DEFINITIONS = [
   { id: '10m', emoji: '🎬', title: '천만관객', description: '총 대화 1천만+', desc: '총 대화수 1,000만 이상', color: 'yellow' },
   { id: '1m', emoji: '💬', title: '밀리언', description: '총 대화 100만+', desc: '총 대화수 100만 이상', color: 'amber' },
   { id: 'superstar', emoji: '🌌', title: '우주대스타', description: '팔로워 1만+', desc: '팔로워 10,000명 이상', color: 'gradient' },
-  { id: 'family', emoji: '👨‍👩‍👧‍👦', title: '또 하나의 가족', description: '캐릭터 50명+', desc: '50명 이상의 캐릭터 제작', color: 'rose' },
   { id: 'fertile', emoji: '🌾', title: '다산의 상징', description: '캐릭터 100명+', desc: '100명 이상의 캐릭터 제작', color: 'lime' },
-  { id: 'iljin', emoji: '🏀', title: '야 체육 안가고 뭐해', description: '#일진 태그', desc: '캐릭터 중 #일진 태그 보유', color: 'orange' },
-  { id: 'jjindda', emoji: '🚶', title: '니 애인 지나간다', description: '#찐따 태그', desc: '캐릭터 중 #찐따 태그 보유', color: 'slate' },
+  { id: 'iljin', emoji: '🏀', title: '일진', description: '#일진 태그', desc: '캐릭터 중 #일진 태그 보유', color: 'orange' },
+  { id: 'jjindda', emoji: '🚶', title: '찐따', description: '#찐따 태그', desc: '캐릭터 중 #찐따 태그 보유', color: 'slate' },
   { id: 'hero', emoji: '🦸', title: '취미일 뿐', description: '#히어로 태그', desc: '캐릭터 중 #히어로 태그 보유', color: 'amber' },
   { id: 'academy', emoji: '🎓', title: '아카데미', description: '#아카데미 태그', desc: '캐릭터 중 #아카데미 태그 보유', color: 'indigo' },
   { id: 'hyeongwan', emoji: '🖤', title: '혐관', description: '#혐관 태그', desc: '캐릭터 중 #혐관 태그 보유', color: 'slate' },
@@ -137,9 +136,8 @@ export function computeEarnedTitles(input) {
   list.push({ id: 'platinum', emoji: '💿', title: '플래티넘 디스크', desc: BADGE_DEFINITIONS.find(b => b.id === 'platinum')?.desc ?? '', color: 'slate', earned: platinumChars.length > 0, chars: platinumChars.map(c => c.name) });
   list.push({ id: 'furry', emoji: '🐾', title: '털', desc: BADGE_DEFINITIONS.find(b => b.id === 'furry')?.desc ?? '', color: 'amber', earned: ['수인', '수인형', '퍼리', 'furry'].some(t => tagSet.has(t)), chars: charsWithAnyTag(characters, ['수인', '수인형', '퍼리', 'furry']) });
   list.push({ id: 'oneyear', emoji: '🎂', title: '벌써 1년', desc: BADGE_DEFINITIONS.find(b => b.id === 'oneyear')?.desc ?? '', color: 'emerald', earned: activityDays >= 365 });
-  list.push({ id: 'military', emoji: '🎖️', title: '이병부터 병장까지', desc: BADGE_DEFINITIONS.find(b => b.id === 'military')?.desc ?? '', color: 'blue', earned: activityDays >= 548 });
+  list.push({ id: 'military', emoji: '🎖️', title: '고인물', desc: BADGE_DEFINITIONS.find(b => b.id === 'military')?.desc ?? '', color: 'blue', earned: activityDays >= 548 });
 
-  list.push({ id: 'family', emoji: '👨‍👩‍👧‍👦', title: '또 하나의 가족', desc: BADGE_DEFINITIONS.find(b => b.id === 'family')?.desc ?? '', color: 'rose', earned: characters.length >= 50 });
   list.push({ id: 'fertile', emoji: '🌾', title: '다산의 상징', desc: BADGE_DEFINITIONS.find(b => b.id === 'fertile')?.desc ?? '', color: 'lime', earned: characters.length >= 100 });
   list.push({ id: 'factory', emoji: '🏭', title: '공장장', desc: BADGE_DEFINITIONS.find(b => b.id === 'factory')?.desc ?? '', color: 'slate', earned: characters.length >= 150 });
   list.push({ id: 'obsessive', emoji: '👀', title: '집착광', desc: BADGE_DEFINITIONS.find(b => b.id === 'obsessive')?.desc ?? '', color: 'violet', earned: tagSet.has('집착') && charsWithTag(characters, '집착').length >= 5, chars: charsWithTag(characters, '집착') });
@@ -158,8 +156,8 @@ export function computeEarnedTitles(input) {
   const zeta100MChars = characters.filter(c => (c.interactionCount || 0) >= 100000000);
   list.push({ id: '100m_zeta', emoji: '🌟', title: '1억제타', desc: BADGE_DEFINITIONS.find(b => b.id === '100m_zeta')?.desc ?? '', color: 'rose', earned: zeta100MChars.length > 0, chars: zeta100MChars.map(c => c.name) });
 
-  list.push({ id: 'iljin', emoji: '🏀', title: '야 체육 안가고 뭐해', desc: BADGE_DEFINITIONS.find(b => b.id === 'iljin')?.desc ?? '', color: 'orange', earned: tagSet.has('일진'), chars: charsWithTag(characters, '일진') });
-  list.push({ id: 'jjindda', emoji: '🚶', title: '니 애인 지나간다', desc: BADGE_DEFINITIONS.find(b => b.id === 'jjindda')?.desc ?? '', color: 'slate', earned: tagSet.has('찐따'), chars: charsWithTag(characters, '찐따') });
+  list.push({ id: 'iljin', emoji: '🏀', title: '일진', desc: BADGE_DEFINITIONS.find(b => b.id === 'iljin')?.desc ?? '', color: 'orange', earned: tagSet.has('일진'), chars: charsWithTag(characters, '일진') });
+  list.push({ id: 'jjindda', emoji: '🚶', title: '찐따', desc: BADGE_DEFINITIONS.find(b => b.id === 'jjindda')?.desc ?? '', color: 'slate', earned: tagSet.has('찐따'), chars: charsWithTag(characters, '찐따') });
   list.push({ id: 'hero', emoji: '🦸', title: '취미일 뿐', desc: BADGE_DEFINITIONS.find(b => b.id === 'hero')?.desc ?? '', color: 'amber', earned: tagSet.has('히어로'), chars: charsWithTag(characters, '히어로') });
   list.push({ id: 'academy', emoji: '🎓', title: '아카데미', desc: BADGE_DEFINITIONS.find(b => b.id === 'academy')?.desc ?? '', color: 'indigo', earned: tagSet.has('아카데미'), chars: charsWithTag(characters, '아카데미') });
   list.push({ id: 'hyeongwan', emoji: '🖤', title: '혐관', desc: BADGE_DEFINITIONS.find(b => b.id === 'hyeongwan')?.desc ?? '', color: 'slate', earned: tagSet.has('혐관'), chars: charsWithTag(characters, '혐관') });
