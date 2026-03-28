@@ -8,7 +8,7 @@ export default function SkeletonUI() {
   return (
     <div className="w-full animate-fade-in-up space-y-4 pt-4">
       {/* 프로필 헤더 스켈레톤 */}
-      <div className="card p-5 flex flex-col items-center gap-3">
+      <div className="glass-card-sm p-5 flex flex-col items-center gap-3">
         <Bone className="w-20 h-20 rounded-full" />
         <Bone className="h-5 w-40" />
         <Bone className="h-4 w-28" />
@@ -23,7 +23,7 @@ export default function SkeletonUI() {
       </div>
 
       {/* ELO 카드 스켈레톤 */}
-      <div className="card p-4 space-y-3">
+      <div className="glass-card-sm p-4 space-y-3">
         <Bone className="h-4 w-24" />
         <Bone className="h-7 w-32" />
         <Bone className="h-2 w-full rounded-full" />
@@ -37,7 +37,7 @@ export default function SkeletonUI() {
       {/* 스탯 그리드 스켈레톤 */}
       <div className="grid grid-cols-3 gap-2">
         {[1, 2, 3, 4, 5, 6].map(i => (
-          <div key={i} className="card p-3 space-y-2">
+          <div key={i} className="glass-card-sm p-3 space-y-2">
             <Bone className="h-3 w-12" />
             <Bone className="h-5 w-16" />
           </div>
@@ -45,7 +45,7 @@ export default function SkeletonUI() {
       </div>
 
       {/* 캐릭터 목록 스켈레톤 */}
-      <div className="card">
+      <div className="glass-card-sm">
         {[1, 2, 3, 4, 5].map(i => (
           <div key={i} className="flex items-center gap-3 p-3">
             <Bone className="w-4 h-4 rounded" />

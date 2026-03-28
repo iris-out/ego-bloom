@@ -1,17 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Moon, TrendingUp, Flower2, BarChart3 } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { BarChart3, Trophy } from 'lucide-react';
 import { APP_VERSION } from '../data/changelog';
 
 /**
  * variant:
- *   'home'    – 로고 + 랭킹 링크 + 테마 토글
- *   'profile' – 뒤로가기 + 버전 + 테마 토글
- *   'ranking' – 뒤로가기 + 로고 + 테마 토글
+ *   'home'    – 로고 + 랭킹/티어 링크
+ *   'profile' – 뒤로가기 + 로고 + LIVE 버튼
+ *   'ranking' – 뒤로가기 + 로고
  */
-export default function NavBar({ variant = 'home', onBack, serverStatus, onStatusClick }) {
-  const { theme, toggleTheme } = useTheme();
+export default function NavBar({ variant = 'home', onBack, serverStatus, onStatusClick, onLiveClick }) {
   const navigate = useNavigate();
 
   const statusDot = {
@@ -27,7 +25,7 @@ export default function NavBar({ variant = 'home', onBack, serverStatus, onStatu
     if (onBack) {
       onBack();
     } else {
-      navigate(-1);
+      navigate('/');
     }
   };
 
@@ -40,15 +38,7 @@ export default function NavBar({ variant = 'home', onBack, serverStatus, onStatu
             <em>Ego</em>Bloom
           </span>
         )}
-        {variant === 'profile' && (
-          <button className="nav-back" onClick={handleBack}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-            홈으로
-          </button>
-        )}
-        {variant === 'ranking' && (
+        {(variant === 'profile' || variant === 'ranking') && (
           <button className="nav-back" onClick={handleBack}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
@@ -76,36 +66,48 @@ export default function NavBar({ variant = 'home', onBack, serverStatus, onStatu
           </button>
         )}
 
-        {/* 중간 spacer (profile 일 때 로고 표시 + 홈으로 이동) */}
+        {/* 중간 spacer (profile 일 때 로고 표시) */}
         {variant === 'profile' && (
-          <button className="nav-logo text-center" style={{ textAlign: 'center', background: 'none', border: 'none', cursor: 'pointer' }} onClick={handleBack}>
+          <button className="nav-logo text-center" style={{ textAlign: 'center', background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => navigate('/')}>
             <em>Ego</em>Bloom
           </button>
         )}
 
         {/* 오른쪽 액션들 */}
-        {variant === 'home' && (
-          <button
-            className="nav-btn"
-            onClick={() => navigate('/ranking')}
-            title="트렌드 랭킹"
-            aria-label="트렌드 랭킹"
-          >
-            <BarChart3 size={16} />
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {variant === 'home' && (
+            <>
+              <button
+                className="nav-btn"
+                onClick={() => navigate('/tier')}
+                title="티어 가이드"
+                aria-label="티어 가이드"
+              >
+                <Trophy size={16} />
+              </button>
+              <button
+                className="nav-btn"
+                onClick={() => navigate('/ranking')}
+                title="트렌드 랭킹"
+                aria-label="트렌드 랭킹"
+              >
+                <BarChart3 size={16} />
+              </button>
+            </>
+          )}
 
-        <button
-          className="nav-btn"
-          onClick={toggleTheme}
-          title="테마 전환"
-          aria-label="테마 전환"
-        >
-          {theme === 'dark'
-            ? <Sun size={16} />
-            : <Moon size={16} />
-          }
-        </button>
+          {variant === 'profile' && onLiveClick && (
+            <button
+              className="nav-btn text-[10px] font-bold tracking-wider"
+              onClick={onLiveClick}
+              title="LIVE 공유"
+              aria-label="LIVE 공유"
+              style={{ width: 'auto', padding: '0 10px', color: 'var(--accent-bright)' }}
+            >
+              LIVE
+            </button>
+          )}
+        </div>
       </div>
     </nav>
   );

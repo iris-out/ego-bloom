@@ -1,31 +1,22 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, AlertCircle, Info, History, X, Flower2, TrendingUp, Hash, ChevronRight } from 'lucide-react';
-import NavBar from '../components/NavBar';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AlertCircle, X, ChevronRight } from 'lucide-react';
 import ChangelogModal from '../components/ChangelogModal';
 import ZetaBanners from '../components/ZetaBanners';
-import { getRecentSearches, addRecentSearch, removeRecentSearch } from '../utils/storage';
-import { toKST } from '../utils/tierCalculator';
-import { APP_VERSION, CHANGELOG } from '../data/changelog';
+import MyProfileCard from '../components/MyProfileCard';
+import SearchPill from '../components/SearchPill';
+import { getRecentSearches, removeRecentSearch } from '../utils/storage';
+import { APP_VERSION } from '../data/changelog';
 import { useServerStatus } from '../hooks/useServerStatus';
-import ProfilePage from './ProfilePage';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const creatorParam = searchParams.get('creator');
-
-  const [input, setInput] = useState('');
   const [recentSearches, setRecentSearches] = useState([]);
   const [showChangelog, setShowChangelog] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const { status: serverStatus, message: emergencyMessage } = useServerStatus();
   const [noticeDismissed, setNoticeDismissed] = useState(false);
   const noticeDismissTimerRef = useRef(null);
   const [topTags, setTopTags] = useState([]);
-  const [showStatusBanner, setShowStatusBanner] = useState(false);
-  const statusBannerTimerRef = useRef(null);
 
   useEffect(() => {
     if (!emergencyMessage) { setNoticeDismissed(false); return; }
@@ -35,316 +26,158 @@ export default function HomePage() {
     return () => clearTimeout(noticeDismissTimerRef.current);
   }, [emergencyMessage]);
 
-  const handleStatusClick = () => {
-    if (statusBannerTimerRef.current) clearTimeout(statusBannerTimerRef.current);
-    setShowStatusBanner(true);
-    statusBannerTimerRef.current = setTimeout(() => setShowStatusBanner(false), 10000);
-  };
-
-  const handleStatusBannerClose = () => {
-    if (statusBannerTimerRef.current) clearTimeout(statusBannerTimerRef.current);
-    setShowStatusBanner(false);
-  };
-
-  // 꽃 이스터에그: rAF 기반 각도 직접 제어
-  const flowerRef = useRef(null);
-  const angleRef = useRef(0);
-  const speedRef = useRef(18); // deg/s 기본
-  const rafRef = useRef(null);
-  const lastTimeRef = useRef(null);
-
-  useEffect(() => {
-    const BASE_SPEED = 18;
-    const tick = (now) => {
-      if (lastTimeRef.current !== null) {
-        const dt = (now - lastTimeRef.current) / 1000;
-        angleRef.current += speedRef.current * dt;
-        if (flowerRef.current) {
-          flowerRef.current.style.transform = `rotate(${angleRef.current}deg)`;
-        }
-        // 감속: 기본 속도 초과 시 서서히 줄임
-        if (speedRef.current > BASE_SPEED) {
-          speedRef.current = Math.max(BASE_SPEED, speedRef.current * (1 - dt * 0.8));
-        }
-      }
-      lastTimeRef.current = now;
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, []);
-
-  const handleFlowerClick = () => {
-    speedRef.current = Math.min(2000, speedRef.current * 2.5);
-  };
-
   useEffect(() => { setRecentSearches(getRecentSearches()); }, []);
 
   useEffect(() => {
     fetch('/data/ranking_latest.json')
       .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d?.combined) setTopTags(d.combined.slice(0, 3)); })
-      .catch(() => {});
+      .then(d => { if (d?.combined) setTopTags(d.combined.slice(0, 5)); })
+      .catch(() => { });
   }, []);
-
-  useEffect(() => {
-    if (!input.trim()) { setSuggestions([]); return; }
-    const filtered = recentSearches.filter(t => t.toLowerCase().includes(input.toLowerCase())).slice(0, 5);
-    setSuggestions(filtered);
-  }, [input, recentSearches]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (input.trim()) {
-      const nr = addRecentSearch(input.trim());
-      if (nr) setRecentSearches(nr);
-      setSearchParams({ creator: input.trim() });
-    }
-  };
 
   const handleDeleteRecent = (term, e) => {
     e.stopPropagation();
     setRecentSearches(removeRecentSearch(term));
   };
 
-  const handleSelectRecent = (term) => {
-    setInput(term);
-    setSearchParams({ creator: term });
-  };
-
-  // ?creator= 쿼리파람이 있으면 ProfilePage 렌더
-  if (creatorParam) {
-    return (
-      <ProfilePage
-        initialCreator={creatorParam}
-        onBack={() => setSearchParams({})}
-        serverStatus={serverStatus}
-      />
-    );
-  }
+  const statusColor = serverStatus === 'ok' ? '#6CD97E' : serverStatus === 'warning' ? '#FBBF24' : '#F87171';
 
   return (
-    <div className="page-bg min-h-[100dvh] flex flex-col relative overflow-hidden">
-      {/* 긴급 공지 배너 — Dynamic Island */}
+    <div className="min-h-[100dvh] flex flex-col relative overflow-hidden">
+      {/* 배경 글로우 */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[rgba(121,155,196,0.15)] rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[60%] bg-[rgba(65,30,110,0.25)] rounded-full blur-[120px]" />
+      </div>
+
+      {/* 공지 배너 */}
       {emergencyMessage && !noticeDismissed && (
-        <div className="fixed top-[calc(var(--nav-height,54px)+8px)] inset-x-0 z-[60] flex justify-center pointer-events-none px-4">
-          <div
-            className="max-w-md w-full pointer-events-auto animate-di-expand"
-            style={{
-              background: 'rgba(10,8,16,0.96)',
-              border: '1px solid rgba(251,191,36,0.2)',
-              borderRadius: '20px',
-              backdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)',
-              transformOrigin: 'top center',
-            }}
-          >
-            <div className="flex items-start gap-3 px-4 py-3.5">
-              <div className="mt-0.5 w-7 h-7 rounded-full bg-amber-500/15 flex items-center justify-center shrink-0">
-                <AlertCircle size={14} className="text-amber-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[9px] font-black text-amber-500/70 uppercase tracking-[0.15em] mb-1">Zeta Official Notice</div>
-                <p className="text-[13px] text-white/85 font-medium leading-relaxed break-words">{emergencyMessage}</p>
-              </div>
-              <button
-                onClick={() => { clearTimeout(noticeDismissTimerRef.current); setNoticeDismissed(true); }}
-                className="mt-0.5 shrink-0 w-5 h-5 flex items-center justify-center rounded-full text-white/40 hover:text-white/70 hover:bg-white/10 transition-colors"
-                aria-label="닫기"
-              >
-                <X size={12} />
-              </button>
-            </div>
+        <div className="fixed top-4 inset-x-0 z-[60] flex justify-center px-4 pointer-events-none">
+          <div className="glass-pill pointer-events-auto flex items-center gap-3 px-4 py-2.5 max-w-md w-fit animate-di-expand shadow-xl">
+            <AlertCircle size={14} className="text-amber-400 shrink-0" />
+            <span className="text-[13px] text-white/80 truncate">{emergencyMessage}</span>
+            <button onClick={() => { clearTimeout(noticeDismissTimerRef.current); setNoticeDismissed(true); }}
+              className="shrink-0 text-white/30 hover:text-white/60"><X size={14} /></button>
           </div>
         </div>
       )}
 
-      <NavBar variant="home" serverStatus={serverStatus} onStatusClick={handleStatusClick} />
-
-      {/* 서버 상태 클릭 배너 — Dynamic Island */}
-      {showStatusBanner && (() => {
-        const cfg = {
-          ok:       { dot: 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]',  border: 'rgba(52,211,153,0.2)',  label: '정상',   sub: 'Zeta 서버가 정상 운영 중입니다.' },
-          warning:  { dot: 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)]',    border: 'rgba(251,191,36,0.2)',  label: '불안정', sub: '일부 서비스가 원활하지 않을 수 있습니다.' },
-          error:    { dot: 'bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.9)]',     border: 'rgba(248,113,113,0.2)', label: '이상',   sub: '서비스 이용에 불편함이 있을 수 있습니다.' },
-          checking: { dot: 'bg-gray-400 animate-pulse',                              border: 'rgba(255,255,255,0.08)',label: '확인 중',sub: '서버 상태를 확인하는 중입니다.' },
-        };
-        const c = cfg[serverStatus] || cfg.checking;
-        return (
-          <div className="fixed top-[calc(var(--nav-height,54px)+8px)] inset-x-0 z-[60] flex justify-center pointer-events-none px-4">
-            <div
-              className="animate-di-expand pointer-events-auto"
-              style={{
-                background: 'rgba(10,8,16,0.96)',
-                border: `1px solid ${c.border}`,
-                borderRadius: '18px',
-                backdropFilter: 'blur(20px)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)',
-                transformOrigin: 'top center',
-                padding: '12px 18px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                minWidth: '220px',
-                maxWidth: '320px',
-              }}
-            >
-              <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${c.dot}`} />
-              <div className="flex-1">
-                <div className="text-[11px] font-black text-white/50 uppercase tracking-[0.12em] leading-none mb-1">Zeta 서버 상태</div>
-                <div className="text-[14px] font-bold text-white/90 leading-none">{c.label}</div>
-                <div className="text-[11px] text-white/45 mt-1 leading-tight">{c.sub}</div>
-              </div>
-              <button
-                onClick={handleStatusBannerClose}
-                className="ml-1 p-1 rounded-full hover:bg-white/10 text-white/30 hover:text-white/60 transition-colors flex-shrink-0"
-              >
-                <X size={13} />
-              </button>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* 배경 그라데이션 */}
-      <div className="absolute top-0 inset-x-0 h-[40vh] bg-gradient-to-b from-[var(--accent)]/8 to-transparent pointer-events-none" />
-
-      <div className="flex-1 flex flex-col items-center pt-[10vh] px-4 pb-20 relative z-10">
+      {/* 메인 콘텐츠 */}
+      <div className="flex flex-col flex-1 px-6 pt-8 pb-[140px] lg:pb-16 relative z-10 max-w-[680px] mx-auto w-full lg:max-w-[1280px] lg:px-[10%]">
         {/* 헤더 */}
-        <div className="flex flex-col items-center text-center mb-10 animate-fade-in-up">
-          <div className="flex items-center gap-3 mb-2">
-            <div
-              className="inline-flex items-center justify-center p-3 rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-lg cursor-pointer select-none"
-              onClick={handleFlowerClick}
-              title="?"
-            >
-              <div ref={flowerRef} style={{ display: 'flex' }}>
-                <Flower2 size={28} className="text-[var(--accent)]" strokeWidth={1.5} />
-              </div>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] via-purple-400 to-indigo-400">
-                EGO-BLOOM
-              </span>
-            </h1>
+        <header className="flex justify-between items-center mb-8 animate-fade-in-up">
+          <div className="flex items-center gap-2.5">
+            <svg viewBox="0 0 24 24" className="w-5 h-6 stroke-white fill-none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 17 L17 17 L15 22 L9 22 Z" />
+              <line x1="6" y1="17" x2="18" y2="17" />
+              <line x1="12" y1="17" x2="12" y2="11" />
+              <path d="M12 6 Q10 2 12 1 Q14 2 12 6" />
+              <path d="M12 6 Q17 4 18 6 Q17 8 12 6" />
+              <path d="M12 6 Q14 10 12 11 Q10 10 12 6" />
+              <path d="M12 6 Q7 8 6 6 Q7 4 12 6" />
+              <circle cx="12" cy="6" r="1.2" />
+            </svg>
+            <h1 className="font-medium text-[22px] tracking-[-0.02em] text-white">EGO-BLOOM</h1>
           </div>
-          <p className="text-sm text-[var(--text-tertiary)]">제타 제작자를 위한 통계 및 업적 대시보드</p>
-        </div>
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-white/70 tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor, boxShadow: `0 0 8px ${statusColor}66` }} />
+            <span>{serverStatus === 'ok' ? '정상' : serverStatus === 'warning' ? '불안정' : '이상'}</span>
+          </div>
+        </header>
 
-        {/* 배너 */}
-        <div className="w-full max-w-lg mb-6 animate-fade-in-up" style={{ animationDelay: '80ms' }}>
-          <ZetaBanners />
-        </div>
+        {/* PC 검색바 (lg에서만 보임) */}
+        <SearchPill className="hidden lg:block mb-10 animate-fade-in-up" style={{ animationDelay: '80ms' }} suggestionsAbove={false} />
 
-        {/* 검색창 */}
-        <div className="w-full max-w-lg animate-fade-in-up" style={{ animationDelay: '160ms' }}>
-          <form onSubmit={handleSubmit}>
-            <div className="relative flex items-center bg-[var(--card)] border border-[var(--border)] rounded-full p-1.5 shadow-lg hover:border-[var(--accent)]/50 focus-within:border-[var(--accent)] focus-within:ring-2 focus-within:ring-[var(--accent-soft)] transition-all">
-              <div className="pl-4 pr-2 text-[var(--text-tertiary)]">
-                <Search size={20} className="opacity-60" />
-              </div>
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onFocus={() => setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  placeholder="@핸들, ID, 또는 프로필 URL"
-                  className="w-full bg-transparent border-none text-base text-[var(--text-primary)] placeholder-[var(--text-tertiary)]/60 py-3 px-2 focus:outline-none"
-                  autoFocus
-                />
-                {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in">
-                    <div className="px-3 py-1.5 border-b border-[var(--border)] text-[10px] font-bold text-[var(--text-tertiary)] bg-[var(--bg-secondary)]">최근 검색어</div>
-                    {suggestions.map((s, i) => (
-                      <button key={i} type="button" onMouseDown={() => { setInput(s); setSearchParams({ creator: s }); setShowSuggestions(false); }}
-                        className="w-full text-left px-3 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--accent)] transition-colors flex items-center gap-2">
-                        <History size={13} className="opacity-50" />{s}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <button type="submit" disabled={!input.trim()}
-                className="shrink-0 h-10 px-5 bg-[var(--accent)] hover:bg-[var(--accent-dark)] text-white font-bold rounded-full transition-all disabled:opacity-40 text-sm">
-                분석
-              </button>
+        {/* 2열 그리드 (PC) / 단일 컬럼 (모바일) */}
+        <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-12 lg:items-start flex-1">
+          {/* 왼쪽: 히어로 + 배너 + 트렌딩 + 최근 검색 */}
+          <div className="min-w-0">
+            {/* 히어로 */}
+            <section className="mb-12 animate-fade-in-up" style={{ animationDelay: '120ms' }}>
+              <h2 className="font-display text-[56px] leading-[0.95] tracking-[-0.04em] font-normal text-white mb-4">
+                Creator<br />
+                <span className="font-serif-kr text-[42px] tracking-[-0.05em] block mt-1">에고 발사대</span>
+              </h2>
+              <p className="text-[14px] text-white/70 font-light leading-relaxed max-w-[80%]">
+                당신의 에고를 발사하세요.<br />대화량, 티어, 그리고 업적으로.
+              </p>
+            </section>
+
+            {/* 배너 */}
+            <div className="mb-10 animate-fade-in-up" style={{ animationDelay: '180ms' }}>
+              <ZetaBanners />
             </div>
-          </form>
-        </div>
 
-        {/* 최근 검색 */}
-        {recentSearches.length > 0 && (
-          <div className="w-full max-w-lg mt-6 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
-            <div className="flex items-center gap-2 mb-2 px-1">
-              <History size={13} className="text-[var(--text-tertiary)]" />
-              <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">최근 검색</span>
-              <div className="group relative ml-auto">
-                <Info size={12} className="text-[var(--text-tertiary)] cursor-help" />
-                <div className="absolute bottom-full right-0 mb-1 w-48 p-2 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-xl text-[10px] text-[var(--text-secondary)] invisible group-hover:visible z-20 text-center">
-                  브라우저 Local Storage에 기기 종속 저장
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {recentSearches.map((term, i) => (
-                <button key={i} onClick={() => handleSelectRecent(term)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--card)] border border-transparent hover:border-[var(--border)] transition-all text-sm text-[var(--text-secondary)] group">
-                  {term}
-                  <span role="button" onClick={e => handleDeleteRecent(term, e)}
-                    className="text-[var(--text-tertiary)] hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
-                    <X size={12} />
-                  </span>
+            {/* 트렌딩 태그 */}
+            <section className="mb-12 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
+              <div className="flex justify-between items-end mb-2 pb-2 border-b border-white/[0.06]">
+                <span className="text-[12px] font-medium text-white/40 uppercase tracking-widest">Trending Tags</span>
+                <button onClick={() => navigate('/ranking')} className="text-[12px] text-white/70 hover:text-white transition-colors flex items-center gap-1">
+                  자세히 보기 <ChevronRight size={12} />
                 </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 트렌딩 태그 미리보기 */}
-        <div className="w-full max-w-lg mt-6 animate-fade-in-up" style={{ animationDelay: '320ms' }}>
-          <div className="flex items-center gap-2 mb-2 px-1">
-            <TrendingUp size={13} className="text-[var(--accent)]" />
-            <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">지금 인기 태그</span>
-          </div>
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-hidden">
-            {topTags.length > 0 ? topTags.map((item, i) => (
-              <div key={item.tag} className="flex items-center gap-3 px-4 py-3 border-b border-[var(--border)] last:border-b-0">
-                <span className={`text-sm font-black w-5 text-center shrink-0 ${i === 0 ? 'text-yellow-400' : i === 1 ? 'text-slate-400' : 'text-amber-600'}`}>
-                  {i + 1}
-                </span>
-                <span className="flex-1 text-sm font-bold text-[var(--text-primary)]">#{item.tag}</span>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <div className="h-1.5 rounded-full bg-[var(--accent-soft)] overflow-hidden w-16">
-                    <div className="h-full rounded-full bg-[var(--accent)]"
-                      style={{ width: `${Math.round((item.score / topTags[0].score) * 100)}%`, opacity: 0.8 }} />
-                  </div>
-                  <span className="text-[10px] text-[var(--text-tertiary)] font-mono w-10 text-right">{item.score.toLocaleString()}</span>
-                </div>
               </div>
-            )) : (
-              [1, 2, 3].map(i => (
-                <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-[var(--border)] last:border-b-0">
-                  <div className="skeleton-bone w-4 h-4 rounded" />
-                  <div className="skeleton-bone flex-1 h-4 rounded" />
-                  <div className="skeleton-bone w-20 h-3 rounded" />
+              <ul className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-x-4">
+                {topTags.length > 0 ? topTags.map((item, i) => (
+                  <li key={item.tag} className="flex items-center py-3.5 border-b border-white/[0.03] last:border-b-0 lg:border-b-0 lg:py-3">
+                    <span className="font-display italic text-[24px] text-white/40 w-8 text-left">{i + 1}</span>
+                    <div className="flex-1 flex flex-col gap-0.5 ml-1 min-w-0">
+                      <span className="text-[16px] font-medium text-white tracking-[-0.01em] truncate">#{item.tag}</span>
+                      <span className="text-[12px] text-white/70 font-light">스코어 {item.score?.toLocaleString()}</span>
+                    </div>
+                  </li>
+                )) : (
+                  [1, 2, 3].map(i => (
+                    <li key={i} className="flex items-center py-3.5 border-b border-white/[0.03] last:border-b-0">
+                      <div className="skeleton-bone w-6 h-6 rounded mr-3" />
+                      <div className="flex-1"><div className="skeleton-bone w-32 h-4 rounded mb-1" /><div className="skeleton-bone w-20 h-3 rounded" /></div>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </section>
+
+            {/* 최근 검색 */}
+            {recentSearches.length > 0 && (
+              <section className="mb-8 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <svg viewBox="0 0 24 24" className="w-3 h-3 stroke-white/40 fill-none stroke-2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                  <span className="text-[12px] font-medium text-white/40 uppercase tracking-widest">최근 검색</span>
                 </div>
-              ))
+                <div className="flex flex-wrap gap-2">
+                  {recentSearches.map((term, i) => (
+                    <button key={i} onClick={() => navigate(`/profile?creator=${encodeURIComponent(term)}`)}
+                      className="glass-pill flex items-center gap-2 px-3.5 py-2 text-[13px] text-white/70 hover:text-white hover:bg-white/[0.08] transition-all group">
+                      {term}
+                      <span role="button" onClick={e => handleDeleteRecent(term, e)}
+                        className="text-white/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                        <X size={11} />
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </section>
             )}
-            <button onClick={() => navigate('/ranking')}
-              className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[12px] font-bold text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-colors">
-              전체 순위 보기 <ChevronRight size={13} />
-            </button>
+          </div>
+
+          {/* 오른쪽: 내 프로필 카드 (PC에서 sticky) */}
+          <div className="mb-10 lg:mb-0 lg:sticky lg:top-8 animate-fade-in-up order-first lg:order-none" style={{ animationDelay: '210ms' }}>
+            <MyProfileCard />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-auto pt-16 pb-4 text-center text-[11px] text-[var(--text-tertiary)] opacity-50">
+        <div className="mt-auto pt-12 pb-2 text-center text-[11px] text-white/30">
           <span>v{APP_VERSION} · </span>
-          <a href="https://github.com/iris-out/ego-bloom/issues" target="_blank" rel="noopener noreferrer" className="underline hover:text-[var(--accent)] hover:opacity-100 transition-all">문의/제보</a>
+          <a href="https://github.com/iris-out/ego-bloom/issues" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/60 transition-all">문의/제보</a>
           <span> · </span>
-          <button onClick={() => setShowChangelog(true)} className="underline hover:text-[var(--accent)] hover:opacity-100 transition-all">변경 내역</button>
+          <button onClick={() => setShowChangelog(true)} className="underline hover:text-white/60 transition-all">변경 내역</button>
+        </div>
+      </div>
+
+      {/* 하단 고정 검색 pill (모바일에서만) */}
+      <div className="lg:hidden fixed bottom-0 left-0 w-full z-20" style={{ padding: '0 24px env(safe-area-inset-bottom, 24px)', background: 'linear-gradient(to top, var(--bg-base) 20%, transparent 100%)' }}>
+        <div className="max-w-[680px] mx-auto mb-4">
+          <SearchPill suggestionsAbove={true} />
         </div>
       </div>
 

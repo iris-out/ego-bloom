@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import ContributionGraph from './ContributionGraph';
-import { getCharacterTier, CHARACTER_TIERS, formatNumber, formatCompactNumber, formatDate } from '../utils/tierCalculator';
+import { getCharacterTier, CHARACTER_TIERS, formatNumber, formatCompactNumber, formatDate, calculateCreatorScore, getCreatorTier } from '../utils/tierCalculator';
 import { WordCloud } from './ExtraCharts';
 import CreatorRadarChart from './CreatorRadarChart';
-import { TierBadge } from './TierBadge';
-import { MessageCircle, Users, BarChart3 } from 'lucide-react';
+import TierIcon from './ui/TierIcon';
+import { MessageCircle, Users, BarChart3, Mic2, Zap } from 'lucide-react';
 
 export default function DetailTab({ stats, characters }) {
   return (
@@ -13,8 +13,8 @@ export default function DetailTab({ stats, characters }) {
       <SummaryStatGrid stats={stats} characters={characters} />
 
       {/* 2. 크리에이터 스탯 레이더 (ProfileHeader에서 이동됨) */}
-      <div className="card px-4 sm:px-5 py-3 sm:py-3.5">
-        <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-3">크리에이터 스탯 레이더</h3>
+      <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl backdrop-blur-sm px-4 sm:px-5 py-3 sm:py-3.5">
+        <h3 className="text-sm font-semibold text-white/70 mb-3">크리에이터 스탯 레이더</h3>
         <CreatorRadarChart stats={stats} characters={characters} />
       </div>
 
@@ -48,12 +48,12 @@ function TierDistribution({ characters }) {
   }, [characters]);
 
   return (
-    <div className="card p-4 sm:p-5">
-      <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-4">캐릭터 티어 분포</h3>
+    <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl backdrop-blur-sm p-4 sm:p-5">
+      <h3 className="text-sm font-semibold text-white/70 mb-4">캐릭터 티어 분포</h3>
       <div className="space-y-2">
         {dist.map(t => (
           <div key={t.key} className="flex items-center gap-2">
-            <span className="text-[10px] w-8 text-right font-bold shrink-0" style={{ color: t.color }}>{t.name}</span>
+            <span className="text-[11px] w-8 text-right font-bold shrink-0" style={{ color: t.color }}>{t.name}</span>
             <div className="flex-1 h-5 bg-[var(--bg-secondary)] rounded-sm overflow-hidden">
               <div className="h-full rounded-sm transition-all duration-700" style={{ width: `${t.pct}%`, backgroundColor: t.color }} />
             </div>
@@ -71,11 +71,14 @@ function SummaryStatGrid({ stats, characters }) {
   const avgInteractions = characters?.length > 0 ? Math.round(totalInteractions / characters.length) : 0;
   const followers = stats?.followerCount || 0;
   const following = stats?.followingCount || 0;
+  const score = calculateCreatorScore(stats, characters);
   const cards = [
     { label: '캐릭터 수',       value: formatNumber(stats?.plotCount || characters?.length || 0), icon: <BarChart3 size={14} /> },
-    { label: '팔로워/팔로잉',   value: following === 0 && followers === 0 ? '-' : (following > 0 ? (followers / following).toFixed(2) : followers.toLocaleString('ko-KR')), icon: <Users size={14} /> },
+    { label: '팔로워/잉',   value: following === 0 && followers === 0 ? '-' : (following > 0 ? (followers / following).toFixed(2) : followers.toLocaleString('ko-KR')), icon: <Users size={14} /> },
     { label: '평균 대화',       value: formatCompactNumber(avgInteractions),                       icon: <BarChart3 size={14} /> },
     { label: '대화/팔로워',     value: followers > 0 ? (totalInteractions / followers).toFixed(2) : '-', icon: <MessageCircle size={14} /> },
+    { label: '음성 재생(분)',    value: formatCompactNumber(Math.round((stats?.voicePlayCount || 0) / 60)), icon: <Mic2 size={14} /> },
+    { label: 'ELO',             value: score.toLocaleString(),                                     icon: <Zap size={14} /> },
   ];
 
   return (
@@ -92,7 +95,7 @@ function SummaryStatGrid({ stats, characters }) {
 
 function StatCard({ label, value, sub }) {
   return (
-    <div className="card p-4">
+    <div className="glass-card-sm p-4">
       <div className="text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase mb-1">{label}</div>
       <div className="text-base sm:text-lg font-bold text-[var(--text-primary)] truncate">{value}</div>
       {sub && <div className="text-[10px] text-[var(--text-tertiary)] mt-0.5">{sub}</div>}

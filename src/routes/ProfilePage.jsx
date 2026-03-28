@@ -1,19 +1,21 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
-import { AlertCircle, Loader2, RefreshCw, Archive } from 'lucide-react';
-import NavBar from '../components/NavBar';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { AlertCircle, Loader2, RefreshCw, Archive, ChevronLeft } from 'lucide-react';
+import { computeEarnedTitles } from '../data/badges';
 import ProfileHeader from '../components/ProfileHeader';
 import SummaryTab from '../components/SummaryTab';
 import SkeletonUI from '../components/SkeletonUI';
 import ChangelogModal from '../components/ChangelogModal';
 import { proxyImageUrl, getPlotImageUrl, getPlotImageUrls } from '../utils/imageUtils';
 import { getCreatorTier, calculateCreatorScore } from '../utils/tierCalculator';
+import { useServerStatus } from '../hooks/useServerStatus';
 
 const DetailTab = lazy(() => import('../components/DetailTab'));
 const AchievementsTab = lazy(() => import('../components/AchievementsTab'));
 const StatsTab = lazy(() => import('../components/StatsTab'));
 
 const CACHE_KEY_PREFIX = 'zeta_cache_v2_';
-const CACHE_DURATION = 20 * 60 * 1000;
+const CACHE_DURATION = 30 * 60 * 1000;
 const RANKING_MAP_CACHE_KEY = 'zeta_ranking_map_v1';
 const RANKING_MAP_TTL_MS = 20 * 60 * 1000;
 
@@ -108,13 +110,18 @@ async function fetchRankingMap() {
 }
 
 const TABS = [
-  { key: 'summary',      label: '요약' },
+  { key: 'summary',      label: '프로필' },
   { key: 'characters',   label: '캐릭터' },
   { key: 'achievements', label: '업적' },
   { key: 'stats',        label: '통계' },
 ];
 
-export default function ProfilePage({ initialCreator, onBack, serverStatus }) {
+export default function ProfilePage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const initialCreator = searchParams.get('creator');
+  const { status: serverStatus } = useServerStatus();
+  const onBack = () => navigate('/');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
@@ -122,6 +129,16 @@ export default function ProfilePage({ initialCreator, onBack, serverStatus }) {
   const [cacheInfo, setCacheInfo] = useState(null);
   const [cacheRemaining, setCacheRemaining] = useState(null);
   const [showChangelog, setShowChangelog] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(false);
+
+  const hasEarnedTitles = useMemo(() => {
+    if (!data) return false;
+    return computeEarnedTitles({ characters: data.characters, stats: data.stats }).some(t => t.earned);
+  }, [data]);
+
+  useEffect(() => {
+    if (!initialCreator) { navigate('/', { replace: true }); }
+  }, [initialCreator, navigate]);
 
   useEffect(() => {
     if (!cacheInfo) { setCacheRemaining(null); return; }
@@ -210,7 +227,6 @@ export default function ProfilePage({ initialCreator, onBack, serverStatus }) {
         profileRes.json(), statsRes.json(), fetchAllPlots(id), fetchRankingMap(),
       ]);
 
-      // API는 voicePlaySeconds를 반환 — voicePlayCount로 매핑
       if (stats.voicePlaySeconds != null && stats.voicePlayCount == null) {
         stats.voicePlayCount = Math.round(stats.voicePlaySeconds);
       }
@@ -246,24 +262,62 @@ export default function ProfilePage({ initialCreator, onBack, serverStatus }) {
     } finally { setLoading(false); }
   };
 
+  // 공통 헤더
+  const Header = () => (
+    <header className="flex justify-between items-center px-6 pt-5 pb-2 relative z-20 lg:px-12">
+      <button
+        onClick={onBack}
+        className="w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+      >
+        <ChevronLeft size={20} className="text-gray-300" />
+      </button>
+      <div className="flex items-center gap-2">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M7 17 L17 17 L15 22 L9 22 Z" />
+          <line x1="6" y1="17" x2="18" y2="17" />
+          <line x1="12" y1="17" x2="12" y2="11" />
+          <path d="M12 6 Q10 2 12 1 Q14 2 12 6" />
+          <path d="M12 6 Q17 4 18 6 Q17 8 12 6" />
+          <path d="M12 6 Q14 10 12 11 Q10 10 12 6" />
+          <path d="M12 6 Q7 8 6 6 Q7 4 12 6" />
+          <circle cx="12" cy="6" r="1.2" />
+        </svg>
+        <span className="font-bold tracking-[0.15em] text-xs text-white uppercase">Ego-Bloom</span>
+      </div>
+      {hasEarnedTitles ? (
+        <button
+          onClick={() => setEditingTitle(true)}
+          className="px-3 py-1.5 rounded-full text-[11px] font-semibold text-white/70 hover:text-white transition-all"
+          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+        >
+          칭호 변경
+        </button>
+      ) : (
+        <div className="w-10" />
+      )}
+    </header>
+  );
+
   if (loading) {
     return (
-      <div className="page-bg min-h-[100dvh]">
-        <NavBar variant="profile" onBack={onBack} serverStatus={serverStatus} />
-        <main className="container py-4"><SkeletonUI /></main>
+      <div className="bg-profile min-h-[100dvh]">
+        <Header />
+        <main className="max-w-[680px] mx-auto px-6 py-4 lg:max-w-[1280px] lg:px-[10%]"><SkeletonUI /></main>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="page-bg min-h-[100dvh]">
-        <NavBar variant="profile" onBack={onBack} serverStatus={serverStatus} />
-        <main className="container py-8 flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">
+      <div className="bg-profile min-h-[100dvh]">
+        <Header />
+        <main className="max-w-[680px] mx-auto px-6 py-8 flex flex-col items-center gap-4 lg:max-w-[1280px] lg:px-[10%]">
+          <div className="flex items-center gap-2 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl border border-red-400/20">
             <AlertCircle size={16} /><span>{error}</span>
           </div>
-          <button onClick={onBack} className="chip">← 홈으로 돌아가기</button>
+          <button onClick={onBack} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 transition-colors">
+            ← 홈으로 돌아가기
+          </button>
         </main>
       </div>
     );
@@ -271,26 +325,26 @@ export default function ProfilePage({ initialCreator, onBack, serverStatus }) {
 
   if (!data) return null;
 
-  const score = calculateCreatorScore(data.stats, data.characters);
-  const tier = getCreatorTier(score);
-
   return (
-    <div className="page-bg min-h-[100dvh]">
-      <NavBar variant="profile" onBack={onBack} serverStatus={serverStatus} />
+    <div className="bg-profile min-h-[100dvh] relative">
+      {/* 배경 글로우 */}
+      <div className="fixed top-[10%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-purple-500/15 rounded-full blur-[120px] pointer-events-none" />
 
-      <main className="container pb-20">
+      <Header />
+
+      <main className="max-w-[680px] mx-auto px-6 pb-20 relative z-10 lg:max-w-[1280px] lg:px-[10%]">
         {/* 캐시 알림 */}
         {cacheInfo && cacheRemaining !== null && (
-          <div className="animate-slide-down flex items-center justify-between px-4 py-2.5 mt-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] text-xs text-[var(--text-tertiary)]">
+          <div className="animate-slide-down flex items-center justify-between px-4 py-2.5 mt-4 rounded-xl bg-white/[0.02] border border-white/[0.05] text-xs text-gray-500">
             <span className="flex items-center gap-1.5">
-              <Archive size={13} className="text-[var(--text-secondary)]" />
+              <Archive size={13} className="text-gray-400" />
               <span className="font-medium">캐시 데이터 —</span>
-              <span className={`font-bold ${cacheRemaining <= 5 ? 'text-orange-400' : 'text-[var(--text-secondary)]'}`}>
+              <span className={`font-bold ${cacheRemaining <= 5 ? 'text-orange-400' : 'text-gray-400'}`}>
                 {cacheRemaining}분 후 만료
               </span>
             </span>
             <button onClick={() => fetchData(initialCreator, true)}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[var(--card)] border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all font-medium">
+              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:border-purple-500/40 hover:text-purple-400 transition-all font-medium text-gray-400">
               <RefreshCw size={11} />새로고침
             </button>
           </div>
@@ -299,11 +353,11 @@ export default function ProfilePage({ initialCreator, onBack, serverStatus }) {
         <div className="profile-layout">
           {/* 탭 바 — 전체 너비 상단 */}
           <div className="profile-layout-tabbar">
-            <div className="tab-bar">
+            <div className="ph-tab-bar">
               {TABS.map(t => (
                 <button
                   key={t.key}
-                  className={`tab-item${tab === t.key ? ' active' : ''}`}
+                  className={`ph-tab-item${tab === t.key ? ' active' : ''}`}
                   onClick={() => setTab(t.key)}
                 >
                   {t.label}
@@ -318,12 +372,14 @@ export default function ProfilePage({ initialCreator, onBack, serverStatus }) {
               profile={data.profile}
               stats={data.stats}
               characters={data.characters}
+              editing={editingTitle}
+              setEditing={setEditingTitle}
             />
           </aside>
 
           {/* 오른쪽 — 탭 컨텐츠 */}
           <div className="profile-layout-main">
-            <Suspense fallback={<div className="flex justify-center py-10"><Loader2 size={24} className="animate-spin text-[var(--text-tertiary)]" /></div>}>
+            <Suspense fallback={<div className="flex justify-center py-10"><Loader2 size={24} className="animate-spin text-gray-600" /></div>}>
               {tab === 'summary' && (
                 <div className="animate-enter">
                   <DetailTab stats={data.stats} characters={data.characters} />

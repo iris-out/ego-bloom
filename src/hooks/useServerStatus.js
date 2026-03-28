@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 const SERVER_STATUS_CACHE_KEY = 'zeta_server_status_cache';
-const SERVER_STATUS_CACHE_TTL = 30 * 1000; // 30초
+const SERVER_STATUS_CACHE_TTL = 5 * 60 * 1000; // 5분
 
 export function useServerStatus() {
   const [data, setData] = useState(() => {
@@ -43,7 +43,7 @@ export function useServerStatus() {
 
     const onVisible = () => { if (document.visibilityState === 'visible') check(); };
     document.addEventListener('visibilitychange', onVisible);
-    const intv = setInterval(check, 2 * 60 * 1000);
+    const intv = setInterval(check, 5 * 60 * 1000);
     return () => {
       document.removeEventListener('visibilitychange', onVisible);
       clearInterval(intv);

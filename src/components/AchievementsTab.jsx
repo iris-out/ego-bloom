@@ -63,16 +63,16 @@ export default function AchievementsTab({ stats, characters }) {
                     ? isGradient
                         ? 'border-purple-400/30 shadow-sm'
                         : `${c.bg} ${c.border} shadow-sm`
-                    : 'bg-[var(--bg-secondary)]/30 border-[var(--border)] opacity-40 grayscale'
+                    : 'bg-[var(--bg-secondary)]/30 border-white/[0.08] opacity-40 grayscale'
                     }`}
                 style={t.earned && isGradient ? { background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(59,130,246,0.15))' } : {}}
             >
                 <div className="text-xl shrink-0 mt-0.5">{t.emoji}</div>
                 <div className="flex-1 min-w-0">
-                    <div className={`text-xs font-bold leading-tight ${t.earned ? (isGradient ? 'text-purple-300' : c.text) : 'text-[var(--text-tertiary)]'}`}>
+                    <div className={`text-[13px] font-bold leading-tight ${t.earned ? (isGradient ? 'text-purple-300' : c.text) : 'text-white/40'}`}>
                         {t.title}
                     </div>
-                    <div className="text-[10px] text-[var(--text-tertiary)] mt-1 leading-relaxed">
+                    <div className="text-[11px] text-[var(--text-tertiary)] mt-1 leading-relaxed">
                         {t.desc}
                     </div>
                 </div>
@@ -103,13 +103,13 @@ export default function AchievementsTab({ stats, characters }) {
                 const rest = ranked.slice(3);
 
                 return (
-                    <div className="card p-4">
+                    <div className="glass-card-sm p-4">
                         <div className="flex items-center justify-between mb-3">
                             <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
                                 <Globe size={14} className="text-violet-400" /> <span>글로벌 랭킹</span>
                             </h3>
                             {rankingUpdatedAt && (
-                                <div className="text-[9px] text-[var(--text-tertiary)] bg-[var(--bg-secondary)] px-1.5 py-0.5 rounded border border-[var(--border)]">
+                                <div className="text-[10px] text-[var(--text-tertiary)] bg-[var(--bg-secondary)] px-2 py-1 rounded border border-[var(--border)]">
                                     {rankingUpdatedAt.getFullYear()}년{rankingUpdatedAt.getMonth() + 1}월{rankingUpdatedAt.getDate()}일 {String(rankingUpdatedAt.getHours()).padStart(2, '0')}:{String(rankingUpdatedAt.getMinutes()).padStart(2, '0')} 업데이트
                                 </div>
                             )}
@@ -138,20 +138,20 @@ export default function AchievementsTab({ stats, characters }) {
                                                     title="Zeta 채팅으로 이동"
                                                 >
                                                     <div className="absolute bottom-full mb-2 w-max max-w-[140px] text-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                                        <div className="text-[9px] sm:text-[10px] bg-[var(--card)] px-2 py-1 flex items-center gap-1 rounded shadow-lg border border-[var(--border)] text-[var(--text-secondary)] font-medium">대화 {formatNumber(char.interactionCount)} <ChevronRight size={10} className="text-[var(--accent)]" /></div>
+                                                        <div className="text-[10px] sm:text-[11px] glass-card-sm px-2 py-1 flex items-center gap-1 rounded shadow-lg text-white/70 font-medium">대화 {formatNumber(char.interactionCount)} <ChevronRight size={10} className="text-[var(--accent)]" /></div>
                                                     </div>
 
                                                     <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 ${isFirst ? 'border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : rank === 2 ? 'border-slate-300' : 'border-orange-400'} mb-2 overflow-hidden bg-[var(--bg-secondary)] shrink-0 flex items-center justify-center relative shadow-sm`}>
                                                         {char.image ? <img src={proxyImageUrl(char.image)} alt={char.name} className="w-full h-full object-cover" /> : <div className="scale-75 sm:scale-100">{medalIcon}</div>}
                                                     </div>
-                                                    <div className={`text-[10px] sm:text-xs font-black truncate w-full text-center mb-1 drop-shadow-sm ${isFirst ? 'text-amber-500' : 'text-[var(--text-primary)]'}`}>
+                                                    <div className={`text-[11px] sm:text-sm font-black truncate w-full text-center mb-1 drop-shadow-sm ${isFirst ? 'text-amber-500' : 'text-[var(--text-primary)]'}`}>
                                                         {char.name}
                                                     </div>
 
                                                     <div className={`w-full ${podiumHeight} ${podiumColor} border-t-2 rounded-t-lg flex flex-col items-center pt-2 sm:pt-3 shadow-inner relative overflow-hidden backdrop-blur-sm`}>
                                                         {isFirst && <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />}
                                                         <div className="z-10 drop-shadow-md scale-90 sm:scale-110">{medalIcon}</div>
-                                                        <span className={`text-[9px] sm:text-[10px] font-black mt-auto mb-2 opacity-60 z-10 tracking-widest ${isFirst ? 'text-yellow-600' : rank === 2 ? 'text-slate-500' : 'text-orange-700'}`}>TOP {rank}</span>
+                                                        <span className={`text-[10px] sm:text-[11px] font-black mt-auto mb-2 opacity-60 z-10 tracking-widest ${isFirst ? 'text-yellow-600' : rank === 2 ? 'text-slate-500' : 'text-orange-700'}`}>TOP {rank}</span>
                                                     </div>
                                                 </a>
                                             );
@@ -175,18 +175,18 @@ export default function AchievementsTab({ stats, characters }) {
                                                     <div className="text-sm font-bold text-[var(--text-primary)] truncate mb-1 group-hover:text-[var(--accent-bright)] transition-colors">{char.name}</div>
                                                     <div className="flex flex-wrap gap-1.5">
                                                         {char.trendingRank != null && (
-                                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-violet-500/10 border border-violet-500/20 text-violet-400">
+                                                            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-violet-500/10 border border-violet-500/20 text-violet-400">
                                                                 트렌딩 #{char.trendingRank}
                                                                 {char.rankDiff !== 0 && <span className={char.rankDiff > 0 ? ' text-emerald-400 ml-0.5' : ' text-red-400 ml-0.5'}> {char.rankDiff > 0 ? '▲' : '▼'}{Math.abs(char.rankDiff)}</span>}
                                                             </span>
                                                         )}
                                                         {char.bestRank != null && (
-                                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-500">
+                                                            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-500">
                                                                 베스트 #{char.bestRank}
                                                             </span>
                                                         )}
                                                         {char.newRank != null && (
-                                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
+                                                            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
                                                                 신작 #{char.newRank}
                                                             </span>
                                                         )}
@@ -217,7 +217,7 @@ export default function AchievementsTab({ stats, characters }) {
             })()}
 
             {/* 칭호 요약 */}
-            <div className="card p-4 sm:p-5">
+            <div className="glass-card-sm p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
                         <Tag size={14} className="text-[var(--text-tertiary)]" /> <span>칭호</span>
@@ -240,7 +240,7 @@ export default function AchievementsTab({ stats, characters }) {
 
             {/* 획득한 칭호 */}
             {earned.length > 0 && (
-                <div className="card p-4 sm:p-5">
+                <div className="glass-card-sm p-4 sm:p-5">
                     <h4 className="text-xs font-bold text-[var(--text-secondary)] mb-3 flex items-center gap-1.5">
                         <CheckCircle2 size={14} className="text-emerald-400" /> 획득한 칭호 <span className="text-[var(--accent)]">({earned.length})</span>
                     </h4>
@@ -252,7 +252,7 @@ export default function AchievementsTab({ stats, characters }) {
 
             {/* 미획득 칭호 */}
             {unearned.length > 0 && (
-                <div className="card p-4 sm:p-5">
+                <div className="glass-card-sm p-4 sm:p-5">
                     <h4 className="text-xs font-bold text-[var(--text-tertiary)] mb-3 flex items-center gap-1.5">
                         <Lock size={14} className="text-[var(--text-tertiary)]" /> 미획득 칭호 <span className="opacity-60">({unearned.length})</span>
                     </h4>

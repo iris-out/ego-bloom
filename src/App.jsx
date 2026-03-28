@@ -1,14 +1,31 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { lazy, Suspense } from 'react';
+import { Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
 import HomePage from './routes/HomePage';
+import ProfilePage from './routes/ProfilePage';
 import RankingPage from './routes/RankingPage';
+
+const TierPage = lazy(() => import('./routes/TierPage'));
+
+// Redirect old /?creator=X to /profile?creator=X
+function LegacyRedirect() {
+  const [searchParams] = useSearchParams();
+  const creator = searchParams.get('creator');
+  if (creator) {
+    return <Navigate to={`/profile?creator=${encodeURIComponent(creator)}`} replace />;
+  }
+  return <HomePage />;
+}
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/ranking" element={<RankingPage />} />
-      <Route path="*" element={<HomePage />} />
-    </Routes>
+    <Suspense fallback={null}>
+      <Routes>
+        <Route path="/" element={<LegacyRedirect />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/ranking" element={<RankingPage />} />
+        <Route path="/tier" element={<TierPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }

@@ -1,16 +1,17 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import {
   formatCompactNumber, getCreatorTier,
   calculateCreatorScore, toKST, getCharacterTier
 } from '../utils/tierCalculator';
-import GemTierBadge from './GemTierBadge';
+import TierIcon from './ui/TierIcon';
 import HoverNumber from './HoverNumber';
-import { Film, Pin } from 'lucide-react';
+import { Pin } from 'lucide-react';
 import { computeEarnedTitles, BADGE_COLOR_MAP, FIXED_BADGE_IDS } from '../data/badges';
 import ImageWithFallback from './ImageWithFallback';
 import { getCreatorBadge, saveCreatorBadge } from '../utils/storage';
-import RecapModal from './RecapModal';
+import LiveViewModal from './LiveViewModal';
 
 const TIER_KO = {
   unranked: 'UNRANKED', bronze: 'BRONZE', silver: 'SILVER', gold: 'GOLD',
@@ -19,23 +20,21 @@ const TIER_KO = {
 
 const TIER_COLORS = {
   unranked: '#6B7280',
-  bronze:   '#C07830',
-  silver:   '#94A3B8',
-  gold:     '#D4A820',
-  platinum: '#2DD4BF',
-  diamond:  '#60A5FA',
-  master:   '#C084FC',
-  champion: '#F87171',
+  bronze:   '#C58356',
+  silver:   '#9CA3AF',
+  gold:     '#FBBF24',
+  platinum: '#E2E8F0',
+  diamond:  '#3B82F6',
+  master:   '#D946EF',
+  champion: '#F97316',
 };
 
-export default function ProfileHeader({ profile, stats, characters }) {
+export default function ProfileHeader({ profile, stats, characters, onLiveClick, editing: editingProp, setEditing: setEditingProp }) {
+  const navigate = useNavigate();
   const [showRecap, setShowRecap] = useState(false);
-  const [editing, setEditing] = useState(false);
-
-  const hasEarnedTitles = useMemo(
-    () => computeEarnedTitles({ characters, stats }).some(t => t.earned),
-    [characters, stats]
-  );
+  const [editingInternal, setEditingInternal] = useState(false);
+  const editing = editingProp !== undefined ? editingProp : editingInternal;
+  const setEditing = setEditingProp || setEditingInternal;
 
   // Hash 기반 Recap 열기/닫기
   React.useEffect(() => {
@@ -77,15 +76,6 @@ export default function ProfileHeader({ profile, stats, characters }) {
     return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([tag]) => tag);
   }, [characters]);
 
-  // 상위 캐릭터 티어 10개
-  const topCharTiers = useMemo(() => {
-    if (!characters?.length) return [];
-    return [...characters]
-      .sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0))
-      .slice(0, 10)
-      .map(c => ({ name: c.name, tier: getCharacterTier(c.interactionCount || 0) }));
-  }, [characters]);
-
   if (!profile || !stats) return null;
 
   const score = calculateCreatorScore(stats, characters);
@@ -97,46 +87,34 @@ export default function ProfileHeader({ profile, stats, characters }) {
   const progressPct = tier.subProgress ?? tier.progress ?? 0;
   const tierColor = TIER_COLORS[tier.key] || TIER_COLORS.unranked;
 
+  // ELO progress bar: current score → next tier threshold
+  const nextMin = tier.nextGoalScore || score;
+  const currentMin = tier.min || 0;
+
   return (
     <>
-      <div className="profile-header-wrap relative">
-        {/* 우상단 편집 버튼 */}
-        {hasEarnedTitles && (
-          <button
-            onClick={() => setEditing(true)}
-            className="absolute top-3 right-0 chip"
-            title="칭호 편집"
-          >
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-              <path d="m15 5 4 4" />
-            </svg>
-          </button>
-        )}
-
-        {/* 아바타 + 이름/핸들 (좌) + 칭호 (우) */}
-        <div className="flex items-center gap-3 mb-4 pr-8">
-          {/* 좌: 아바타 + 이름/핸들 */}
-          <div className="flex items-center gap-2.5 shrink-0">
-            <div className="profile-avatar-wrap">
-              <div className="profile-avatar">
+      <div className="ph-wrap">
+        {/* 아바타 + 이름/핸들 */}
+        <div className="flex flex-col items-center">
+          <div className="relative">
+            <div className="ph-avatar-ring" style={{ '--tier-color': tierColor }}>
+              <div className="ph-avatar">
                 {profile.profileImageUrl ? (
                   <img src={profile.profileImageUrl} alt={profile.nickname} crossOrigin="anonymous" loading="eager" />
                 ) : (
-                  <span className="text-3xl font-black text-[var(--text-tertiary)]">
+                  <span className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-br from-purple-300 to-indigo-400">
                     {(profile.nickname || '?')[0]}
                   </span>
                 )}
               </div>
             </div>
-            <div className="min-w-0">
-              <div className="profile-name truncate">{profile.nickname}</div>
-              <div className="profile-handle truncate">@{profile.username}</div>
-            </div>
           </div>
 
-          {/* 우: 칭호 pills */}
-          <div className="flex-1 min-w-0">
+          <h1 className="font-serif-kr text-[22px] mt-4 font-bold tracking-tight text-white">{profile.nickname}</h1>
+          <span className="text-[13px] text-gray-500 mt-1">@{profile.username}</span>
+
+          {/* 칭호 pills */}
+          <div className="mt-4">
             <CreatorPills
               characters={characters}
               stats={stats}
@@ -147,111 +125,105 @@ export default function ProfileHeader({ profile, stats, characters }) {
           </div>
         </div>
 
-        {/* ELO / 티어 카드 — 계급장 스타일 */}
-        <div className={`elo-card${['diamond','master','champion'].includes(tier.key) ? ` elo-card-animated elo-card-${tier.key}` : ''}`}>
-          {/* 티어명 헤더 — 계급장 */}
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <div className="h-px flex-1" style={{ background: `linear-gradient(to right, transparent, ${tierColor}60)` }} />
-            <div
-              className="text-[13px] font-black tracking-[0.18em] uppercase px-3"
-              style={{ color: tierColor, textShadow: `0 0 12px ${tierColor}80` }}
+        {/* 메인 스탯 glass card */}
+        <div className="ph-stat-card">
+          {/* 티어 아이콘 + 이름 */}
+          <div className="flex flex-col items-center justify-center pt-[27px] pb-[24px] border-b border-white/[0.04] relative">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full blur-2xl" style={{ background: `${tierColor}30` }} />
+            <button
+              onClick={() => navigate('/tier')}
+              className="relative z-10 transition-transform hover:scale-110 active:scale-95 cursor-pointer"
+              title="티어 가이드 보기"
             >
-              {tierLabel}
+              <TierIcon tier={tier.key} size={70} />
+            </button>
+            <div className="mt-4 flex flex-col items-center z-10">
+              <span
+                className="text-[16px] font-black tracking-[0.25em] uppercase bg-clip-text text-transparent"
+                style={{ backgroundImage: `linear-gradient(to right, ${tierColor}, ${tierColor}CC)` }}
+              >
+                {tierLabel}
+              </span>
             </div>
-            <div className="h-px flex-1" style={{ background: `linear-gradient(to left, transparent, ${tierColor}60)` }} />
           </div>
 
-          {/* 배지 + 진행 정보 */}
-          <div className="flex items-center gap-4">
-            <GemTierBadge tier={tier} size="xl" score={score} breakdown={breakdown} />
-            <div className="flex-1 min-w-0">
-              <div className="text-[11px] font-mono mb-1" style={{ color: tierColor }}>
-                ELO {score.toLocaleString()}
-              </div>
-              <div className="progress-bar mb-1" style={{ '--tier-progress-color': tierColor }}>
-                <div className="progress-fill" style={{ width: `${Math.min(100, Math.max(0, progressPct))}%` }} />
-              </div>
-              <div className="elo-next">
-                <span className="font-bold" style={{ color: tierColor }}>{Math.floor(progressPct)}%</span>
+          {/* 3열 통계 */}
+          <div className="flex justify-between items-center py-6 px-4">
+            <div className="flex flex-col items-center w-1/3">
+              <span className="text-2xl font-black text-white tracking-tight">
+                <HoverNumber value={stats.plotInteractionCount || 0} />
+              </span>
+              <span className="text-[11px] text-gray-500 mt-1 font-semibold uppercase tracking-widest">대화량</span>
+            </div>
+            <div className="w-[1px] h-10 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+            <div className="flex flex-col items-center w-1/3">
+              <span className="text-2xl font-black text-white tracking-tight">
+                {(stats.followerCount || 0).toLocaleString()}
+              </span>
+              <span className="text-[11px] text-gray-500 mt-1 font-semibold uppercase tracking-widest">팔로워</span>
+            </div>
+            <div className="w-[1px] h-10 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+            <div className="flex flex-col items-center w-1/3">
+              <span className="text-2xl font-black text-white tracking-tight">
+                <HoverNumber value={stats.plotCount || 0} />
+              </span>
+              <span className="text-[11px] text-gray-500 mt-1 font-semibold uppercase tracking-widest">캐릭터</span>
+            </div>
+          </div>
+
+          {/* ELO 프로그레스 바 */}
+          <div className="pt-3 pb-5 px-6 border-t border-white/[0.04] bg-white/[0.01]">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[10px] text-gray-500 font-semibold tracking-wider">ELO SCORE</span>
+              <span className="text-[10px] text-gray-500 font-medium">
+                {formatCompactNumber(score)}
                 {tier.nextGoalScore && tier.key !== 'champion' && (
-                  <span className="text-[var(--text-tertiary)]">
-                    {formatCompactNumber(Math.max(0, tier.nextGoalScore - score))} 남음
-                  </span>
+                  <span className="text-gray-600"> / {formatCompactNumber(tier.nextGoalScore)}</span>
                 )}
-              </div>
-              {tier.nextGoalLabel && tier.key !== 'champion' && (
-                <div className="mt-1 text-[10px] text-[var(--text-tertiary)]">
-                  → {tier.nextGoalLabel}
-                </div>
-              )}
+              </span>
+            </div>
+            <div className="h-[4px] w-full bg-black/60 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-1000"
+                style={{
+                  width: `${Math.min(100, Math.max(2, progressPct))}%`,
+                  background: `linear-gradient(to right, ${tierColor}99, ${tierColor}CC, ${tierColor})`,
+                }}
+              />
             </div>
           </div>
         </div>
 
-        {/* 상위 캐릭터 티어 카드 */}
-        {topCharTiers.length > 0 && (
-          <div className="card p-3 mb-3">
-            <div className="text-[10px] font-semibold text-[var(--text-tertiary)] mb-2">상위 10개 캐릭터 티어</div>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {topCharTiers.map((item, i) => (
-                <div
-                  key={i}
-                  title={`${item.name} (${item.tier.name})`}
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black shrink-0 border cursor-default"
-                  style={{
-                    color: item.tier.color,
-                    borderColor: item.tier.color + '60',
-                    background: item.tier.color + '18',
-                  }}
-                >
-                  {item.tier.name}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 스탯 row */}
-        <div className="profile-stats-row">
-          <div className="profile-stat">
-            <div className="profile-stat-val"><HoverNumber value={stats.followerCount || 0} /></div>
-            <div className="profile-stat-key">팔로워</div>
-          </div>
-          <div className="profile-stat">
-            <div className="profile-stat-val"><HoverNumber value={stats.plotCount || 0} /></div>
-            <div className="profile-stat-key">캐릭터</div>
-          </div>
-          <div className="profile-stat">
-            <div className="profile-stat-val"><HoverNumber value={stats.plotInteractionCount || 0} /></div>
-            <div className="profile-stat-key">총 대화</div>
-          </div>
-          <div className="profile-stat">
-            <div className="profile-stat-val"><HoverNumber value={stats.voicePlayCount || 0} /></div>
-            <div className="profile-stat-key">음성 재생</div>
-          </div>
-        </div>
-
-        {/* 프로필 태그 + RECAP 버튼 */}
-        {topTags.length > 0 && (
-          <div className="profile-tags" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div className="flex flex-nowrap gap-1.5 overflow-hidden">
+        {/* 프로필 태그 + LIVE 버튼 */}
+        {(topTags.length > 0 || onLiveClick) && (
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex flex-nowrap gap-1.5 overflow-hidden flex-1">
               {topTags.map(tag => (
-                <span key={tag} className="chip shrink-0">#{tag}</span>
+                <span key={tag} className="px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/5 text-[12px] text-gray-400 shrink-0">
+                  #{tag}
+                </span>
               ))}
             </div>
             <button
-              onClick={openRecap}
-              className="chip bg-[var(--accent-soft)] border-[var(--accent)]/30 text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-all flex items-center gap-1 shrink-0 ml-2"
+              onClick={onLiveClick || openRecap}
+              className="ml-2 px-4 py-2 rounded-full text-[12px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0"
+              style={{
+                background: 'linear-gradient(135deg, rgba(139,92,246,0.3), rgba(59,130,246,0.2))',
+                border: '1px solid rgba(139,92,246,0.5)',
+                color: '#C4B5FD',
+                boxShadow: '0 0 12px rgba(139,92,246,0.25), inset 0 1px 0 rgba(255,255,255,0.05)',
+              }}
             >
-              <Film size={10} />RECAP
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+              LIVE
             </button>
           </div>
         )}
       </div>
 
-      {/* Recap 모달 — portal로 document.body에 렌더링 (stacking context 탈출) */}
+      {/* LiveView 모달 — portal로 document.body에 렌더링 */}
       {showRecap && createPortal(
-        <RecapModal
+        <LiveViewModal
           isOpen={showRecap}
           onClose={closeRecap}
           characters={characters || []}
@@ -272,24 +244,25 @@ function CreatorPills({ characters, stats, creatorId, editing, setEditing }) {
   const allEarned = useMemo(() => allTitles.filter(t => t.earned), [allTitles]);
   const fixedIds = FIXED_BADGE_IDS;
 
-  const [selected, setSelected] = useState(null);
+  // 초기값: 저장된 배지 있으면 그걸, 없으면 첫 4개
+  const defaultIds = useMemo(() => allEarned.slice(0, 4).map(p => p.id), [allEarned]);
+
+  const [selected, setSelected] = useState(() => {
+    if (creatorId) {
+      const stored = getCreatorBadge(creatorId);
+      if (stored && Array.isArray(stored) && stored.length > 0) return stored;
+    }
+    return null; // null → defaultIds 사용
+  });
 
   React.useEffect(() => {
-    if (creatorId) {
-      const storedIds = getCreatorBadge(creatorId);
-      if (storedIds && Array.isArray(storedIds)) {
-        const validIds = storedIds.filter(id => allEarned.some(e => e.id === id));
-        if (validIds.length > 0) {
-          setSelected(prev => {
-            if (!prev) return validIds;
-            if (prev.length === validIds.length && prev.every((v, i) => v === validIds[i])) return prev;
-            return validIds;
-          });
-        }
-      }
+    if (!creatorId) return;
+    const storedIds = getCreatorBadge(creatorId);
+    if (storedIds && Array.isArray(storedIds) && storedIds.length > 0) {
+      const validIds = storedIds.filter(id => allEarned.some(e => e.id === id));
+      if (validIds.length > 0) setSelected(validIds);
     }
   }, [creatorId, allEarned]);
-
 
   React.useEffect(() => {
     if (editing) document.body.style.overflow = 'hidden';
@@ -297,24 +270,27 @@ function CreatorPills({ characters, stats, creatorId, editing, setEditing }) {
   }, [editing]);
 
   const activeIds = useMemo(() => {
+    const base = selected ?? defaultIds;
     const presentFixed = allEarned.filter(p => fixedIds.includes(p.id)).map(p => p.id);
-    if (selected) {
-      const unified = Array.from(new Set([...presentFixed, ...selected]));
-      return unified.slice(0, 4);
-    }
-    return allEarned.slice(0, 4).map(p => p.id);
-  }, [selected, allEarned, fixedIds]);
+    const unified = Array.from(new Set([...presentFixed, ...base]));
+    return unified.slice(0, 4);
+  }, [selected, defaultIds, allEarned, fixedIds]);
 
   const toggleId = (id) => {
     if (fixedIds.includes(id)) return;
     setSelected(prev => {
-      const cur = prev || allEarned.slice(0, 8).map(p => p.id);
-      let newSelection;
-      if (cur.includes(id)) newSelection = cur.filter(x => x !== id);
-      else if (cur.length >= 4) newSelection = cur;
-      else newSelection = [...cur, id];
-      if (creatorId) saveCreatorBadge(creatorId, newSelection);
-      return newSelection;
+      const cur = prev ?? defaultIds;
+      let newSel;
+      if (cur.includes(id)) {
+        newSel = cur.filter(x => x !== id);
+      } else if (cur.length >= 4) {
+        // 4개 꽉 찼을 때는 교체 불가 (체크박스 disabled로 처리)
+        newSel = cur;
+      } else {
+        newSel = [...cur, id];
+      }
+      if (creatorId) saveCreatorBadge(creatorId, newSel);
+      return newSel;
     });
   };
 
@@ -325,19 +301,19 @@ function CreatorPills({ characters, stats, creatorId, editing, setEditing }) {
     const style = BADGE_COLOR_MAP[p.color] || BADGE_COLOR_MAP.slate;
     const isGradient = p.color === 'gradient';
     const label = `${p.emoji} ${p.title}`;
-    return isGradient ? (
+    return (
       <div key={p.id} className="relative group/pill shrink-0">
-        <span className="chip text-white border-purple-400/30" style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' }}>
+        <span
+          className={`px-3 py-1.5 rounded-full border text-[11px] font-medium inline-flex items-center gap-1.5 ${
+            isGradient
+              ? 'text-white border-purple-400/30'
+              : `${style.bg} border-white/5 ${style.text}`
+          }`}
+          style={isGradient ? { background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' } : { background: 'rgba(255,255,255,0.03)' }}
+        >
           {label}
         </span>
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 px-2 py-1 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-lg text-[10px] text-[var(--text-secondary)] whitespace-nowrap opacity-0 group-hover/pill:opacity-100 transition-opacity pointer-events-none z-50">
-          {p.desc}
-        </div>
-      </div>
-    ) : (
-      <div key={p.id} className="relative group/pill shrink-0">
-        <span className={`chip ${style.bg} border-0 ${style.text}`}>{label}</span>
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 px-2 py-1 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-lg text-[10px] text-[var(--text-secondary)] whitespace-nowrap opacity-0 group-hover/pill:opacity-100 transition-opacity pointer-events-none z-50">
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 px-2 py-1 bg-[#1A1625] border border-white/10 rounded-lg shadow-lg text-[10px] text-gray-400 whitespace-nowrap opacity-0 group-hover/pill:opacity-100 transition-opacity pointer-events-none z-50">
           {p.desc}
         </div>
       </div>
@@ -345,41 +321,94 @@ function CreatorPills({ characters, stats, creatorId, editing, setEditing }) {
   });
 
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap justify-center gap-2">
       {pillNodes}
 
       {/* 편집 모달 */}
       {editing && createPortal(
+        <div
+          className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
+          onClick={e => e.target === e.currentTarget && setEditing(false)}
+        >
           <div
-            className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
-            onClick={e => e.target === e.currentTarget && setEditing(false)}
+            className="w-full sm:max-w-md max-h-[85dvh] flex flex-col sm:rounded-2xl rounded-t-2xl overflow-hidden"
+            style={{ background: '#130F1E', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 -20px 60px rgba(0,0,0,0.6)' }}
+            onClick={e => e.stopPropagation()}
           >
-            <div className="w-full max-w-lg max-h-[85dvh] flex flex-col rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
-              <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
-                <span className="font-bold text-[var(--text-primary)]">표시할 칭호 ({activeIds.length}/4)</span>
-                <button onClick={() => setEditing(false)} className="nav-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></button>
+            {/* 헤더 */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+              <div>
+                <span className="font-bold text-white text-[15px]">칭호 설정</span>
+                <p className="text-[11px] text-gray-500 mt-0.5">최대 4개까지 표시됩니다</p>
               </div>
-              <div className="overflow-y-auto flex-1 p-3 space-y-1">
-                {allEarned.map(p => {
-                  const isFixed = fixedIds.includes(p.id);
-                  const checked = activeIds.includes(p.id);
-                  const disabled = isFixed || (!checked && activeIds.length >= 4);
-                  return (
-                    <label key={p.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-[var(--bg-secondary)] transition-colors ${disabled ? 'opacity-50' : ''}`}>
-                      <input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggleId(p.id)} className="w-4 h-4 rounded accent-[var(--accent)]" />
-                      <span className="text-sm text-[var(--text-primary)] flex items-center gap-1.5 flex-1">
-                        {isFixed && <Pin size={11} className="opacity-60" />}
-                        {p.emoji} {p.title}
-                      </span>
-                      {p.desc && <span className="text-[10px] text-[var(--text-tertiary)] max-w-[130px] text-right">{p.desc}</span>}
-                    </label>
-                  );
-                })}
+              <div className="flex items-center gap-3">
+                <span className="text-[12px] font-semibold text-purple-400">{activeIds.length} / 4</span>
+                <button
+                  onClick={() => setEditing(false)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-white transition-colors"
+                  style={{ background: 'rgba(255,255,255,0.06)' }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                </button>
               </div>
             </div>
-          </div>,
-          document.body
-        )}
+
+            {/* 목록 */}
+            <div className="overflow-y-auto flex-1 py-2">
+              {allEarned.map(p => {
+                const isFixed = fixedIds.includes(p.id);
+                const checked = activeIds.includes(p.id);
+                const disabled = isFixed || (!checked && activeIds.length >= 4);
+                const style = BADGE_COLOR_MAP[p.color] || BADGE_COLOR_MAP.slate;
+
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => !disabled && toggleId(p.id)}
+                    disabled={disabled && !checked}
+                    className={`w-full flex items-center gap-3 px-5 py-3 text-left transition-colors ${
+                      checked
+                        ? 'bg-white/[0.05]'
+                        : disabled
+                        ? 'opacity-40 cursor-not-allowed'
+                        : 'hover:bg-white/[0.03]'
+                    }`}
+                  >
+                    {/* 체크박스 */}
+                    <div
+                      className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all ${
+                        checked ? 'bg-purple-500 border-purple-500' : 'border border-white/20'
+                      }`}
+                    >
+                      {checked && (
+                        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M2 6l3 3 5-5" />
+                        </svg>
+                      )}
+                    </div>
+
+                    {/* 칭호 뱃지 미리보기 */}
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-medium shrink-0 ${style.text}`}
+                      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    >
+                      {p.emoji} {p.title}
+                    </span>
+
+                    {/* 설명 */}
+                    <span className="text-[12px] text-gray-500 truncate flex-1">{p.desc}</span>
+
+                    {isFixed && (
+                      <Pin size={10} className="text-gray-600 shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

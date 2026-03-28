@@ -29,6 +29,10 @@ stat.md
 # ai agent
 .plan/
 CLAUDE.md
+checklist.md
+produce.md
 
 # prototype
 prototype/
+plan/
+design_ai/

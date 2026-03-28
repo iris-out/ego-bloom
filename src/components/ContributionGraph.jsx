@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
 import { toKST } from '../utils/tierCalculator';
 
 const DAY_SIZE = 11;
@@ -15,14 +14,6 @@ const COLORS_DARK = [
   '#B794F4',
 ];
 
-const COLORS_LIGHT = [
-  'rgba(0,0,0,0.06)',
-  '#D6BCFA',
-  '#B794F4',
-  '#9F7AEA',
-  '#805AD5',
-];
-
 function getLevel(count, maxCount) {
   if (count === 0) return 0;
   if (maxCount <= 1) return 4;
@@ -34,7 +25,6 @@ function getLevel(count, maxCount) {
 }
 
 export default function ContributionGraph({ characters }) {
-  const { theme } = useTheme();
   const [tooltip, setTooltip] = useState(null);
   const [selectedYear, setSelectedYear] = useState(toKST().getFullYear());
 
@@ -59,7 +49,7 @@ export default function ContributionGraph({ characters }) {
     }
     return streak;
   }, [characters]);
-  const colors = theme === 'dark' ? COLORS_DARK : COLORS_LIGHT;
+  const colors = COLORS_DARK;
   const containerRef = React.useRef(null);
 
   // ... (useMemo remains same)
@@ -129,7 +119,7 @@ export default function ContributionGraph({ characters }) {
     });
 
     return { grid, months, totalCount: filteredChars.length, maxCount, years };
-  }, [characters, selectedYear, theme]);
+  }, [characters, selectedYear]);
 
   if (!characters?.length) return null;
 

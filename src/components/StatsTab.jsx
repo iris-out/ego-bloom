@@ -5,7 +5,7 @@ const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
 function StatCard({ label, value, sub }) {
   return (
-    <div className="card p-4">
+    <div className="glass-card-sm p-4">
       <div className="text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase tracking-wider mb-1">{label}</div>
       <div className="text-base sm:text-lg font-bold text-[var(--text-primary)] truncate">{value}</div>
       {sub && <div className="text-[10px] text-[var(--text-tertiary)] mt-0.5">{sub}</div>}
@@ -110,7 +110,7 @@ export default function StatsTab({ stats, characters }) {
 
       {/* 태그별 평균 대화량 */}
       {tagAvgData.length > 0 && (
-        <div className="card p-4 sm:p-5">
+        <div className="glass-card-sm p-4 sm:p-5">
           <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-4">태그별 평균 대화량</h3>
           <div className="space-y-2">
             {tagAvgData.map(({ tag, avg, count, pct }) => (

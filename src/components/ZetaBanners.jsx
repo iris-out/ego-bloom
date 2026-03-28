@@ -104,15 +104,13 @@ export default function ZetaBanners() {
       <div className="relative">
         <button
           onClick={() => scrollBy(-1)}
-          className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full border border-[var(--border)] shadow-[0_2px_10px_rgba(0,0,0,0.6)] text-[var(--text-primary)] hover:text-white transition-all"
-          style={{ background: 'var(--card)' }}
+          className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center glass-pill shadow-[0_2px_10px_rgba(0,0,0,0.6)] text-white/70 hover:text-white transition-all"
         >
           <ChevronLeft size={14} />
         </button>
         <button
           onClick={() => scrollBy(1)}
-          className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full border border-[var(--border)] shadow-[0_2px_10px_rgba(0,0,0,0.6)] text-[var(--text-primary)] hover:text-white transition-all"
-          style={{ background: 'var(--card)' }}
+          className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center glass-pill shadow-[0_2px_10px_rgba(0,0,0,0.6)] text-white/70 hover:text-white transition-all"
         >
           <ChevronRight size={14} />
         </button>

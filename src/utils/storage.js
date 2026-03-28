@@ -85,3 +85,59 @@ export const saveCreatorBadge = (creatorId, badgeId) => {
         console.error('Failed to save creator badge', e);
     }
 };
+
+// ─── My Profile (Main Page Pinned Profile) ───────────────────
+const MY_PROFILE_KEY = 'zeta_my_profile_id';
+const MY_PROFILE_CACHE_KEY = 'zeta_my_profile_cache';
+const MY_PROFILE_TTL = 3 * 60 * 60 * 1000; // 3 hours
+
+export const getMyProfileId = () => {
+    try {
+        return localStorage.getItem(MY_PROFILE_KEY) || null;
+    } catch { return null; }
+};
+
+export const setMyProfileId = (id) => {
+    try {
+        localStorage.setItem(MY_PROFILE_KEY, id);
+    } catch (e) {
+        console.error('Failed to save my profile ID', e);
+    }
+};
+
+export const removeMyProfile = () => {
+    try {
+        localStorage.removeItem(MY_PROFILE_KEY);
+        localStorage.removeItem(MY_PROFILE_CACHE_KEY);
+    } catch (e) {
+        console.error('Failed to remove my profile', e);
+    }
+};
+
+export const getMyProfileCache = () => {
+    try {
+        const stored = localStorage.getItem(MY_PROFILE_CACHE_KEY);
+        if (!stored) return null;
+        const parsed = JSON.parse(stored);
+        return parsed;
+    } catch { return null; }
+};
+
+export const setMyProfileCache = (data) => {
+    try {
+        const payload = { ...data, _cachedAt: Date.now() };
+        localStorage.setItem(MY_PROFILE_CACHE_KEY, JSON.stringify(payload));
+    } catch (e) {
+        console.error('Failed to cache my profile', e);
+    }
+};
+
+export const isMyProfileStale = () => {
+    try {
+        const stored = localStorage.getItem(MY_PROFILE_CACHE_KEY);
+        if (!stored) return true;
+        const { _cachedAt } = JSON.parse(stored);
+        if (!_cachedAt) return true;
+        return Date.now() - _cachedAt > MY_PROFILE_TTL;
+    } catch { return true; }
+};
