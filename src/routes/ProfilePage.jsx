@@ -54,6 +54,7 @@ async function fetchAllPlots(creatorId) {
   const firstPlots = mapPlots(firstData.plots);
   if (firstPlots.length < limit) return firstPlots;
 
+  const seenIds = new Set(firstPlots.map(p => p.id));
   let all = [...firstPlots];
   let offset = limit;
   const MAX_PLOTS = 2000;
@@ -70,8 +71,13 @@ async function fetchAllPlots(creatorId) {
     );
     let done = false;
     for (const plots of batchResults) {
-      all.push(...plots);
-      if (plots.length < limit) { done = true; break; }
+      if (plots.length < limit) { done = true; }
+      for (const p of plots) {
+        if (seenIds.has(p.id)) { done = true; break; }
+        seenIds.add(p.id);
+        all.push(p);
+      }
+      if (done) break;
     }
     if (done) break;
     offset += limit * 3;
