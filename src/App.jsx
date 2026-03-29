@@ -5,6 +5,7 @@ import ProfilePage from './routes/ProfilePage';
 import RankingPage from './routes/RankingPage';
 
 const TierPage = lazy(() => import('./routes/TierPage'));
+const WorldPage = lazy(() => import('./routes/WorldPage'));
 
 // Redirect old /?creator=X to /profile?creator=X
 function LegacyRedirect() {
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/ranking" element={<RankingPage />} />
         <Route path="/tier" element={<TierPage />} />
+        <Route path="/world" element={<WorldPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>

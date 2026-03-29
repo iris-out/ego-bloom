@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, X, ChevronRight } from 'lucide-react';
+import { AlertCircle, X, ChevronRight, Database } from 'lucide-react';
 import ChangelogModal from '../components/ChangelogModal';
+import DataCollectionModal from '../components/DataCollectionModal';
 import ZetaBanners from '../components/ZetaBanners';
 import MyProfileCard from '../components/MyProfileCard';
 import SearchPill from '../components/SearchPill';
@@ -13,10 +14,12 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [recentSearches, setRecentSearches] = useState([]);
   const [showChangelog, setShowChangelog] = useState(false);
+  const [showDataModal, setShowDataModal] = useState(false);
   const { status: serverStatus, message: emergencyMessage } = useServerStatus();
   const [noticeDismissed, setNoticeDismissed] = useState(false);
   const noticeDismissTimerRef = useRef(null);
   const [topTags, setTopTags] = useState([]);
+  const [topCreators, setTopCreators] = useState([]);
 
   useEffect(() => {
     if (!emergencyMessage) { setNoticeDismissed(false); return; }
@@ -28,10 +31,25 @@ export default function HomePage() {
 
   useEffect(() => { setRecentSearches(getRecentSearches()); }, []);
 
+  // 첫 방문자에게 데이터 수집 안내 자동 표시
+  useEffect(() => {
+    const visited = localStorage.getItem('ego-bloom-visited');
+    if (!visited) {
+      setShowDataModal(true);
+      localStorage.setItem('ego-bloom-visited', '1');
+    }
+  }, []);
+
   useEffect(() => {
     fetch('/data/ranking_latest.json')
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.combined) setTopTags(d.combined.slice(0, 5)); })
+      .catch(() => { });
+      
+    // 글로벌 랭킹 상위 5명 불러오기
+    fetch('/api/get-rankings')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.rankings) setTopCreators(d.rankings.slice(0, 5)); })
       .catch(() => { });
   }, []);
 
@@ -80,6 +98,13 @@ export default function HomePage() {
             <h1 className="font-medium text-[22px] tracking-[-0.02em] text-white">EGO-BLOOM</h1>
           </div>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-white/70 tracking-wider">
+            <button
+              onClick={() => setShowDataModal(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors mr-1"
+            >
+              <Database size={11} className="text-purple-400" />
+              <span className="hidden sm:inline">데이터 수집</span>
+            </button>
             <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor, boxShadow: `0 0 8px ${statusColor}66` }} />
             <span>{serverStatus === 'ok' ? '정상' : serverStatus === 'warning' ? '불안정' : '이상'}</span>
           </div>
@@ -90,7 +115,7 @@ export default function HomePage() {
 
         {/* 2열 그리드 (PC) / 단일 컬럼 (모바일) */}
         <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-12 lg:items-start flex-1">
-          {/* 왼쪽: 히어로 + 배너 + 트렌딩 + 최근 검색 */}
+          {/* 왼쪽: 히어로 + 배너 + 랭킹 + 트렌딩 + 최근 검색 */}
           <div className="min-w-0">
             {/* 히어로 */}
             <section className="mb-12 animate-fade-in-up" style={{ animationDelay: '120ms' }}>
@@ -98,9 +123,16 @@ export default function HomePage() {
                 Creator<br />
                 <span className="font-serif-kr text-[42px] tracking-[-0.05em] block mt-1">에고 발사대</span>
               </h2>
-              <p className="text-[14px] text-white/70 font-light leading-relaxed max-w-[80%]">
+              <p className="text-[14px] text-white/70 font-light leading-relaxed max-w-[80%] mb-6">
                 당신의 에고를 발사하세요.<br />대화량, 티어, 그리고 업적으로.
               </p>
+              <button 
+                onClick={() => navigate('/world')}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 hover:bg-purple-500/30 transition-all text-sm font-medium text-purple-100"
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                오픈월드 탐험하기 (Beta)
+              </button>
             </section>
 
             {/* 배너 */}
@@ -108,13 +140,43 @@ export default function HomePage() {
               <ZetaBanners />
             </div>
 
+            {/* 글로벌 랭킹 (Top 5) */}
+            <section className="mb-12 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+              <div className="flex justify-between items-end mb-2 pb-2 border-b border-white/[0.06]">
+                <span className="text-[12px] font-medium text-white/40 uppercase tracking-widest">Global Top Creators</span>
+                <button onClick={() => navigate('/ranking')} className="text-[12px] text-white/70 hover:text-white transition-colors flex items-center gap-1">
+                  전체 보기 <ChevronRight size={12} />
+                </button>
+              </div>
+              <ul className="flex flex-col mt-3 gap-2">
+                {topCreators.length > 0 ? topCreators.map((creator, i) => {
+                  const isTop3 = i < 3;
+                  const rankColors = ['text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]', 'text-gray-300 drop-shadow-[0_0_8px_rgba(209,213,219,0.5)]', 'text-amber-600 drop-shadow-[0_0_8px_rgba(217,119,6,0.5)]'];
+                  return (
+                    <li key={creator.id} onClick={() => navigate(`/?creator=${creator.handle || creator.id}`)} 
+                        className="flex items-center p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.08] cursor-pointer transition-all">
+                      <span className={`font-display italic text-[20px] w-8 text-center mr-2 ${isTop3 ? rankColors[i] : 'text-white/40'}`}>{i + 1}</span>
+                      <div className="flex-1 flex flex-col min-w-0">
+                        <span className="text-[15px] font-bold text-white tracking-tight truncate">{creator.nickname}</span>
+                        <span className="text-[11px] text-white/50 truncate font-mono tracking-wider">ELO {creator.elo_score?.toLocaleString()} pt</span>
+                      </div>
+                      <div className="text-[10px] px-2.5 py-1 rounded bg-white/5 text-white/70 uppercase font-bold tracking-widest ml-2 shrink-0 border border-white/10">
+                        {creator.tier_name || 'UNRANKED'}
+                      </div>
+                    </li>
+                  )
+                }) : (
+                  <div className="text-[13px] text-white/40 p-4 text-center bg-white/[0.02] rounded-xl border border-white/[0.05]">
+                    아직 수집된 랭킹 데이터가 없습니다.
+                  </div>
+                )}
+              </ul>
+            </section>
+
             {/* 트렌딩 태그 */}
             <section className="mb-12 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
               <div className="flex justify-between items-end mb-2 pb-2 border-b border-white/[0.06]">
                 <span className="text-[12px] font-medium text-white/40 uppercase tracking-widest">Trending Tags</span>
-                <button onClick={() => navigate('/ranking')} className="text-[12px] text-white/70 hover:text-white transition-colors flex items-center gap-1">
-                  자세히 보기 <ChevronRight size={12} />
-                </button>
               </div>
               <ul className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-x-4">
                 {topTags.length > 0 ? topTags.map((item, i) => (
@@ -183,6 +245,7 @@ export default function HomePage() {
       </div>
 
       <ChangelogModal isOpen={showChangelog} onClose={() => setShowChangelog(false)} />
+      <DataCollectionModal isOpen={showDataModal} onClose={() => setShowDataModal(false)} />
     </div>
   );
 }

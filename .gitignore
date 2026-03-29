@@ -36,3 +36,11 @@ produce.md
 prototype/
 plan/
 design_ai/
+
+# environment
+.env
+plan.md
+todo.md
+
+scan_pii.sh
+*.sh

@@ -161,7 +161,7 @@ const ICON_MAP = {
 };
 
 export default function TierIcon({ tier = 'unranked', size = 'md', className = '' }) {
-  const px = typeof size === 'number' ? size : (SIZES[size] || SIZES.md);
+  const px = typeof size === 'number' ? size : (SIZES[size] || size);
   const IconComponent = ICON_MAP[tier] || ICON_MAP.unranked;
   const colors = TIER_COLORS[tier] || TIER_COLORS.unranked;
 

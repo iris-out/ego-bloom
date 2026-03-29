@@ -170,6 +170,14 @@ export default function ProfilePage() {
     setLoading(true); setError(null); setData(null); setCacheInfo(null); setTab('summary');
 
     try {
+      // UUID 형식이 아니면서, URL 형태도 아니라면 핸들(@) 검색으로 간주함
+      const isUUID = /^[0-9a-fA-F-]{36}$/.test(id);
+      const isURL = id.includes('/creators/');
+      
+      if (!isUUID && !isURL && !id.startsWith('@')) {
+        id = '@' + id;
+      }
+
       if (id.startsWith('@')) {
         const handleCacheKey = 'HANDLE_MAP_' + id;
         const HANDLE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -197,10 +205,11 @@ export default function ProfilePage() {
           localStorage.setItem(handleCacheKey, JSON.stringify({ id: fetchedId, ts: Date.now() }));
           id = fetchedId;
         }
-      } else if (id.includes('/creators/')) {
+      } else if (isURL) {
         const parts = id.split('/creators/');
         if (parts[1]) id = parts[1].split('/')[0];
       }
+      
       if (!id.match(/^[0-9a-fA-F-]{36}$/)) throw new Error('올바른 Creator ID 또는 @핸들이 아닙니다.');
 
       const cacheKey = CACHE_KEY_PREFIX + id;
@@ -238,6 +247,30 @@ export default function ProfilePage() {
       }
 
       if (profile.profileImageUrl) profile.profileImageUrl = proxyImageUrl(profile.profileImageUrl);
+
+      // --- 백그라운드 랭킹 데이터 수집 시작 ---
+      // 주의: 아직 rankingMap이 병합되지 않은 상태의 allPlots를 기준으로 점수를 계산합니다.
+      const eloScore = calculateCreatorScore(stats, allPlots);
+      const tierInfo = getCreatorTier(eloScore);
+      
+      // 유저의 데이터를 DB에 업데이트합니다 (결과를 기다리지 않고 비동기로 찔러주기만 함)
+      fetch('/api/update-creator', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          handle: profile.username || null,
+          nickname: profile.nickname || 'Unknown',
+          profileImageUrl: profile.profileImageUrl,
+          followerCount: stats.followerCount || 0,
+          plotInteractionCount: stats.plotInteractionCount || 0,
+          voicePlayCount: stats.voicePlayCount || 0,
+          eloScore: eloScore,
+          tierName: tierInfo.name
+        })
+      }).catch(err => console.error('[Ranking Update Error]:', err));
+      // --- 백그라운드 랭킹 데이터 수집 끝 ---
+
       const characters = allPlots.map(p => ({
         ...p,
         imageUrl: getPlotImageUrl(p),

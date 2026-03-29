@@ -47,9 +47,17 @@ export default function NavBar({ variant = 'home', onBack, serverStatus, onStatu
           </button>
         )}
 
-        {/* 서버 상태 (home/ranking 에서 표시) */}
+        {/* 데이터 수집 및 서버 상태 (home/ranking 에서 표시) */}
         {serverStatus && variant !== 'profile' && (
-          <button
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowDataModal(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+            >
+              <Database size={12} className="text-white/60" />
+              <span className="text-[10px] font-medium text-white/60 hidden sm:inline">데이터 수집 안내</span>
+            </button>
+            <button
             onClick={onStatusClick}
             className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-300 select-none"
             style={{
