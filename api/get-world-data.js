@@ -36,7 +36,7 @@ export default async function handler(req, res) {
     if (error) throw error;
 
     // --- 그리드 기반 도시 배치 알고리즘 ---
-    const GRID_SIZE = 168; // 빌딩 간의 간격 (미터 단위, 지형 셰이더와 통일)
+    const GRID_SIZE = 24; // 빌딩 간의 간격 (미터 단위, 지형 셰이더와 통일)
     const ROAD_INTERVAL = 4; // 몇 칸마다 도로가 생기는지 (예: 4칸마다 도로)
     
     // 빌딩이 들어갈 수 있는 슬롯(구획) 좌표를 미리 계산하는 제네레이터 스타일 로직
@@ -83,8 +83,8 @@ export default async function handler(req, res) {
       const slot = slots[index] || { gx: index, gz: index };
       
       // 약간의 랜덤 오프셋을 더해 완벽한 격자 느낌을 탈피 (-1.5 ~ +1.5)
-      const jitterX = (Math.random() - 0.5) * 56.0;
-      const jitterZ = (Math.random() - 0.5) * 56.0;
+      const jitterX = (Math.random() - 0.5) * 8.0;
+      const jitterZ = (Math.random() - 0.5) * 8.0;
       
       const x = slot.gx * GRID_SIZE + jitterX;
       const z = slot.gz * GRID_SIZE + jitterZ;
@@ -95,7 +95,7 @@ export default async function handler(req, res) {
         z,
         // ELO 기반 높이 — 전체 범위를 6~120으로 정규화
         // log10 스케일로 ELO 1~최대값을 골고루 분산
-        height: Math.max(11, (Math.log10(Math.max(1, creator.elo_score)) - 2) * 12)
+        height: Math.max(13, (Math.log10(Math.max(1, creator.elo_score)) - 2) * 12)
       };
     });
 

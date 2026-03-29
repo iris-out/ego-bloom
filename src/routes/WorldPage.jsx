@@ -88,7 +88,7 @@ const BuildingShaderMaterial = {
 
 const GroundShaderMaterial = {
   uniforms: {
-    uIsNight: { value: false }, uGridSize: { value: 168.0 }, uRoadInterval: { value: 4.0 },
+    uIsNight: { value: false }, uGridSize: { value: 24.0 }, uRoadInterval: { value: 4.0 },
     uLamps: { value: [] }
   },
   vertexShader: `
@@ -628,14 +628,14 @@ function getTierWidth(t) {
   return 11.0;
 }
 
-const HEIGHT_SCALE = 1.76;
+const HEIGHT_SCALE = 3.17;
 function getTierHeightMult(t) {
-  if (t==='champion') return 1.832;
-  if (t==='master')   return 1.576;
-  if (t==='diamond')  return 1.352;
-  if (t==='platinum') return 1.192;
-  if (t==='gold')     return 1.115;
-  if (t==='silver')   return 1.051;
+  if (t==='champion') return 1.35;
+  if (t==='master')   return 1.25;
+  if (t==='diamond')  return 1.17;
+  if (t==='platinum') return 1.10;
+  if (t==='gold')     return 1.06;
+  if (t==='silver')   return 1.03;
   return 1.0;
 }
 
@@ -735,7 +735,7 @@ function WorldControls({ joystickValues, mobileVertical, acceleration, cameraTar
   const [, getKeys] = useKeyboardControls();
   const phi   = useRef(Math.PI / 4);
   const theta = useRef(Math.PI / 4);
-  const distance = useRef(160);
+  const distance = useRef(200);
   const isMouseDown = useRef(false);
   const target   = useRef(new THREE.Vector3(0, 0, 0));
   const velocity = useRef(new THREE.Vector3(0, 0, 0));
@@ -753,7 +753,7 @@ function WorldControls({ joystickValues, mobileVertical, acceleration, cameraTar
       }
     };
     const onWheel = (e) => {
-      distance.current = Math.max(30, Math.min(500, distance.current + e.deltaY * 0.1));
+      distance.current = Math.max(30, Math.min(2000, distance.current + e.deltaY * 0.2));
     };
 
     let initialTouchDist = null;
@@ -772,7 +772,7 @@ function WorldControls({ joystickValues, mobileVertical, acceleration, cameraTar
           e.touches[0].clientY - e.touches[1].clientY
         );
         const delta = initialTouchDist - currentDist;
-        distance.current = Math.max(30, Math.min(500, distance.current + delta * 0.5));
+        distance.current = Math.max(30, Math.min(2000, distance.current + delta * 0.8));
         initialTouchDist = currentDist;
       }
     };
@@ -944,7 +944,7 @@ export default function WorldPage() {
   const [timeOfDay, setTimeOfDay] = useState('day');
   const [weather,   setWeather]   = useState('clear');
   const [quality,   setQuality]   = useState('medium');
-  const [acceleration, setAcceleration] = useState(600);
+  const [acceleration, setAcceleration] = useState(700);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState(null);
   const [showMinimap, setShowMinimap] = useState(true);
@@ -1070,9 +1070,9 @@ export default function WorldPage() {
                 <div className="grid grid-cols-4 gap-1">
                   {[
                     { l: '느림', v: 350 },
-                    { l: '보통', v: 600 },
-                    { l: '빠름', v: 900 },
-                    { l: '매우빠름', v: 1200 }
+                    { l: '보통', v: 700 },
+                    { l: '빠름', v: 1200 },
+                    { l: '매우빠름', v: 2000 }
                   ].map(s => (
                     <button key={s.v} onClick={() => setAcceleration(s.v)}
                       className={`py-1 rounded-lg text-[10px] font-medium transition-colors ${acceleration===s.v?'bg-purple-600 text-white':'bg-white/10 text-white/50 hover:bg-white/20'}`}>
@@ -1135,7 +1135,7 @@ export default function WorldPage() {
           </div>
         )}
 
-        <Canvas shadows camera={{ fov: 45 }} gl={{ antialias: true }} dpr={QUALITY_DPR[quality]}>
+        <Canvas shadows camera={{ fov: 45, near: 0.5, far: 30000 }} gl={{ antialias: true }} dpr={QUALITY_DPR[quality]}>
           <Suspense fallback={null}>
             {timeOfDay === 'night' ? (
               <color attach="background" args={['#020205']} />
@@ -1174,7 +1174,7 @@ export default function WorldPage() {
 
             {/* 지면 */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -0.01, 0]}>
-              <planeGeometry args={[4000, 4000]} />
+              <planeGeometry args={[8000, 8000]} />
               <shaderMaterial ref={groundMatRef} attach="material" {...gShader} />
             </mesh>
 

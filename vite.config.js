@@ -187,32 +187,41 @@ function supabaseApiPlugin(env) {
 
           if (error) throw error;
 
-          const GRID_SIZE = 8;
+          const GRID_SIZE = 24;
           const ROAD_INTERVAL = 4;
           const slots = [];
-          const MAX_LAYERS = 20;
 
-          for (let l = 0; l <= MAX_LAYERS; l++) {
-            for (let x = -l; x <= l; x++) {
-              for (let z = -l; z <= l; z++) {
-                if (Math.abs(x) !== l && Math.abs(z) !== l) continue;
-                if (x % ROAD_INTERVAL !== 0 && z % ROAD_INTERVAL !== 0) {
-                  slots.push({ gx: x, gz: z });
-                }
-                if (slots.length >= data.length) break;
-              }
-              if (slots.length >= data.length) break;
+          const visitedSet = new Set();
+          const queue = [[0, 0]];
+          visitedSet.add('0,0');
+
+          while (slots.length < data.length && queue.length > 0) {
+            const [x, z] = queue.shift();
+            const isRoadX = x % ROAD_INTERVAL === 0;
+            const isRoadZ = z % ROAD_INTERVAL === 0;
+            const isRiver = z >= 12 && z <= 20;
+            if (!isRoadX && !isRoadZ && !isRiver) slots.push({ gx: x, gz: z });
+            for (const [dx, dz] of [[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]]) {
+              const nx = x + dx, nz = z + dz;
+              const key = `${nx},${nz}`;
+              if (!visitedSet.has(key)) { visitedSet.add(key); queue.push([nx, nz]); }
             }
-            if (slots.length >= data.length) break;
+          }
+
+          for (let i = slots.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [slots[i], slots[j]] = [slots[j], slots[i]];
           }
 
           const worldData = data.map((creator, index) => {
             const slot = slots[index] || { gx: index, gz: index };
+            const jitterX = (Math.random() - 0.5) * 8.0;
+            const jitterZ = (Math.random() - 0.5) * 8.0;
             return {
               ...creator,
-              x: slot.gx * GRID_SIZE,
-              z: slot.gz * GRID_SIZE,
-              height: Math.max(2, (Math.log10(Math.max(1, creator.elo_score)) - 3) * 8) 
+              x: slot.gx * GRID_SIZE + jitterX,
+              z: slot.gz * GRID_SIZE + jitterZ,
+              height: Math.max(13, (Math.log10(Math.max(1, creator.elo_score)) - 2) * 12)
             };
           });
 
