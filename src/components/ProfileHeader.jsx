@@ -139,7 +139,7 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
             </button>
             <div className="mt-4 flex flex-col items-center z-10">
               <span
-                className="text-[16px] font-black tracking-[0.25em] uppercase bg-clip-text text-transparent"
+                className="text-[12px] sm:text-[16px] font-black tracking-[0.15em] sm:tracking-[0.25em] uppercase bg-clip-text text-transparent"
                 style={{ backgroundImage: `linear-gradient(to right, ${tierColor}, ${tierColor}CC)` }}
               >
                 {tierLabel}

@@ -34,14 +34,14 @@ const AVATAR_PALETTES = [
   { bg: 'from-violet-500/15 to-fuchsia-500/15', text: '#C4B5FD' },
 ];
 
-// 티어 배지 스타일
-const TIER_BADGE_STYLES = {
-  x:  { gradient: 'linear-gradient(135deg, #F56565, #C53030)', text: '#fff' },
-  sr: { gradient: 'linear-gradient(135deg, #F6AD55, #DD6B20)', text: '#000' },
-  r:  { gradient: 'linear-gradient(135deg, #A78BFA, #7C3AED)', text: '#fff' },
-  s:  { gradient: 'linear-gradient(135deg, #60A5FA, #2563EB)', text: '#fff' },
-  a:  { gradient: 'linear-gradient(135deg, #34D399, #059669)', text: '#fff' },
-  b:  { gradient: 'linear-gradient(135deg, #9CA3AF, #6B7280)', text: '#fff' },
+// 티어 배지 아웃라인 컬러 (Outline Minimal)
+const TIER_OUTLINE_COLORS = {
+  x:  '#f87171',
+  sr: '#f59e0b',
+  r:  '#a78bfa',
+  s:  '#60a5fa',
+  a:  '#34d399',
+  b:  '#9ca3af',
 };
 
 export default function SummaryTab({ characters, stats }) {
@@ -276,7 +276,7 @@ function CharacterCard({ char, rank, paletteIdx, onTagClick, activeTags, onSelec
   const tier = getCharacterTier(char.interactionCount || 0);
   const tags = (char.hashtags || char.tags || []).slice(0, 2);
   const palette = AVATAR_PALETTES[paletteIdx] || AVATAR_PALETTES[0];
-  const badgeStyle = TIER_BADGE_STYLES[tier.key] || TIER_BADGE_STYLES.b;
+  const tierColor = TIER_OUTLINE_COLORS[tier.key] || TIER_OUTLINE_COLORS.b;
   const relDate = formatRelativeDate(char.createdAt || char.createdDate);
 
   const card = (
@@ -294,49 +294,50 @@ function CharacterCard({ char, rank, paletteIdx, onTagClick, activeTags, onSelec
     >
       {/* 왼쪽: 아바타 + 정보 */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        {/* 아바타 */}
-        <div
-          className={`w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden relative border border-white/5`}
-          style={{ background: '#161320' }}
-        >
-          <div className={`absolute inset-0 bg-gradient-to-br ${palette.bg}`} />
-          {char.imageUrl ? (
-            <ImageWithFallback
-              src={char.imageUrl}
-              fallbackSrcs={(char.imageUrls || []).slice(1)}
-              alt={char.name}
-              className="w-full h-full object-cover relative z-10"
-            />
-          ) : (
-            <span
-              className="font-serif-kr text-lg font-bold relative z-10"
-              style={{ color: palette.text }}
-            >
-              {(char.name || '?')[0]}
-            </span>
-          )}
+        {/* 아바타 + 티어 배지 */}
+        <div className="relative flex-shrink-0" style={{ width: 48, height: 48 }}>
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden relative border border-white/5"
+            style={{ background: '#161320' }}
+          >
+            <div className={`absolute inset-0 bg-gradient-to-br ${palette.bg}`} />
+            {char.imageUrl ? (
+              <ImageWithFallback
+                src={char.imageUrl}
+                fallbackSrcs={(char.imageUrls || []).slice(1)}
+                alt={char.name}
+                className="w-full h-full object-cover relative z-10"
+              />
+            ) : (
+              <span
+                className="font-serif-kr text-lg font-bold relative z-10"
+                style={{ color: palette.text }}
+              >
+                {(char.name || '?')[0]}
+              </span>
+            )}
+          </div>
+          {/* 티어 배지 — Outline Minimal, 아바타 하단 중앙 */}
+          <span
+            className="absolute left-1/2 -translate-x-1/2 -bottom-[7px] z-10 font-bold leading-none whitespace-nowrap"
+            style={{
+              fontSize: '9px',
+              letterSpacing: '0.08em',
+              padding: '2px 6px',
+              borderRadius: '999px',
+              background: 'rgba(11,8,18,0.92)',
+              border: `1.5px solid ${tierColor}`,
+              color: tierColor,
+            }}
+          >
+            {tier.name}
+          </span>
         </div>
 
-        {/* 이름 + 티어 + 태그 */}
+        {/* 이름 + 태그 */}
         <div className="flex flex-col justify-center min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-bold text-gray-100 text-[14px] truncate">{char.name}</h3>
-            {/* 티어 배지 */}
-            <span
-              className="px-2 rounded font-black leading-none shrink-0"
-              style={{ background: badgeStyle.gradient, color: badgeStyle.text, fontSize: '10.5px', paddingTop: '3px', paddingBottom: '3px' }}
-            >
-              {tier.name}
-            </span>
-            {/* 언리밋 배지 */}
-            {char.unlimitedAllowed && (
-              <span
-                className="px-2 rounded font-black leading-none text-white shrink-0"
-                style={{ background: 'linear-gradient(135deg,#8B5CF6,#3B82F6)', fontSize: '10.5px', paddingTop: '3px', paddingBottom: '3px' }}
-              >
-                언리밋
-              </span>
-            )}
           </div>
           <div className="flex gap-1 flex-wrap">
             {tags.map(tag => (
@@ -352,6 +353,12 @@ function CharacterCard({ char, rank, paletteIdx, onTagClick, activeTags, onSelec
                 #{tag}
               </button>
             ))}
+            {/* 언리밋 태그 */}
+            {char.unlimitedAllowed && (
+              <span className="text-[11px] px-2 py-1 rounded-md bg-violet-500/10 text-violet-300 border border-violet-500/20">
+                언리밋
+              </span>
+            )}
             {/* 글로벌 랭크 배지 (있을 때만) */}
             {char.globalRank && (
               <RankBadge globalRank={char.globalRank} rankDiff={char.rankDiff} isNew={char.isNew} />

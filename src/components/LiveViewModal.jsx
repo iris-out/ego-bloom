@@ -21,14 +21,13 @@ const TIER_COLORS_MAP = {
 // ============================================================
 // Slide 1: 퍼플 그라디언트 — 메인 쇼케이스
 // ============================================================
-function Slide1({ profile, tier, score, stats, badges, activityDays }) {
+function Slide1({ profile, tier, score, stats, badges, activityDays, vh }) {
   const tierColor = TIER_COLORS_MAP[tier.key] || TIER_COLORS_MAP.unranked;
-  const progressPct = tier.subProgress ?? 0;
 
   return (
     <div
-      className="w-full h-full flex flex-col items-center pt-20 pb-10 px-6 justify-between relative overflow-hidden"
-      style={{ background: 'radial-gradient(ellipse at top, rgba(88,28,135,0.4) 0%, #0B0812 60%), #0B0812' }}
+      className="w-full flex flex-col items-center justify-center pt-12 pb-6 px-6 gap-4 relative overflow-hidden"
+      style={{ height: vh, background: 'radial-gradient(ellipse at top, rgba(88,28,135,0.4) 0%, #0B0812 60%), #0B0812' }}
     >
       {/* Noise overlay */}
       <div
@@ -38,61 +37,58 @@ function Slide1({ profile, tier, score, stats, badges, activityDays }) {
         }}
       />
 
-      {/* Top section */}
-      <div className="z-10 flex flex-col items-center gap-6 w-full">
-        {/* Avatar */}
-        <div className="relative">
-          <div className="absolute inset-0 rounded-full blur-xl opacity-50" style={{ background: 'linear-gradient(135deg, #7C3AED, #3B82F6)' }} />
-          <div className="w-24 h-24 rounded-full p-[3px] relative z-10" style={{ background: 'linear-gradient(135deg, #8B5CF6, #EC4899, #3B82F6)' }}>
-            <div className="w-full h-full rounded-full bg-[#0B0812] flex items-center justify-center overflow-hidden">
-              {profile.profileImageUrl ? (
-                <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover rounded-full" crossOrigin="anonymous" />
-              ) : (
-                <span className="text-3xl font-bold text-white">{(profile.nickname || '?')[0]}</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Name */}
-        <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-white">{profile.nickname}</h1>
-          <p className="text-sm text-purple-200/60 font-medium mt-1">@{profile.username}</p>
-        </div>
-
-        {/* Badges */}
-        {badges.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-2 max-w-[280px]">
-            {badges.slice(0, 4).map(b => (
-              <div
-                key={b.id}
-                className="px-3 py-1.5 rounded-full text-xs font-medium text-white flex items-center gap-1.5"
-                style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255,255,255,0.05)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-                }}
-              >
-                {b.emoji} {b.title}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Tier icon */}
-        <div className="flex flex-col items-center gap-2 relative">
-          <div className="absolute inset-0 rounded-full blur-[30px] opacity-20" style={{ background: tierColor }} />
-          <div style={{ filter: `drop-shadow(0 0 15px ${tierColor}88)` }}>
-            <TierIcon tier={tier.key} size={64} />
-          </div>
-          <div className="text-[11px] font-bold tracking-[0.2em] uppercase" style={{ color: tierColor }}>
-            {tier.name} {ROMAN[tier.subdivision] || ''}
+      {/* Avatar */}
+      <div className="relative z-10">
+        <div className="absolute inset-0 rounded-full blur-xl opacity-50" style={{ background: 'linear-gradient(135deg, #7C3AED, #3B82F6)' }} />
+        <div className="w-24 h-24 rounded-full p-[3px] relative z-10" style={{ background: 'linear-gradient(135deg, #8B5CF6, #EC4899, #3B82F6)' }}>
+          <div className="w-full h-full rounded-full bg-[#0B0812] flex items-center justify-center overflow-hidden">
+            {profile.profileImageUrl ? (
+              <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover rounded-full" crossOrigin="anonymous" />
+            ) : (
+              <span className="text-3xl font-bold text-white">{(profile.nickname || '?')[0]}</span>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Bottom stats */}
+      {/* Name */}
+      <div className="text-center z-10">
+        <h1 className="text-2xl font-bold tracking-tight text-white">{profile.nickname}</h1>
+        <p className="text-sm text-purple-200/60 font-medium mt-1">@{profile.username}</p>
+      </div>
+
+      {/* Badges */}
+      {badges.length > 0 && (
+        <div className="flex flex-wrap justify-center gap-2 max-w-[280px] z-10">
+          {badges.slice(0, 4).map(b => (
+            <div
+              key={b.id}
+              className="px-3 py-1.5 rounded-full text-xs font-medium text-white flex items-center gap-1.5"
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.05)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+              }}
+            >
+              {b.emoji} {b.title}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Tier icon */}
+      <div className="flex flex-col items-center gap-2 relative z-10">
+        <div className="absolute inset-0 rounded-full blur-[30px] opacity-20" style={{ background: tierColor }} />
+        <div style={{ filter: `drop-shadow(0 0 15px ${tierColor}88)` }}>
+          <TierIcon tier={tier.key} size={64} />
+        </div>
+        <div className="text-[11px] font-bold tracking-[0.2em] uppercase" style={{ color: tierColor }}>
+          {tier.name} {ROMAN[tier.subdivision] || ''}
+        </div>
+      </div>
+
+      {/* Stats */}
       <div className="z-10 w-full space-y-3">
         {activityDays > 0 && (
           <div className="text-center">
@@ -103,7 +99,6 @@ function Slide1({ profile, tier, score, stats, badges, activityDays }) {
             </span>
           </div>
         )}
-
         <div className="grid grid-cols-3 gap-2">
           {[
             { label: '대화량', val: stats.plotInteractionCount },
@@ -120,31 +115,6 @@ function Slide1({ profile, tier, score, stats, badges, activityDays }) {
             </div>
           ))}
         </div>
-
-        {/* ELO progress */}
-        <div
-          className="rounded-2xl p-4"
-          style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.05)' }}
-        >
-          <div className="flex justify-between items-end mb-2">
-            <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Season Progress</span>
-            <div className="text-xs font-bold font-mono">
-              <span className="text-white">{formatCompactNumber(score)}</span>
-              {tier.nextGoalScore && <span className="text-gray-500"> / {formatCompactNumber(tier.nextGoalScore)}</span>}
-            </div>
-          </div>
-          <div className="w-full h-2 bg-black/50 rounded-full overflow-hidden border border-white/5">
-            <div
-              className="h-full rounded-full relative"
-              style={{
-                width: `${Math.min(100, Math.max(2, progressPct))}%`,
-                background: `linear-gradient(to right, ${tierColor}99, ${tierColor})`,
-              }}
-            >
-              <div className="absolute top-0 right-0 bottom-0 w-4 bg-white/30 blur-[2px]" />
-            </div>
-          </div>
-        </div>
       </div>
 
       <p className="absolute bottom-4 text-[8px] text-white/20 tracking-widest z-10">EGO-BLOOM</p>
@@ -155,11 +125,11 @@ function Slide1({ profile, tier, score, stats, badges, activityDays }) {
 // ============================================================
 // Slide 2: 블랙 미니멀 — 타이포 중심
 // ============================================================
-function Slide2({ profile, tier, score, stats, badges, activityDays }) {
+function Slide2({ profile, tier, score, stats, badges, activityDays, vh }) {
   return (
-    <div className="w-full h-full flex flex-col pt-16 pb-12 px-8 relative overflow-hidden bg-[#050505]">
+    <div className="w-full flex flex-col pt-14 pb-6 px-8 relative overflow-hidden bg-[#050505]" style={{ height: vh }}>
       {/* Header */}
-      <div className="flex items-center gap-4 mb-14">
+      <div className="flex items-center gap-4 mb-8">
         <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center overflow-hidden shrink-0">
           {profile.profileImageUrl ? (
             <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover" crossOrigin="anonymous" />
@@ -175,7 +145,7 @@ function Slide2({ profile, tier, score, stats, badges, activityDays }) {
 
       {/* Big number */}
       <div className="flex-1 flex flex-col justify-center">
-        <div className="mb-10">
+        <div className="mb-6">
           <p className="text-[11px] font-mono text-gray-500 uppercase tracking-[0.3em] mb-2 border-l border-white/20 pl-3">총 대화수</p>
           <h2 className="text-[76px] font-black leading-none tracking-tighter text-white">
             {formatCompactNumber(stats.plotInteractionCount)
@@ -186,7 +156,7 @@ function Slide2({ profile, tier, score, stats, badges, activityDays }) {
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 gap-8 mb-14">
+        <div className="grid grid-cols-2 gap-8 mb-8">
           <div>
             <p className="text-[11px] font-mono text-gray-500 uppercase tracking-[0.3em] mb-2 border-l border-white/20 pl-3">팔로워</p>
             <h3 className="text-4xl font-black tracking-tight text-white">
@@ -226,22 +196,6 @@ function Slide2({ profile, tier, score, stats, badges, activityDays }) {
         </div>
       </div>
 
-      {/* ELO bar */}
-      <div className="mt-auto w-full pt-4 border-t border-white/10">
-        <div className="flex justify-between items-baseline mb-2">
-          <span className="text-[11px] font-mono text-gray-500 uppercase tracking-widest">랭크 점수</span>
-          <span className="text-[10px] font-mono text-white">
-            {formatCompactNumber(score)}
-            {tier.nextGoalScore && <span className="text-gray-600"> / {formatCompactNumber(tier.nextGoalScore)}</span>}
-          </span>
-        </div>
-        <div className="w-full h-[1px] bg-white/10 relative">
-          <div
-            className="absolute top-0 left-0 h-full bg-white"
-            style={{ width: `${Math.min(100, Math.max(2, tier.subProgress ?? 0))}%` }}
-          />
-        </div>
-      </div>
 
       <p className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[8px] text-white/10 tracking-widest">EGO-BLOOM</p>
     </div>
@@ -251,13 +205,13 @@ function Slide2({ profile, tier, score, stats, badges, activityDays }) {
 // ============================================================
 // Slide 3: 사이버펑크 그리드 — 게이밍
 // ============================================================
-function Slide3({ profile, tier, score, stats, badges, activityDays }) {
+function Slide3({ profile, tier, score, stats, badges, activityDays, vh }) {
   const tierColor = TIER_COLORS_MAP[tier.key] || TIER_COLORS_MAP.unranked;
 
   return (
     <div
-      className="w-full h-full flex flex-col pt-16 pb-10 px-5 relative overflow-hidden"
-      style={{ background: '#09090b', fontFamily: "'JetBrains Mono', monospace" }}
+      className="w-full flex flex-col pt-16 pb-10 px-5 relative overflow-hidden"
+      style={{ height: vh, background: '#09090b', fontFamily: "'JetBrains Mono', monospace" }}
     >
       {/* Grid bg */}
       <div
@@ -380,18 +334,6 @@ function Slide3({ profile, tier, score, stats, badges, activityDays }) {
               </div>
             </div>
 
-            {/* Progress bar */}
-            <div
-              className="w-full h-[6px] bg-gray-900 border border-gray-800 relative overflow-hidden"
-              style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
-            >
-              <div
-                className="absolute top-0 left-0 h-full bg-cyan-500"
-                style={{ width: `${Math.min(100, Math.max(2, tier.subProgress ?? 0))}%`, boxShadow: '0 0 10px #00f0ff' }}
-              >
-                <div className="absolute top-0 right-0 h-full w-2 bg-white blur-[1px]" />
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -404,16 +346,12 @@ function Slide3({ profile, tier, score, stats, badges, activityDays }) {
 // ============================================================
 // Slide 4: 다크 애널리틱스 — 데이터 대시보드
 // ============================================================
-function Slide4({ profile, tier, score, stats, badges, activityDays }) {
+function Slide4({ profile, tier, score, stats, badges, activityDays, vh }) {
   const tierColor = TIER_COLORS_MAP[tier.key] || TIER_COLORS_MAP.unranked;
-  const progressPct = tier.subProgress ?? 0;
-  // Circular progress stroke
   const r = 45;
-  const circumference = 2 * Math.PI * r;
-  const dashOffset = circumference * (1 - progressPct / 100);
 
   return (
-    <div className="w-full h-full flex flex-col pt-14 pb-8 px-4 relative overflow-hidden bg-[#0a0c10] text-gray-100">
+    <div className="w-full flex flex-col pt-14 pb-8 px-4 relative overflow-hidden bg-[#0a0c10] text-gray-100" style={{ height: vh }}>
       {/* Header */}
       <div className="flex justify-between items-center mb-5 px-2">
         <h2 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
@@ -461,13 +399,6 @@ function Slide4({ profile, tier, score, stats, badges, activityDays }) {
           <div className="relative w-20 h-20 mb-2">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
               <circle cx="50" cy="50" r={r} fill="none" stroke="#1f2433" strokeWidth="8" strokeLinecap="round" />
-              <circle
-                cx="50" cy="50" r={r} fill="none"
-                stroke={tierColor} strokeWidth="8"
-                strokeDasharray={circumference}
-                strokeDashoffset={dashOffset}
-                strokeLinecap="round"
-              />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <TierIcon tier={tier.key} size={20} />
@@ -540,28 +471,6 @@ function Slide4({ profile, tier, score, stats, badges, activityDays }) {
         </div>
       )}
 
-      {/* ELO segmented bar */}
-      <div className="mt-3 px-1">
-        <div className="flex justify-between text-[10px] mb-1.5 font-medium">
-          <span className="text-gray-400">ELO Rating</span>
-          <span className="text-white">
-            {formatCompactNumber(score)}
-            {tier.nextGoalScore && <span className="text-gray-500"> / {formatCompactNumber(tier.nextGoalScore)}</span>}
-          </span>
-        </div>
-        <div className="flex gap-1 h-2">
-          {Array.from({ length: 7 }).map((_, i) => {
-            const filled = (i + 1) / 7 <= progressPct / 100;
-            return (
-              <div
-                key={i}
-                className={`flex-1 ${i === 0 ? 'rounded-l-full' : ''} ${i === 6 ? 'rounded-r-full' : ''}`}
-                style={{ background: filled ? tierColor : '#1f2433' }}
-              />
-            );
-          })}
-        </div>
-      </div>
 
       <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[8px] text-white/10 tracking-widest">EGO-BLOOM</p>
     </div>
@@ -607,9 +516,17 @@ export default function LiveViewModal({ isOpen, onClose, characters, stats, prof
 
   // Prevent body scroll
   useEffect(() => {
-    if (isOpen) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = '';
-    return () => { document.body.style.overflow = ''; };
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
   }, [isOpen]);
 
   // Sync scroll → dot index
@@ -666,52 +583,63 @@ export default function LiveViewModal({ isOpen, onClose, characters, stats, prof
     activityDays,
   };
 
+  const VH = '100vh';
+
   return (
-    <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
-      {/* Close button */}
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 z-[10000] w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-colors"
-      >
-        <X className="w-4 h-4 text-white" />
-      </button>
-
-      {/* Dot indicators */}
-      <div className="absolute top-5 left-1/2 -translate-x-1/2 z-[10000] flex items-center gap-2 pointer-events-none">
-        {SLIDES.map((_, i) => (
-          <div
-            key={i}
-            className="h-1 rounded-full transition-all duration-300"
-            style={{
-              width: i === currentIdx ? 48 : 48,
-              background: i === currentIdx ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.3)',
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Phone frame wrapper (desktop) / full screen (mobile) */}
+    <div
+      className="fixed z-[9999] bg-black"
+      style={{ top: 0, left: 0, width: '100vw', height: VH }}
+    >
+      {/* Story-style wrapper: full screen on mobile, full-height 9:16 centered on desktop */}
       <div
-        className="relative w-full h-full lg:w-[375px] lg:h-[812px] lg:rounded-[40px] lg:ring-8 lg:ring-gray-900 overflow-hidden shadow-2xl"
-        style={{ maxWidth: '100vw', maxHeight: '100vh' }}
+        className="absolute overflow-hidden"
+        style={{
+          top: 0,
+          height: VH,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: `min(calc(${VH} * 9 / 16), 100vw)`,
+        }}
       >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-[10000] w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-colors"
+        >
+          <X className="w-4 h-4 text-white" />
+        </button>
+
+        {/* Dot indicators */}
+        <div className="absolute top-5 left-1/2 -translate-x-1/2 z-[10000] flex items-center gap-2 pointer-events-none">
+          {SLIDES.map((_, i) => (
+            <div
+              key={i}
+              className="h-1 rounded-full transition-all duration-300"
+              style={{
+                width: 48,
+                background: i === currentIdx ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.3)',
+              }}
+            />
+          ))}
+        </div>
+
         {/* Slider */}
         <div
           ref={sliderRef}
           onScroll={handleScroll}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          className="w-full h-full flex overflow-x-auto scrollbar-hide"
-          style={{ scrollSnapType: 'x mandatory', scrollBehavior: 'auto' }}
+          className="flex overflow-x-auto overflow-y-hidden scrollbar-hide"
+          style={{ width: '100%', height: VH, scrollSnapType: 'x mandatory', scrollBehavior: 'auto' }}
         >
           {SLIDES.map(({ id, component: SlideComponent }) => (
             <div
               key={id}
-              className="min-w-full h-full"
-              style={{ scrollSnapAlign: 'center' }}
+              className="shrink-0"
+              style={{ width: '100%', height: VH, scrollSnapAlign: 'center' }}
               onClick={handleTap}
             >
-              <SlideComponent {...slideProps} />
+              <SlideComponent {...slideProps} vh={VH} />
             </div>
           ))}
         </div>

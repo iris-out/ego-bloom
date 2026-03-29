@@ -79,35 +79,139 @@ function TagBarList({ tags, maxTags = 30 }) {
 }
 
 // ─── Genre Distribution ───────────────────────────────────────────────────────
+const GENRE_COLORS = {
+  BL:    { bar: '#ec4899', glow: 'rgba(236,72,153,0.5)',  dot: 'bg-[#ec4899]' },
+  '로맨스': { bar: '#8b5cf6', glow: 'rgba(139,92,246,0.5)', dot: 'bg-[#8b5cf6]' },
+  '순애':  { bar: '#3b82f6', glow: 'rgba(59,130,246,0.5)', dot: 'bg-[#3b82f6]' },
+  '판타지': { bar: '#10b981', glow: 'rgba(16,185,129,0.5)', dot: 'bg-[#10b981]' },
+  '일상':  { bar: '#f59e0b', glow: 'rgba(245,158,11,0.5)', dot: 'bg-[#f59e0b]' },
+};
+const GENRE_FALLBACK = { bar: '#71717a', glow: 'rgba(113,113,122,0.4)', dot: 'bg-[#71717a]' };
+
 function GenreDistribution({ genres }) {
   if (!genres || genres.length === 0) return null;
-  const colors = ['bg-pink-500', 'bg-purple-500', 'bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-slate-500'];
 
   return (
-    <div className="mb-8">
-      <div className="flex items-center gap-2 mb-3">
-        <BarChart3 size={18} className="text-purple-400" />
-        <h3 className="text-sm font-bold text-white">주요 장르 점유율</h3>
+    <div className="rounded-2xl p-5 mb-4 relative overflow-hidden border border-white/[0.06] bg-white/[0.02] shadow-xl shadow-black/20">
+      <div className="absolute top-0 left-1/4 w-72 h-72 bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="flex items-center gap-2 mb-5 relative z-10">
+        <BarChart3 size={16} className="text-violet-400" />
+        <h3 className="text-sm font-semibold text-white">주요 장르 점유율</h3>
       </div>
-      <div className="w-full h-3 sm:h-4 bg-black/40 rounded-full overflow-hidden flex shadow-inner mb-3">
-        {genres.map((g, i) => (
-          <div
-            key={g.tag}
-            style={{ width: `${g.pct}%` }}
-            className={`h-full ${colors[i % colors.length]} transition-all duration-1000 hover:brightness-110 cursor-help`}
-            title={`${g.tag} (${g.pct}%)`}
-          />
-        ))}
+      {/* Stacked bar */}
+      <div className="w-full h-8 flex rounded-full overflow-hidden bg-black/40 shadow-inner mb-5 relative z-10">
+        {genres.map((g) => {
+          const c = GENRE_COLORS[g.tag] || GENRE_FALLBACK;
+          return (
+            <div
+              key={g.tag}
+              className="h-full relative group transition-all duration-500 hover:brightness-110"
+              style={{ width: `${g.pct}%`, background: c.bar }}
+              title={`${g.tag}: ${g.pct}%`}
+            >
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#1A0D30] border border-white/10 px-2 py-0.5 rounded text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none shadow-lg">
+                {g.tag}: {g.pct}%
+              </div>
+            </div>
+          );
+        })}
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
-        {genres.map((g, i) => (
-          <div key={g.tag} className="flex items-center gap-1.5 text-xs min-w-0">
-            <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${colors[i % colors.length]} shadow-sm`} />
-            <span className="font-medium text-white/70 truncate">{g.tag}</span>
-            <span className="text-[10px] text-white/40 font-mono shrink-0">{g.pct}%</span>
-          </div>
-        ))}
+      {/* Legend grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 relative z-10">
+        {genres.map((g) => {
+          const c = GENRE_COLORS[g.tag] || GENRE_FALLBACK;
+          return (
+            <div key={g.tag} className="flex flex-col gap-1 p-2 rounded-xl hover:bg-white/[0.03] transition-colors">
+              <div className="flex items-center gap-1.5">
+                <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${c.dot}`} style={{ boxShadow: `0 0 6px ${c.glow}` }} />
+                <span className="text-[12px] font-medium text-white/80 truncate">{g.tag}</span>
+              </div>
+              <div className="pl-4">
+                <span className="text-xl font-bold text-white">{g.pct}<span className="text-sm font-normal text-white/40">%</span></span>
+              </div>
+            </div>
+          );
+        })}
       </div>
+    </div>
+  );
+}
+
+// ─── Hashtag Rank List ────────────────────────────────────────────────────────
+function HashtagRankList({ tags, maxVisible = 10, maxTags = 30 }) {
+  const [expanded, setExpanded] = useState(false);
+  if (!tags || tags.length === 0) return <p className="text-xs text-white/30 py-4 text-center">데이터 없음</p>;
+
+  const limited = tags.slice(0, maxTags);
+  const visible = expanded ? limited : limited.slice(0, maxVisible);
+  const maxScore = limited[0]?.score || 1;
+
+  return (
+    <div className="mt-2">
+      {/* Scale labels */}
+      <div className="flex justify-between text-[9px] text-white/30 mb-3 pl-[180px] md:pl-[240px] pr-12">
+        <span>0</span>
+        <span>{Math.round(maxScore * 0.25).toLocaleString()}</span>
+        <span>{Math.round(maxScore * 0.5).toLocaleString()}</span>
+        <span>{Math.round(maxScore * 0.75).toLocaleString()}</span>
+        <span>{(maxScore >= 10000 ? (maxScore / 10000).toFixed(1) + '만' : maxScore.toLocaleString())}</span>
+      </div>
+      <div className="flex flex-col gap-2.5">
+        {visible.map((t, i) => {
+          const rank = i + 1;
+          const widthPct = (t.score / maxScore) * 100;
+          const isTop = rank <= 5;
+          const scoreLabel = t.score >= 10000 ? (t.score / 10000).toFixed(1) + '만' : t.score.toLocaleString();
+
+          return (
+            <div key={t.tag} className="flex items-center group cursor-default">
+              {/* Rank + tag label */}
+              <div className="w-[180px] md:w-[240px] flex items-center pr-4 shrink-0">
+                <span className="w-7 text-sm font-bold text-white/40 group-hover:text-white/70 transition-colors">{rank}</span>
+                <span className="w-8 text-center text-[11px] font-bold text-white/30">-</span>
+                <span className="text-sm font-medium text-white truncate">#{t.tag}</span>
+              </div>
+              {/* Bar + score */}
+              <div className="flex-1 flex items-center gap-3 min-w-0">
+                <div className="flex-1 relative">
+                  {isTop ? (
+                    <div
+                      className="h-6 rounded-r-md group-hover:brightness-110 transition-all relative overflow-hidden"
+                      style={{
+                        width: `${widthPct}%`,
+                        background: `linear-gradient(to right, rgba(99,102,241,${0.6 + (5 - rank) * 0.08}), rgba(139,92,246,${0.7 + (5 - rank) * 0.06}))`,
+                        boxShadow: rank === 1 ? '0 0 12px rgba(99,102,241,0.3)' : undefined,
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  ) : (
+                    <div
+                      className="h-6 rounded-r-md border border-white/[0.08] group-hover:border-white/[0.15] transition-all overflow-hidden"
+                      style={{ width: `${widthPct}%`, background: 'rgba(255,255,255,0.03)' }}
+                    >
+                      <div className="h-full bg-violet-500/10" />
+                    </div>
+                  )}
+                </div>
+                <span className={`text-[11px] font-bold min-w-[44px] text-right transition-colors ${rank === 1 ? 'text-white' : 'text-white/50 group-hover:text-white/80'}`}>
+                  {scoreLabel}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {limited.length > maxVisible && (
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={() => setExpanded(e => !e)}
+            className="px-5 py-2 text-[12px] font-medium text-white/50 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] rounded-full transition-all flex items-center gap-2"
+          >
+            {expanded ? `접기 ↑` : `TOP ${maxTags} 전체 보기 ↓`}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -197,35 +301,42 @@ function TogetherView({ data }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-between items-center bg-white/[0.02] p-2 rounded-xl border border-white/[0.06] overflow-x-auto hide-scrollbar min-h-[52px]">
-        <div className="flex gap-2">
-          <button onClick={() => setFilter('all')} className={`flex items-center justify-center px-4 h-8 text-xs font-bold rounded-lg transition-all border ${filterBtnClass(filter === 'all')}`}>전체</button>
-          <button onClick={() => setFilter('female')} className={`flex items-center justify-center gap-1.5 px-4 h-8 text-xs font-bold rounded-lg transition-all border ${filterBtnClass(filter === 'female', 'female')}`}><GenderIcon type="female" />여성향</button>
-          <button onClick={() => setFilter('male')} className={`flex items-center justify-center gap-1.5 px-4 h-8 text-xs font-bold rounded-lg transition-all border ${filterBtnClass(filter === 'male', 'male')}`}><GenderIcon type="male" />남성향</button>
-        </div>
+      {/* Genre filter pills */}
+      <div className="flex gap-2 pb-4 border-b border-white/[0.06] overflow-x-auto hide-scrollbar">
+        <button onClick={() => setFilter('all')} className={`px-4 py-2 text-sm font-medium rounded-full border flex items-center gap-2 transition-all whitespace-nowrap ${filterBtnClass(filter === 'all')}`}>전체</button>
+        <button onClick={() => setFilter('female')} className={`px-4 py-2 text-sm font-medium rounded-full border flex items-center gap-2 transition-all whitespace-nowrap ${filterBtnClass(filter === 'female', 'female')}`}><GenderIcon type="female" />여성향</button>
+        <button onClick={() => setFilter('male')} className={`px-4 py-2 text-sm font-medium rounded-full border flex items-center gap-2 transition-all whitespace-nowrap ${filterBtnClass(filter === 'male', 'male')}`}><GenderIcon type="male" />남성향</button>
       </div>
 
-      <div className="relative p-5 overflow-hidden rounded-2xl bg-white/[0.02] border border-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.08)] backdrop-blur-sm">
-        <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500 rounded-full blur-[60px] opacity-10 pointer-events-none -mr-10 -mt-10" />
-        <div className="relative z-10">
-          <GenreDistribution genres={filterHashtags(data?.genres, filter)} />
-          <div className="mb-4 pt-4 border-t border-white/[0.06] flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 mt-4">
-            <div>
-              <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-1">
-                <TrendingUp size={14} className="text-purple-400" />
+      {/* Genre share card */}
+      <GenreDistribution genres={filterHashtags(data?.genres, filter)} />
+
+      {/* Hashtag trend card */}
+      <div className="rounded-2xl p-5 border border-white/[0.06] bg-white/[0.02] shadow-xl shadow-black/20">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5 pb-5 border-b border-white/[0.06]">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp size={16} className="text-violet-400" />
+              <h3 className="text-sm font-semibold text-white">
                 랭킹 종합 해시태그 트렌드 TOP 30
-                {filter !== 'all' && <span className="text-[10px] font-medium opacity-70 border border-current px-1.5 py-0.5 rounded-md text-purple-400">Filter On</span>}
+                {filter !== 'all' && <span className="ml-2 text-[10px] font-medium opacity-70 border border-current px-1.5 py-0.5 rounded-md text-purple-400">Filter On</span>}
               </h3>
-              <p className="text-[10px] text-white/40">트렌딩×3 · 베스트×2 · 신작×1 가중치 적용 (각 최고 TOP 100 기준)</p>
             </div>
-            <div className="flex bg-black/30 rounded-lg p-1 self-start sm:self-auto shrink-0 border border-white/[0.06]">
-              <button onClick={() => setViewType('list')} className={`px-3 py-1.5 text-[11px] font-bold rounded-md transition-all ${viewType === 'list' ? 'bg-white/[0.08] shadow text-white' : 'text-white/40 hover:text-white/60'}`}>리스트</button>
-              <button onClick={() => setViewType('treemap')} className={`px-3 py-1.5 text-[11px] font-bold rounded-md transition-all ${viewType === 'treemap' ? 'bg-white/[0.08] shadow text-white' : 'text-white/40 hover:text-white/60'}`}>트리맵</button>
-            </div>
+            <p className="text-[11px] text-white/40 flex items-center gap-1">
+              트렌딩×3 · 베스트×2 · 신작×1 가중치 적용 (각 최고 TOP 100 기준)
+            </p>
           </div>
-          {viewType === 'list' && <TagBarList tags={filterHashtags(data?.combined, filter)} />}
-          {viewType === 'treemap' && <TagTreemap tags={filterHashtags(data?.combined, filter)} />}
+          <div className="flex bg-black/30 rounded-lg p-1 self-start shrink-0 border border-white/[0.06]">
+            <button onClick={() => setViewType('list')} className={`px-3 py-1.5 text-[11px] font-medium rounded flex items-center gap-1.5 transition-all ${viewType === 'list' ? 'bg-white/[0.08] text-white shadow' : 'text-white/40 hover:text-white/60'}`}>
+              <Hash size={11} /> 리스트
+            </button>
+            <button onClick={() => setViewType('treemap')} className={`px-3 py-1.5 text-[11px] font-medium rounded flex items-center gap-1.5 transition-all ${viewType === 'treemap' ? 'bg-white/[0.08] text-white shadow' : 'text-white/40 hover:text-white/60'}`}>
+              <BarChart3 size={11} /> 트리맵
+            </button>
+          </div>
         </div>
+        {viewType === 'list' && <HashtagRankList tags={filterHashtags(data?.combined, filter)} maxVisible={10} maxTags={30} />}
+        {viewType === 'treemap' && <TagTreemap tags={filterHashtags(data?.combined, filter)} />}
       </div>
     </div>
   );

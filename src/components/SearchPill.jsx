@@ -9,6 +9,7 @@ export default function SearchPill({ className = '', style, suggestionsAbove = f
   const [recentSearches, setRecentSearches] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   useEffect(() => {
     setRecentSearches(getRecentSearches());
@@ -34,15 +35,18 @@ export default function SearchPill({ className = '', style, suggestionsAbove = f
 
   return (
     <form onSubmit={handleSubmit} className={className} style={style}>
-      <label className="glass-pill flex items-center w-full h-14 px-5 gap-3 shadow-[0_10px_30px_rgba(0,0,0,0.3)] relative" style={{ background: 'rgba(255,255,255,0.07)' }}>
+      <label
+        className="glass-pill flex items-center w-full h-14 px-5 gap-3 shadow-[0_10px_30px_rgba(0,0,0,0.3)] relative cursor-text"
+        style={{ background: focused ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.12)', transition: 'background 0.2s ease' }}
+      >
         <Search size={20} className="text-white/70 shrink-0" />
         <div className="flex-1 relative">
           <input
             type="text"
             value={input}
             onChange={e => setInput(e.target.value)}
-            onFocus={() => setShowSuggestions(true)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            onFocus={() => { setShowSuggestions(true); setFocused(true); }}
+            onBlur={() => { setTimeout(() => setShowSuggestions(false), 200); setFocused(false); }}
             placeholder="@핸들, ID, URL 검색"
             className="w-full bg-transparent border-none text-[15px] text-white placeholder-white/40 font-light py-3 focus:outline-none"
           />

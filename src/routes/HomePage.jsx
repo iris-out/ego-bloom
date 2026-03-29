@@ -146,7 +146,8 @@ export default function HomePage() {
                 <div className="flex flex-wrap gap-2">
                   {recentSearches.map((term, i) => (
                     <button key={i} onClick={() => navigate(`/profile?creator=${encodeURIComponent(term)}`)}
-                      className="glass-pill flex items-center gap-2 px-3.5 py-2 text-[13px] text-white/70 hover:text-white hover:bg-white/[0.08] transition-all group">
+                      className="glass-pill flex items-center gap-2 px-3.5 py-2 text-[13px] text-white/80 hover:text-white transition-all group"
+                      style={{ background: 'rgba(255,255,255,0.12)' }}>
                       {term}
                       <span role="button" onClick={e => handleDeleteRecent(term, e)}
                         className="text-white/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
