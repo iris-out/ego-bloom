@@ -842,7 +842,6 @@ export default function WorldPage() {
   const [weather,   setWeather]   = useState('clear');
   const [quality,   setQuality]   = useState('medium');
   const [acceleration, setAcceleration] = useState(500);
-  const [showLabels,   setShowLabels]   = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState(null);
   const [showMinimap, setShowMinimap] = useState(true);
@@ -911,15 +910,6 @@ export default function WorldPage() {
           <div className="absolute top-16 left-4 z-[70] w-68 bg-black/85 backdrop-blur-xl border border-white/10 rounded-2xl p-5 pointer-events-auto" style={{width:'17rem'}}>
             <h3 className="text-white font-bold text-sm mb-4">월드 설정</h3>
             <div className="flex flex-col gap-4">
-
-              {/* 닉네임 표시 */}
-              <div className="flex items-center justify-between">
-                <span className="text-white/70 text-xs">닉네임 표시</span>
-                <button onClick={() => setShowLabels(!showLabels)}
-                  className={`w-10 h-5 rounded-full transition-colors relative ${showLabels?'bg-purple-600':'bg-white/10'}`}>
-                  <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${showLabels?'left-6':'left-1'}`}/>
-                </button>
-              </div>
 
               {/* 미니맵 표시 */}
               <div className="flex items-center justify-between mt-3">
@@ -1098,7 +1088,7 @@ export default function WorldPage() {
             {!loading && (
               <Buildings
                 data={buildings}
-                showLabels={showLabels}
+                showLabels={false}
                 timeOfDay={timeOfDay}
                 setSelectedBuilding={setSelectedBuilding}
                 cameraDistRef={cameraDistRef}
