@@ -26,7 +26,7 @@ function Slide1({ profile, tier, score, stats, badges, activityDays, vh }) {
 
   return (
     <div
-      className="w-full flex flex-col items-center justify-center pt-12 pb-6 px-6 gap-4 relative overflow-hidden"
+      className="w-full flex flex-col items-center justify-start pt-14 pb-6 px-6 gap-4 relative overflow-y-auto scrollbar-hide"
       style={{ height: vh, background: 'radial-gradient(ellipse at top, rgba(88,28,135,0.4) 0%, #0B0812 60%), #0B0812' }}
     >
       {/* Noise overlay */}
@@ -127,7 +127,7 @@ function Slide1({ profile, tier, score, stats, badges, activityDays, vh }) {
 // ============================================================
 function Slide2({ profile, tier, score, stats, badges, activityDays, vh }) {
   return (
-    <div className="w-full flex flex-col pt-14 pb-6 px-8 relative overflow-hidden bg-[#050505]" style={{ height: vh }}>
+    <div className="w-full flex flex-col pt-14 pb-6 px-8 relative overflow-y-auto scrollbar-hide bg-[#050505]" style={{ height: vh }}>
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center overflow-hidden shrink-0">
@@ -210,7 +210,7 @@ function Slide3({ profile, tier, score, stats, badges, activityDays, vh }) {
 
   return (
     <div
-      className="w-full flex flex-col pt-16 pb-10 px-5 relative overflow-hidden"
+      className="w-full flex flex-col pt-16 pb-10 px-5 relative overflow-y-auto scrollbar-hide"
       style={{ height: vh, background: '#09090b', fontFamily: "'JetBrains Mono', monospace" }}
     >
       {/* Grid bg */}
@@ -351,7 +351,7 @@ function Slide4({ profile, tier, score, stats, badges, activityDays, vh }) {
   const r = 45;
 
   return (
-    <div className="w-full flex flex-col pt-14 pb-8 px-4 relative overflow-hidden bg-[#0a0c10] text-gray-100" style={{ height: vh }}>
+    <div className="w-full flex flex-col pt-14 pb-8 px-4 relative overflow-y-auto scrollbar-hide bg-[#0a0c10] text-gray-100" style={{ height: vh }}>
       {/* Header */}
       <div className="flex justify-between items-center mb-5 px-2">
         <h2 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
@@ -562,6 +562,8 @@ export default function LiveViewModal({ isOpen, onClose, characters, stats, prof
     touchStartX.current = e.touches[0].clientX;
   }, []);
 
+  const handleWheel = useCallback((e) => { e.stopPropagation(); }, []);
+
   const handleTouchEnd = useCallback((e) => {
     if (touchStartX.current === null) return;
     const dx = e.changedTouches[0].clientX - touchStartX.current;
@@ -629,8 +631,9 @@ export default function LiveViewModal({ isOpen, onClose, characters, stats, prof
           onScroll={handleScroll}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
+          onWheel={handleWheel}
           className="flex overflow-x-auto overflow-y-hidden scrollbar-hide"
-          style={{ width: '100%', height: VH, scrollSnapType: 'x mandatory', scrollBehavior: 'auto' }}
+          style={{ width: '100%', height: VH, scrollSnapType: 'x mandatory', scrollBehavior: 'auto', overscrollBehavior: 'contain' }}
         >
           {SLIDES.map(({ id, component: SlideComponent }) => (
             <div

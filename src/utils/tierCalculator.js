@@ -38,16 +38,25 @@ export function getCharacterTier(interactionCount) {
   return { ...tier, progress, nextTier, index: idx };
 }
 
+const CHAMPION_VIRTUAL_MAX = 300_000_000;
+
+function calcSubdivision(ratio) {
+  if (ratio < 0.25) return { subdivision: 4, subProgress: (ratio / 0.25) * 100 };
+  if (ratio < 0.50) return { subdivision: 3, subProgress: ((ratio - 0.25) / 0.25) * 100 };
+  if (ratio < 0.75) return { subdivision: 2, subProgress: ((ratio - 0.50) / 0.25) * 100 };
+  return { subdivision: 1, subProgress: ((ratio - 0.75) / 0.25) * 100 };
+}
+
 // ===== 크리에이터 티어 시스템 (ELO 점수 기준) =====
 export const CREATOR_TIERS = [
   { key: 'unranked', name: 'Unranked', min: -1, gradient: 'from-gray-700 to-gray-800', color: '#718096' },
   { key: 'bronze', name: 'Bronze', min: 0, gradient: 'from-amber-700 to-amber-900', color: '#B7791F' },
-  { key: 'silver', name: 'Silver', min: 40500, gradient: 'from-gray-300 to-gray-500', color: '#A0AEC0' },
-  { key: 'gold', name: 'Gold', min: 182250, gradient: 'from-yellow-300 to-yellow-600', color: '#ECC94B' },
-  { key: 'platinum', name: 'Platinum', min: 900000, gradient: 'from-cyan-300 to-cyan-600', color: '#38B2AC' },
-  { key: 'diamond', name: 'Diamond', min: 4050000, gradient: 'from-blue-400 to-blue-700', color: '#4299E1' },
-  { key: 'master', name: 'Master', min: 18000000, gradient: 'from-yellow-300 to-yellow-600', color: '#FFD700' },
-  { key: 'champion', name: 'Champion', min: 81000000, gradient: 'from-red-500 to-red-800', color: '#F56565' },
+  { key: 'silver', name: 'Silver', min: 39082, gradient: 'from-gray-300 to-gray-500', color: '#A0AEC0' },
+  { key: 'gold', name: 'Gold', min: 175871, gradient: 'from-yellow-300 to-yellow-600', color: '#ECC94B' },
+  { key: 'platinum', name: 'Platinum', min: 868500, gradient: 'from-cyan-300 to-cyan-600', color: '#38B2AC' },
+  { key: 'diamond', name: 'Diamond', min: 3908250, gradient: 'from-blue-400 to-blue-700', color: '#4299E1' },
+  { key: 'master', name: 'Master', min: 17370000, gradient: 'from-yellow-300 to-yellow-600', color: '#FFD700' },
+  { key: 'champion', name: 'Champion', min: 78165000, gradient: 'from-red-500 to-red-800', color: '#F56565' },
 ];
 
 // 새로운 ELO V4.1 점수 산정 방식이다. (팔로워 x300, 음성 x100, 기준 완화)
@@ -212,34 +221,24 @@ export function getCreatorTier(score) {
     let subProgress = 0;
 
     if (tier.key === 'unranked') {
-      // Should not happen here if score >= 0, but safe fallback
       subdivision = null;
-    } else if (ratio < 0.25) {
-      subdivision = 4;
-      nextGoalLabel = `${tier.name} 3`;
-      nextGoalScore = Math.floor(tier.min + range * 0.25);
-      subProgress = (ratio / 0.25) * 100;
-    } else if (ratio < 0.5) {
-      subdivision = 3;
-      nextGoalLabel = `${tier.name} 2`;
-      nextGoalScore = Math.floor(tier.min + range * 0.5);
-      subProgress = ((ratio - 0.25) / 0.25) * 100;
-    } else if (ratio < 0.75) {
-      subdivision = 2;
-      nextGoalLabel = `${tier.name} 1`;
-      nextGoalScore = Math.floor(tier.min + range * 0.75);
-      subProgress = ((ratio - 0.5) / 0.25) * 100;
+      subProgress = 0;
     } else {
-      subdivision = 1;
-      nextGoalLabel = nextTier.name;
-      nextGoalScore = nextTier.min;
-      subProgress = ((ratio - 0.75) / 0.25) * 100;
+      const sub = calcSubdivision(ratio);
+      subdivision = sub.subdivision;
+      subProgress = sub.subProgress;
+      if (subdivision === 4) { nextGoalLabel = `${tier.name} 3`; nextGoalScore = Math.floor(tier.min + range * 0.25); }
+      else if (subdivision === 3) { nextGoalLabel = `${tier.name} 2`; nextGoalScore = Math.floor(tier.min + range * 0.5); }
+      else if (subdivision === 2) { nextGoalLabel = `${tier.name} 1`; nextGoalScore = Math.floor(tier.min + range * 0.75); }
     }
 
     return { ...tier, progress, nextTier, index: idx, subdivision, nextGoalLabel, nextGoalScore, subProgress };
   }
 
-  return { ...tier, progress: 100, nextTier: null, index: idx, subdivision: 1, nextGoalLabel: 'Max', nextGoalScore: score, subProgress: 100 };
+  // Champion: 가상 상한선으로 세분화 계산
+  const champRatio = Math.min(1, Math.max(0, (score - tier.min) / (CHAMPION_VIRTUAL_MAX - tier.min)));
+  const { subdivision: champSub, subProgress: champSubProg } = calcSubdivision(champRatio);
+  return { ...tier, progress: champRatio * 100, nextTier: null, index: idx, subdivision: champSub, nextGoalLabel: 'Max', nextGoalScore: CHAMPION_VIRTUAL_MAX, subProgress: champSubProg };
 }
 
 export function calculatePercentile(messageCount) {

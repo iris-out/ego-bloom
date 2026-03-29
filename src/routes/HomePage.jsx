@@ -9,6 +9,8 @@ import SearchPill from '../components/SearchPill';
 import { getRecentSearches, removeRecentSearch } from '../utils/storage';
 import { APP_VERSION } from '../data/changelog';
 import { useServerStatus } from '../hooks/useServerStatus';
+import { getCreatorTier } from '../utils/tierCalculator';
+import TierIcon from '../components/ui/TierIcon';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -160,9 +162,19 @@ export default function HomePage() {
                         <span className="text-[15px] font-bold text-white tracking-tight truncate">{creator.nickname}</span>
                         <span className="text-[11px] text-white/50 truncate font-mono tracking-wider">ELO {creator.elo_score?.toLocaleString()} pt</span>
                       </div>
-                      <div className="text-[10px] px-2.5 py-1 rounded bg-white/5 text-white/70 uppercase font-bold tracking-widest ml-2 shrink-0 border border-white/10">
-                        {creator.tier_name || 'UNRANKED'}
-                      </div>
+                      {(() => {
+                        const tierData = getCreatorTier(creator.elo_score ?? 0);
+                        return (
+                          <div className="flex flex-col items-center gap-0.5 ml-2 shrink-0">
+                            <div className="w-9 h-9 flex items-center justify-center">
+                              <TierIcon tier={tierData.key} size="100%" />
+                            </div>
+                            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: tierData.color }}>
+                              {tierData.name}{tierData.subdivision ? ` ${tierData.subdivision}` : ''}
+                            </span>
+                          </div>
+                        );
+                      })()}
                     </li>
                   )
                 }) : (

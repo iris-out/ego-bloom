@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Users, MessageCircle, Mic, Crown, Search, X } from 'lucide-react';
+import { Loader2, Users, MessageCircle, Crown, Search, X } from 'lucide-react';
 import { formatNumber, getCreatorTier } from '../utils/tierCalculator';
 import TierIcon from './ui/TierIcon';
 
@@ -125,16 +125,12 @@ export default function CreatorRankingView() {
             ];
 
             const tierData = getCreatorTier(creator.elo_score ?? 0);
-            const tierKey = tierData.key;
-            const tierInfo = tierData;
-            const subdivisionLabel = tierData.nextTier !== null && tierData.subdivision !== null
-              ? ` ${tierData.subdivision}`
-              : '';
+            const subdivisionLabel = tierData.subdivision !== null ? ` ${tierData.subdivision}` : '';
 
             return (
               <div 
                 key={creator.id}
-                onClick={() => navigate(`/profile/${creator.handle || creator.id}`)}
+                onClick={() => navigate(`/profile?creator=${encodeURIComponent(creator.handle ? `@${creator.handle}` : creator.id)}`)}
                 className={`flex items-center gap-4 p-4 rounded-2xl transition-all cursor-pointer group relative overflow-hidden
                   ${isTop3 ? 'bg-gradient-to-r from-white/[0.08] to-transparent border border-white/10 hover:border-white/20' 
                            : 'bg-white/[0.02] border border-white/[0.02] hover:bg-white/[0.05] hover:border-white/10'}`}
@@ -169,29 +165,24 @@ export default function CreatorRankingView() {
                       <Users size={12} className={isTop3 ? 'text-white/60' : 'text-white/30'} />
                       <span>{formatNumber(creator.follower_count)}</span>
                     </div>
-                    <div className="flex items-center gap-1.5" title="음성 재생 수">
-                      <Mic size={12} className={isTop3 ? 'text-white/60' : 'text-white/30'} />
-                      <span>{formatNumber(creator.voice_play_count)}</span>
+                    <div className="flex items-center gap-1 font-mono" title="ELO 점수">
+                      <span className={isTop3 ? 'text-white/50' : 'text-white/25'}>ELO</span>
+                      <span>{formatNumber(creator.elo_score)}</span>
+                      <span className={`text-[10px] font-sans ${isTop3 ? 'text-white/30' : 'text-white/20'}`}>pt</span>
                     </div>
                   </div>
                 </div>
 
-                {/* 우측: 티어 정보 + 티어 아이콘 */}
-                <div className="flex items-center gap-4 shrink-0 z-10">
-                  <div className="flex flex-col items-end gap-1">
-                    <div
-                      className="text-[12px] md:text-[14px] font-black uppercase tracking-wider"
-                      style={{ color: tierInfo.color, textShadow: `0 0 12px ${tierInfo.color}66` }}
-                    >
-                      {tierData.name}{subdivisionLabel}
-                    </div>
-                    <div className="text-[11px] md:text-[12px] text-white/60 font-semibold font-mono tracking-wider">
-                      {formatNumber(creator.elo_score)} <span className="text-[10px] text-white/30 font-sans">pt</span>
-                    </div>
+                {/* 우측: 티어 아이콘 + 티어 텍스트 */}
+                <div className="flex flex-col items-center gap-0.5 shrink-0 z-10 w-[60px] md:w-[74px]">
+                  <div className="w-10 h-10 md:w-[54px] md:h-[54px] flex items-center justify-center filter drop-shadow-xl transform group-hover:scale-110 transition-transform duration-300">
+                    <TierIcon tier={tierData.key} size="100%" />
                   </div>
-                  
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center filter drop-shadow-xl transform group-hover:scale-110 transition-transform duration-300">
-                    <TierIcon tier={tierKey} size="100%" />
+                  <div
+                    className="text-[10px] md:text-[11px] font-black uppercase tracking-wider text-center w-full"
+                    style={{ color: tierData.color, textShadow: `0 0 8px ${tierData.color}66` }}
+                  >
+                    {tierData.name}{subdivisionLabel}
                   </div>
                 </div>
               </div>
@@ -214,7 +205,7 @@ export default function CreatorRankingView() {
               </div>
             ) : searchResult && (
               <div 
-                onClick={() => navigate(`/profile/${searchResult.user.handle || searchResult.user.id}`)}
+                onClick={() => navigate(`/profile?creator=${encodeURIComponent(searchResult.user.handle ? `@${searchResult.user.handle}` : searchResult.user.id)}`)}
                 className="w-full flex items-center gap-4 bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10 cursor-pointer transition-all"
               >
                 {/* 등수 */}

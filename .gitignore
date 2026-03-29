@@ -41,6 +41,7 @@ design_ai/
 .env
 plan.md
 todo.md
+.agent/
 
 scan_pii.sh
 *.sh

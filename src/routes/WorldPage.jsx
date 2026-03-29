@@ -88,7 +88,7 @@ const BuildingShaderMaterial = {
 
 const GroundShaderMaterial = {
   uniforms: {
-    uIsNight: { value: false }, uGridSize: { value: 10.0 }, uRoadInterval: { value: 4.0 },
+    uIsNight: { value: false }, uGridSize: { value: 168.0 }, uRoadInterval: { value: 4.0 },
     uLamps: { value: [] }
   },
   vertexShader: `
@@ -619,14 +619,16 @@ function getTierColor(t) {
   return '#444';
 }
 function getTierWidth(t) {
-  if (t==='champion') return 11.25;
-  if (t==='master')   return 10.5;
-  if (t==='diamond')  return 9.75;
-  if (t==='platinum'||t==='gold') return 9.0;
-  return 8.25;
+  if (t==='champion') return 20.0;
+  if (t==='master')   return 18.0;
+  if (t==='diamond')  return 16.0;
+  if (t==='platinum') return 14.0;
+  if (t==='gold')     return 13.0;
+  if (t==='silver')   return 12.0;
+  return 11.0;
 }
 
-const HEIGHT_SCALE = 2.0;
+const HEIGHT_SCALE = 1.76;
 function getTierHeightMult(t) {
   if (t==='champion') return 1.832;
   if (t==='master')   return 1.576;
@@ -973,7 +975,7 @@ export default function WorldPage() {
 
   const gShader = useMemo(() => ({
     ...GroundShaderMaterial,
-    uniforms: { ...GroundShaderMaterial.uniforms, uIsNight:{ value:isNight }, uGridSize:{ value:10.0 }, uRoadInterval:{ value:4.0 }, uLamps: { value: LAMP_POSITIONS } }
+    uniforms: { ...GroundShaderMaterial.uniforms, uIsNight:{ value:isNight }, uGridSize:{ value:16.0 }, uRoadInterval:{ value:4.0 }, uLamps: { value: LAMP_POSITIONS } }
   }), [LAMP_POSITIONS]);
 
   const weatherAmbientMult = weather === 'cloudy' || weather === 'rain' || weather === 'snow' ? 0.65 : 1.0;
@@ -992,12 +994,12 @@ export default function WorldPage() {
 
         {/* 좌상단 헤더 */}
         <div className="absolute top-4 left-4 z-[60] flex items-center gap-3 pointer-events-none">
-          <button onClick={() => navigate('/')} className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md border border-white/40 flex items-center justify-center hover:bg-white transition-colors pointer-events-auto shadow-lg">
-            <ChevronLeft size={20} className="text-[#05050a]" />
+          <button onClick={() => navigate('/')} className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-colors pointer-events-auto shadow-lg">
+            <ChevronLeft size={20} className="text-black" />
           </button>
           <button onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md border border-white/40 flex items-center justify-center hover:bg-white transition-colors pointer-events-auto shadow-lg">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#05050a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-colors pointer-events-auto shadow-lg">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </button>
           {/* 데이터 수집 안내 버튼 */}
           <div className="px-4 py-2 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex flex-col justify-center">
