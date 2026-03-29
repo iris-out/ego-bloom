@@ -51,8 +51,8 @@ function calcSubdivision(ratio) {
 export const CREATOR_TIERS = [
   { key: 'unranked', name: 'Unranked', min: -1, gradient: 'from-gray-700 to-gray-800', color: '#718096' },
   { key: 'bronze', name: 'Bronze', min: 0, gradient: 'from-amber-700 to-amber-900', color: '#B7791F' },
-  { key: 'silver', name: 'Silver', min: 39082, gradient: 'from-gray-300 to-gray-500', color: '#A0AEC0' },
-  { key: 'gold', name: 'Gold', min: 175871, gradient: 'from-yellow-300 to-yellow-600', color: '#ECC94B' },
+  { key: 'silver', name: 'Silver', min: 12000, gradient: 'from-gray-300 to-gray-500', color: '#A0AEC0' },
+  { key: 'gold', name: 'Gold', min: 85000, gradient: 'from-yellow-300 to-yellow-600', color: '#ECC94B' },
   { key: 'platinum', name: 'Platinum', min: 868500, gradient: 'from-cyan-300 to-cyan-600', color: '#38B2AC' },
   { key: 'diamond', name: 'Diamond', min: 3908250, gradient: 'from-blue-400 to-blue-700', color: '#4299E1' },
   { key: 'master', name: 'Master', min: 17370000, gradient: 'from-yellow-300 to-yellow-600', color: '#FFD700' },
