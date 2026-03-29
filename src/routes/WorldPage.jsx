@@ -22,13 +22,13 @@ function getKSTTimeOfDay() {
 // ─── 시간대별 설정 ────────────────────────────────────────────────────────
 
 const SKY_PARAMS = {
-  night:  { sunPosition: [0, -1, 0],       turbidity: 2,  rayleigh: 0.3, mieCoefficient: 0.001,  mieDirectionalG: 0.7 },
+  night:  { sunPosition: [0, -1, 0],       turbidity: 0.1,  rayleigh: 0.001, mieCoefficient: 0.001,  mieDirectionalG: 0.7 },
   dawn:   { sunPosition: [-200, 28, 120],  turbidity: 6,  rayleigh: 4,   mieCoefficient: 0.06,   mieDirectionalG: 0.9 },
   day:    { sunPosition: [120, 140, -180], turbidity: 10, rayleigh: 2,   mieCoefficient: 0.005,  mieDirectionalG: 0.8 },
   sunset: { sunPosition: [180, 20, -100],  turbidity: 6,  rayleigh: 4.5, mieCoefficient: 0.08,   mieDirectionalG: 0.85 },
 };
 const LIGHT_PARAMS = {
-  night:  { ambient: 0.018, di: 0.55, dc: '#0F1B9E', dp: [80, 200, -60] },
+  night:  { ambient: 0.15, di: 0.65, dc: '#4A5B96', dp: [80, 200, -60] },
   dawn:   { ambient: 0.14,  di: 2.0,  dc: '#FF7010', dp: [-260, 16, 160] },
   day:    { ambient: 0.45,  di: 2.4,  dc: '#FFFEF0', dp: [160, 230, -260] },
   sunset: { ambient: 0.09,  di: 2.1,  dc: '#FF2200', dp: [250, 8, -50] },
@@ -88,7 +88,8 @@ const BuildingShaderMaterial = {
 
 const GroundShaderMaterial = {
   uniforms: {
-    uIsNight: { value: false }, uGridSize: { value: 10.0 }, uRoadInterval: { value: 4.0 }
+    uIsNight: { value: false }, uGridSize: { value: 10.0 }, uRoadInterval: { value: 4.0 },
+    uLamps: { value: [] }
   },
   vertexShader: `
     varying vec3 vWorldPosition;
@@ -101,22 +102,32 @@ const GroundShaderMaterial = {
   fragmentShader: `
     varying vec3 vWorldPosition;
     uniform bool uIsNight; uniform float uGridSize; uniform float uRoadInterval;
+    uniform vec3 uLamps[30];
     void main() {
       float ax = vWorldPosition.x, az = vWorldPosition.z;
       float gx = ax / uGridSize, gz = az / uGridSize;
       bool isRoadX = abs(mod(round(gx), uRoadInterval)) < 0.1;
       bool isRoadZ = abs(mod(round(gz), uRoadInterval)) < 0.1;
-      vec3 color = uIsNight ? vec3(0.02, 0.02, 0.025) : vec3(0.65, 0.65, 0.68);
+      vec3 color = uIsNight ? vec3(0.003, 0.003, 0.005) : vec3(0.65, 0.65, 0.68);
       if (isRoadX || isRoadZ) {
-        color = uIsNight ? vec3(0.015,0.015,0.02) : vec3(0.35,0.35,0.40);
+        color = uIsNight ? vec3(0.002,0.002,0.003) : vec3(0.35,0.35,0.40);
         float dx = abs(ax - round(gx)*uGridSize), dz = abs(az - round(gz)*uGridSize);
-        if ((isRoadX&&dx<0.15)||(isRoadZ&&dz<0.15)) color = uIsNight ? vec3(0.3,0.2,0.05) : vec3(0.8,0.6,0.1);
+        if ((isRoadX&&dx<0.15)||(isRoadZ&&dz<0.15)) color = uIsNight ? vec3(0.1,0.05,0.01) : vec3(0.8,0.6,0.1);
         float fx = step(0.5,fract(az*0.2)), fz = step(0.5,fract(ax*0.2));
-        vec3 laneColor = uIsNight ? vec3(0.2) : vec3(0.7);
+        vec3 laneColor = uIsNight ? vec3(0.05) : vec3(0.7);
         if (isRoadX&&abs(dx-1.5)<0.05&&fx>0.5) color=laneColor;
         if (isRoadX&&abs(dx+1.5)<0.05&&fx>0.5) color=laneColor;
         if (isRoadZ&&abs(dz-1.5)<0.05&&fz>0.5) color=laneColor;
         if (isRoadZ&&abs(dz+1.5)<0.05&&fz>0.5) color=laneColor;
+      }
+      if (uIsNight) {
+        for(int i=0; i<30; i++) {
+          float d = distance(vWorldPosition, uLamps[i]);
+          if (d < 50.0) {
+            float intensity = pow(1.0 - (d / 50.0), 2.5);
+            color += vec3(0.9, 0.7, 0.3) * intensity * 0.45;
+          }
+        }
       }
       gl_FragColor = vec4(color, 1.0);
     }
@@ -418,6 +429,47 @@ function ParkTrees({ timeOfDay }) {
   );
 }
 
+function StreetLamps({ positions, timeOfDay }) {
+  const isNight = timeOfDay === 'night';
+  const count = positions.length;
+  const poleRef = useRef();
+  const bulbRef = useRef();
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  useEffect(() => {
+    if (!poleRef.current || !bulbRef.current) return;
+    positions.forEach((p, i) => {
+      dummy.position.set(p.x, 3.5, p.z);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+      poleRef.current.setMatrixAt(i, dummy.matrix);
+      
+      dummy.position.set(p.x, 7.5, p.z);
+      dummy.updateMatrix();
+      bulbRef.current.setMatrixAt(i, dummy.matrix);
+    });
+    poleRef.current.instanceMatrix.needsUpdate = true;
+    bulbRef.current.instanceMatrix.needsUpdate = true;
+  }, [positions, dummy]);
+
+  const poleColor = isNight ? '#111' : '#666';
+  const bulbColor = isNight ? '#FFF0B0' : '#888';
+  const emissive = isNight ? '#FFC040' : '#000000';
+
+  return (
+    <>
+      <instancedMesh ref={poleRef} args={[null, null, count]} frustumCulled={false}>
+        <cylinderGeometry args={[0.2, 0.3, 7]} />
+        <meshStandardMaterial color={poleColor} roughness={0.7} />
+      </instancedMesh>
+      <instancedMesh ref={bulbRef} args={[null, null, count]} frustumCulled={false}>
+        <sphereGeometry args={[1.2, 16, 16]} />
+        <meshStandardMaterial color={bulbColor} emissive={emissive} emissiveIntensity={isNight ? 2.5 : 0} />
+      </instancedMesh>
+    </>
+  );
+}
+
 
 // ─── 강변 웨이브 지오메트리 ────────────────────────────────────────────────
 
@@ -701,15 +753,49 @@ function WorldControls({ joystickValues, mobileVertical, acceleration, cameraTar
     const onWheel = (e) => {
       distance.current = Math.max(30, Math.min(500, distance.current + e.deltaY * 0.1));
     };
+
+    let initialTouchDist = null;
+    const onTouchStart = (e) => {
+      if (e.touches.length === 2) {
+        initialTouchDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+      }
+    };
+    const onTouchMove = (e) => {
+      if (e.touches.length === 2 && initialTouchDist !== null) {
+        const currentDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        const delta = initialTouchDist - currentDist;
+        distance.current = Math.max(30, Math.min(500, distance.current + delta * 0.5));
+        initialTouchDist = currentDist;
+      }
+    };
+    const onTouchEnd = (e) => {
+      if (e.touches.length < 2) {
+        initialTouchDist = null;
+      }
+    };
+
     el.addEventListener('mousedown', onDown);
     window.addEventListener('mouseup', onUp);
     window.addEventListener('mousemove', onMove);
     el.addEventListener('wheel', onWheel, { passive: false });
+    el.addEventListener('touchstart', onTouchStart, { passive: false });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd, { passive: false });
+
     return () => {
       el.removeEventListener('mousedown', onDown);
       window.removeEventListener('mouseup', onUp);
       window.removeEventListener('mousemove', onMove);
       el.removeEventListener('wheel', onWheel);
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
     };
   }, [gl]);
 
@@ -838,10 +924,25 @@ export default function WorldPage() {
   const [buildings, setBuildings] = useState([]);
   const [loading,   setLoading]   = useState(true);
 
+  const LAMP_POSITIONS = useMemo(() => {
+    const pos = [];
+    const RIV_MIN = 107, RIV_MAX = 213;
+    for (let ci = 0; ci < 80; ci++) {
+      const cx = (seededRand(ci * 12.3) - 0.5) * 860;
+      const cz = (seededRand(ci * 8.7) - 0.5) * 860;
+      if (cz > RIV_MIN && cz < RIV_MAX) continue;
+      if (Math.abs(cx) > 500 || Math.abs(cz) > 500) continue;
+      pos.push(new THREE.Vector3(cx, 0, cz));
+      if (pos.length >= 30) break;
+    }
+    while(pos.length < 30) pos.push(new THREE.Vector3(2000,0,2000));
+    return pos;
+  }, []);
+
   const [timeOfDay, setTimeOfDay] = useState('day');
   const [weather,   setWeather]   = useState('clear');
   const [quality,   setQuality]   = useState('medium');
-  const [acceleration, setAcceleration] = useState(500);
+  const [acceleration, setAcceleration] = useState(600);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState(null);
   const [showMinimap, setShowMinimap] = useState(true);
@@ -872,8 +973,8 @@ export default function WorldPage() {
 
   const gShader = useMemo(() => ({
     ...GroundShaderMaterial,
-    uniforms: { ...GroundShaderMaterial.uniforms, uIsNight:{ value:isNight }, uGridSize:{ value:10.0 }, uRoadInterval:{ value:4.0 } }
-  }), []);
+    uniforms: { ...GroundShaderMaterial.uniforms, uIsNight:{ value:isNight }, uGridSize:{ value:10.0 }, uRoadInterval:{ value:4.0 }, uLamps: { value: LAMP_POSITIONS } }
+  }), [LAMP_POSITIONS]);
 
   const weatherAmbientMult = weather === 'cloudy' || weather === 'rain' || weather === 'snow' ? 0.65 : 1.0;
 
@@ -966,10 +1067,10 @@ export default function WorldPage() {
                 </div>
                 <div className="grid grid-cols-4 gap-1">
                   {[
-                    { l: '느림', v: 300 },
-                    { l: '보통', v: 500 },
-                    { l: '빠름', v: 700 },
-                    { l: '매우빠름', v: 900 }
+                    { l: '느림', v: 350 },
+                    { l: '보통', v: 600 },
+                    { l: '빠름', v: 900 },
+                    { l: '매우빠름', v: 1200 }
                   ].map(s => (
                     <button key={s.v} onClick={() => setAcceleration(s.v)}
                       className={`py-1 rounded-lg text-[10px] font-medium transition-colors ${acceleration===s.v?'bg-purple-600 text-white':'bg-white/10 text-white/50 hover:bg-white/20'}`}>
@@ -1034,7 +1135,11 @@ export default function WorldPage() {
 
         <Canvas shadows camera={{ fov: 45 }} gl={{ antialias: true }} dpr={QUALITY_DPR[quality]}>
           <Suspense fallback={null}>
-            <Sky {...sp} />
+            {timeOfDay === 'night' ? (
+              <color attach="background" args={['#020205']} />
+            ) : (
+              <Sky {...sp} />
+            )}
             <ambientLight intensity={lp.ambient * weatherAmbientMult} />
             <directionalLight position={lp.dp} intensity={lp.di * weatherAmbientMult} color={lp.dc}
               castShadow shadow-mapSize={[2048, 2048]} />
@@ -1042,7 +1147,7 @@ export default function WorldPage() {
             {/* 시간대별 보조 광원 */}
             {timeOfDay === 'night' && <>
               <pointLight position={[90, 170, -240]} color="#8899FF" intensity={0.7} distance={600} />
-              <hemisphereLight args={['#0A1050', '#000008', 0.18]} />
+              <hemisphereLight args={['#0A1230', '#000008', 0.25]} />
             </>}
             {timeOfDay === 'dawn' && <>
               <hemisphereLight args={['#FF8030', '#180A00', 0.55]} />
@@ -1068,7 +1173,7 @@ export default function WorldPage() {
             {/* 지면 */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -0.01, 0]}>
               <planeGeometry args={[4000, 4000]} />
-              <shaderMaterial attach="material" {...gShader} />
+              <shaderMaterial ref={groundMatRef} attach="material" {...gShader} />
             </mesh>
 
             {/* 강 코너 */}
@@ -1076,8 +1181,9 @@ export default function WorldPage() {
             <RiverBanks />
             <Bridges timeOfDay={timeOfDay} />
 
-            {/* 자연물 */}
+            {/* 자연물 및 가로등 */}
             <ParkTrees timeOfDay={timeOfDay} />
+            <StreetLamps positions={LAMP_POSITIONS} timeOfDay={timeOfDay} />
             <VoxelClouds weather={weather} />
 
             {/* 날씨 파티클 */}
