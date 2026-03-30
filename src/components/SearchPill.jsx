@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getRecentSearches, addRecentSearch, removeRecentSearch } from '../utils/storage';
+import { getRecentSearches, addRecentSearch, removeRecentSearch, getLastSearch, setLastSearch } from '../utils/storage';
 
 export default function SearchPill({ className = '', style, suggestionsAbove = false }) {
   const navigate = useNavigate();
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(() => getLastSearch());
   const [recentSearches, setRecentSearches] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -27,6 +27,7 @@ export default function SearchPill({ className = '', style, suggestionsAbove = f
     if (input.trim()) {
       const nr = addRecentSearch(input.trim());
       if (nr) setRecentSearches(nr);
+      setLastSearch(input.trim());
       navigate(`/profile?creator=${encodeURIComponent(input.trim())}`);
     }
   };

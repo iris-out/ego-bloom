@@ -31,6 +31,12 @@ jobs:
       - name: Generate ranking_latest.json
         run: node scripts/fetch_ranking.js
 
+      - name: Snapshot account_current → account_history
+        run: node scripts/snapshot_history.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"

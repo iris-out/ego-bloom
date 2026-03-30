@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RefreshCw, Plus, X } from 'lucide-react';
+import { RefreshCw, Plus, X, Heart } from 'lucide-react';
 import {
   getMyProfileId,
   setMyProfileId,
@@ -8,6 +8,7 @@ import {
   getMyProfileCache,
   setMyProfileCache,
   isMyProfileStale,
+  getFavorites,
 } from '../utils/storage';
 import { formatCompactNumber } from '../utils/tierCalculator';
 import { proxyImageUrl } from '../utils/imageUtils';
@@ -21,6 +22,7 @@ export default function MyProfileCard() {
   const [inputValue, setInputValue] = useState('');
   const [error, setError] = useState(null);
   const inputRef = useRef(null);
+  const favorites = getFavorites().slice(0, 5);
 
   const resolveId = useCallback(async (raw) => {
     const trimmed = raw.trim();
@@ -226,6 +228,28 @@ export default function MyProfileCard() {
 
       {error && (
         <p className="mb-2 text-[10px] text-red-400/70 text-center">{error}</p>
+      )}
+
+      {/* 즐겨찾기 섹션 */}
+      {favorites.length > 0 && (
+        <div className="border-t border-white/[0.04] pt-2 mt-2">
+          <div className="flex items-center gap-1 mb-1.5">
+            <Heart size={10} className="text-pink-400/70" fill="currentColor" />
+            <span className="text-[10px] text-white/30 font-medium">즐겨찾기</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            {favorites.map(fav => (
+              <button
+                key={fav.id}
+                onClick={(e) => { e.stopPropagation(); navigate(`/profile?creator=${encodeURIComponent(fav.handle ? `@${fav.handle}` : fav.id)}`); }}
+                className="w-full text-left flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/[0.05] transition-colors group/fav"
+              >
+                <span className="text-[12px] text-white/65 truncate group-hover/fav:text-white/90 transition-colors">{fav.nickname || fav.handle || fav.id}</span>
+                {fav.handle && <span className="text-[10px] text-white/25 truncate shrink-0">@{fav.handle}</span>}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Bottom-right action buttons */}

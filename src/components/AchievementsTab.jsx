@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { formatNumber, toKST } from '../utils/tierCalculator';
 import { computeEarnedTitles } from '../data/badges';
-import { ChevronRight, Globe, Crown, Medal, BarChart3, Tag, PartyPopper, CheckCircle2, Lock } from 'lucide-react';
+import { ChevronRight, Globe, Crown, Medal, BarChart3, Tag, PartyPopper, CheckCircle2, Lock, TrendingUp } from 'lucide-react';
 import { proxyImageUrl } from '../utils/imageUtils';
 
 // ===== 격려 메시지 (카드 위에 표시) =====
@@ -63,11 +63,11 @@ export default function AchievementsTab({ stats, characters }) {
                     ? isGradient
                         ? 'border-purple-400/30 shadow-sm'
                         : `${c.bg} ${c.border} shadow-sm`
-                    : 'bg-[var(--bg-secondary)]/30 border-white/[0.08] opacity-40 grayscale'
+                    : 'bg-[var(--bg-secondary)]/30 border-white/[0.08] opacity-60'
                     }`}
                 style={t.earned && isGradient ? { background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(59,130,246,0.15))' } : {}}
             >
-                <div className="text-xl shrink-0 mt-0.5">{t.emoji}</div>
+                <div className={`text-xl shrink-0 mt-0.5 ${!t.earned ? 'grayscale' : ''}`}>{t.emoji}</div>
                 <div className="flex-1 min-w-0">
                     <div className={`text-[13px] font-bold leading-tight ${t.earned ? (isGradient ? 'text-purple-300' : c.text) : 'text-white/40'}`}>
                         {t.title}
@@ -75,6 +75,23 @@ export default function AchievementsTab({ stats, characters }) {
                     <div className="text-[11px] text-[var(--text-tertiary)] mt-1 leading-relaxed">
                         {t.desc}
                     </div>
+                    {/* 진행도 바 (미획득 + progress 있는 경우) */}
+                    {!t.earned && t.progress && (
+                        <div className="mt-2">
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-[10px] text-white/30">{t.progress.label}</span>
+                                <span className="text-[10px] text-white/40 font-mono">
+                                    {t.progress.current.toLocaleString()} / {t.progress.max.toLocaleString()}
+                                </span>
+                            </div>
+                            <div className="h-1 bg-white/[0.08] rounded-full overflow-hidden">
+                                <div
+                                    className="h-full rounded-full bg-[var(--accent)] transition-all"
+                                    style={{ width: `${Math.min(100, (t.progress.current / t.progress.max) * 100)}%`, opacity: 0.7 }}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
                 {t.earned && (
                     <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${isGradient ? '' : c.dot}`}

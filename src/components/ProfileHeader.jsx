@@ -7,10 +7,10 @@ import {
 } from '../utils/tierCalculator';
 import TierIcon from './ui/TierIcon';
 import HoverNumber from './HoverNumber';
-import { Pin } from 'lucide-react';
+import { Pin, Link2, Check, Heart } from 'lucide-react';
 import { computeEarnedTitles, BADGE_COLOR_MAP, FIXED_BADGE_IDS } from '../data/badges';
 import ImageWithFallback from './ImageWithFallback';
-import { getCreatorBadge, saveCreatorBadge } from '../utils/storage';
+import { getCreatorBadge, saveCreatorBadge, addFavorite, removeFavorite, isFavorite } from '../utils/storage';
 import LiveViewModal from './LiveViewModal';
 
 const TIER_KO = {
@@ -35,6 +35,8 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
   const [editingInternal, setEditingInternal] = useState(false);
   const editing = editingProp !== undefined ? editingProp : editingInternal;
   const setEditing = setEditingProp || setEditingInternal;
+  const [copied, setCopied] = useState(false);
+  const [favorited, setFavorited] = useState(() => profile?.id ? isFavorite(profile.id) : false);
 
   // Hash 기반 Recap 열기/닫기
   React.useEffect(() => {
@@ -49,6 +51,24 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
     if (window.location.hash === '#recap') history.back();
     else setShowRecap(false);
   }, []);
+
+  const handleCopyLink = useCallback(() => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }).catch(() => {});
+  }, []);
+
+  const handleFavorite = useCallback(() => {
+    if (!profile?.id) return;
+    if (favorited) {
+      removeFavorite(profile.id);
+      setFavorited(false);
+    } else {
+      addFavorite(profile.id, profile.nickname, profile.username);
+      setFavorited(true);
+    }
+  }, [profile, favorited]);
 
   const breakdown = useMemo(() => {
     if (!profile || !stats) return null;
@@ -112,6 +132,30 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
 
           <h1 className="font-serif-kr text-[22px] mt-4 font-bold tracking-tight text-white">{profile.nickname}</h1>
           <span className="text-[13px] text-gray-500 mt-1">@{profile.username}</span>
+
+          {/* 링크 복사 + 즐겨찾기 버튼 */}
+          <div className="flex items-center gap-2 mt-3">
+            <button
+              onClick={handleCopyLink}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/[0.08] text-[11px] font-medium text-white/50 hover:text-white/80 transition-all"
+              title="프로필 링크 복사"
+            >
+              {copied ? <Check size={12} className="text-emerald-400" /> : <Link2 size={12} />}
+              <span>{copied ? '복사됨!' : '링크 복사'}</span>
+            </button>
+            <button
+              onClick={handleFavorite}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-medium transition-all ${
+                favorited
+                  ? 'bg-pink-500/15 border-pink-500/30 text-pink-400 hover:bg-pink-500/25'
+                  : 'bg-white/[0.05] border-white/[0.08] text-white/50 hover:text-white/80 hover:bg-white/[0.10]'
+              }`}
+              title={favorited ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+            >
+              <Heart size={12} fill={favorited ? 'currentColor' : 'none'} />
+              <span>{favorited ? '즐겨찾기' : '즐겨찾기'}</span>
+            </button>
+          </div>
 
           {/* 칭호 pills */}
           <div className="mt-4">

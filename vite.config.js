@@ -176,6 +176,74 @@ function supabaseApiPlugin(env) {
         }
       });
 
+      server.middlewares.use('/api/get-season-rankings', async (req, res, next) => {
+        try {
+          if (!supabase) throw new Error('Supabase not configured');
+          const url = new URL(req.url, `http://${req.headers.host}`);
+          const now = new Date();
+          const year = parseInt(url.searchParams.get('year')) || now.getUTCFullYear();
+          const month = parseInt(url.searchParams.get('month')) || (now.getUTCMonth() + 1);
+          const seasonStart = `${year}-${String(month).padStart(2, '0')}-01`;
+
+          // Get all current scores
+          const { data: current, error: currentErr } = await supabase
+            .from('account_current')
+            .select('id, nickname, handle, elo_score, tier_name, follower_count, plot_interaction_count')
+            .gt('elo_score', 0);
+          if (currentErr) throw currentErr;
+
+          if (!current || current.length === 0) {
+            res.setHeader('Content-Type', 'application/json');
+            return res.end(JSON.stringify({ rankings: [], season: { year, month, start: seasonStart } }));
+          }
+
+          const ids = current.map(r => r.id);
+
+          // Get earliest history records at/after season start for each creator
+          const CHUNK = 400;
+          let allHistory = [];
+          for (let i = 0; i < ids.length; i += CHUNK) {
+            const chunk = ids.slice(i, i + CHUNK);
+            const { data: rows, error: histErr } = await supabase
+              .from('account_history')
+              .select('id, elo_score, record_date')
+              .gte('record_date', seasonStart)
+              .in('id', chunk)
+              .order('record_date', { ascending: true });
+            if (histErr) throw histErr;
+            allHistory = allHistory.concat(rows || []);
+          }
+
+          const seasonStartElo = {};
+          for (const row of allHistory) {
+            if (!seasonStartElo[row.id]) {
+              seasonStartElo[row.id] = row.elo_score;
+            }
+          }
+
+          const ranked = current
+            .filter(c => seasonStartElo[c.id] != null)
+            .map(creator => ({
+              ...creator,
+              start_elo: seasonStartElo[creator.id],
+              elo_change: creator.elo_score - seasonStartElo[creator.id],
+            }))
+            .sort((a, b) => b.elo_change - a.elo_change)
+            .slice(0, 30);
+
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({
+            rankings: ranked,
+            season: { year, month, start: seasonStart },
+          }));
+        } catch (err) {
+          console.error('Get Season Rankings Error:', err);
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
+
       server.middlewares.use('/api/get-world-data', async (req, res, next) => {
         try {
           if (!supabase) throw new Error('Supabase not configured');

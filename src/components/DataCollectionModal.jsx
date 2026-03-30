@@ -1,13 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { X, Database, ShieldCheck, Clock } from 'lucide-react';
 
 export default function DataCollectionModal({ isOpen, onClose }) {
-  const [agreed, setAgreed] = useState(false);
-
-  // 모달 열릴 때마다 체크박스 초기화
   useEffect(() => {
     if (isOpen) {
-      setAgreed(false);
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -138,59 +134,20 @@ export default function DataCollectionModal({ isOpen, onClose }) {
               </div>
             </div>
           </div>
-
-          {/* 동의 체크박스 */}
-          <label
-            style={{
-              display: 'flex', alignItems: 'center', gap: '10px',
-              padding: '12px 14px',
-              background: agreed ? 'rgba(168,85,247,0.08)' : 'rgba(255,255,255,0.03)',
-              border: `1px solid ${agreed ? 'rgba(168,85,247,0.35)' : 'rgba(255,255,255,0.08)'}`,
-              borderRadius: '12px',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={agreed}
-              onChange={e => setAgreed(e.target.checked)}
-              style={{ display: 'none' }}
-            />
-            {/* 커스텀 체크박스 */}
-            <div style={{
-              width: '18px', height: '18px', borderRadius: '5px', flexShrink: 0,
-              border: `2px solid ${agreed ? '#a855f7' : 'rgba(255,255,255,0.2)'}`,
-              background: agreed ? '#a855f7' : 'transparent',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all 0.2s',
-            }}>
-              {agreed && (
-                <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                  <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-            </div>
-            <span style={{ fontSize: '12px', color: agreed ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.45)', lineHeight: '1.5' }}>
-              위 내용을 확인하였으며, 데이터 수집에 동의합니다.
-            </span>
-          </label>
         </div>
 
         {/* 하단 버튼 */}
         <div style={{ padding: '0 20px 20px' }}>
           <button
-            onClick={agreed ? onClose : undefined}
+            onClick={onClose}
             style={{
               width: '100%',
               padding: '12px',
               borderRadius: '12px',
               border: 'none',
-              cursor: agreed ? 'pointer' : 'not-allowed',
-              background: agreed
-                ? 'linear-gradient(to right, rgba(168,85,247,0.4), rgba(99,102,241,0.4))'
-                : 'rgba(255,255,255,0.05)',
-              color: agreed ? '#fff' : 'rgba(255,255,255,0.25)',
+              cursor: 'pointer',
+              background: 'linear-gradient(to right, rgba(168,85,247,0.4), rgba(99,102,241,0.4))',
+              color: '#fff',
               fontSize: '13px',
               fontWeight: 600,
               letterSpacing: '0.03em',

@@ -127,19 +127,19 @@ export function computeEarnedTitles(input) {
   list.push({ id: 'mesu', emoji: '🩷', title: '허접', desc: BADGE_DEFINITIONS.find(b => b.id === 'mesu')?.desc ?? '', color: 'pink', earned: mesuChars.length > 0, chars: mesuChars });
   list.push({ id: 'unlimit', emoji: '🔮', title: '언리밋', desc: BADGE_DEFINITIONS.find(b => b.id === 'unlimit')?.desc ?? '', color: 'violet', earned: unlimitedChars.length > 0, chars: unlimitedChars.map(c => c.name) });
 
-  list.push({ id: '1m', emoji: '💬', title: '밀리언', desc: BADGE_DEFINITIONS.find(b => b.id === '1m')?.desc ?? '', color: 'amber', earned: totalInteractions >= 1000000 });
-  list.push({ id: '10m', emoji: '🎬', title: '천만관객', desc: BADGE_DEFINITIONS.find(b => b.id === '10m')?.desc ?? '', color: 'yellow', earned: totalInteractions >= 10000000 });
-  list.push({ id: 'superstar', emoji: '🌌', title: '우주대스타', desc: BADGE_DEFINITIONS.find(b => b.id === 'superstar')?.desc ?? '', color: 'gradient', earned: followers >= 10000 });
+  list.push({ id: '1m', emoji: '💬', title: '밀리언', desc: BADGE_DEFINITIONS.find(b => b.id === '1m')?.desc ?? '', color: 'amber', earned: totalInteractions >= 1000000, progress: totalInteractions < 1000000 ? { current: totalInteractions, max: 1000000, label: '총 대화수' } : undefined });
+  list.push({ id: '10m', emoji: '🎬', title: '천만관객', desc: BADGE_DEFINITIONS.find(b => b.id === '10m')?.desc ?? '', color: 'yellow', earned: totalInteractions >= 10000000, progress: totalInteractions < 10000000 ? { current: totalInteractions, max: 10000000, label: '총 대화수' } : undefined });
+  list.push({ id: 'superstar', emoji: '🌌', title: '우주대스타', desc: BADGE_DEFINITIONS.find(b => b.id === 'superstar')?.desc ?? '', color: 'gradient', earned: followers >= 10000, progress: followers < 10000 ? { current: followers, max: 10000, label: '팔로워' } : undefined });
   const hattrickChars = charactersWithInteraction(characters, 1000000);
-  list.push({ id: 'hattrick', emoji: '🎩', title: '해트트릭', desc: BADGE_DEFINITIONS.find(b => b.id === 'hattrick')?.desc ?? '', color: 'indigo', earned: hattrickChars.length >= 3, chars: hattrickChars.map(c => c.name) });
+  list.push({ id: 'hattrick', emoji: '🎩', title: '해트트릭', desc: BADGE_DEFINITIONS.find(b => b.id === 'hattrick')?.desc ?? '', color: 'indigo', earned: hattrickChars.length >= 3, chars: hattrickChars.map(c => c.name), progress: hattrickChars.length < 3 ? { current: hattrickChars.length, max: 3, label: '100만+ 캐릭터' } : undefined });
   const platinumChars = charactersWithInteraction(characters, 1000000);
   list.push({ id: 'platinum', emoji: '💿', title: '플래티넘 디스크', desc: BADGE_DEFINITIONS.find(b => b.id === 'platinum')?.desc ?? '', color: 'slate', earned: platinumChars.length > 0, chars: platinumChars.map(c => c.name) });
   list.push({ id: 'furry', emoji: '🐾', title: '털', desc: BADGE_DEFINITIONS.find(b => b.id === 'furry')?.desc ?? '', color: 'amber', earned: ['수인', '수인형', '퍼리', 'furry'].some(t => tagSet.has(t)), chars: charsWithAnyTag(characters, ['수인', '수인형', '퍼리', 'furry']) });
-  list.push({ id: 'oneyear', emoji: '🎂', title: '벌써 1년', desc: BADGE_DEFINITIONS.find(b => b.id === 'oneyear')?.desc ?? '', color: 'emerald', earned: activityDays >= 365 });
-  list.push({ id: 'military', emoji: '🎖️', title: '고인물', desc: BADGE_DEFINITIONS.find(b => b.id === 'military')?.desc ?? '', color: 'blue', earned: activityDays >= 548 });
+  list.push({ id: 'oneyear', emoji: '🎂', title: '벌써 1년', desc: BADGE_DEFINITIONS.find(b => b.id === 'oneyear')?.desc ?? '', color: 'emerald', earned: activityDays >= 365, progress: activityDays < 365 ? { current: Math.floor(activityDays), max: 365, label: '활동일' } : undefined });
+  list.push({ id: 'military', emoji: '🎖️', title: '고인물', desc: BADGE_DEFINITIONS.find(b => b.id === 'military')?.desc ?? '', color: 'blue', earned: activityDays >= 548, progress: activityDays < 548 ? { current: Math.floor(activityDays), max: 548, label: '활동일' } : undefined });
 
-  list.push({ id: 'fertile', emoji: '🌾', title: '다산의 상징', desc: BADGE_DEFINITIONS.find(b => b.id === 'fertile')?.desc ?? '', color: 'lime', earned: characters.length >= 100 });
-  list.push({ id: 'factory', emoji: '🏭', title: '공장장', desc: BADGE_DEFINITIONS.find(b => b.id === 'factory')?.desc ?? '', color: 'slate', earned: characters.length >= 150 });
+  list.push({ id: 'fertile', emoji: '🌾', title: '다산의 상징', desc: BADGE_DEFINITIONS.find(b => b.id === 'fertile')?.desc ?? '', color: 'lime', earned: characters.length >= 100, progress: characters.length < 100 ? { current: characters.length, max: 100, label: '캐릭터' } : undefined });
+  list.push({ id: 'factory', emoji: '🏭', title: '공장장', desc: BADGE_DEFINITIONS.find(b => b.id === 'factory')?.desc ?? '', color: 'slate', earned: characters.length >= 150, progress: characters.length < 150 ? { current: characters.length, max: 150, label: '캐릭터' } : undefined });
   list.push({ id: 'obsessive', emoji: '👀', title: '집착광', desc: BADGE_DEFINITIONS.find(b => b.id === 'obsessive')?.desc ?? '', color: 'violet', earned: tagSet.has('집착') && charsWithTag(characters, '집착').length >= 5, chars: charsWithTag(characters, '집착') });
   list.push({ id: 'purelove', emoji: '💘', title: '오직 순애만', desc: BADGE_DEFINITIONS.find(b => b.id === 'purelove')?.desc ?? '', color: 'pink', earned: !hasNtr && sunaeChars.length >= 5, chars: sunaeChars });
   list.push({ id: 'lonely', emoji: '🗣️', title: '말상대 구함', desc: BADGE_DEFINITIONS.find(b => b.id === 'lonely')?.desc ?? '', color: 'slate', earned: totalInteractions >= 1000 && followers === 0 });
@@ -154,7 +154,8 @@ export function computeEarnedTitles(input) {
   list.push({ id: 'expensive', emoji: '💸', title: '비싼 몸', desc: BADGE_DEFINITIONS.find(b => b.id === 'expensive')?.desc ?? '', color: 'gradient', earned: followRatio >= 10000 });
 
   const zeta100MChars = characters.filter(c => (c.interactionCount || 0) >= 100000000);
-  list.push({ id: '100m_zeta', emoji: '🌟', title: '1억제타', desc: BADGE_DEFINITIONS.find(b => b.id === '100m_zeta')?.desc ?? '', color: 'rose', earned: zeta100MChars.length > 0, chars: zeta100MChars.map(c => c.name) });
+  const maxSingleChar = characters.reduce((max, c) => Math.max(max, c.interactionCount || 0), 0);
+  list.push({ id: '100m_zeta', emoji: '🌟', title: '1억제타', desc: BADGE_DEFINITIONS.find(b => b.id === '100m_zeta')?.desc ?? '', color: 'rose', earned: zeta100MChars.length > 0, chars: zeta100MChars.map(c => c.name), progress: zeta100MChars.length === 0 && maxSingleChar > 0 ? { current: maxSingleChar, max: 100000000, label: '최고 캐릭터 대화수' } : undefined });
 
   list.push({ id: 'iljin', emoji: '🏀', title: '일진', desc: BADGE_DEFINITIONS.find(b => b.id === 'iljin')?.desc ?? '', color: 'orange', earned: tagSet.has('일진'), chars: charsWithTag(characters, '일진') });
   list.push({ id: 'jjindda', emoji: '🚶', title: '찐따', desc: BADGE_DEFINITIONS.find(b => b.id === 'jjindda')?.desc ?? '', color: 'slate', earned: tagSet.has('찐따'), chars: charsWithTag(characters, '찐따') });

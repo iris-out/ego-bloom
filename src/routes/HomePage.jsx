@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, X, ChevronRight, Database } from 'lucide-react';
+import { X, ChevronRight, Database } from 'lucide-react';
+import { useServerStatus } from '../hooks/useServerStatus';
 import ChangelogModal from '../components/ChangelogModal';
 import DataCollectionModal from '../components/DataCollectionModal';
 import ZetaBanners from '../components/ZetaBanners';
@@ -8,7 +9,6 @@ import MyProfileCard from '../components/MyProfileCard';
 import SearchPill from '../components/SearchPill';
 import { getRecentSearches, removeRecentSearch } from '../utils/storage';
 import { APP_VERSION } from '../data/changelog';
-import { useServerStatus } from '../hooks/useServerStatus';
 import { getCreatorTier } from '../utils/tierCalculator';
 import TierIcon from '../components/ui/TierIcon';
 
@@ -17,19 +17,9 @@ export default function HomePage() {
   const [recentSearches, setRecentSearches] = useState([]);
   const [showChangelog, setShowChangelog] = useState(false);
   const [showDataModal, setShowDataModal] = useState(false);
-  const { status: serverStatus, message: emergencyMessage } = useServerStatus();
-  const [noticeDismissed, setNoticeDismissed] = useState(false);
-  const noticeDismissTimerRef = useRef(null);
   const [topTags, setTopTags] = useState([]);
   const [topCreators, setTopCreators] = useState([]);
-
-  useEffect(() => {
-    if (!emergencyMessage) { setNoticeDismissed(false); return; }
-    setNoticeDismissed(false);
-    if (noticeDismissTimerRef.current) clearTimeout(noticeDismissTimerRef.current);
-    noticeDismissTimerRef.current = setTimeout(() => setNoticeDismissed(true), 10000);
-    return () => clearTimeout(noticeDismissTimerRef.current);
-  }, [emergencyMessage]);
+  const { status: serverStatus } = useServerStatus();
 
   useEffect(() => { setRecentSearches(getRecentSearches()); }, []);
 
@@ -47,7 +37,7 @@ export default function HomePage() {
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.combined) setTopTags(d.combined.slice(0, 5)); })
       .catch(() => { });
-      
+
     // 글로벌 랭킹 상위 5명 불러오기
     fetch('/api/get-rankings')
       .then(r => r.ok ? r.json() : null)
@@ -60,8 +50,6 @@ export default function HomePage() {
     setRecentSearches(removeRecentSearch(term));
   };
 
-  const statusColor = serverStatus === 'ok' ? '#6CD97E' : serverStatus === 'warning' ? '#FBBF24' : '#F87171';
-
   return (
     <div className="min-h-[100dvh] flex flex-col relative overflow-hidden">
       {/* 배경 글로우 */}
@@ -69,18 +57,6 @@ export default function HomePage() {
         <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[rgba(121,155,196,0.15)] rounded-full blur-[120px]" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[60%] bg-[rgba(65,30,110,0.25)] rounded-full blur-[120px]" />
       </div>
-
-      {/* 공지 배너 */}
-      {emergencyMessage && !noticeDismissed && (
-        <div className="fixed top-4 inset-x-0 z-[60] flex justify-center px-4 pointer-events-none">
-          <div className="glass-pill pointer-events-auto flex items-center gap-3 px-4 py-2.5 max-w-md w-fit animate-di-expand shadow-xl">
-            <AlertCircle size={14} className="text-amber-400 shrink-0" />
-            <span className="text-[13px] text-white/80 truncate">{emergencyMessage}</span>
-            <button onClick={() => { clearTimeout(noticeDismissTimerRef.current); setNoticeDismissed(true); }}
-              className="shrink-0 text-white/30 hover:text-white/60"><X size={14} /></button>
-          </div>
-        </div>
-      )}
 
       {/* 메인 콘텐츠 */}
       <div className="flex flex-col flex-1 px-6 pt-8 pb-[140px] lg:pb-16 relative z-10 max-w-[680px] mx-auto w-full lg:max-w-[1280px] lg:px-[10%]">
@@ -99,16 +75,25 @@ export default function HomePage() {
             </svg>
             <h1 className="font-medium text-[22px] tracking-[-0.02em] text-white">EGO-BLOOM</h1>
           </div>
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-white/70 tracking-wider">
+          <div className="flex items-center gap-2">
+            {/* 서버 상태 */}
+            {(() => {
+              const color = serverStatus === 'ok' ? '#6CD97E' : serverStatus === 'warning' ? '#FBBF24' : serverStatus === 'checking' ? 'rgba(255,255,255,0.3)' : '#F87171';
+              const label = serverStatus === 'ok' ? 'ZETA 서버 정상' : serverStatus === 'warning' ? 'ZETA 서버 불안정' : serverStatus === 'checking' ? 'ZETA 서버 확인 중' : 'ZETA 서버 이상';
+              return (
+                <div className="flex items-center gap-1.5 text-[11px] font-medium text-white/50 tracking-wide">
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color, boxShadow: `0 0 6px ${color}88` }} />
+                  <span className="hidden sm:inline">{label}</span>
+                </div>
+              );
+            })()}
             <button
               onClick={() => setShowDataModal(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors mr-1"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors text-[11px] font-medium text-white/70 tracking-wider"
             >
               <Database size={11} className="text-purple-400" />
               <span className="hidden sm:inline">데이터 수집</span>
             </button>
-            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor, boxShadow: `0 0 8px ${statusColor}66` }} />
-            <span>{serverStatus === 'ok' ? '정상' : serverStatus === 'warning' ? '불안정' : '이상'}</span>
           </div>
         </header>
 
@@ -117,33 +102,26 @@ export default function HomePage() {
 
         {/* 2열 그리드 (PC) / 단일 컬럼 (모바일) */}
         <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-12 lg:items-start flex-1">
-          {/* 왼쪽: 히어로 + 배너 + 랭킹 + 트렌딩 + 최근 검색 */}
+          {/* 왼쪽: 히어로 + 소식 + 랭킹 + 트렌딩 + 최근 검색 */}
           <div className="min-w-0">
             {/* 히어로 */}
-            <section className="mb-12 animate-fade-in-up" style={{ animationDelay: '120ms' }}>
+            <section className="mb-10 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
               <h2 className="font-display text-[56px] leading-[0.95] tracking-[-0.04em] font-normal text-white mb-4">
                 Creator<br />
                 <span className="font-serif-kr text-[42px] tracking-[-0.05em] block mt-1">에고 발사대</span>
               </h2>
-              <p className="text-[14px] text-white/70 font-light leading-relaxed max-w-[80%] mb-6">
+              <p className="text-[14px] text-white/70 font-light leading-relaxed max-w-[80%]">
                 당신의 에고를 발사하세요.<br />대화량, 티어, 그리고 업적으로.
               </p>
-              <button 
-                onClick={() => navigate('/world')}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 hover:bg-purple-500/30 transition-all text-sm font-medium text-purple-100"
-              >
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                오픈월드 탐험하기 (Beta)
-              </button>
             </section>
 
-            {/* 배너 */}
-            <div className="mb-10 animate-fade-in-up" style={{ animationDelay: '180ms' }}>
+            {/* Zeta 소식 & 공지사항 (히어로 아래) */}
+            <div className="mb-10 animate-fade-in-up" style={{ animationDelay: '140ms' }}>
               <ZetaBanners />
             </div>
 
             {/* 글로벌 랭킹 (Top 5) */}
-            <section className="mb-12 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+            <section className="mb-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
               <div className="flex justify-between items-end mb-2 pb-2 border-b border-white/[0.06]">
                 <span className="text-[12px] font-medium text-white/40 uppercase tracking-widest">Global Top Creators</span>
                 <button onClick={() => navigate('/ranking')} className="text-[12px] text-white/70 hover:text-white transition-colors flex items-center gap-1">
@@ -155,7 +133,7 @@ export default function HomePage() {
                   const isTop3 = i < 3;
                   const rankColors = ['text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]', 'text-gray-300 drop-shadow-[0_0_8px_rgba(209,213,219,0.5)]', 'text-amber-600 drop-shadow-[0_0_8px_rgba(217,119,6,0.5)]'];
                   return (
-                    <li key={creator.id} onClick={() => navigate(`/?creator=${creator.handle || creator.id}`)} 
+                    <li key={creator.id} onClick={() => navigate(`/?creator=${creator.handle || creator.id}`)}
                         className="flex items-center p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.08] cursor-pointer transition-all">
                       <span className={`font-display italic text-[20px] w-8 text-center mr-2 ${isTop3 ? rankColors[i] : 'text-white/40'}`}>{i + 1}</span>
                       <div className="flex-1 flex flex-col min-w-0">
@@ -184,6 +162,17 @@ export default function HomePage() {
                 )}
               </ul>
             </section>
+
+            {/* 오픈월드 탐험하기 버튼 */}
+            <div className="mb-12 animate-fade-in-up" style={{ animationDelay: '220ms' }}>
+              <button
+                onClick={() => navigate('/world')}
+                className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/20 hover:bg-purple-500/20 hover:border-purple-500/40 transition-all text-sm font-medium text-purple-200/80 hover:text-purple-100"
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                오픈월드 탐험하기 (Beta)
+              </button>
+            </div>
 
             {/* 트렌딩 태그 */}
             <section className="mb-12 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
@@ -224,7 +213,7 @@ export default function HomePage() {
                       style={{ background: 'rgba(255,255,255,0.12)' }}>
                       {term}
                       <span role="button" onClick={e => handleDeleteRecent(term, e)}
-                        className="text-white/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                        className="text-white/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all p-1.5 -m-1.5">
                         <X size={11} />
                       </span>
                     </button>

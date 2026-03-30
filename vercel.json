@@ -8,6 +8,10 @@
             "destination": "/api/resolve-handle"
         },
         {
+            "source": "/api/get-season-rankings",
+            "destination": "/api/get-season-rankings"
+        },
+        {
             "source": "/api/zeta/:path*",
             "destination": "https://api.zeta-ai.io/v1/:path*"
         },

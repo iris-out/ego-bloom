@@ -44,7 +44,8 @@ export default function CreatorRankingView() {
     setSearchResult(null);
     
     try {
-      const res = await fetch(`/api/search-rank?q=${encodeURIComponent(searchQuery.trim())}`);
+      const query = searchQuery.trim().replace(/^@/, '');
+      const res = await fetch(`/api/search-rank?q=${encodeURIComponent(query)}`);
       const data = await res.json();
       
       if (!res.ok || data.error) {
@@ -222,13 +223,17 @@ export default function CreatorRankingView() {
             const subdivisionLabel = tierData.subdivision !== null ? ` ${tierData.subdivision}` : '';
 
             return (
-              <div 
+              <div
                 key={creator.id}
                 onClick={() => navigate(`/profile?creator=${encodeURIComponent(creator.handle ? `@${creator.handle}` : creator.id)}`)}
                 className={`flex items-center gap-4 p-4 rounded-2xl transition-all cursor-pointer group relative overflow-hidden
-                  ${isTop3 ? 'bg-gradient-to-r from-white/[0.08] to-transparent border border-white/10 hover:border-white/20' 
+                  ${isTop3 ? 'bg-gradient-to-r from-white/[0.08] to-transparent border border-white/10 hover:border-white/20'
                            : 'bg-white/[0.02] border border-white/[0.02] hover:bg-white/[0.05] hover:border-white/10'}`}
               >
+                {/* hover 힌트 */}
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[11px] text-white/30 font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none pr-[70px] md:pr-[86px]">
+                  프로필 보기 <ChevronRight size={11} />
+                </div>
                 {/* 1등 배경 하이라이트 효과 */}
                 {index === 0 && (
                   <div className="absolute top-0 left-0 w-[150px] h-full bg-gradient-to-r from-yellow-500/10 to-transparent pointer-events-none" />
@@ -264,6 +269,16 @@ export default function CreatorRankingView() {
                       <span>{formatNumber(creator.elo_score)}</span>
                       <span className={`text-[10px] font-sans ${isTop3 ? 'text-white/30' : 'text-white/20'}`}>pt</span>
                     </div>
+                    {/* 순위 변동 */}
+                    {creator.rank_change === null ? (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/15 text-purple-400 border border-purple-500/20">NEW</span>
+                    ) : creator.rank_change > 0 ? (
+                      <span className="text-emerald-400 font-bold">↑{creator.rank_change}</span>
+                    ) : creator.rank_change < 0 ? (
+                      <span className="text-red-400 font-bold">↓{Math.abs(creator.rank_change)}</span>
+                    ) : (
+                      <span className="text-white/25">—</span>
+                    )}
                   </div>
                 </div>
 
@@ -286,8 +301,8 @@ export default function CreatorRankingView() {
 
       {/* 검색 결과 — createPortal로 viewport 기준 고정 */}
       {(searchResult || searchLoading || searchError) && createPortal(
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/95 backdrop-blur-2xl border-t border-white/10 z-[9998] animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-          <div className="max-w-2xl mx-auto flex items-center justify-between">
+        <div className="fixed bottom-0 left-0 right-0 px-3 pt-3 pb-4 sm:p-4 bg-black/95 backdrop-blur-2xl border-t border-white/10 z-[9998] animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+          <div className="w-full max-w-2xl mx-auto flex items-center gap-2 sm:gap-3">
             {searchLoading ? (
               <div className="flex items-center gap-3 text-white/60 py-2">
                 <Loader2 size={16} className="animate-spin" />
@@ -298,28 +313,29 @@ export default function CreatorRankingView() {
                 <span className="text-sm font-medium">{searchError}</span>
               </div>
             ) : searchResult && (
-              <div 
+              <div
                 onClick={() => navigate(`/profile?creator=${encodeURIComponent(searchResult.user.handle ? `@${searchResult.user.handle}` : searchResult.user.id)}`)}
-                className="w-full flex items-center gap-4 bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10 cursor-pointer transition-all"
+                className="flex-1 min-w-0 flex items-center gap-3 bg-white/5 hover:bg-white/10 p-2.5 sm:p-3 rounded-xl border border-white/10 cursor-pointer transition-all"
               >
                 {/* 등수 */}
-                <div className="min-w-[40px] text-center font-black text-xl text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.4)]">
+                <div className="min-w-[36px] sm:min-w-[40px] text-center font-black text-xl text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.4)] shrink-0">
                   {searchResult.rank}
                 </div>
 
                 {/* 정보 */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-1.5 mb-1">
                     <span className="font-bold text-base text-white truncate">
                       {searchResult.user.nickname}
                     </span>
                     {searchResult.user.handle && (
-                      <span className="text-xs text-white/50 truncate">@{searchResult.user.handle}</span>
+                      <span className="text-xs text-white/40 truncate hidden sm:inline">@{searchResult.user.handle}</span>
                     )}
                   </div>
                   <div className="flex items-center gap-3 text-[11px] text-white/50">
                     <span className="flex items-center gap-1"><MessageCircle size={10} />{formatNumber(searchResult.user.plot_interaction_count)}</span>
                     <span className="flex items-center gap-1"><Users size={10} />{formatNumber(searchResult.user.follower_count)}</span>
+                    <span className="font-mono hidden sm:inline">{formatNumber(searchResult.user.elo_score)} pt</span>
                   </div>
                 </div>
 
@@ -327,8 +343,8 @@ export default function CreatorRankingView() {
                 {(() => {
                   const tierData = getCreatorTier(searchResult.user.elo_score ?? 0);
                   return (
-                    <div className="flex items-center gap-3 shrink-0">
-                      <div className="text-right">
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="text-right hidden sm:block">
                         <div className="text-[12px] font-black uppercase" style={{ color: tierData.color }}>
                           {tierData.name}{tierData.subdivision ? ` ${tierData.subdivision}` : ''}
                         </div>
@@ -336,7 +352,7 @@ export default function CreatorRankingView() {
                           {formatNumber(searchResult.user.elo_score)} pt
                         </div>
                       </div>
-                      <div className="w-10 h-10 flex items-center justify-center">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center">
                         <TierIcon tier={tierData.key} size="100%" />
                       </div>
                     </div>
@@ -344,15 +360,15 @@ export default function CreatorRankingView() {
                 })()}
               </div>
             )}
-            
+
             {(searchError || searchResult) && (
-              <button 
+              <button
                 onClick={() => {
                   setSearchResult(null);
                   setSearchError(null);
                   setSearchQuery('');
                 }}
-                className="ml-4 p-2 text-white/40 hover:text-white/80 hover:bg-white/5 rounded-full transition-all shrink-0"
+                className="p-2 text-white/40 hover:text-white/80 hover:bg-white/5 rounded-full transition-all shrink-0"
               >
                 <X size={16} />
               </button>

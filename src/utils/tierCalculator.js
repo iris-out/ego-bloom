@@ -120,60 +120,7 @@ export function calculateCreatorScore(stats, characters) {
   return Math.floor(score);
 }
 
-// 최근 6개월(180일) 기준 점수 산정
-export function calculateCreatorScoreRecent(stats, characters) {
-  if (!stats) return -1; // Stats missing implies unranked or error
 
-  const sixMonthsAgo = toKST();
-  sixMonthsAgo.setDate(sixMonthsAgo.getDate() - 180);
-
-  // 최근 6개월 내 생성된 캐릭터 필터링
-  const recentChars = (characters || []).filter(c => {
-    const date = c.createdAt || c.createdDate;
-    if (!date) return false;
-    return toKST(date) >= sixMonthsAgo;
-  });
-
-  // 캐릭터가 없으면 Unranked (-1)
-  if (recentChars.length === 0) return -1;
-
-  // 1. 최근 캐릭터 총 대화량
-  const totalInteractions = recentChars.reduce((acc, c) => acc + (c.interactionCount || 0), 0);
-
-  // 2. 팔로워 수 (현재 기준 유지)
-  const followers = stats.followerCount || 0;
-
-  // 3. 상위 20개 (최근 캐릭터 중)
-  let top20Sum = 0;
-  if (recentChars.length > 0) {
-    const sorted = [...recentChars].sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0));
-    top20Sum = sorted.slice(0, 20).reduce((acc, c) => acc + (c.interactionCount || 0), 0);
-  }
-
-  // 4. 평균 대화량 (최근 캐릭터 기준)
-  const charCount = recentChars.length || 1;
-  const avgInteractions = recentChars.length > 0 ? totalInteractions / charCount : 0;
-
-  // 5. 음성 재생 수 (현재 기준 유지)
-  const voicePlays = stats.voicePlayCount || 0;
-
-  let score = (totalInteractions * 3.0)
-    + (followers * 300.0)
-    + (top20Sum * 0.5)
-    + (avgInteractions * 20.0)
-    + (voicePlays * 100.0);
-
-  // 효율 가산: 최근 캐릭터 수가 적은데 최근 대화량/팔로워가 많으면 보너스 (상한 12%)
-  const recentCount = recentChars.length;
-  if (recentCount <= 15 && recentCount >= 1 && (totalInteractions > 5000 || followers > 30)) {
-    const rosterFactor = (15 - recentCount) / 15;
-    const impact = totalInteractions / 5000 + followers / 20;
-    const bonus = Math.min(score * 0.12, rosterFactor * impact * 900); // V4.2: 가산 강도 1.5배
-    score += bonus;
-  }
-
-  return Math.floor(score);
-}
 
 export function getCreatorTier(score) {
   // Unranked 처리

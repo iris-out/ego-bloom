@@ -117,8 +117,8 @@ export default function GrowthChart({ characters }) {
                                     fill="rgba(0,0,0,0.85)"
                                 />
                                 <text x={Math.min(b.x - 60, W - 130) + 8} y={b.y - 36} fill="white" fontSize="10" fontWeight="bold">{b.year}년</text>
-                                <text x={Math.min(b.x - 60, W - 130) + 8} y={b.y - 22} fill="#D6BCFA" fontSize="9">신규 {b.count}개 | 누적 {b.cumCount}개</text>
-                                <text x={Math.min(b.x - 60, W - 130) + 8} y={b.y - 10} fill="#9F7AEA" fontSize="9">대화 {formatNumber(b.interactions)}</text>
+                                <text x={Math.min(b.x - 60, W - 130) + 8} y={b.y - 22} fill="var(--accent-bright)" fontSize="9">신규 {b.count}개 | 누적 {b.cumCount}개</text>
+                                <text x={Math.min(b.x - 60, W - 130) + 8} y={b.y - 10} fill="var(--accent)" fontSize="9">대화 {formatNumber(b.interactions)}</text>
                             </g>
                         </g>
                     ))}

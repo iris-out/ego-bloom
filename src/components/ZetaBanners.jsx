@@ -19,7 +19,6 @@ export default function ZetaBanners() {
   const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dismissed, setDismissed] = useState(getDismissed);
-  const [hidden, setHidden] = useState(false);
   const scrollRef = useRef(null);
   const dragState = useRef({ isDragging: false, startX: 0, scrollLeft: 0 });
 
@@ -85,21 +84,14 @@ export default function ZetaBanners() {
   if (loading) return null;
 
   const visible = banners.filter(b => !dismissed.has(b.id));
-  if (visible.length === 0 || hidden) return null;
+  if (visible.length === 0) return null;
 
   return (
     <div className="w-full animate-fade-in-up">
-      <div className="flex items-center justify-between mb-3 px-1">
+      <div className="flex items-center mb-3 px-1">
         <h3 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider flex items-center gap-1.5">
           <Megaphone size={14} className="text-[var(--accent)]" /> Zeta 소식 &amp; 공지사항
         </h3>
-        <button
-          onClick={() => setHidden(true)}
-          className="nav-btn"
-          title="배너 전체 숨기기"
-        >
-          <X size={12} />
-        </button>
       </div>
       <div className="relative">
         <button
@@ -114,65 +106,65 @@ export default function ZetaBanners() {
         >
           <ChevronRight size={14} />
         </button>
-      <div
-        ref={scrollRef}
-        className="flex overflow-x-auto gap-3 pb-2 snap-x snap-mandatory custom-scrollbar cursor-grab"
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseUp}
-      >
-        {visible.map((banner) => {
-          const isUrl = banner.clickAction?.type === 'externalLink';
-          const rawHref = banner.clickAction?.href || '';
-          const localHref = rawHref.startsWith('/ko') ? rawHref : `/ko${rawHref}`;
-          const href = isUrl ? banner.clickAction.url : `https://zeta-ai.io${localHref}`;
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto gap-3 pb-2 snap-x snap-mandatory custom-scrollbar cursor-grab"
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp}
+          onMouseLeave={onMouseUp}
+        >
+          {visible.map((banner) => {
+            const isUrl = banner.clickAction?.type === 'externalLink';
+            const rawHref = banner.clickAction?.href || '';
+            const localHref = rawHref.startsWith('/ko') ? rawHref : `/ko${rawHref}`;
+            const href = isUrl ? banner.clickAction.url : `https://zeta-ai.io${localHref}`;
 
-          return (
-            <div key={banner.id} className="relative flex-none w-[280px] sm:w-[320px] snap-center group">
-              <a
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative block h-[100px] rounded-xl overflow-hidden border border-[var(--border)] group-hover:border-[var(--accent)] transition-all"
-              >
-                {banner.imageUrl ? (
-                  <>
-                    <img
-                      src={proxyImageUrl(banner.imageUrl)}
-                      alt={banner.titlePrimary}
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  </>
-                ) : (
-                  <div className="absolute inset-0 bg-[var(--card)] flex items-center justify-center">
-                    <MessageCircle size={36} className="opacity-10" />
-                  </div>
-                )}
-                <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <h4 className="text-sm font-bold text-white leading-tight drop-shadow-md truncate">
-                    {banner.titlePrimary}
-                  </h4>
-                  {banner.titleSecondary && banner.titleSecondary.trim() !== '' && (
-                    <p className="text-[10px] text-gray-200 mt-0.5 drop-shadow-sm truncate">
-                      {banner.titleSecondary}
-                    </p>
+            return (
+              <div key={banner.id} className="relative flex-none w-[280px] sm:w-[320px] snap-center group">
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative block h-[100px] rounded-xl overflow-hidden border border-[var(--border)] group-hover:border-[var(--accent)] transition-all"
+                >
+                  {banner.imageUrl ? (
+                    <>
+                      <img
+                        src={proxyImageUrl(banner.imageUrl)}
+                        alt={banner.titlePrimary}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 bg-[var(--card)] flex items-center justify-center">
+                      <MessageCircle size={36} className="opacity-10" />
+                    </div>
                   )}
-                </div>
-              </a>
-              <button
-                onClick={(e) => dismiss(banner.id, e)}
-                className="absolute top-2 right-2 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
-                title="이 배너 숨기기"
-              >
-                <X size={10} />
-              </button>
-            </div>
-          );
-        })}
-      </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <h4 className="text-sm font-bold text-white leading-tight drop-shadow-md truncate">
+                      {banner.titlePrimary}
+                    </h4>
+                    {banner.titleSecondary && banner.titleSecondary.trim() !== '' && (
+                      <p className="text-[10px] text-gray-200 mt-0.5 drop-shadow-sm truncate">
+                        {banner.titleSecondary}
+                      </p>
+                    )}
+                  </div>
+                </a>
+                <button
+                  onClick={(e) => dismiss(banner.id, e)}
+                  className="absolute top-2 right-2 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+                  title="이 배너 숨기기"
+                >
+                  <X size={10} />
+                </button>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

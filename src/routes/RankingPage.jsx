@@ -58,55 +58,41 @@ export default function RankingPage() {
 
           {/* 탭 네비게이션 */}
           <div className="flex bg-white/[0.04] rounded-xl p-1 border border-white/[0.07]">
-            <button
-              onClick={() => setActiveTab('creator')}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold tracking-wider transition-all ${
-                activeTab === 'creator'
-                  ? 'bg-gradient-to-b from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/20'
-                  : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
-              }`}
-            >
-              글로벌 랭킹
-            </button>
-            <button
-              onClick={() => setActiveTab('trend')}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold tracking-wider transition-all ${
-                activeTab === 'trend'
-                  ? 'bg-gradient-to-b from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/20'
-                  : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
-              }`}
-            >
-              해시태그 트렌드
-            </button>
+            {[
+              { key: 'creator', label: '글로벌 랭킹' },
+              { key: 'trend', label: '해시태그 트렌드' },
+            ].map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold tracking-wider transition-all ${
+                  activeTab === tab.key
+                    ? 'bg-gradient-to-b from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/20'
+                    : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
       </header>
 
       <main className="max-w-[680px] mx-auto px-6 py-6 relative z-10 lg:max-w-[1280px] lg:px-12">
-        {activeTab === 'creator' ? (
-          <Suspense fallback={
-            <div className="flex items-center justify-center py-20">
-              <Loader2 size={28} className="animate-spin text-white/30" />
-            </div>
-          }>
+        {activeTab === 'creator' && (
+          <Suspense fallback={<div className="flex items-center justify-center py-20"><Loader2 size={28} className="animate-spin text-white/30" /></div>}>
             <CreatorRankingView />
           </Suspense>
-        ) : (
+        )}
+
+        {activeTab === 'trend' && (
           loading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 size={28} className="animate-spin text-white/30" />
             </div>
           ) : (
-            <Suspense fallback={
-              <div className="flex items-center justify-center py-20">
-                <Loader2 size={28} className="animate-spin text-white/30" />
-              </div>
-            }>
-              <TrendContent
-                hashtagData={hashtagData}
-                trendLoading={false}
-                embedded={true}
-              />
+            <Suspense fallback={<div className="flex items-center justify-center py-20"><Loader2 size={28} className="animate-spin text-white/30" /></div>}>
+              <TrendContent hashtagData={hashtagData} trendLoading={false} embedded={true} />
             </Suspense>
           )
         )}

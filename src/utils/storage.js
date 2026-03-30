@@ -141,3 +141,50 @@ export const isMyProfileStale = () => {
         return Date.now() - _cachedAt > MY_PROFILE_TTL;
     } catch { return true; }
 };
+
+// ─── Last Search (session) ────────────────────────────────────
+const LAST_SEARCH_KEY = 'zeta_last_search';
+
+export const getLastSearch = () => {
+    try { return sessionStorage.getItem(LAST_SEARCH_KEY) || ''; } catch { return ''; }
+};
+
+export const setLastSearch = (query) => {
+    try { if (query) sessionStorage.setItem(LAST_SEARCH_KEY, query); } catch { }
+};
+
+// ─── Favorites ───────────────────────────────────────────────
+const FAVORITES_KEY = 'zeta_favorites_v1';
+const MAX_FAVORITES = 20;
+
+export const getFavorites = () => {
+    try {
+        const stored = localStorage.getItem(FAVORITES_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+};
+
+export const addFavorite = (id, nickname, handle) => {
+    if (!id) return;
+    try {
+        let favs = getFavorites().filter(f => f.id !== id);
+        favs.unshift({ id, nickname, handle });
+        if (favs.length > MAX_FAVORITES) favs = favs.slice(0, MAX_FAVORITES);
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+    } catch (e) {
+        console.error('Failed to add favorite', e);
+    }
+};
+
+export const removeFavorite = (id) => {
+    try {
+        const favs = getFavorites().filter(f => f.id !== id);
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+    } catch (e) {
+        console.error('Failed to remove favorite', e);
+    }
+};
+
+export const isFavorite = (id) => {
+    try { return getFavorites().some(f => f.id === id); } catch { return false; }
+};

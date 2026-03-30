@@ -988,13 +988,13 @@ function River({ timeOfDay }) {
 // ─── 빌딩 ────────────────────────────────────────────────────────────────
 
 function getTierColor(t) {
-  if (t==='champion') return '#DC2626';
-  if (t==='master')   return '#9333EA';
-  if (t==='diamond')  return '#2563EB';
-  if (t==='platinum') return '#94A3B8';
-  if (t==='gold')     return '#D97706';
-  if (t==='silver')   return '#6B7280';
-  if (t==='bronze')   return '#92400E';
+  if (t==='champion') return '#F97316';
+  if (t==='master')   return '#D946EF';
+  if (t==='diamond')  return '#3B82F6';
+  if (t==='platinum') return '#E2E8F0';
+  if (t==='gold')     return '#FBBF24';
+  if (t==='silver')   return '#9CA3AF';
+  if (t==='bronze')   return '#C58356';
   return '#444';
 }
 function getTierWidth(t) {
