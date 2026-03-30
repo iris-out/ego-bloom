@@ -202,18 +202,25 @@ export function formatNumber(num) {
   if (num == null) return '0';
   const abs = Math.abs(num);
 
-  // Billion 단위 이상은 B, Million은 M, Thousand는 K로 표기
-  if (abs >= 1000000000) {
-    const v = (num / 1000000000).toFixed(1);
-    return `${v.endsWith('.0') ? v.slice(0, -2) : v}B`;
+  const truncate = (value, decimals) => {
+    const factor = Math.pow(10, decimals);
+    return Math.floor(value * factor) / factor;
+  };
+
+  // 1억 이상 (100,000,000) -> 2.95억
+  if (abs >= 100000000) {
+    const v = truncate(abs / 100000000, 2);
+    return `${num < 0 ? '-' : ''}${v}억`;
   }
-  if (abs >= 1000000) {
-    const v = (num / 1000000).toFixed(1);
-    return `${v.endsWith('.0') ? v.slice(0, -2) : v}M`;
+  // 1만 이상 (10,000) -> 3.5만, 300만, 2930만
+  if (abs >= 10000) {
+    const v = truncate(abs / 10000, 1);
+    return `${num < 0 ? '-' : ''}${v}만`;
   }
+  // 1천 이상 (1,000) -> 2.3천
   if (abs >= 1000) {
-    const v = (num / 1000).toFixed(1);
-    return `${v.endsWith('.0') ? v.slice(0, -2) : v}K`;
+    const v = truncate(abs / 1000, 1);
+    return `${num < 0 ? '-' : ''}${v}천`;
   }
   return new Intl.NumberFormat('ko-KR').format(num);
 }

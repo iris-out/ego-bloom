@@ -10,7 +10,7 @@ import HoverNumber from './HoverNumber';
 import { Pin, Link2, Check, Heart } from 'lucide-react';
 import { computeEarnedTitles, BADGE_COLOR_MAP, FIXED_BADGE_IDS } from '../data/badges';
 import ImageWithFallback from './ImageWithFallback';
-import { getCreatorBadge, saveCreatorBadge, addFavorite, removeFavorite, isFavorite } from '../utils/storage';
+import { getCreatorBadge, saveCreatorBadge } from '../utils/storage';
 import LiveViewModal from './LiveViewModal';
 
 const TIER_KO = {
@@ -36,7 +36,6 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
   const editing = editingProp !== undefined ? editingProp : editingInternal;
   const setEditing = setEditingProp || setEditingInternal;
   const [copied, setCopied] = useState(false);
-  const [favorited, setFavorited] = useState(() => profile?.id ? isFavorite(profile.id) : false);
 
   // Hash 기반 Recap 열기/닫기
   React.useEffect(() => {
@@ -59,16 +58,6 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
     }).catch(() => {});
   }, []);
 
-  const handleFavorite = useCallback(() => {
-    if (!profile?.id) return;
-    if (favorited) {
-      removeFavorite(profile.id);
-      setFavorited(false);
-    } else {
-      addFavorite(profile.id, profile.nickname, profile.username);
-      setFavorited(true);
-    }
-  }, [profile, favorited]);
 
   const breakdown = useMemo(() => {
     if (!profile || !stats) return null;
@@ -133,29 +122,6 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
           <h1 className="font-serif-kr text-[22px] mt-4 font-bold tracking-tight text-white">{profile.nickname}</h1>
           <span className="text-[13px] text-gray-500 mt-1">@{profile.username}</span>
 
-          {/* 링크 복사 + 즐겨찾기 버튼 */}
-          <div className="flex items-center gap-2 mt-3">
-            <button
-              onClick={handleCopyLink}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/[0.08] text-[11px] font-medium text-white/50 hover:text-white/80 transition-all"
-              title="프로필 링크 복사"
-            >
-              {copied ? <Check size={12} className="text-emerald-400" /> : <Link2 size={12} />}
-              <span>{copied ? '복사됨!' : '링크 복사'}</span>
-            </button>
-            <button
-              onClick={handleFavorite}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-medium transition-all ${
-                favorited
-                  ? 'bg-pink-500/15 border-pink-500/30 text-pink-400 hover:bg-pink-500/25'
-                  : 'bg-white/[0.05] border-white/[0.08] text-white/50 hover:text-white/80 hover:bg-white/[0.10]'
-              }`}
-              title={favorited ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-            >
-              <Heart size={12} fill={favorited ? 'currentColor' : 'none'} />
-              <span>{favorited ? '즐겨찾기' : '즐겨찾기'}</span>
-            </button>
-          </div>
 
           {/* 칭호 pills */}
           <div className="mt-4">
@@ -209,7 +175,7 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
             <div className="w-[1px] h-10 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
             <div className="flex flex-col items-center w-1/3">
               <span className="text-2xl font-black text-white tracking-tight">
-                <HoverNumber value={stats.plotCount || 0} />
+                <HoverNumber value={characters?.length ?? stats.plotCount ?? 0} />
               </span>
               <span className="text-[11px] text-gray-500 mt-1 font-semibold uppercase tracking-widest">캐릭터</span>
             </div>
@@ -236,6 +202,17 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
               />
             </div>
           </div>
+        </div>
+
+        {/* 링크 복사 버튼 (카드 하단 이동) */}
+        <div className="mt-3 flex justify-center">
+          <button
+            onClick={handleCopyLink}
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.08] hover:border-white/[0.15] text-sm font-semibold text-white/70 hover:text-white transition-all active:scale-95"
+          >
+            {copied ? <Check size={16} className="text-emerald-400" /> : <Link2 size={16} />}
+            <span>{copied ? '프로필 링크가 복사되었습니다!' : '프로필 링크 복사'}</span>
+          </button>
         </div>
 
         {/* 프로필 태그 + LIVE 버튼 */}

@@ -245,6 +245,8 @@ export default function ProfilePage() {
       if (stats.voicePlaySeconds != null && stats.voicePlayCount == null) {
         stats.voicePlayCount = Math.round(stats.voicePlaySeconds);
       }
+      // 삭제되거나 비공개된 캐릭터 개수가 통계에 반영되는 문제를 막기 위해 실제 목록과 동기화
+      stats.plotCount = allPlots ? allPlots.length : 0;
 
       if (profile.profileImageUrl) profile.profileImageUrl = proxyImageUrl(profile.profileImageUrl);
 

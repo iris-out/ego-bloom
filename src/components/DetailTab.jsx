@@ -73,11 +73,11 @@ function SummaryStatGrid({ stats, characters }) {
   const following = stats?.followingCount || 0;
   const score = calculateCreatorScore(stats, characters);
   const cards = [
-    { label: '캐릭터 수',       value: formatNumber(stats?.plotCount || characters?.length || 0), icon: <BarChart3 size={14} /> },
+    { label: '캐릭터 수',       value: formatNumber(characters?.length ?? stats?.plotCount ?? 0), icon: <BarChart3 size={14} /> },
     { label: '팔로워/잉',   value: following === 0 && followers === 0 ? '-' : (following > 0 ? (followers / following).toFixed(2) : followers.toLocaleString('ko-KR')), icon: <Users size={14} /> },
     { label: '평균 대화',       value: formatCompactNumber(avgInteractions),                       icon: <BarChart3 size={14} /> },
     { label: '대화/팔로워',     value: followers > 0 ? (totalInteractions / followers).toFixed(2) : '-', icon: <MessageCircle size={14} /> },
-    { label: '음성 재생(분)',    value: formatCompactNumber(Math.round((stats?.voicePlayCount || 0) / 60)), icon: <Mic2 size={14} /> },
+    { label: '음성 재생(회)',    value: formatCompactNumber(stats?.voicePlayCount || 0), icon: <Mic2 size={14} /> },
     { label: 'ELO',             value: score.toLocaleString(),                                     icon: <Zap size={14} /> },
   ];
 

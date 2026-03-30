@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import ImageWithFallback from './ImageWithFallback';
 import RankBadge from './RankBadge';
-import { getCharacterTier, toKST } from '../utils/tierCalculator';
+import { getCharacterTier, toKST, formatNumber } from '../utils/tierCalculator';
 import { Search, MessageCircle, Calendar, ArrowUpAZ, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import CharacterDetailModal from './CharacterDetailModal';
 
@@ -376,18 +376,11 @@ function CharacterCard({ char, rank, paletteIdx, onTagClick, activeTags, onSelec
           className="text-[20px] font-black tracking-tight text-white tabular-nums"
           style={{ letterSpacing: '-0.5px' }}
         >
-          {formatCompactCount(char.interactionCount || 0)}
+          {formatNumber(char.interactionCount || 0)}
         </div>
       </div>
     </div>
   );
 
   return card;
-}
-
-// 대화수 포맷 (디자인 스펙처럼 소수점 포함)
-function formatCompactCount(n) {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 2).replace(/\.?0+$/, '')}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(n >= 100_000 ? 0 : 1).replace(/\.?0+$/, '')}K`;
-  return n.toString();
 }

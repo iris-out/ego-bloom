@@ -103,7 +103,7 @@ function Slide1({ profile, tier, score, stats, badges, activityDays, vh }) {
           {[
             { label: '대화량', val: stats.plotInteractionCount },
             { label: '팔로워', val: stats.followerCount },
-            { label: '캐릭터', val: stats.plotCount },
+            { label: '캐릭터', val: characters?.length ?? stats.plotCount },
           ].map(s => (
             <div
               key={s.label}
@@ -149,9 +149,9 @@ function Slide2({ profile, tier, score, stats, badges, activityDays, vh }) {
           <p className="text-[11px] font-mono text-gray-500 uppercase tracking-[0.3em] mb-2 border-l border-white/20 pl-3">총 대화수</p>
           <h2 className="text-[76px] font-black leading-none tracking-tighter text-white">
             {formatCompactNumber(stats.plotInteractionCount)
-              .replace(/([KMB])$/, '')}
+              .replace(/([억만천])$/, '')}
             <span className="text-gray-600 text-[60px]">
-              {formatCompactNumber(stats.plotInteractionCount).match(/[KMB]$/)?.[0] || ''}
+              {formatCompactNumber(stats.plotInteractionCount).match(/[억만천]$/)?.[0] || ''}
             </span>
           </h2>
         </div>
@@ -160,13 +160,13 @@ function Slide2({ profile, tier, score, stats, badges, activityDays, vh }) {
           <div>
             <p className="text-[11px] font-mono text-gray-500 uppercase tracking-[0.3em] mb-2 border-l border-white/20 pl-3">팔로워</p>
             <h3 className="text-4xl font-black tracking-tight text-white">
-              {formatCompactNumber(stats.followerCount).replace(/([KMB])$/, '')}
-              <span className="text-gray-600">{formatCompactNumber(stats.followerCount).match(/[KMB]$/)?.[0] || ''}</span>
+              {formatCompactNumber(stats.followerCount).replace(/([억만천])$/, '')}
+              <span className="text-gray-600">{formatCompactNumber(stats.followerCount).match(/[억만천]$/)?.[0] || ''}</span>
             </h3>
           </div>
           <div>
             <p className="text-[11px] font-mono text-gray-500 uppercase tracking-[0.3em] mb-2 border-l border-white/20 pl-3">캐릭터</p>
-            <h3 className="text-4xl font-black tracking-tight text-white">{stats.plotCount || 0}</h3>
+            <h3 className="text-4xl font-black tracking-tight text-white">{characters?.length ?? stats.plotCount ?? 0}</h3>
           </div>
         </div>
 
@@ -284,7 +284,7 @@ function Slide3({ profile, tier, score, stats, badges, activityDays, vh }) {
             <div className="flex justify-between items-end">
               <div>
                 <p className="text-[11px] text-pink-500/70 uppercase mb-1">활성 캐릭터</p>
-                <p className="text-2xl font-bold text-white">{stats.plotCount || 0}</p>
+                <p className="text-2xl font-bold text-white">{characters?.length ?? stats.plotCount ?? 0}</p>
               </div>
             </div>
           </div>
@@ -423,7 +423,7 @@ function Slide4({ profile, tier, score, stats, badges, activityDays, vh }) {
             style={{ background: '#13161f', border: '1px solid rgba(255,255,255,0.05)' }}
           >
             <div className="text-[10px] text-gray-400 font-medium mb-1">Characters</div>
-            <div className="text-2xl font-bold text-white">{stats.plotCount || 0}</div>
+            <div className="text-2xl font-bold text-white">{characters?.length ?? stats.plotCount ?? 0}</div>
           </div>
         </div>
       </div>
