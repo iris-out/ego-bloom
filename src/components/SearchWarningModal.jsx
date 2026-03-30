@@ -1,15 +1,27 @@
-import React, { useEffect } from 'react';
-import { X, AlertTriangle, ShieldCheck, UserMinus, Info, Github, Mail } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, AlertTriangle, ShieldCheck, UserMinus, Info, Mail, Check } from 'lucide-react';
 
 export default function SearchWarningModal({ isOpen, onClose }) {
+  const [agreed, setAgreed] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      // Load agreement state
+      const hasAgreed = localStorage.getItem('ego-bloom-warning-agreed') === 'true';
+      setAgreed(hasAgreed);
     } else {
       document.body.style.overflow = '';
     }
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
+
+  const handleConfirm = () => {
+    if (agreed) {
+      localStorage.setItem('ego-bloom-warning-agreed', 'true');
+      onClose();
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -144,37 +156,67 @@ export default function SearchWarningModal({ isOpen, onClose }) {
               </a>
             </div>
           </div>
+
+          {/* 체크박스 영역 */}
+          <div 
+            onClick={() => setAgreed(!agreed)}
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '12px', 
+              padding: '16px', borderRadius: '16px', 
+              background: agreed ? 'rgba(251, 146, 60, 0.1)' : 'rgba(255,255,255,0.03)',
+              border: agreed ? '1px solid rgba(251, 146, 60, 0.3)' : '1px solid rgba(255,255,255,0.08)',
+              cursor: 'pointer', transition: 'all 0.2s'
+            }}
+          >
+            <div style={{
+              width: '24px', height: '24px', borderRadius: '6px',
+              border: agreed ? 'none' : '2px solid rgba(255,255,255,0.2)',
+              background: agreed ? '#fb923c' : 'transparent',
+              display: 'flex', alignItems: 'center', justifyCenter: 'center',
+              transition: 'all 0.2s'
+            }}>
+              {agreed && <Check size={18} color="#000" strokeWidth={3} />}
+            </div>
+            <span style={{ fontSize: '14px', fontWeight: 700, color: agreed ? '#fff' : 'rgba(255,255,255,0.6)' }}>
+              위 주의사항을 모두 읽었으며, 이에 동의합니다.
+            </span>
+          </div>
         </div>
 
         {/* 하단 버튼 */}
         <div style={{ padding: '0 24px 24px' }}>
           <button
-            onClick={onClose}
+            onClick={handleConfirm}
+            disabled={!agreed}
             style={{
               width: '100%',
               padding: '16px',
               borderRadius: '16px',
               border: 'none',
-              cursor: 'pointer',
-              background: '#fb923c',
-              color: '#000',
+              cursor: agreed ? 'pointer' : 'not-allowed',
+              background: agreed ? '#fb923c' : 'rgba(255,255,255,0.05)',
+              color: agreed ? '#000' : 'rgba(255,255,255,0.2)',
               fontSize: '15px',
               fontWeight: 800,
               letterSpacing: '-0.01em',
               transition: 'all 0.2s',
               outline: 'none',
-              boxShadow: '0 4px 12px rgba(251, 146, 60, 0.3)'
+              boxShadow: agreed ? '0 4px 12px rgba(251, 146, 60, 0.3)' : 'none'
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.background = '#f97316';
-              e.currentTarget.style.transform = 'translateY(-1px)';
+              if (agreed) {
+                e.currentTarget.style.background = '#f97316';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.background = '#fb923c';
-              e.currentTarget.style.transform = 'translateY(0)';
+              if (agreed) {
+                e.currentTarget.style.background = '#fb923c';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }
             }}
           >
-            모든 내용을 확인했습니다
+            확인했습니다
           </button>
         </div>
       </div>

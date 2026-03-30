@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, ChevronRight, Database, AlertTriangle } from 'lucide-react';
+import { X, ChevronRight, Database, AlertTriangle, Lock } from 'lucide-react';
 import { useServerStatus } from '../hooks/useServerStatus';
 import ChangelogModal from '../components/ChangelogModal';
 import DataCollectionModal from '../components/DataCollectionModal';
@@ -19,20 +19,34 @@ export default function HomePage() {
   const [showChangelog, setShowChangelog] = useState(false);
   const [showDataModal, setShowDataModal] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);
+  const [hasAgreedToWarning, setHasAgreedToWarning] = useState(false);
   const [topTags, setTopTags] = useState([]);
   const [topCreators, setTopCreators] = useState([]);
   const { status: serverStatus } = useServerStatus();
 
   useEffect(() => { setRecentSearches(getRecentSearches()); }, []);
 
-  // 첫 방문자에게 데이터 수집 안내 자동 표시
+  // 첫 방문자에게 데이터 수집 안내 자동 표시 및 경고 동의 여부 확인
   useEffect(() => {
     const visited = localStorage.getItem('ego-bloom-visited');
     if (!visited) {
       setShowDataModal(true);
       localStorage.setItem('ego-bloom-visited', '1');
     }
+
+    const agreed = localStorage.getItem('ego-bloom-warning-agreed') === 'true';
+    setHasAgreedToWarning(agreed);
+    if (!agreed) {
+      setShowWarningModal(true);
+    }
   }, []);
+
+  // 모달 닫힐 때 동의 여부 재확인
+  const handleCloseWarning = () => {
+    const agreed = localStorage.getItem('ego-bloom-warning-agreed') === 'true';
+    setHasAgreedToWarning(agreed);
+    setShowWarningModal(false);
+  };
 
   useEffect(() => {
     fetch('/data/ranking_latest.json')
@@ -67,7 +81,7 @@ export default function HomePage() {
           <div className="flex items-center gap-2.5">
             <svg viewBox="0 0 24 24" className="w-5 h-6 stroke-white fill-none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M7 17 L17 17 L15 22 L9 22 Z" />
-              <line x1="6" y1="17" x2="18" y2="17" />
+              <line x1="6" x17="18" y1="17" y2="17" />
               <line x1="12" y1="17" x2="12" y2="11" />
               <path d="M12 6 Q10 2 12 1 Q14 2 12 6" />
               <path d="M12 6 Q17 4 18 6 Q17 8 12 6" />
@@ -100,7 +114,20 @@ export default function HomePage() {
         </header>
 
         {/* PC 검색바 (lg에서만 보임) */}
-        <SearchPill className="hidden lg:block mb-10 animate-fade-in-up" style={{ animationDelay: '80ms' }} suggestionsAbove={false} />
+        <div className="hidden lg:block relative mb-10 animate-fade-in-up" style={{ animationDelay: '80ms' }}>
+          <SearchPill suggestionsAbove={false} />
+          {!hasAgreedToWarning && (
+            <div 
+              onClick={() => setShowWarningModal(true)}
+              className="absolute inset-0 bg-[#0F0A1A]/60 backdrop-blur-[4px] rounded-full flex items-center justify-center cursor-pointer border border-orange-500/30 hover:bg-[#0F0A1A]/40 transition-all group"
+            >
+              <div className="flex items-center gap-2.5 text-orange-400 font-bold text-sm">
+                <Lock size={16} />
+                <span>검색 가이드라인에 동의가 필요합니다</span>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* 2열 그리드 (PC) / 단일 컬럼 (모바일) */}
         <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-12 lg:items-start flex-1">
@@ -118,15 +145,31 @@ export default function HomePage() {
             </section>
 
             {/* 검색 전 주의사항 Pill */}
-            <div className="mb-4 animate-fade-in-up" style={{ animationDelay: '120ms' }}>
+            <div className="mb-6 animate-fade-in-up" style={{ animationDelay: '120ms' }}>
               <button
                 onClick={() => setShowWarningModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 transition-all group"
+                className={`flex items-center justify-between w-full p-4 rounded-2xl border transition-all group ${
+                  hasAgreedToWarning 
+                    ? 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06]' 
+                    : 'bg-orange-500/5 border-orange-500/20 hover:bg-orange-500/10'
+                }`}
               >
-                <AlertTriangle size={14} className="text-orange-400" />
-                <span className="text-[12px] font-bold text-orange-400/90 group-hover:text-orange-400">
-                  검색 전 주의사항 (필독)
-                </span>
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl ${hasAgreedToWarning ? 'bg-white/5 text-white/40' : 'bg-orange-500/10 text-orange-400'}`}>
+                    <AlertTriangle size={18} />
+                  </div>
+                  <div className="text-left">
+                    <div className={`text-[14px] font-bold ${hasAgreedToWarning ? 'text-white/80' : 'text-orange-400'}`}>
+                      검색 전 주의사항 (필독)
+                    </div>
+                    <div className="text-[11px] text-white/40 mt-0.5">
+                      {hasAgreedToWarning ? '가이드라인에 동의했습니다' : '검색 기능을 이용하기 위해 동의가 필요합니다'}
+                    </div>
+                  </div>
+                </div>
+                <div className={`p-1.5 rounded-lg transition-colors ${hasAgreedToWarning ? 'text-white/20' : 'bg-orange-500/10 text-orange-400'}`}>
+                  <ChevronRight size={16} />
+                </div>
               </button>
             </div>
 
@@ -255,14 +298,25 @@ export default function HomePage() {
 
       {/* 하단 고정 검색 pill (모바일에서만) */}
       <div className="lg:hidden fixed bottom-0 left-0 w-full z-20" style={{ padding: '0 24px env(safe-area-inset-bottom, 24px)', background: 'linear-gradient(to top, var(--bg-base) 20%, transparent 100%)' }}>
-        <div className="max-w-[680px] mx-auto mb-4">
+        <div className="max-w-[680px] mx-auto mb-4 relative">
           <SearchPill suggestionsAbove={true} />
+          {!hasAgreedToWarning && (
+            <div 
+              onClick={() => setShowWarningModal(true)}
+              className="absolute inset-0 bg-[#0F0A1A]/80 backdrop-blur-[6px] rounded-full flex items-center justify-center cursor-pointer border border-orange-500/40"
+            >
+              <div className="flex items-center gap-2 text-orange-400 font-bold text-xs">
+                <Lock size={14} />
+                <span>가이드라인 동의 후 이용 가능</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       <ChangelogModal isOpen={showChangelog} onClose={() => setShowChangelog(false)} />
       <DataCollectionModal isOpen={showDataModal} onClose={() => setShowDataModal(false)} />
-      <SearchWarningModal isOpen={showWarningModal} onClose={() => setShowWarningModal(false)} />
+      <SearchWarningModal isOpen={showWarningModal} onClose={handleCloseWarning} />
     </div>
   );
 }
