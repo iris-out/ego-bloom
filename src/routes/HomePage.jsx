@@ -247,7 +247,7 @@ export default function HomePage() {
         {/* Footer */}
         <div className="mt-auto pt-12 pb-2 text-center text-[11px] text-white/30">
           <span>v{APP_VERSION} · </span>
-          <a href="https://github.com/iris-out/ego-bloom/issues" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/60 transition-all">문의/제보</a>
+          <a href="mailto:irisout_@outlook.kr" className="underline hover:text-white/60 transition-all">문의/제보</a>
           <span> · </span>
           <button onClick={() => setShowChangelog(true)} className="underline hover:text-white/60 transition-all">변경 내역</button>
         </div>

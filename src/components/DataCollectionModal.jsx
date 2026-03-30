@@ -128,8 +128,8 @@ export default function DataCollectionModal({ isOpen, onClose }) {
               <div>
                 <div style={{ fontSize: '13px', fontWeight: 600, color: '#fff', marginBottom: '4px' }}>보관 및 파기</div>
                 <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', lineHeight: '1.6' }}>
-                  수집된 랭킹 데이터는 제타에서 공개된 데이터 중 최소한의 데이터만을 사용하면서  트렌드 분석을 위해 일정 기간 보관되며, 서비스 운영 목적이 달성된 후(또는 유저 요청 시) 지체 없이 파기됩니다.
-                  본인의 등수가 랭킹에 노출되는 것을 원하지 않으시다면, irisout_@outlook.kr 혹은 https://github.com/iris-out/ego-bloom 의 issue 탭에 문의해 주세요.
+                  수집된 랭킹 데이터는 제타에서 공개된 데이터 중 최소한의 데이터만을 사용하면서 트렌드 분석을 위해 일정 기간 보관되며, 서비스 운영 목적이 달성된 후(또는 유저 요청 시) 지체 없이 파기됩니다.
+                  본인의 등수가 랭킹에 노출되는 것을 원하지 않으시다면, irisout_@outlook.kr 에 문의해 주세요.
                 </div>
               </div>
             </div>

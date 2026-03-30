@@ -120,21 +120,6 @@ export default function CreatorRankingView() {
                   랭킹 노출을 원하지 않으시면 아래 방법으로 신청해 주세요. 확인 후 즉시 삭제 처리됩니다.
                 </p>
                 <a
-                  href="https://github.com/iris-out/ego-bloom/issues"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.15] transition-all group"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Github size={14} className="text-white/60 group-hover:text-white transition-colors" />
-                    <div>
-                      <div className="text-white/80 text-[12px] font-medium group-hover:text-white transition-colors">GitHub Issues</div>
-                      <div className="text-white/35 text-[10px]">github.com/iris-out/ego-bloom</div>
-                    </div>
-                  </div>
-                  <ChevronRight size={13} className="text-white/25 group-hover:text-white/60 transition-colors" />
-                </a>
-                <a
                   href="mailto:irisout_@outlook.kr"
                   className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.15] transition-all group"
                 >

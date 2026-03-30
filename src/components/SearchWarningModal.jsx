@@ -130,21 +130,6 @@ export default function SearchWarningModal({ isOpen, onClose }) {
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <a 
-                href="https://github.com/iris-out/ego-bloom/issues" 
-                target="_blank" 
-                rel="noreferrer"
-                style={{ 
-                  display: 'flex', alignItems: 'center', gap: '10px',
-                  color: '#fff', textDecoration: 'none', fontSize: '14px',
-                  padding: '10px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)',
-                  transition: 'background 0.2s'
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-              >
-                <Github size={16} /> <span>Github 이슈 제보</span>
-              </a>
-              <a 
                 href="mailto:irisout_@outlook.kr"
                 style={{ 
                   display: 'flex', alignItems: 'center', gap: '10px',
