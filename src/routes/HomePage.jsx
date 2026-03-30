@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, ChevronRight, Database } from 'lucide-react';
+import { X, ChevronRight, Database, AlertTriangle } from 'lucide-react';
 import { useServerStatus } from '../hooks/useServerStatus';
 import ChangelogModal from '../components/ChangelogModal';
 import DataCollectionModal from '../components/DataCollectionModal';
+import SearchWarningModal from '../components/SearchWarningModal';
 import ZetaBanners from '../components/ZetaBanners';
 import MyProfileCard from '../components/MyProfileCard';
 import SearchPill from '../components/SearchPill';
@@ -17,6 +18,7 @@ export default function HomePage() {
   const [recentSearches, setRecentSearches] = useState([]);
   const [showChangelog, setShowChangelog] = useState(false);
   const [showDataModal, setShowDataModal] = useState(false);
+  const [showWarningModal, setShowWarningModal] = useState(false);
   const [topTags, setTopTags] = useState([]);
   const [topCreators, setTopCreators] = useState([]);
   const { status: serverStatus } = useServerStatus();
@@ -114,6 +116,19 @@ export default function HomePage() {
                 당신의 에고를 발사하세요.<br />대화량, 티어, 그리고 업적으로.
               </p>
             </section>
+
+            {/* 검색 전 주의사항 Pill */}
+            <div className="mb-4 animate-fade-in-up" style={{ animationDelay: '120ms' }}>
+              <button
+                onClick={() => setShowWarningModal(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 transition-all group"
+              >
+                <AlertTriangle size={14} className="text-orange-400" />
+                <span className="text-[12px] font-bold text-orange-400/90 group-hover:text-orange-400">
+                  검색 전 주의사항 (필독)
+                </span>
+              </button>
+            </div>
 
             {/* Zeta 소식 & 공지사항 (히어로 아래) */}
             <div className="mb-10 animate-fade-in-up" style={{ animationDelay: '140ms' }}>
@@ -247,6 +262,7 @@ export default function HomePage() {
 
       <ChangelogModal isOpen={showChangelog} onClose={() => setShowChangelog(false)} />
       <DataCollectionModal isOpen={showDataModal} onClose={() => setShowDataModal(false)} />
+      <SearchWarningModal isOpen={showWarningModal} onClose={() => setShowWarningModal(false)} />
     </div>
   );
 }

@@ -57,6 +57,11 @@ export default async function handler(req, res) {
     const recordDate = kst.toISOString().split('T')[0];
 
     // 1. account_current에 UPSERT (덮어쓰기)
+    const blacklist = (process.env.RANK_BLACKLIST || '').split(',').map(s => s.trim()).filter(Boolean);
+    if (blacklist.includes(id)) {
+      return res.status(200).json({ success: true, message: 'Creator is blacklisted, skipping update' });
+    }
+
     const { error: currentError } = await supabase
       .from('account_current')
       .upsert({

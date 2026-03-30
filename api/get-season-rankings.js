@@ -23,11 +23,19 @@ export default async function handler(req, res) {
     const month = parseInt(req.query.month) || (now.getUTCMonth() + 1);
     const seasonStart = `${year}-${String(month).padStart(2, '0')}-01`;
 
+    const blacklist = (process.env.RANK_BLACKLIST || '').split(',').map(s => s.trim()).filter(Boolean);
+
     // Get all current scores
-    const { data: current, error: currentErr } = await supabase
+    let query = supabase
       .from('account_current')
       .select('id, nickname, handle, elo_score, tier_name, follower_count, plot_interaction_count')
       .gt('elo_score', 0);
+
+    if (blacklist.length > 0) {
+      query = query.not('id', 'in', `(${blacklist.join(',')})`);
+    }
+
+    const { data: current, error: currentErr } = await query;
     if (currentErr) throw currentErr;
 
     if (!current || current.length === 0) {

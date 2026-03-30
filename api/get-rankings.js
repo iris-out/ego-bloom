@@ -35,11 +35,18 @@ export default async function handler(req, res) {
 
   try {
     // Today's top 30
-    const { data, error } = await supabase
+    const blacklist = (process.env.RANK_BLACKLIST || '').split(',').map(s => s.trim()).filter(Boolean);
+    
+    let query = supabase
       .from('account_current')
       .select('*')
-      .order('elo_score', { ascending: false })
-      .limit(30);
+      .order('elo_score', { ascending: false });
+
+    if (blacklist.length > 0) {
+      query = query.not('id', 'in', `(${blacklist.join(',')})`);
+    }
+
+    const { data, error } = await query.limit(30);
 
     if (error) throw error;
 

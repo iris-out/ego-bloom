@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Users, MessageCircle, Crown, Search, X, Info, Github, Mail, ChevronRight } from 'lucide-react';
+import { Loader2, Users, MessageCircle, Crown, X, Info, Github, Mail, ChevronRight } from 'lucide-react';
 import { formatNumber, getCreatorTier } from '../utils/tierCalculator';
 import TierIcon from './ui/TierIcon';
 
@@ -10,11 +10,6 @@ export default function CreatorRankingView() {
   const [rankings, setRankings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResult, setSearchResult] = useState(null);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [searchError, setSearchError] = useState(null);
 
   const [showInfoModal, setShowInfoModal] = useState(false);
 
@@ -25,7 +20,7 @@ export default function CreatorRankingView() {
         return res.json();
       })
       .then(data => {
-        setRankings((data.rankings || []).slice(0, 30));
+        setRankings((data.rankings || []).slice(0, 5));
         setLoading(false);
       })
       .catch(err => {
@@ -34,31 +29,6 @@ export default function CreatorRankingView() {
         setLoading(false);
       });
   }, []);
-
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    
-    setSearchLoading(true);
-    setSearchError(null);
-    setSearchResult(null);
-    
-    try {
-      const query = searchQuery.trim().replace(/^@/, '');
-      const res = await fetch(`/api/search-rank?q=${encodeURIComponent(query)}`);
-      const data = await res.json();
-      
-      if (!res.ok || data.error) {
-        throw new Error(data.error || '검색에 실패했습니다.');
-      }
-      
-      setSearchResult({ user: data.user, rank: data.rank });
-    } catch (err) {
-      setSearchError(err.message);
-    } finally {
-      setSearchLoading(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -90,7 +60,7 @@ export default function CreatorRankingView() {
       <div className="flex items-center justify-between mb-2 px-1">
         <div className="flex items-center gap-2">
           <Crown className="text-yellow-500" size={20} />
-          <h2 className="text-lg font-bold text-white tracking-wide">글로벌 크리에이터 랭킹 TOP 30</h2>
+          <h2 className="text-lg font-bold text-white tracking-wide">글로벌 크리에이터 랭킹 TOP 5</h2>
         </div>
         <button
           onClick={() => setShowInfoModal(true)}
@@ -183,33 +153,6 @@ export default function CreatorRankingView() {
         </div>
       , document.body)}
 
-      <form onSubmit={handleSearch} className="mb-2 relative group px-1">
-        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-          <Search size={16} className="text-white/40 group-focus-within:text-white/80 transition-colors" />
-        </div>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="닉네임 또는 핸들 검색 (@handle)"
-          className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-10 text-sm focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all text-white placeholder-white/30"
-        />
-        {searchQuery && (
-          <button 
-            type="button" 
-            onClick={() => {
-              setSearchQuery('');
-              setSearchResult(null);
-              setSearchError(null);
-            }} 
-            className="absolute inset-y-0 right-4 flex items-center justify-center w-8 h-full text-white/40 hover:text-white/80 transition-colors"
-          >
-            <X size={16} />
-          </button>
-        )}
-        <button type="submit" className="hidden" />
-      </form>
-
       <div className="flex flex-col gap-3 pb-24">
         {rankings.map((creator, index) => {
             const isTop3 = index < 3;
@@ -298,85 +241,6 @@ export default function CreatorRankingView() {
             );
         })}
       </div>
-
-      {/* 검색 결과 — createPortal로 viewport 기준 고정 */}
-      {(searchResult || searchLoading || searchError) && createPortal(
-        <div className="fixed bottom-0 left-0 right-0 px-3 pt-3 pb-4 sm:p-4 bg-black/95 backdrop-blur-2xl border-t border-white/10 z-[9998] animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-          <div className="w-full max-w-2xl mx-auto flex items-center gap-2 sm:gap-3">
-            {searchLoading ? (
-              <div className="flex items-center gap-3 text-white/60 py-2">
-                <Loader2 size={16} className="animate-spin" />
-                <span className="text-sm">검색 중...</span>
-              </div>
-            ) : searchError ? (
-              <div className="flex items-center gap-3 text-red-400 py-2">
-                <span className="text-sm font-medium">{searchError}</span>
-              </div>
-            ) : searchResult && (
-              <div
-                onClick={() => navigate(`/profile?creator=${encodeURIComponent(searchResult.user.handle ? `@${searchResult.user.handle}` : searchResult.user.id)}`)}
-                className="flex-1 min-w-0 flex items-center gap-3 bg-white/5 hover:bg-white/10 p-2.5 sm:p-3 rounded-xl border border-white/10 cursor-pointer transition-all"
-              >
-                {/* 등수 */}
-                <div className="min-w-[36px] sm:min-w-[40px] text-center font-black text-xl text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.4)] shrink-0">
-                  {searchResult.rank}
-                </div>
-
-                {/* 정보 */}
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="font-bold text-base text-white truncate">
-                      {searchResult.user.nickname}
-                    </span>
-                    {searchResult.user.handle && (
-                      <span className="text-xs text-white/40 truncate hidden sm:inline">@{searchResult.user.handle}</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 text-[11px] text-white/50">
-                    <span className="flex items-center gap-1"><MessageCircle size={10} />{formatNumber(searchResult.user.plot_interaction_count)}</span>
-                    <span className="flex items-center gap-1"><Users size={10} />{formatNumber(searchResult.user.follower_count)}</span>
-                    <span className="font-mono hidden sm:inline">{formatNumber(searchResult.user.elo_score)} pt</span>
-                  </div>
-                </div>
-
-                {/* 티어 */}
-                {(() => {
-                  const tierData = getCreatorTier(searchResult.user.elo_score ?? 0);
-                  return (
-                    <div className="flex items-center gap-2 shrink-0">
-                      <div className="text-right hidden sm:block">
-                        <div className="text-[12px] font-black uppercase" style={{ color: tierData.color }}>
-                          {tierData.name}{tierData.subdivision ? ` ${tierData.subdivision}` : ''}
-                        </div>
-                        <div className="text-[10px] text-white/50 font-mono">
-                          {formatNumber(searchResult.user.elo_score)} pt
-                        </div>
-                      </div>
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center">
-                        <TierIcon tier={tierData.key} size="100%" />
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-
-            {(searchError || searchResult) && (
-              <button
-                onClick={() => {
-                  setSearchResult(null);
-                  setSearchError(null);
-                  setSearchQuery('');
-                }}
-                className="p-2 text-white/40 hover:text-white/80 hover:bg-white/5 rounded-full transition-all shrink-0"
-              >
-                <X size={16} />
-              </button>
-            )}
-          </div>
-        </div>,
-        document.body
-      )}
     </div>
   );
 }
