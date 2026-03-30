@@ -1,10 +1,9 @@
 import React, { Suspense, useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Sky, Html, KeyboardControls, useKeyboardControls, Stars } from '@react-three/drei';
+import { Sky, KeyboardControls, useKeyboardControls, Stars } from '@react-three/drei';
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import * as THREE from 'three';
-import { formatNumber } from '../utils/tierCalculator';
 import JoystickControls from '../components/JoystickControls';
 
 // ─── 시간대 감지 ──────────────────────────────────────────────────────────
@@ -1093,9 +1092,6 @@ function Buildings({ data, timeOfDay, cameraDistRef }) {
     });
   }, [groups, dummy, col]);
 
-  const [hovG, setHovG] = useState(null);
-  const [hovI, setHovI] = useState(null);
-
   const FRAGS = [BLDG_FRAG_T0, BLDG_FRAG_T1, BLDG_FRAG_T2, BLDG_FRAG_T3];
 
   return (
@@ -1111,8 +1107,6 @@ function Buildings({ data, timeOfDay, cameraDistRef }) {
                 mainRefs.current[gi] = mesh;
               }}
               args={[null,null,grpData.length]} frustumCulled={false}
-              onPointerMove={e => { e.stopPropagation(); setHovG(gi); setHovI(e.instanceId); document.body.style.cursor='default'; }}
-              onPointerOut={() => { setHovG(null); setHovI(null); document.body.style.cursor='auto'; }}
             >
               <boxGeometry />
               <shaderMaterial ref={el => { materialRefs.current[gi]=el; }} attach="material" {...shaders[gi]} vertexColors />
@@ -1141,25 +1135,6 @@ function Buildings({ data, timeOfDay, cameraDistRef }) {
         );
       })}
 
-      {groups.flatMap((grpData, gi) =>
-        grpData.map((b, i) => {
-          const t  = (b.tier_name||'').toLowerCase();
-          const sh = b.height*HEIGHT_SCALE*getTierHeightMult(t);
-          const isHov = hovG===gi && hovI===i;
-          if (!isHov && !((cameraDistRef?.current??160)<200 && i<50)) return null;
-          return (
-            <Html key={b.id} position={[b.x,sh+4,b.z]} center style={{pointerEvents:'none'}}>
-              <div className={`flex flex-col items-center transition-all duration-200 ${isHov?'scale-110':'scale-100 opacity-70'}`}>
-                <div className="bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 flex flex-col items-center min-w-[60px]">
-                  <span className="text-white font-bold text-[10px] whitespace-nowrap">{b.nickname}</span>
-                  {isHov && <span className="text-[8px] text-white/50">{formatNumber(b.elo_score)} pt</span>}
-                </div>
-                <div className="w-0.5 h-3 bg-white/20" />
-              </div>
-            </Html>
-          );
-        })
-      )}
     </>
   );
 }
