@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Users, MessageCircle, Crown, Search, X } from 'lucide-react';
+import { Loader2, Users, MessageCircle, Crown, Search, X, Info, Github, Mail, ChevronRight } from 'lucide-react';
 import { formatNumber, getCreatorTier } from '../utils/tierCalculator';
 import TierIcon from './ui/TierIcon';
 
@@ -15,6 +16,8 @@ export default function CreatorRankingView() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState(null);
 
+  const [showInfoModal, setShowInfoModal] = useState(false);
+
   useEffect(() => {
     fetch('/api/get-rankings')
       .then(res => {
@@ -22,7 +25,7 @@ export default function CreatorRankingView() {
         return res.json();
       })
       .then(data => {
-        setRankings(data.rankings || []);
+        setRankings((data.rankings || []).slice(0, 30));
         setLoading(false);
       })
       .catch(err => {
@@ -83,10 +86,101 @@ export default function CreatorRankingView() {
 
   return (
     <div className="flex flex-col gap-4 pb-8 animate-enter relative">
-      <div className="flex items-center gap-2 mb-2 px-1">
-        <Crown className="text-yellow-500" size={20} />
-        <h2 className="text-lg font-bold text-white tracking-wide">글로벌 크리에이터 랭킹</h2>
+      <div className="flex items-center justify-between mb-2 px-1">
+        <div className="flex items-center gap-2">
+          <Crown className="text-yellow-500" size={20} />
+          <h2 className="text-lg font-bold text-white tracking-wide">글로벌 크리에이터 랭킹 TOP 30</h2>
+        </div>
+        <button
+          onClick={() => setShowInfoModal(true)}
+          className="flex items-center gap-1.5 text-[11px] font-semibold text-purple-300/80 hover:text-purple-200 transition-all px-3 py-1.5 rounded-full bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/25 hover:border-purple-400/40 tracking-wide"
+        >
+          <Info size={14} />
+          <span>랭킹에 관하여 / 노출 금지 신청</span>
+        </button>
       </div>
+
+      {/* 랭킹 정보 모달 — createPortal로 viewport 기준 고정 */}
+      {showInfoModal && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4"
+          onClick={() => setShowInfoModal(false)}
+        >
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-sm bg-[#0A0612] border border-white/10 rounded-2xl overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.6)] animate-slide-up sm:animate-di-expand"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* 상단 컬러 바 */}
+            <div className="h-[3px] bg-gradient-to-r from-purple-500 to-indigo-500" />
+
+            {/* 헤더 */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+              <div className="flex items-center gap-2">
+                <Info size={15} className="text-purple-400" />
+                <span className="text-white font-bold text-[14px]">랭킹에 관하여 / 노출 금지 신청</span>
+              </div>
+              <button onClick={() => setShowInfoModal(false)} className="text-white/30 hover:text-white/80 transition-colors p-1">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="p-5 flex flex-col gap-5">
+              {/* 수집 원리 */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                  <span className="text-white font-semibold text-[13px]">랭킹이 수집되는 원리</span>
+                </div>
+                <p className="text-white/55 text-[12px] leading-relaxed pl-3.5">
+                  자동 수집이 <span className="text-white/80 font-medium">아닙니다.</span> 누군가가 메인 화면 검색창에서 해당 크리에이터를 검색할 때만 통계가 수집되어 랭킹에 등록됩니다. 등록된 이후에는 매일 자정(KST) 자동으로 갱신됩니다.
+                </p>
+              </div>
+
+              <div className="h-px bg-white/[0.06]" />
+
+              {/* 노출 금지 신청 */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                  <span className="text-white font-semibold text-[13px]">노출 금지 신청</span>
+                </div>
+                <p className="text-white/55 text-[12px] leading-relaxed pl-3.5 mb-2">
+                  랭킹 노출을 원하지 않으시면 아래 방법으로 신청해 주세요. 확인 후 즉시 삭제 처리됩니다.
+                </p>
+                <a
+                  href="https://github.com/iris-out/ego-bloom/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.15] transition-all group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Github size={14} className="text-white/60 group-hover:text-white transition-colors" />
+                    <div>
+                      <div className="text-white/80 text-[12px] font-medium group-hover:text-white transition-colors">GitHub Issues</div>
+                      <div className="text-white/35 text-[10px]">github.com/iris-out/ego-bloom</div>
+                    </div>
+                  </div>
+                  <ChevronRight size={13} className="text-white/25 group-hover:text-white/60 transition-colors" />
+                </a>
+                <a
+                  href="mailto:irisout_@outlook.kr"
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.15] transition-all group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Mail size={14} className="text-white/60 group-hover:text-white transition-colors" />
+                    <div>
+                      <div className="text-white/80 text-[12px] font-medium group-hover:text-white transition-colors">이메일</div>
+                      <div className="text-white/35 text-[10px]">irisout_@outlook.kr</div>
+                    </div>
+                  </div>
+                  <ChevronRight size={13} className="text-white/25 group-hover:text-white/60 transition-colors" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      , document.body)}
 
       <form onSubmit={handleSearch} className="mb-2 relative group px-1">
         <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
@@ -190,9 +284,9 @@ export default function CreatorRankingView() {
         })}
       </div>
 
-      {/* 검색 결과 */}
-      {(searchResult || searchLoading || searchError) && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/95 backdrop-blur-2xl border-t border-white/10 z-50 animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+      {/* 검색 결과 — createPortal로 viewport 기준 고정 */}
+      {(searchResult || searchLoading || searchError) && createPortal(
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/95 backdrop-blur-2xl border-t border-white/10 z-[9998] animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             {searchLoading ? (
               <div className="flex items-center gap-3 text-white/60 py-2">
@@ -264,7 +358,8 @@ export default function CreatorRankingView() {
               </button>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -36,7 +36,7 @@ export default async function handler(req, res) {
     if (error) throw error;
 
     // --- 그리드 기반 도시 배치 알고리즘 ---
-    const GRID_SIZE = 24; // 빌딩 간의 간격 (미터 단위, 지형 셰이더와 통일)
+    const GRID_SIZE = 48; // 빌딩 간의 간격 (미터 단위, 지형 셰이더와 통일)
     const ROAD_INTERVAL = 4; // 몇 칸마다 도로가 생기는지 (예: 4칸마다 도로)
     
     // 빌딩이 들어갈 수 있는 슬롯(구획) 좌표를 미리 계산하는 제네레이터 스타일 로직
@@ -55,8 +55,8 @@ export default async function handler(req, res) {
       const isRoadX = x % ROAD_INTERVAL === 0;
       const isRoadZ = z % ROAD_INTERVAL === 0;
       
-      // 중앙을 가로지르는 강(River) 구역(z=12 ~ z=20)은 건물 배치에서 제외
-      const isRiver = z >= 12 && z <= 20;
+      // 중앙을 가로지르는 강(River) 구역은 건물 배치에서 제외 (world z=120~200 → grid z=2~5)
+      const isRiver = z >= 2 && z <= 5;
 
       if (!isRoadX && !isRoadZ && !isRiver) {
         slots.push({ gx: x, gz: z });

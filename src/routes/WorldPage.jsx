@@ -2,7 +2,7 @@ import React, { Suspense, useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Sky, Html, KeyboardControls, useKeyboardControls, Stars } from '@react-three/drei';
-import { ChevronLeft, Loader2, X } from 'lucide-react';
+import { ChevronLeft, Loader2 } from 'lucide-react';
 import * as THREE from 'three';
 import { formatNumber } from '../utils/tierCalculator';
 import JoystickControls from '../components/JoystickControls';
@@ -36,55 +36,120 @@ const LIGHT_PARAMS = {
 
 // ─── 셰이더 정의 ──────────────────────────────────────────────────────────
 
-const BuildingShaderMaterial = {
-  uniforms: {
-    uIsNight:      { value: false },
-    uEmissiveColor: { value: new THREE.Color('#FCD34D') },
-    uTime:         { value: 0 },
-  },
-  vertexShader: `
-    varying vec2 vUv;
-    varying vec3 vInstanceColor;
-    void main() {
-      vUv = uv;
-      vInstanceColor = instanceColor;
-      vec4 worldPosition = instanceMatrix * vec4(position, 1.0);
-      gl_Position = projectionMatrix * viewMatrix * worldPosition;
-    }
-  `,
-  fragmentShader: `
-    varying vec2 vUv; varying vec3 vInstanceColor;
-    uniform bool uIsNight; uniform vec3 uEmissiveColor; uniform float uTime;
-    float rand(vec2 co){ return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
-    void main() {
-      vec3 baseGrey = uIsNight ? vec3(0.005, 0.005, 0.008) : vec3(0.83, 0.84, 0.87);
-      float topBand = smoothstep(0.87, 0.92, vUv.y);
-      float pulse   = uIsNight ? (2.6 + sin(uTime * 1.6) * 0.5) : 1.0;
-      vec3 tierColor = vInstanceColor * pulse;
-      vec3 color = mix(baseGrey, tierColor, topBand);
+// ─── 빌딩 셰이더 4종 ─────────────────────────────────────────────────────
+
+const BLDG_VERT = `
+  varying vec2 vUv;
+  varying vec3 vInstanceColor;
+  void main() {
+    vUv = uv;
+    vInstanceColor = instanceColor;
+    gl_Position = projectionMatrix * viewMatrix * instanceMatrix * vec4(position, 1.0);
+  }
+`;
+
+// Type 0: 아파트형 — Bronze / Silver
+const BLDG_FRAG_T0 = `
+  varying vec2 vUv; varying vec3 vInstanceColor;
+  uniform bool uIsNight; uniform vec3 uEmissiveColor; uniform float uTime;
+  float rand(vec2 c){ return fract(sin(dot(c,vec2(12.9898,78.233)))*43758.5453); }
+  void main() {
+    vec3 wall  = uIsNight ? vec3(0.04,0.04,0.05) : vec3(0.82,0.80,0.78);
+    float flY  = fract(vUv.y * 14.0);
+    float slab = step(0.88, flY);
+    vec3 slabC = uIsNight ? vec3(0.02,0.02,0.025) : vec3(0.58,0.56,0.54);
+    float wx   = fract(vUv.x * 6.0);
+    float isWin= step(0.15,wx)*step(wx,0.85)*step(0.15,flY)*step(flY,0.82)
+                *step(0.02,vUv.y)*step(vUv.y,0.93);
+    float top  = smoothstep(0.87,0.93,vUv.y);
+    float pulse= uIsNight ? (2.1+sin(uTime*1.6)*0.4) : 1.0;
+    vec3 color = mix(mix(wall,slabC,slab), vInstanceColor*pulse, top);
+    if (isWin > 0.5) {
       if (uIsNight) {
-        float bleed = smoothstep(0.72, 0.87, vUv.y) * (1.0 - topBand);
-        color += vInstanceColor * bleed * 0.45;
-      }
-      float windowX = step(0.15, fract(vUv.x * 6.0));
-      float windowY = step(0.2,  fract(vUv.y * 30.0));
-      float isWindow = windowX * windowY;
-      if (vUv.y > 0.96 || vUv.y < 0.02 || topBand > 0.1) isWindow = 0.0;
-      if (isWindow > 0.5) {
-        if (uIsNight) {
-          vec2 wId = vec2(floor(vUv.x * 6.0), floor(vUv.y * 30.0));
-          float wRand = rand(wId + vInstanceColor.rg);
-          color = wRand > 0.45
-            ? mix(uEmissiveColor, vec3(1.0, 1.0, 0.85), wRand * 0.5) * 2.4
-            : baseGrey * 0.28;
-        } else {
-          color = mix(color, vec3(0.12, 0.16, 0.28), 0.6);
-        }
-      }
-      gl_FragColor = vec4(color, 1.0);
+        float r = rand(vec2(floor(vUv.x*6.0),floor(vUv.y*14.0))+vInstanceColor.rg);
+        color = r > 0.38 ? mix(uEmissiveColor,vec3(1.0,0.92,0.72),r*0.5)*2.1 : vec3(0.005,0.005,0.008);
+      } else { color = mix(color,vec3(0.62,0.74,0.88),0.65); }
     }
-  `
-};
+    gl_FragColor = vec4(color,1.0);
+  }
+`;
+
+// Type 1: 오피스/커튼월 — Gold / Platinum
+const BLDG_FRAG_T1 = `
+  varying vec2 vUv; varying vec3 vInstanceColor;
+  uniform bool uIsNight; uniform vec3 uEmissiveColor; uniform float uTime;
+  float rand(vec2 c){ return fract(sin(dot(c,vec2(12.9898,78.233)))*43758.5453); }
+  void main() {
+    vec3 glass   = uIsNight ? vec3(0.006,0.014,0.030) : vec3(0.17,0.26,0.44);
+    float px     = fract(vUv.x*8.0); float py = fract(vUv.y*24.0);
+    float isFr   = max(step(0.88,px), max(step(0.88,py), max(step(0.93,vUv.x),step(vUv.x,0.07))));
+    vec3 frC     = uIsNight ? vec3(0.055,0.055,0.070) : vec3(0.30,0.30,0.35);
+    float top    = smoothstep(0.87,0.93,vUv.y);
+    float pulse  = uIsNight ? (2.3+sin(uTime*1.9)*0.5) : 1.0;
+    vec3 color   = mix(glass,frC,isFr);
+    color = mix(color,vInstanceColor*pulse,top);
+    if (!uIsNight && isFr < 0.5) {
+      float refl = smoothstep(0.0,0.5,vUv.x)-smoothstep(0.5,1.0,vUv.x);
+      color += vec3(0.04,0.07,0.11)*refl;
+    }
+    if (uIsNight && isFr<0.5 && top<0.1 && vUv.y>0.02) {
+      float r = rand(vec2(floor(vUv.x*8.0),floor(vUv.y*24.0))+vInstanceColor.rg*0.5);
+      if (r>0.42) color = mix(vec3(0.04,0.10,0.28),vec3(0.18,0.38,0.92),r*0.4)*2.6;
+    }
+    gl_FragColor = vec4(color,1.0);
+  }
+`;
+
+// Type 2: 마천루/미러글라스 — Diamond
+const BLDG_FRAG_T2 = `
+  varying vec2 vUv; varying vec3 vInstanceColor;
+  uniform bool uIsNight; uniform vec3 uEmissiveColor; uniform float uTime;
+  float rand(vec2 c){ return fract(sin(dot(c,vec2(12.9898,78.233)))*43758.5453); }
+  void main() {
+    vec3 base  = uIsNight ? vec3(0.008,0.010,0.018) : vec3(0.09,0.11,0.18);
+    float gx   = fract(vUv.x*10.0); float gy = fract(vUv.y*32.0);
+    float isFr = max(step(0.92,gx),step(0.92,gy));
+    vec3 frC   = uIsNight ? vec3(0.04,0.04,0.06) : vec3(0.22,0.24,0.30);
+    float top  = smoothstep(0.84,0.92,vUv.y);
+    float eg   = max(smoothstep(0.87,1.0,vUv.x),smoothstep(0.87,1.0,1.0-vUv.x));
+    float pulse= uIsNight ? (2.6+sin(uTime*2.1)*0.6) : 1.2;
+    vec3 color = mix(base,frC,isFr);
+    color = mix(color,vInstanceColor*pulse,max(top,eg*0.6));
+    if (!uIsNight && isFr<0.5) { float s=smoothstep(0.2,0.85,vUv.y); color=mix(color,vec3(0.30,0.40,0.60),s*0.55); }
+    if (uIsNight && isFr<0.5 && top<0.1 && eg<0.1 && vUv.y>0.02) {
+      float r = rand(vec2(floor(vUv.x*10.0),floor(vUv.y*32.0))+vInstanceColor.gb);
+      if (r>0.52) color = mix(color,vec3(0.08,0.18,0.80),r*0.55)*3.2;
+    }
+    gl_FragColor = vec4(color,1.0);
+  }
+`;
+
+// Type 3: 랜드마크/발광 — Master / Champion
+const BLDG_FRAG_T3 = `
+  varying vec2 vUv; varying vec3 vInstanceColor;
+  uniform bool uIsNight; uniform vec3 uEmissiveColor; uniform float uTime;
+  float rand(vec2 c){ return fract(sin(dot(c,vec2(12.9898,78.233)))*43758.5453); }
+  void main() {
+    vec3 base  = uIsNight ? vec3(0.005,0.005,0.010) : vec3(0.07,0.07,0.11);
+    float px   = fract(vUv.x*4.0);
+    float isEd = max(smoothstep(0.86,1.0,px),smoothstep(0.86,1.0,1.0-px));
+    float ring = step(0.94,fract(vUv.y*6.0));
+    float wx   = fract(vUv.x*8.0); float wy = fract(vUv.y*50.0);
+    float isWin= step(0.22,wx)*step(wx,0.78)*step(0.28,wy)*step(wy,0.84)
+                *step(0.02,vUv.y)*step(vUv.y,0.95);
+    float top  = smoothstep(0.90,0.98,vUv.y);
+    float pulse= uIsNight ? (3.2+sin(uTime*2.6)*0.9) : 1.6;
+    vec3 color = base + vInstanceColor*isEd*pulse*0.85 + vInstanceColor*ring*pulse*0.45;
+    color = mix(color,vInstanceColor*pulse*1.6,top);
+    if (isWin>0.5) {
+      if (uIsNight) {
+        float r = rand(vec2(floor(vUv.x*8.0),floor(vUv.y*50.0))+vInstanceColor.rg);
+        if (r>0.28) color = mix(uEmissiveColor,vInstanceColor,r)*3.8;
+      } else { color = vec3(0.55,0.72,0.96); }
+    }
+    gl_FragColor = vec4(color,1.0);
+  }
+`;
 
 const GroundShaderMaterial = {
   uniforms: {
@@ -471,6 +536,189 @@ function StreetLamps({ positions, timeOfDay }) {
 }
 
 
+// ─── 산지 ────────────────────────────────────────────────────────────────
+
+function Mountains({ timeOfDay }) {
+  const isNight = timeOfDay === 'night';
+  const peaks = useMemo(() => Array.from({length:28},(_,i)=>({
+    x:  (seededRand(i*7.31)-0.5)*900,
+    z:  -340 - seededRand(i*5.19)*360,
+    h:  55 + seededRand(i*11.7)*110,
+    r:  28 + seededRand(i*3.87)*40,
+    seg: 6 + (i%3),
+    snow: seededRand(i*11.7)*110 > 85,
+  })), []);
+
+  const rockC  = isNight ? '#1a1820' : '#5a5360';
+  const snowC  = isNight ? '#b0b8c8' : '#eef2ff';
+  const baseC  = isNight ? '#130f18' : '#48443e';
+
+  return (
+    <group>
+      {peaks.map((p,i)=>(
+        <group key={i} position={[p.x,0,p.z]}>
+          {/* 산기슭 넓은 원뿔 */}
+          <mesh position={[0,p.h*0.28,0]} castShadow>
+            <coneGeometry args={[p.r*1.35, p.h*0.56, p.seg]} />
+            <meshStandardMaterial color={baseC} roughness={0.97} />
+          </mesh>
+          {/* 산 몸체 */}
+          <mesh position={[0,p.h*0.5,0]} castShadow>
+            <coneGeometry args={[p.r, p.h, p.seg]} />
+            <meshStandardMaterial color={rockC} roughness={0.95} />
+          </mesh>
+          {/* 눈 덮인 꼭대기 */}
+          {p.snow && (
+            <mesh position={[0,p.h*0.74,0]}>
+              <coneGeometry args={[p.r*0.28, p.h*0.30, p.seg]} />
+              <meshStandardMaterial color={snowC} roughness={0.45} />
+            </mesh>
+          )}
+        </group>
+      ))}
+    </group>
+  );
+}
+
+// ─── 숲 지대 ─────────────────────────────────────────────────────────────
+
+function ForestZone({ timeOfDay }) {
+  const isNight = timeOfDay === 'night';
+  const trees = useMemo(() => {
+    const arr = [];
+    for (let i=0; i<300; i++) {
+      const x = (seededRand(i*6.13)-0.5)*720;
+      const z = 290 + seededRand(i*4.77)*340;
+      const sc= 0.7 + seededRand(i*9.21)*2.0;
+      const ro= seededRand(i*15.3)*Math.PI*2;
+      arr.push({x,z,sc,ro});
+    }
+    return arr;
+  }, []);
+
+  const trunkRef  = useRef();
+  const leavesRef = useRef();
+  const dummy = useMemo(()=>new THREE.Object3D(),[]);
+
+  useEffect(()=>{
+    if (!trunkRef.current||!leavesRef.current) return;
+    trees.forEach((t,i)=>{
+      dummy.position.set(t.x, 1.6*t.sc, t.z);
+      dummy.scale.set(t.sc*0.35, t.sc*1.1, t.sc*0.35);
+      dummy.rotation.set(0,t.ro,0); dummy.updateMatrix();
+      trunkRef.current.setMatrixAt(i,dummy.matrix);
+      dummy.position.set(t.x, 3.8*t.sc, t.z);
+      dummy.scale.set(t.sc, t.sc*1.7, t.sc);
+      dummy.updateMatrix();
+      leavesRef.current.setMatrixAt(i,dummy.matrix);
+    });
+    trunkRef.current.instanceMatrix.needsUpdate  = true;
+    leavesRef.current.instanceMatrix.needsUpdate = true;
+  },[trees,dummy]);
+
+  return (
+    <>
+      <instancedMesh ref={trunkRef} args={[null,null,trees.length]} frustumCulled={false}>
+        <cylinderGeometry args={[0.18,0.28,3,6]} />
+        <meshStandardMaterial color={isNight?'#1a0d06':'#4a2810'} roughness={0.95} />
+      </instancedMesh>
+      <instancedMesh ref={leavesRef} args={[null,null,trees.length]} frustumCulled={false}>
+        <coneGeometry args={[1.2,3.2,7]} />
+        <meshStandardMaterial color={isNight?'#041204':'#1a5218'} roughness={0.80} />
+      </instancedMesh>
+    </>
+  );
+}
+
+// ─── 공원 지대 ────────────────────────────────────────────────────────────
+
+function ParkZone({ timeOfDay }) {
+  const isNight = timeOfDay === 'night';
+  const PX=-310, PZ=-20, PW=160, PD=180;
+  const grassC   = isNight ? '#0d1f0c' : '#3a7a32';
+  const pathC    = isNight ? '#222028' : '#c8b898';
+  const benchC   = isNight ? '#2a1808' : '#7a4820';
+  const fountainC= isNight ? '#0a1828' : '#3070a8';
+
+  const benches = useMemo(()=>Array.from({length:6},(_,i)=>({
+    x: PX+(seededRand(i*5.3)-0.5)*PW*0.7,
+    z: PZ+(seededRand(i*7.9)-0.5)*PD*0.7,
+    rot: seededRand(i*3.1)*Math.PI*2,
+  })),[]);
+
+  return (
+    <group>
+      {/* 잔디 */}
+      <mesh rotation={[-Math.PI/2,0,0]} position={[PX,0.02,PZ]}>
+        <planeGeometry args={[PW,PD]} />
+        <meshStandardMaterial color={grassC} roughness={0.95} />
+      </mesh>
+      {/* 산책로 십자형 */}
+      <mesh position={[PX,0.03,PZ]}><boxGeometry args={[PW,0.04,6]} /><meshStandardMaterial color={pathC} roughness={0.85} /></mesh>
+      <mesh position={[PX,0.03,PZ]}><boxGeometry args={[6,0.04,PD]} /><meshStandardMaterial color={pathC} roughness={0.85} /></mesh>
+      {/* 분수 */}
+      <group position={[PX,0,PZ]}>
+        <mesh position={[0,0.5,0]}><cylinderGeometry args={[5.5,6,1,12]} /><meshStandardMaterial color={isNight?'#181820':'#888'} roughness={0.7} /></mesh>
+        <mesh position={[0,0.93,0]}><cylinderGeometry args={[5,5,0.06,12]} /><meshStandardMaterial color={fountainC} transparent opacity={0.7} roughness={0.2} /></mesh>
+        <mesh position={[0,1.9,0]}><cylinderGeometry args={[0.3,0.4,2.5,8]} /><meshStandardMaterial color={isNight?'#202028':'#aaa'} roughness={0.6} /></mesh>
+        {isNight && <mesh position={[0,3.6,0]}><cylinderGeometry args={[0.12,0.75,3.6,8]} /><meshStandardMaterial color={fountainC} transparent opacity={0.3} /></mesh>}
+      </group>
+      {/* 벤치 */}
+      {benches.map((b,i)=>(
+        <group key={i} position={[b.x,0,b.z]} rotation={[0,b.rot,0]}>
+          <mesh position={[0,0.5,0]}><boxGeometry args={[2,0.12,0.7]} /><meshStandardMaterial color={benchC} roughness={0.9} /></mesh>
+          <mesh position={[0,0.85,-0.28]}><boxGeometry args={[2,0.55,0.1]} /><meshStandardMaterial color={benchC} roughness={0.9} /></mesh>
+          {[-0.8,0.8].map(dx=>(
+            <mesh key={dx} position={[dx,0.25,0]}><boxGeometry args={[0.1,0.5,0.65]} /><meshStandardMaterial color={isNight?'#111':'#555'} roughness={0.7} /></mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  );
+}
+
+// ─── 새 무리 ──────────────────────────────────────────────────────────────
+
+function Birds({ timeOfDay }) {
+  const visible = timeOfDay !== 'night';
+  const COUNT = 35;
+  const meshRef = useRef();
+  const dummy   = useMemo(()=>new THREE.Object3D(),[]);
+  const flock   = useMemo(()=>Array.from({length:COUNT},(_,i)=>({
+    orbitR: 60  + seededRand(i*7.11)*120,
+    orbitY: 50  + seededRand(i*5.37)*100,
+    cx:     (seededRand(i*3.21)-0.5)*400,
+    cz:     (seededRand(i*9.83)-0.5)*400,
+    speed:  0.08+ seededRand(i*4.73)*0.18,
+    phase:  seededRand(i*6.17)*Math.PI*2,
+    tilt:   (seededRand(i*2.59)-0.5)*0.4,
+    wing:   seededRand(i*11.3)*Math.PI*2,
+  })),[]);
+
+  useFrame(state=>{
+    if (!meshRef.current||!visible) return;
+    const t=state.clock.elapsedTime;
+    flock.forEach((b,i)=>{
+      const a=t*b.speed+b.phase;
+      const flap=Math.sin(t*5+b.wing)*0.3;
+      dummy.position.set(b.cx+Math.cos(a)*b.orbitR, b.orbitY+Math.sin(t*0.3+b.phase)*8, b.cz+Math.sin(a)*b.orbitR);
+      dummy.rotation.set(b.tilt+flap*0.1, -a+Math.PI/2, flap);
+      dummy.scale.set(1.5,0.4,3.0);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i,dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate=true;
+  });
+
+  if (!visible) return null;
+  return (
+    <instancedMesh ref={meshRef} args={[null,null,COUNT]} frustumCulled={false}>
+      <coneGeometry args={[0.5,2,4]} />
+      <meshStandardMaterial color="#e8e4de" roughness={0.8} />
+    </instancedMesh>
+  );
+}
+
 // ─── 강변 웨이브 지오메트리 ────────────────────────────────────────────────
 
 function makeWavyStripGeo(length, width, segs, waveAmp, seed) {
@@ -521,55 +769,187 @@ function RiverBanks() {
   );
 }
 
-function Bridges({ timeOfDay }) {
-  const isNight   = timeOfDay === 'night';
-  const deckColor   = isNight ? '#303030' : '#868686';
-  const pillarColor = isNight ? '#3C3C3C' : '#969696';
-  const railColor   = isNight ? '#484848' : '#A8A8A8';
+function GoldenGateBridge({ timeOfDay }) {
+  const isNight = timeOfDay === 'night';
+  const ORANGE = '#C0511A';
+  const DECK_Y = 3.5;
+  const DECK_LEN = 130;   // z: 95 to 225 (river z=120~200, 20 units extra each side)
+  const DECK_W   = 22;
+  const TOWER_Z1 = 125;   // near north bank
+  const TOWER_Z2 = 195;   // near south bank
+  const TOWER_H  = 58;
+  const TOWER_TOP_Y = DECK_Y + TOWER_H;
+  const LEG_W = 4, LEG_D = 7;
+  const SAG_Y = DECK_Y + 14; // cable sag at midspan
 
-  const bridgeXPositions = useMemo(() => {
-    const pos = [];
-    let x = -280, i = 0;
-    while (x < 280) {
-      pos.push(x + (seededRand(i * 7.31) - 0.5) * 14);
-      x += 38 + seededRand(i * 5.17) * 26;
-      i++;
+  // Hanger positions between the two towers
+  const hangers = useMemo(() => {
+    const arr = [];
+    for (let z = TOWER_Z1 + 7; z < TOWER_Z2; z += 7) {
+      const t = (z - TOWER_Z1) / (TOWER_Z2 - TOWER_Z1);
+      const cableY = TOWER_TOP_Y - (TOWER_TOP_Y - SAG_Y) * 4 * t * (1 - t);
+      arr.push({ z, cableY });
     }
-    return pos.filter(p => Math.abs(p) < 290);
+    return arr;
   }, []);
+
+  // Cable segments: anchor → tower1 → midspan → tower2 → anchor
+  const cablePoints = [
+    { z: 97,      y: DECK_Y + 4 },
+    { z: TOWER_Z1, y: TOWER_TOP_Y },
+    { z: 160,     y: SAG_Y },
+    { z: TOWER_Z2, y: TOWER_TOP_Y },
+    { z: 223,     y: DECK_Y + 4 },
+  ];
+
+  const CABLE_X = [-DECK_W / 2 + 1.5, DECK_W / 2 - 1.5];
 
   return (
     <group>
-      {bridgeXPositions.map((x, ki) => {
-        const yRot = (seededRand(ki * 3.7) - 0.5) * 0.06;
-        return (
-          <group key={ki} position={[x, 0, 160]} rotation={[0, yRot, 0]}>
-            <mesh position={[0, 2.8, 0]}>
-              <boxGeometry args={[12, 1.6, 90]} />
-              <meshStandardMaterial color={deckColor} />
+      {/* Deck */}
+      <mesh position={[0, DECK_Y, 160]}>
+        <boxGeometry args={[DECK_W, 1.4, DECK_LEN]} />
+        <meshStandardMaterial color={isNight ? '#404040' : '#787878'} roughness={0.85} />
+      </mesh>
+
+      {/* Center lane line */}
+      <mesh position={[0, DECK_Y + 0.72, 160]}>
+        <boxGeometry args={[0.35, 0.04, DECK_LEN - 6]} />
+        <meshStandardMaterial color="#DDDD44" />
+      </mesh>
+
+      {/* Side railings */}
+      {[-1, 1].map(s => (
+        <mesh key={s} position={[s * (DECK_W / 2 - 1), DECK_Y + 2.2, 160]}>
+          <boxGeometry args={[0.6, 2.0, DECK_LEN - 6]} />
+          <meshStandardMaterial color={ORANGE} roughness={0.7} />
+        </mesh>
+      ))}
+
+      {/* Tower 1 */}
+      {[TOWER_Z1, TOWER_Z2].map((tz, ti) => (
+        <group key={ti} position={[0, 0, tz]}>
+          {/* Left & right legs */}
+          {[-1, 1].map(s => (
+            <mesh key={s} position={[s * DECK_W / 4, DECK_Y + TOWER_H / 2, 0]}>
+              <boxGeometry args={[LEG_W, TOWER_H, LEG_D]} />
+              <meshStandardMaterial color={ORANGE} roughness={0.65} metalness={0.2} />
             </mesh>
-            <mesh position={[0, 3.65, 0]}>
-              <boxGeometry args={[0.3, 0.05, 90]} />
-              <meshStandardMaterial color="#C89A15" />
+          ))}
+          {/* Crossbeams */}
+          {[0.28, 0.60].map((frac, ci) => (
+            <mesh key={ci} position={[0, DECK_Y + TOWER_H * frac, 0]}>
+              <boxGeometry args={[DECK_W / 2 + LEG_W, LEG_W * 0.65, LEG_D]} />
+              <meshStandardMaterial color={ORANGE} roughness={0.65} />
             </mesh>
-            {[-30, 0, 30].map(z => (
-              <mesh key={z} position={[0, 1.0, z]}>
-                <boxGeometry args={[11, 5, 4.5]} />
-                <meshStandardMaterial color={pillarColor} />
+          ))}
+          {isNight && (
+            <pointLight position={[0, DECK_Y + TOWER_H + 3, 0]} color="#FF8833" intensity={1.0} distance={100} />
+          )}
+        </group>
+      ))}
+
+      {/* Suspension cables */}
+      {CABLE_X.map((cx, ci) => (
+        <group key={ci}>
+          {cablePoints.slice(0, -1).map((p, si) => {
+            const q = cablePoints[si + 1];
+            const midZ = (p.z + q.z) / 2;
+            const midY = (p.y + q.y) / 2;
+            const dz = q.z - p.z;
+            const dy = q.y - p.y;
+            const len = Math.sqrt(dz * dz + dy * dy);
+            // rotate cylinder (default Y-axis) to align with (dy, dz) direction in Y-Z plane
+            const rotX = Math.atan2(dz, dy);
+            return (
+              <mesh key={si} position={[cx, midY, midZ]} rotation={[rotX, 0, 0]}>
+                <cylinderGeometry args={[0.28, 0.28, len, 5]} />
+                <meshStandardMaterial color="#7A3510" roughness={0.6} />
               </mesh>
-            ))}
-            <mesh position={[-6.2, 4.0, 0]}>
-              <boxGeometry args={[0.5, 1.0, 90]} />
-              <meshStandardMaterial color={railColor} />
-            </mesh>
-            <mesh position={[6.2, 4.0, 0]}>
-              <boxGeometry args={[0.5, 1.0, 90]} />
-              <meshStandardMaterial color={railColor} />
-            </mesh>
-          </group>
-        );
-      })}
+            );
+          })}
+          {/* Hangers */}
+          {hangers.map((h, hi) => {
+            const hangerLen = h.cableY - DECK_Y;
+            return (
+              <mesh key={hi} position={[cx, DECK_Y + hangerLen / 2, h.z]}>
+                <cylinderGeometry args={[0.12, 0.12, hangerLen, 4]} />
+                <meshStandardMaterial color="#8B4010" roughness={0.6} />
+              </mesh>
+            );
+          })}
+        </group>
+      ))}
     </group>
+  );
+}
+
+function Cars({ timeOfDay }) {
+  const isNight = timeOfDay === 'night';
+
+  // Roads at world z = 0, ±192 (GRID_SIZE*ROAD_INTERVAL=192)
+  const CAR_DEFS = useMemo(() => {
+    const roadZs = [-384, -192, 0, 192, 384];
+    const colors = ['#CC3333','#3366CC','#DDAA22','#EEEEEE','#44AA66','#AA44CC','#DD6622'];
+    const cars = [];
+    roadZs.forEach((rz, ri) => {
+      for (let i = 0; i < 6; i++) {
+        const dir = seededRand(ri * 31 + i * 17) > 0.5 ? 1 : -1;
+        cars.push({
+          rz: rz + (dir > 0 ? 3.5 : -3.5), // offset for lane
+          startX: (seededRand(ri * 7 + i * 5) * 2 - 1) * 900,
+          speed: dir * (55 + seededRand(ri * 13 + i) * 55),
+          color: colors[(ri * 6 + i) % colors.length],
+        });
+      }
+    });
+    return cars;
+  }, []);
+
+  const posRef = useRef(CAR_DEFS.map(c => c.startX));
+  const groupRefs = useRef([]);
+
+  useFrame((_, delta) => {
+    CAR_DEFS.forEach((car, i) => {
+      posRef.current[i] += car.speed * delta;
+      if (posRef.current[i] > 1000) posRef.current[i] = -1000;
+      if (posRef.current[i] < -1000) posRef.current[i] = 1000;
+      if (groupRefs.current[i]) {
+        groupRefs.current[i].position.x = posRef.current[i];
+      }
+    });
+  });
+
+  return (
+    <>
+      {CAR_DEFS.map((car, i) => (
+        <group
+          key={i}
+          ref={el => { groupRefs.current[i] = el; }}
+          position={[car.startX, 1.2, car.rz]}
+          rotation={[0, car.speed > 0 ? 0 : Math.PI, 0]}
+        >
+          {/* Body */}
+          <mesh>
+            <boxGeometry args={[5.5, 1.8, 2.6]} />
+            <meshStandardMaterial color={car.color} roughness={0.4} metalness={0.25} />
+          </mesh>
+          {/* Roof */}
+          <mesh position={[0.3, 1.1, 0]}>
+            <boxGeometry args={[3.5, 1.2, 2.4]} />
+            <meshStandardMaterial color={car.color} roughness={0.4} metalness={0.25} />
+          </mesh>
+          {/* Windshield (front) */}
+          <mesh position={[2.2, 0.9, 0]}>
+            <boxGeometry args={[0.1, 1.0, 2.2]} />
+            <meshStandardMaterial color="#88CCFF" roughness={0.1} metalness={0.5} transparent opacity={0.7} />
+          </mesh>
+          {isNight && (
+            <pointLight position={[3.0, 0.5, 0]} color="#FFFFAA" intensity={0.7} distance={35} />
+          )}
+        </group>
+      ))}
+    </>
   );
 }
 
@@ -638,92 +1018,148 @@ function getTierHeightMult(t) {
   if (t==='silver')   return 1.03;
   return 1.0;
 }
+function getTierGroup(t) {
+  if (t==='master' || t==='champion') return 3; // 랜드마크
+  if (t==='diamond') return 2;                   // 마천루
+  if (t==='gold' || t==='platinum') return 1;    // 오피스
+  return 0;                                       // 브론즈/실버: 아파트
+}
 
-function Buildings({ data, showLabels, timeOfDay, setSelectedBuilding, cameraDistRef }) {
-  const meshRef = useRef();
-  const dummy   = useMemo(() => new THREE.Object3D(), []);
-  const color   = new THREE.Color();
-  const [hoveredIdx, setHoveredIdx] = useState(null);
+function Buildings({ data, timeOfDay, cameraDistRef }) {
   const isNight = timeOfDay === 'night';
-  const materialRef = useRef();
 
-  useEffect(() => {
-    if (materialRef.current) {
-      materialRef.current.uniforms.uIsNight.value = isNight;
-    }
-  }, [isNight]);
+  const groups = useMemo(() => {
+    const g = [[], [], [], []];
+    data.forEach(b => { g[getTierGroup((b.tier_name||'').toLowerCase())].push(b); });
+    return g;
+  }, [data]);
 
-  const bShader = useMemo(() => ({
-    ...BuildingShaderMaterial,
+  const mainRefs     = useRef([null, null, null, null]);
+  const extraRefs    = useRef([null, null, null, null]);
+  const materialRefs = useRef([null, null, null, null]);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const col   = useMemo(() => new THREE.Color(), []);
+
+  const shaders = useMemo(() => [BLDG_FRAG_T0, BLDG_FRAG_T1, BLDG_FRAG_T2, BLDG_FRAG_T3].map(frag => ({
+    vertexShader: BLDG_VERT,
+    fragmentShader: frag,
     uniforms: {
-      ...BuildingShaderMaterial.uniforms,
-      uIsNight:       { value: isNight },
+      uIsNight:       { value: false },
       uEmissiveColor: { value: new THREE.Color('#FCD34D') },
       uTime:          { value: 0 },
-    }
-  }), []);
+    },
+  })), []);
 
-  useFrame((state) => {
-    if (materialRef.current?.uniforms) {
-      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
-    }
+  useEffect(() => {
+    materialRefs.current.forEach(m => { if (m?.uniforms) m.uniforms.uIsNight.value = isNight; });
+  }, [isNight]);
+
+  useFrame(state => {
+    materialRefs.current.forEach(m => { if (m?.uniforms) m.uniforms.uTime.value = state.clock.elapsedTime; });
   });
 
   useEffect(() => {
-    if (!meshRef.current || data.length === 0) return;
-    data.forEach((b, i) => {
-      const t = (b.tier_name || '').toLowerCase();
-      const sh = b.height * HEIGHT_SCALE * getTierHeightMult(t);
-      dummy.position.set(b.x, sh / 2, b.z);
-      dummy.scale.set(getTierWidth(t), sh, getTierWidth(t));
-      dummy.updateMatrix();
-      meshRef.current.setMatrixAt(i, dummy.matrix);
-      color.set(getTierColor(t));
-      meshRef.current.setColorAt(i, color);
+    groups.forEach((grpData, gi) => {
+      const main  = mainRefs.current[gi];
+      const extra = extraRefs.current[gi];
+      if (!main || grpData.length === 0) return;
+      grpData.forEach((b, i) => {
+        const t  = (b.tier_name||'').toLowerCase();
+        const sh = b.height * HEIGHT_SCALE * getTierHeightMult(t);
+        const w  = getTierWidth(t);
+        dummy.position.set(b.x, sh/2, b.z);
+        dummy.scale.set(w, sh, w);
+        dummy.rotation.set(0,0,0);
+        dummy.updateMatrix();
+        main.setMatrixAt(i, dummy.matrix);
+        col.set(getTierColor(t));
+        main.setColorAt(i, col);
+        if (extra) {
+          if (gi===1) {
+            const ph=sh*0.08; dummy.position.set(b.x,sh+ph/2,b.z); dummy.scale.set(w*0.55,ph,w*0.55);
+          } else if (gi===2) {
+            const ch=sh*0.08; dummy.position.set(b.x,sh+ch/2,b.z); dummy.scale.set(w*0.45,ch,w*0.45);
+          } else if (gi===3) {
+            const ah=sh*0.10; dummy.position.set(b.x,sh+ah/2,b.z); dummy.scale.set(0.8,ah,0.8);
+          }
+          dummy.rotation.set(0,0,0); dummy.updateMatrix();
+          extra.setMatrixAt(i, dummy.matrix);
+          extra.setColorAt(i, col);
+        }
+      });
+      main.instanceMatrix.needsUpdate = true;
+      if (main.instanceColor)  main.instanceColor.needsUpdate  = true;
+      if (extra) { extra.instanceMatrix.needsUpdate = true; if (extra.instanceColor) extra.instanceColor.needsUpdate = true; }
     });
-    meshRef.current.instanceMatrix.needsUpdate = true;
-    meshRef.current.instanceColor.needsUpdate  = true;
-  }, [data, dummy]);
+  }, [groups, dummy, col]);
+
+  const [hovG, setHovG] = useState(null);
+  const [hovI, setHovI] = useState(null);
+
+  const FRAGS = [BLDG_FRAG_T0, BLDG_FRAG_T1, BLDG_FRAG_T2, BLDG_FRAG_T3];
 
   return (
     <>
-      <instancedMesh
-        ref={(mesh) => {
-          if (mesh && data.length > 0 && !mesh.instanceColor) {
-            mesh.instanceColor = new THREE.InstancedBufferAttribute(
-              new Float32Array(data.length * 3).fill(0.5), 3
-            );
-          }
-          meshRef.current = mesh;
-        }}
-        args={[null, null, data.length]} castShadow receiveShadow
-        frustumCulled={false}
-        onPointerMove={(e) => { e.stopPropagation(); setHoveredIdx(e.instanceId); document.body.style.cursor = 'pointer'; }}
-        onPointerOut={() => { setHoveredIdx(null); document.body.style.cursor = 'auto'; }}
-        onClick={(e) => { if (e.instanceId !== undefined) setSelectedBuilding(data[e.instanceId]); }}
-      >
-        <boxGeometry />
-        <shaderMaterial ref={materialRef} attach="material" {...bShader} vertexColors />
-      </instancedMesh>
-
-      {data.map((b, i) => {
-        const t = (b.tier_name || '').toLowerCase();
-        const sh = b.height * HEIGHT_SCALE * getTierHeightMult(t);
-        const isHovered = hoveredIdx === i;
-        const dist = cameraDistRef?.current ?? 160;
-        if (!isHovered && !(showLabels && i < 50 && dist < 200)) return null;
+      {groups.map((grpData, gi) => {
+        if (grpData.length === 0) return null;
         return (
-          <Html key={b.id} position={[b.x, sh + 3, b.z]} center style={{ pointerEvents: 'none' }}>
-            <div className={`flex flex-col items-center transition-all duration-200 ${isHovered ? 'scale-110' : 'scale-100 opacity-70'}`}>
-              <div className="bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 flex flex-col items-center min-w-[60px]">
-                <span className="text-white font-bold text-[10px] whitespace-nowrap">{b.nickname}</span>
-                {isHovered && <span className="text-[8px] text-white/50">{formatNumber(b.elo_score)} pt</span>}
-              </div>
-              <div className="w-0.5 h-3 bg-white/20" />
-            </div>
-          </Html>
+          <React.Fragment key={gi}>
+            <instancedMesh
+              ref={mesh => {
+                if (mesh && !mesh.instanceColor)
+                  mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(grpData.length*3).fill(0.5),3);
+                mainRefs.current[gi] = mesh;
+              }}
+              args={[null,null,grpData.length]} frustumCulled={false}
+              onPointerMove={e => { e.stopPropagation(); setHovG(gi); setHovI(e.instanceId); document.body.style.cursor='default'; }}
+              onPointerOut={() => { setHovG(null); setHovI(null); document.body.style.cursor='auto'; }}
+            >
+              <boxGeometry />
+              <shaderMaterial ref={el => { materialRefs.current[gi]=el; }} attach="material" {...shaders[gi]} vertexColors />
+            </instancedMesh>
+
+            {/* 오피스 — 펜트하우스 박스 */}
+            {gi===1 && (
+              <instancedMesh ref={mesh=>{ if(mesh&&!mesh.instanceColor) mesh.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(grpData.length*3).fill(0.5),3); extraRefs.current[1]=mesh; }} args={[null,null,grpData.length]} frustumCulled={false}>
+                <boxGeometry /><shaderMaterial attach="material" {...shaders[1]} vertexColors />
+              </instancedMesh>
+            )}
+            {/* 마천루 — 콘 지붕 */}
+            {gi===2 && (
+              <instancedMesh ref={mesh=>{ if(mesh&&!mesh.instanceColor) mesh.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(grpData.length*3).fill(0.5),3); extraRefs.current[2]=mesh; }} args={[null,null,grpData.length]} frustumCulled={false}>
+                <coneGeometry args={[1,1,8]} /><meshStandardMaterial color={isNight?'#111118':'#2a2a35'} />
+              </instancedMesh>
+            )}
+            {/* 랜드마크 — 안테나 실린더 */}
+            {gi===3 && (
+              <instancedMesh ref={mesh=>{ if(mesh&&!mesh.instanceColor) mesh.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(grpData.length*3).fill(0.5),3); extraRefs.current[3]=mesh; }} args={[null,null,grpData.length]} frustumCulled={false}>
+                <cylinderGeometry args={[0.5,0.5,1,6]} />
+                <meshStandardMaterial color={isNight?'#999':'#bbb'} emissive={isNight?'#9333EA':'#000'} emissiveIntensity={isNight?1.2:0} />
+              </instancedMesh>
+            )}
+          </React.Fragment>
         );
       })}
+
+      {groups.flatMap((grpData, gi) =>
+        grpData.map((b, i) => {
+          const t  = (b.tier_name||'').toLowerCase();
+          const sh = b.height*HEIGHT_SCALE*getTierHeightMult(t);
+          const isHov = hovG===gi && hovI===i;
+          if (!isHov && !((cameraDistRef?.current??160)<200 && i<50)) return null;
+          return (
+            <Html key={b.id} position={[b.x,sh+4,b.z]} center style={{pointerEvents:'none'}}>
+              <div className={`flex flex-col items-center transition-all duration-200 ${isHov?'scale-110':'scale-100 opacity-70'}`}>
+                <div className="bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 flex flex-col items-center min-w-[60px]">
+                  <span className="text-white font-bold text-[10px] whitespace-nowrap">{b.nickname}</span>
+                  {isHov && <span className="text-[8px] text-white/50">{formatNumber(b.elo_score)} pt</span>}
+                </div>
+                <div className="w-0.5 h-3 bg-white/20" />
+              </div>
+            </Html>
+          );
+        })
+      )}
     </>
   );
 }
@@ -946,7 +1382,6 @@ export default function WorldPage() {
   const [quality,   setQuality]   = useState('medium');
   const [acceleration, setAcceleration] = useState(700);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [selectedBuilding, setSelectedBuilding] = useState(null);
   const [showMinimap, setShowMinimap] = useState(true);
 
   const joystickValues  = useRef({ move:{x:0,y:0}, rotate:{x:0,y:0} });
@@ -975,7 +1410,7 @@ export default function WorldPage() {
 
   const gShader = useMemo(() => ({
     ...GroundShaderMaterial,
-    uniforms: { ...GroundShaderMaterial.uniforms, uIsNight:{ value:isNight }, uGridSize:{ value:16.0 }, uRoadInterval:{ value:4.0 }, uLamps: { value: LAMP_POSITIONS } }
+    uniforms: { ...GroundShaderMaterial.uniforms, uIsNight:{ value:isNight }, uGridSize:{ value:48.0 }, uRoadInterval:{ value:4.0 }, uLamps: { value: LAMP_POSITIONS } }
   }), [LAMP_POSITIONS]);
 
   const weatherAmbientMult = weather === 'cloudy' || weather === 'rain' || weather === 'snow' ? 0.65 : 1.0;
@@ -1116,25 +1551,6 @@ export default function WorldPage() {
           </button>
         </div>
 
-        {/* 빌딩 클릭 미리보기 */}
-        {selectedBuilding && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[60] pointer-events-auto">
-            <div className="bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl px-6 py-4 flex items-center gap-5 min-w-[300px]">
-              <div className="flex-1 min-w-0">
-                <div className="text-white font-bold text-sm truncate">{selectedBuilding.nickname}</div>
-                <div className="text-white/40 text-[11px] mt-0.5">{selectedBuilding.tier_name} · {formatNumber(selectedBuilding.elo_score)} pt</div>
-              </div>
-              <button onClick={() => navigate(`/?creator=${selectedBuilding.handle||selectedBuilding.id}`)}
-                className="bg-white/10 hover:bg-white/20 text-white text-xs px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
-                프로필 보기
-              </button>
-              <button onClick={() => setSelectedBuilding(null)} className="text-white/30 hover:text-white transition-colors flex-shrink-0">
-                <X size={15} />
-              </button>
-            </div>
-          </div>
-        )}
-
         <Canvas shadows camera={{ fov: 45, near: 0.5, far: 30000 }} gl={{ antialias: true }} dpr={QUALITY_DPR[quality]}>
           <Suspense fallback={null}>
             {timeOfDay === 'night' ? (
@@ -1181,11 +1597,17 @@ export default function WorldPage() {
             {/* 강 코너 */}
             <River timeOfDay={timeOfDay} />
             <RiverBanks />
-            <Bridges timeOfDay={timeOfDay} />
+            <GoldenGateBridge timeOfDay={timeOfDay} />
+            <Cars timeOfDay={timeOfDay} />
 
             {/* 자연물 및 가로등 */}
             <ParkTrees timeOfDay={timeOfDay} />
             <StreetLamps positions={LAMP_POSITIONS} timeOfDay={timeOfDay} />
+            {/* 지형 */}
+            <Mountains timeOfDay={timeOfDay} />
+            <ForestZone timeOfDay={timeOfDay} />
+            <ParkZone timeOfDay={timeOfDay} />
+            <Birds timeOfDay={timeOfDay} />
             <VoxelClouds weather={weather} />
 
             {/* 날씨 파티클 */}
@@ -1196,9 +1618,7 @@ export default function WorldPage() {
             {!loading && (
               <Buildings
                 data={buildings}
-                showLabels={false}
                 timeOfDay={timeOfDay}
-                setSelectedBuilding={setSelectedBuilding}
                 cameraDistRef={cameraDistRef}
               />
             )}
@@ -1222,30 +1642,6 @@ export default function WorldPage() {
           </div>
         )}
 
-        {/* 선택된 건물 정보 (Toast/BottomSheet) */}
-        <div 
-          className={`absolute inset-x-0 bottom-0 z-[80] pointer-events-none flex flex-col items-center justify-end pb-4 lg:pb-8 px-4 transition-all duration-500 ease-out ${
-            selectedBuilding ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
-          }`}
-        >
-          {selectedBuilding && (
-            <div className="pointer-events-auto bg-black/60 backdrop-blur-xl border border-white/20 rounded-2xl w-full max-w-md lg:max-w-max p-4 lg:p-5 shadow-[0_0_40px_rgba(0,0,0,0.5)] flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-              <div className="flex flex-col">
-                <span className="text-white/60 text-[10px] lg:text-xs font-semibold tracking-widest uppercase mb-0.5 lg:mb-1">{selectedBuilding.tier_name} Tier</span>
-                <span className="text-white font-bold text-lg lg:text-xl">{selectedBuilding.nickname}</span>
-                <span className="text-purple-400 text-xs lg:text-sm font-medium mt-0.5">{formatNumber(selectedBuilding.elo_score)} pts</span>
-              </div>
-              <div className="w-full lg:w-auto flex gap-2 mt-1 lg:mt-0">
-                <button onClick={() => setSelectedBuilding(null)} className="flex-1 lg:flex-none py-2 px-4 lg:py-2.5 lg:px-5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs lg:text-sm font-bold transition-colors">
-                  닫기
-                </button>
-                <button onClick={() => navigate(`/creator/${selectedBuilding.id}`)} className="flex-1 lg:flex-none py-2 px-4 lg:py-2.5 lg:px-5 rounded-xl bg-white text-black hover:bg-white/90 text-xs lg:text-sm font-bold transition-colors shadow-lg">
-                  프로필 보기
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
     </KeyboardControls>
   );

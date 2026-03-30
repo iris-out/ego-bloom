@@ -27,12 +27,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    // ELO 점수 기준 내림차순, 상위 100명 조회
+    // ELO 점수 기준 내림차순, 상위 30명 조회
     const { data, error } = await supabase
       .from('account_current')
       .select('*')
       .order('elo_score', { ascending: false })
-      .limit(100);
+      .limit(30);
 
     if (error) throw error;
 

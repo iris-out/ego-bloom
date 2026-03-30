@@ -45,3 +45,5 @@ todo.md
 
 scan_pii.sh
 *.sh
+.playwright-mcp/
+.claude/

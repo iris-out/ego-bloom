@@ -33,37 +33,37 @@ export default function RankingPage() {
   const statusColor = serverStatus === 'ok' ? '#6CD97E' : serverStatus === 'warning' ? '#FBBF24' : '#F87171';
 
   return (
-    <div className="min-h-[100dvh] relative overflow-hidden bg-[#0F0817]">
-      {/* 배경 글로우 */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[rgba(121,155,196,0.08)] rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[60%] bg-[rgba(65,30,110,0.15)] rounded-full blur-[120px]" />
+    <div className="min-h-[100dvh] bg-[#1A0D30]">
+      {/* 배경 글로우 (fixed, pointer-events-none) */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-[-15%] left-[-8%] w-[55%] h-[55%] bg-[rgba(100,60,180,0.10)] rounded-full blur-[130px]" />
+        <div className="absolute bottom-[-15%] right-[-8%] w-[45%] h-[55%] bg-[rgba(55,20,100,0.12)] rounded-full blur-[130px]" />
       </div>
 
       {/* 헤더 */}
-      <header className="sticky top-0 z-50 border-b border-white/5 bg-[#1A0D30]/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 bg-[#1A0D30] border-b border-white/[0.06]">
         <div className="max-w-[680px] mx-auto px-6 py-4 lg:max-w-[1280px] lg:px-12">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <button onClick={() => navigate('/')} className="text-white/60 hover:text-white transition-colors">
+              <button onClick={() => navigate('/')} className="text-white/50 hover:text-white transition-colors">
                 <ChevronLeft size={20} />
               </button>
-              <h1 className="font-bold text-lg tracking-[0.1em] text-white uppercase">Ranking</h1>
+              <h1 className="font-bold text-base tracking-[0.12em] text-white/90 uppercase">Ranking</h1>
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] font-medium text-white/70 tracking-wider">
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-white/50 tracking-wider">
               <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor, boxShadow: `0 0 8px ${statusColor}66` }} />
               <span>{serverStatus === 'ok' ? '정상' : serverStatus === 'warning' ? '불안정' : '이상'}</span>
             </div>
           </div>
 
           {/* 탭 네비게이션 */}
-          <div className="flex bg-white/5 rounded-xl p-1 border border-white/10">
+          <div className="flex bg-white/[0.04] rounded-xl p-1 border border-white/[0.07]">
             <button
               onClick={() => setActiveTab('creator')}
               className={`flex-1 py-2 rounded-lg text-xs font-bold tracking-wider transition-all ${
                 activeTab === 'creator'
-                  ? 'bg-gradient-to-b from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/25'
-                  : 'text-white/50 hover:text-white hover:bg-white/5'
+                  ? 'bg-gradient-to-b from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/20'
+                  : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
               }`}
             >
               글로벌 랭킹
@@ -72,8 +72,8 @@ export default function RankingPage() {
               onClick={() => setActiveTab('trend')}
               className={`flex-1 py-2 rounded-lg text-xs font-bold tracking-wider transition-all ${
                 activeTab === 'trend'
-                  ? 'bg-gradient-to-b from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/25'
-                  : 'text-white/50 hover:text-white hover:bg-white/5'
+                  ? 'bg-gradient-to-b from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/20'
+                  : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
               }`}
             >
               해시태그 트렌드
