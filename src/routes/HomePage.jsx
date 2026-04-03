@@ -8,6 +8,7 @@ import SearchWarningModal from '../components/SearchWarningModal';
 import ZetaBanners from '../components/ZetaBanners';
 import MyProfileCard from '../components/MyProfileCard';
 import SearchPill from '../components/SearchPill';
+import EmergencyToast from '../components/EmergencyToast';
 import { getRecentSearches, removeRecentSearch } from '../utils/storage';
 import { APP_VERSION } from '../data/changelog';
 import { getCreatorTier } from '../utils/tierCalculator';
@@ -15,31 +16,26 @@ import TierIcon from '../components/ui/TierIcon';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [recentSearches, setRecentSearches] = useState([]);
+  const [recentSearches, setRecentSearches] = useState(() => getRecentSearches());
   const [showChangelog, setShowChangelog] = useState(false);
-  const [showDataModal, setShowDataModal] = useState(false);
-  const [showWarningModal, setShowWarningModal] = useState(false);
-  const [hasAgreedToWarning, setHasAgreedToWarning] = useState(false);
-  const [topTags, setTopTags] = useState([]);
-  const [topCreators, setTopCreators] = useState([]);
-  const { status: serverStatus } = useServerStatus();
-
-  useEffect(() => { setRecentSearches(getRecentSearches()); }, []);
-
-  // 첫 방문자에게 데이터 수집 안내 자동 표시 및 경고 동의 여부 확인
-  useEffect(() => {
+  const [showDataModal, setShowDataModal] = useState(() => {
     const visited = localStorage.getItem('ego-bloom-visited');
     if (!visited) {
-      setShowDataModal(true);
       localStorage.setItem('ego-bloom-visited', '1');
+      return true;
     }
-
+    return false;
+  });
+  const [showWarningModal, setShowWarningModal] = useState(() => {
     const agreed = localStorage.getItem('ego-bloom-warning-agreed') === 'true';
-    setHasAgreedToWarning(agreed);
-    if (!agreed) {
-      setShowWarningModal(true);
-    }
-  }, []);
+    return !agreed;
+  });
+  const [hasAgreedToWarning, setHasAgreedToWarning] = useState(() => localStorage.getItem('ego-bloom-warning-agreed') === 'true');
+  const [topTags, setTopTags] = useState([]);
+  const [topCreators, setTopCreators] = useState([]);
+  const { status: serverStatus, message: serverMessage } = useServerStatus();
+
+  // useEffect 제거 (useState 초기화로 대체됨)
 
   // 모달 닫힐 때 동의 여부 재확인
   const handleCloseWarning = () => {
@@ -68,6 +64,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-[100dvh] flex flex-col relative overflow-hidden">
+      <EmergencyToast status={serverStatus} message={serverMessage} />
       {/* 배경 글로우 */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[rgba(121,155,196,0.15)] rounded-full blur-[120px]" />

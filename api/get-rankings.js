@@ -46,7 +46,7 @@ export default async function handler(req, res) {
       query = query.not('id', 'in', `(${blacklist.join(',')})`);
     }
 
-    const { data, error } = await query.limit(30);
+    const { data, error } = await query.limit(40);
 
     if (error) throw error;
 

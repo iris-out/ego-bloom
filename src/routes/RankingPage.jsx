@@ -1,10 +1,10 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, ChevronLeft } from 'lucide-react';
 import { useServerStatus } from '../hooks/useServerStatus';
 
-const TrendContent = lazy(() => import('../components/TrendView'));
-const CreatorRankingView = lazy(() => import('../components/CreatorRankingView'));
+import TrendContent from '../components/TrendView';
+import CreatorRankingView from '../components/CreatorRankingView';
 
 async function fetchHashtagTrends() {
   try {
@@ -80,9 +80,7 @@ export default function RankingPage() {
 
       <main className="max-w-[680px] mx-auto px-6 py-6 relative z-10 lg:max-w-[1280px] lg:px-12">
         {activeTab === 'creator' && (
-          <Suspense fallback={<div className="flex items-center justify-center py-20"><Loader2 size={28} className="animate-spin text-white/30" /></div>}>
-            <CreatorRankingView />
-          </Suspense>
+          <CreatorRankingView />
         )}
 
         {activeTab === 'trend' && (
@@ -91,9 +89,7 @@ export default function RankingPage() {
               <Loader2 size={28} className="animate-spin text-white/30" />
             </div>
           ) : (
-            <Suspense fallback={<div className="flex items-center justify-center py-20"><Loader2 size={28} className="animate-spin text-white/30" /></div>}>
-              <TrendContent hashtagData={hashtagData} trendLoading={false} embedded={true} />
-            </Suspense>
+            <TrendContent hashtagData={hashtagData} trendLoading={false} embedded={true} />
           )
         )}
       </main>
