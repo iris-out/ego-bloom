@@ -159,10 +159,17 @@ export default function AchievementsTab({ stats, characters }) {
         const isGradient = t.color === 'gradient';
         const c = colorMap[t.color] || colorMap.slate;
 
+        // 순애 ↔ NTR 상호 배타 이스터에그
+        const easterEgg = t.id === 'sunae'
+            ? '순애의 지조를 잃지 말아 주세요.'
+            : t.id === 'ntr'
+            ? '순애기사가 당신을 기억할 것입니다'
+            : null;
+
         return (
             <div
                 key={t.title}
-                className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${t.earned
+                className={`group relative flex items-start gap-3 p-3 rounded-xl border transition-all overflow-hidden ${t.earned
                     ? isGradient
                         ? 'border-purple-400/30 shadow-sm'
                         : `${c.bg} ${c.border} shadow-sm`
@@ -174,6 +181,9 @@ export default function AchievementsTab({ stats, characters }) {
                 <div className="flex-1 min-w-0">
                     <div className={`text-[13px] font-bold leading-tight ${t.earned ? (isGradient ? 'text-blue-300' : c.text) : 'text-white/40'}`}>
                         {t.title}
+                        {(t.id === 'sunae' || t.id === 'ntr') && t.earned && (
+                            <span className="ml-1.5 text-[11px] opacity-60">🔒</span>
+                        )}
                     </div>
                     <div className="text-[11px] text-[var(--text-tertiary)] mt-1 leading-relaxed">
                         {t.desc}
@@ -207,9 +217,35 @@ export default function AchievementsTab({ stats, characters }) {
                         <span className="text-white text-[10px] font-bold">✓</span>
                     </div>
                 )}
+                {/* 이스터에그 호버 오버레이 (순애 / NTR) */}
+                {easterEgg && (
+                    <div
+                        className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"
+                        style={{
+                            background: t.id === 'sunae'
+                                ? 'rgba(236,72,153,0.85)'
+                                : 'rgba(220,38,38,0.85)',
+                            backdropFilter: 'blur(4px)',
+                        }}
+                    >
+                        <p style={{
+                            fontFamily: '"Nanum Myeongjo", "Noto Serif KR", "Apple Myungjo", "Batang", Georgia, serif',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            color: 'rgba(255,255,255,0.95)',
+                            textAlign: 'center',
+                            padding: '0 12px',
+                            letterSpacing: '0.04em',
+                            lineHeight: 1.6,
+                        }}>
+                            {easterEgg}
+                        </p>
+                    </div>
+                )}
             </div>
         );
     };
+
 
     // 랭킹 카드 색상
     const rankCardStyle = (idx) => {

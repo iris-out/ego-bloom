@@ -54,7 +54,7 @@ export const BADGE_DEFINITIONS = [
   { id: 'furry',     emoji: '🐾', title: '털',           description: '퍼리·수인',               desc: '#퍼리, #수인 태그 보유',                    color: 'amber',   category: 'tag' },
   { id: 'obsessive', emoji: '👀', title: '집착광',       description: '집착 태그 5개+',          desc: '#집착 태그 캐릭터 5개 이상 제작',           color: 'violet',  category: 'tag' },
   { id: 'purelove',  emoji: '💘', title: '오직 순애만',  description: 'NTR 없이 순애 5개+',      desc: 'NTR 없이 #순애 캐릭터 5개 이상',           color: 'pink',    category: 'tag' },
-  { id: 'iljin',     emoji: '🏀', title: '일진',         description: '#일진 태그',              desc: '캐릭터 중 #일진 태그 보유',                 color: 'orange',  category: 'tag' },
+  { id: 'iljin',     emoji: '🏀', title: '체육 안가고 뭐함', description: '#일진 태그',           desc: '캐릭터 중 #일진 태그 보유',                 color: 'orange',  category: 'tag' },
   { id: 'jjindda',   emoji: '🚶', title: '찐따',         description: '#찐따 태그',              desc: '캐릭터 중 #찐따 태그 보유',                 color: 'slate',   category: 'tag' },
   { id: 'hero',      emoji: '🦸', title: '취미일 뿐',   description: '#히어로 태그',             desc: '캐릭터 중 #히어로 태그 보유',               color: 'amber',   category: 'tag' },
   { id: 'academy',   emoji: '🎓', title: '아카데미',     description: '#아카데미 태그',           desc: '캐릭터 중 #아카데미 태그 보유',             color: 'indigo',  category: 'tag' },
@@ -64,8 +64,15 @@ export const BADGE_DEFINITIONS = [
   { id: 'guwon',     emoji: '🩹', title: '구원',         description: '#구원 태그',              desc: '캐릭터 중 #구원 태그 보유',                 color: 'emerald', category: 'tag' },
   { id: 'saikai',    emoji: '💌', title: 'S is not..', description: '#재회 태그',              desc: '캐릭터 중 #재회 태그 보유. ',    color: 'rose',    category: 'tag' },
   { id: 'robot',     emoji: '🤖', title: '텅텅이',       description: '#로봇/#안드로이드 태그',  desc: '캐릭터 중 #로봇, #안드로이드 태그 보유.', color: 'slate',   category: 'tag' },
-    { id: 'original',  emoji: '✨', title: '오리지널',     description: '2차창작 태그 없음',        desc: '게임/애니/영화 2차창작 없이 오리지널만 제작', color: 'sky',     category: 'tag' },
+    { id: 'magicalgirl', emoji: '🌙', title: '나와 계약해서..', description: '#마법소녀 태그',     desc: '캐릭터 중 #마법소녀 태그 보유. 같이 마법소녀 할래요?', color: 'violet', category: 'tag' },
+  { id: 'harem',     emoji: '🌸', title: '판타지',          description: '#하렘 태그',              desc: '캐릭터 중 #하렘, #역하렘 태그 보유',        color: 'pink',    category: 'tag' },
+  { id: 'cute',      emoji: '🍒', title: '귀여움은 정의다', description: '#귀여움 태그',             desc: '캐릭터 중 #귀여움 태그 보유.',    color: 'rose',    category: 'tag' },
+  { id: 'soldier',   emoji: '🎖️', title: '우리의 결의',     description: '#군인 태그',              desc: '캐릭터 중 #군인, #군대 태그 보유',          color: 'slate',   category: 'tag' },
+  { id: 'lily',      emoji: '🌷', title: '난입은 범죄',     description: '#백합 태그',              desc: '캐릭터 중 #백합 태그 보유. GL 존중',        color: 'pink',    category: 'tag' },
+  { id: 'original',  emoji: '✨', title: '오리지널',     description: '2차창작 태그 없음',        desc: '게임/애니/영화 2차창작 없이 오리지널만 제작', color: 'sky',     category: 'tag' },
 
+  { id: 'boss',      emoji: '😎', title: '굿데이 보스',     description: '#보스 태그',              desc: '캐릭터 중 #보스 태그 보유.',        color: 'amber',   category: 'tag' },
+  { id: 'glasses',   emoji: '👓', title: '미소녀의 요소',   description: '#안경 태그',              desc: '캐릭터 중 #안경 태그 보유',                 color: 'indigo',  category: 'tag' },
   // ─── 개그 태그 (bonus) ───
   { id: 'truck',     emoji: '🚛', title: '트럭 주의',   description: '이세계/환생/회귀 태그',   desc: '#이세계, #환생, #회귀 등 태그 보유. "터엉-" ', color: 'orange',  category: 'tag' },
   { id: 'yethwi',    emoji: '🔄', title: '또 회귀함',   description: '#회귀 태그',               desc: '#회귀 태그 보유. 오늘도 회귀하는 당신', color: 'violet',  category: 'tag' },
@@ -194,6 +201,11 @@ export function computeEarnedTitles(input) {
   const mesuChars = charsWithAnyTag(characters, ['메스가키', '소악마', '도발']);
   list.push({ id: 'guwon',     emoji: '🩹', title: '구원',         desc: BADGE_DEFINITIONS.find(b => b.id === 'guwon')?.desc ?? '',    color: 'emerald', earned: tagSet.has('구원'), chars: charsWithTag(characters, '구원') });
 
+  const bossChars = charsWithTag(characters, '보스');
+  list.push({ id: 'boss',    emoji: '😎', title: '굿데이 보스',   desc: BADGE_DEFINITIONS.find(b => b.id === 'boss')?.desc ?? '',    color: 'amber',  earned: bossChars.length > 0,    chars: bossChars });
+  const glassesChars = charsWithTag(characters, '안경');
+  list.push({ id: 'glasses', emoji: '👓', title: '미소녀의 요소', desc: BADGE_DEFINITIONS.find(b => b.id === 'glasses')?.desc ?? '', color: 'indigo', earned: glassesChars.length > 0, chars: glassesChars });
+
   // ─── 개그 태그 (bonus) ───
   const truckChars = charsWithAnyTag(characters, ['이세계', '환생', '회귀', '환생이세계']);
   list.push({ id: 'truck',  emoji: '🚛', title: '트럭 주의',   desc: BADGE_DEFINITIONS.find(b => b.id === 'truck')?.desc ?? '',  color: 'orange',  earned: truckChars.length > 0, chars: truckChars });
@@ -207,7 +219,18 @@ export function computeEarnedTitles(input) {
   const robotChars = charsWithAnyTag(characters, ['로봇', '안드로이드']);
   list.push({ id: 'robot',  emoji: '🤖', title: '텅텅이',       desc: BADGE_DEFINITIONS.find(b => b.id === 'robot')?.desc ?? '',  color: 'slate', earned: robotChars.length > 0,  chars: robotChars });
 
-    const hasNo2nd = !characters.some(c => (c.hashtags || c.tags || []).some(t => MEDIA_SET.has(t.toLowerCase())));
+    const magicalChars = charsWithTag(characters, '마법소녀');
+  list.push({ id: 'magicalgirl', emoji: '🌙', title: '나와 계약해서..', desc: BADGE_DEFINITIONS.find(b => b.id === 'magicalgirl')?.desc ?? '', color: 'violet', earned: magicalChars.length > 0, chars: magicalChars });
+  const haremChars = charsWithAnyTag(characters, ['하렘', '역하렘']);
+  list.push({ id: 'harem',  emoji: '🌸', title: '판타지',          desc: BADGE_DEFINITIONS.find(b => b.id === 'harem')?.desc ?? '',       color: 'pink',  earned: haremChars.length > 0, chars: haremChars });
+  const cuteChars = charsWithTag(characters, '귀여움');
+  list.push({ id: 'cute',   emoji: '🍒', title: '귀여움은 정의다', desc: BADGE_DEFINITIONS.find(b => b.id === 'cute')?.desc ?? '',         color: 'rose',  earned: cuteChars.length > 0,   chars: cuteChars });
+  const soldierChars = charsWithAnyTag(characters, ['군인', '군대']);
+  list.push({ id: 'soldier',emoji: '🎖️', title: '우리의 결의',     desc: BADGE_DEFINITIONS.find(b => b.id === 'soldier')?.desc ?? '',      color: 'slate', earned: soldierChars.length > 0, chars: soldierChars });
+  const lilyChars = charsWithTag(characters, '백합');
+  list.push({ id: 'lily',   emoji: '🌷', title: '난입은 범죄',     desc: BADGE_DEFINITIONS.find(b => b.id === 'lily')?.desc ?? '',          color: 'pink',  earned: lilyChars.length > 0,   chars: lilyChars });
+
+  const hasNo2nd = !characters.some(c => (c.hashtags || c.tags || []).some(t => MEDIA_SET.has(t.toLowerCase())));
   list.push({ id: 'original', emoji: '✨', title: '오리지널', desc: BADGE_DEFINITIONS.find(b => b.id === 'original')?.desc ?? '', color: 'sky', earned: hasNo2nd && characters.length > 0 });
 
 
