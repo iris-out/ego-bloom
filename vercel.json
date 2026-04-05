@@ -12,6 +12,10 @@
             "destination": "/api/get-season-rankings"
         },
         {
+            "source": "/api/get-growth-ranking",
+            "destination": "/api/get-growth-ranking"
+        },
+        {
             "source": "/api/zeta/:path*",
             "destination": "https://api.zeta-ai.io/v1/:path*"
         },

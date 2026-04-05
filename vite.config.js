@@ -244,6 +244,105 @@ function supabaseApiPlugin(env) {
         }
       });
 
+      server.middlewares.use('/api/get-growth-ranking', async (req, res) => {
+        try {
+          if (!supabase) throw new Error('Supabase not configured');
+
+          const now = new Date();
+          const kst = new Date(now.getTime() + (now.getTimezoneOffset() + 540) * 60000);
+          const todayKST = kst.toISOString().split('T')[0];
+          const threeDaysAgo = new Date(kst);
+          threeDaysAgo.setDate(kst.getDate() - 3);
+          const threeDaysAgoStr = threeDaysAgo.toISOString().split('T')[0];
+
+          // 최근 4일치 history 레코드 가져오기
+          const { data: histRows, error: histErr } = await supabase
+            .from('account_history')
+            .select('id, record_date, elo_score, follower_count, plot_interaction_count, nickname, handle, tier_name')
+            .gte('record_date', threeDaysAgoStr)
+            .lte('record_date', todayKST)
+            .order('record_date', { ascending: true });
+          if (histErr) throw histErr;
+
+          // 크리에이터별 전체 레코드 수 확인 (전체 기간 history 수)
+          const allIds = [...new Set((histRows || []).map(r => r.id))];
+          let totalRecordMap = {};
+          if (allIds.length > 0) {
+            const CHUNK = 400;
+            for (let i = 0; i < allIds.length; i += CHUNK) {
+              const chunk = allIds.slice(i, i + CHUNK);
+              const { data: countRows } = await supabase
+                .from('account_history')
+                .select('id', { count: 'exact' })
+                .in('id', chunk);
+              // group by id manually
+              if (countRows) countRows.forEach(r => {
+                totalRecordMap[r.id] = (totalRecordMap[r.id] || 0) + 1;
+              });
+            }
+          }
+
+          // 크리에이터별 그룹화
+          const byCreator = {};
+          for (const row of (histRows || [])) {
+            if (!byCreator[row.id]) byCreator[row.id] = [];
+            byCreator[row.id].push(row);
+          }
+
+          // 성장 점수 계산 (3일 쇼 + 전체 레코드 3일 초과 필요)
+          const growthList = [];
+          for (const [id, records] of Object.entries(byCreator)) {
+            if (records.length < 2) continue;
+            if ((totalRecordMap[id] || 0) <= 3) continue; // 3일 이하 제외
+            const oldest = records[0];
+            const latest = records[records.length - 1];
+            const growthScore = (latest.elo_score || 0) - (oldest.elo_score || 0);
+            growthList.push({
+              id, nickname: latest.nickname, handle: latest.handle,
+              elo_score: latest.elo_score || 0,
+              elo_oldest: oldest.elo_score || 0,
+              growth_score: growthScore,
+              follower_count: latest.follower_count || 0,
+              follower_count_oldest: oldest.follower_count || 0,
+              plot_interaction_count: latest.plot_interaction_count || 0,
+              plot_interaction_oldest: oldest.plot_interaction_count || 0,
+            });
+          }
+
+          growthList.sort((a, b) => b.growth_score - a.growth_score);
+          const positiveGrowth = growthList.filter(c => c.growth_score > 0);
+          const top10 = positiveGrowth.slice(0, 10);
+          const total = positiveGrowth.length;
+
+          const TIER_INFO = [
+            { pct: 0.01, tier: 'champion', name: 'CHAMPION', color: '#F97316' },
+            { pct: 0.05, tier: 'master',   name: 'MASTER',   color: '#D946EF' },
+            { pct: 0.15, tier: 'diamond',  name: 'DIAMOND',  color: '#3B82F6' },
+            { pct: 0.30, tier: 'platinum', name: 'PLATINUM', color: '#E2E8F0' },
+            { pct: 0.50, tier: 'gold',     name: 'GOLD',     color: '#FBBF24' },
+            { pct: 0.70, tier: 'silver',   name: 'SILVER',   color: '#9CA3AF' },
+          ];
+          const assignTier = (rank, tot) => {
+            const pct = rank / tot;
+            const t = TIER_INFO.find(t => pct <= t.pct);
+            return t || { tier: 'bronze', name: 'BRONZE', color: '#C58356' };
+          };
+
+          const rankings = top10.map((c, i) => {
+            const t = assignTier(i + 1, total);
+            return { ...c, growth_rank: i + 1, growth_tier: t.tier, growth_tier_name: t.name, growth_tier_color: t.color };
+          });
+
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ rankings, dataAvailable: true, windowDays: 3 }));
+        } catch (err) {
+          console.error('Growth Ranking Error:', err);
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
+
       server.middlewares.use('/api/get-world-data', async (req, res, next) => {
         try {
           if (!supabase) throw new Error('Supabase not configured');

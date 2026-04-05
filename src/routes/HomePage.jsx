@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, ChevronRight, Database, AlertTriangle, Lock } from 'lucide-react';
 import { useServerStatus } from '../hooks/useServerStatus';
@@ -14,16 +14,24 @@ import { APP_VERSION } from '../data/changelog';
 import { getCreatorTier } from '../utils/tierCalculator';
 import TierIcon from '../components/ui/TierIcon';
 
-// 고정된 별 위치 (매 렌더마다 재생성 방지)
-const STAR_DATA = Array.from({ length: 72 }, (_, i) => ({
+// seeded LCG random — 격자 패턴 방지, 시드 고정으로 SSR/배포 후에도 동일 패턴
+function _lcg(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s = Math.imul(1664525, s) + 1013904223 >>> 0;
+    return s / 0x100000000;
+  };
+}
+const _r = _lcg(0xDEADBEEF);
+const STAR_DATA = Array.from({ length: 52 }, (_, i) => ({
   id: i,
-  x: ((i * 13.73 + 7.31) % 97) + 1.5,
-  y: ((i * 7.11 + 3.91) % 78) + 1,
-  size: i % 5 === 0 ? 1.8 : i % 3 === 0 ? 1.2 : 0.9,
-  baseOpacity: 0.12 + (i % 7) * 0.05,
-  peakOpacity: 0.35 + (i % 5) * 0.1,
-  dur: 2.4 + (i % 6) * 0.55,
-  delay: (i % 9) * 0.45,
+  x: _r() * 94 + 2,
+  y: _r() * 90 + 2,
+  size: 0.6 + _r() * 1.3,
+  baseOpacity: 0.06 + _r() * 0.18,
+  peakOpacity: 0.22 + _r() * 0.40,
+  dur: 1.8 + _r() * 3.8,
+  delay: _r() * 6.0,
 }));
 
 function StarField({ globalOpacity = 1 }) {
@@ -109,6 +117,7 @@ export default function HomePage() {
   const [hasAgreedToWarning, setHasAgreedToWarning] = useState(() => localStorage.getItem('ego-bloom-warning-agreed') === 'true');
   const [topTags, setTopTags] = useState([]);
   const [topCreators, setTopCreators] = useState([]);
+  const [mobileTab, setMobileTab] = useState('creators'); // 'creators' | 'tags'
   const { status: serverStatus, message: serverMessage } = useServerStatus();
 
   // useEffect 제거 (useState 초기화로 대체됨)
@@ -246,13 +255,110 @@ export default function HomePage() {
               </p>
             </section>
 
+          {/* 모바일 전용: 즐겨찾기 프로필 카드 (ZetaBanners 위) */}
+            <div className="mb-6 lg:hidden animate-fade-in-up" style={{ animationDelay: '130ms' }}>
+              <MyProfileCard />
+            </div>
+
             {/* Zeta 소식 & 공지사항 (히어로 아래) */}
             <div className="mb-10 animate-fade-in-up" style={{ animationDelay: '140ms' }}>
               <ZetaBanners />
             </div>
 
-            {/* 글로벌 랭킹 (Top 5) */}
-            <section className="mb-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+            {/* 모바일: pill 탭 (글로벌 랭킹 / 트렌딩 태그) */}
+            <div className="lg:hidden mb-6 animate-fade-in-up" style={{ animationDelay: '180ms' }}>
+              {/* 탭 버튼 */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => setMobileTab('creators')}
+                  className={`flex-1 py-2 px-4 rounded-full text-[13px] font-bold tracking-wide transition-all border ${
+                    mobileTab === 'creators'
+                      ? 'bg-white/10 border-white/20 text-white shadow-sm'
+                      : 'bg-transparent border-white/10 text-white/40 hover:text-white/70'
+                  }`}
+                >
+                  Global Top Creators
+                </button>
+                <button
+                  onClick={() => setMobileTab('tags')}
+                  className={`flex-1 py-2 px-4 rounded-full text-[13px] font-bold tracking-wide transition-all border ${
+                    mobileTab === 'tags'
+                      ? 'bg-white/10 border-white/20 text-white shadow-sm'
+                      : 'bg-transparent border-white/10 text-white/40 hover:text-white/70'
+                  }`}
+                >
+                  Trending Tags
+                </button>
+              </div>
+
+              {/* 글로벌 랭킹 탭 내용 */}
+              {mobileTab === 'creators' && (
+                <div>
+                  <div className="flex justify-end mb-2">
+                    <button onClick={() => navigate('/ranking')} className="text-[12px] text-white/70 hover:text-white transition-colors flex items-center gap-1">
+                      전체 보기 <ChevronRight size={12} />
+                    </button>
+                  </div>
+                  <ul className="flex flex-col gap-2">
+                    {topCreators.length > 0 ? topCreators.map((creator, i) => {
+                      const isTop3 = i < 3;
+                      const rankColors = ['text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]', 'text-gray-300 drop-shadow-[0_0_8px_rgba(209,213,219,0.5)]', 'text-amber-600 drop-shadow-[0_0_8px_rgba(217,119,6,0.5)]'];
+                      const tierData = getCreatorTier(creator.elo_score ?? 0);
+                      return (
+                        <li key={creator.id} onClick={() => navigate(`/profile?creator=${encodeURIComponent(creator.handle ? `@${creator.handle}` : creator.id)}`)}
+                            className="flex items-center p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.08] cursor-pointer transition-all group">
+                          <span className={`w-8 text-center font-bold text-[18px] mr-2 shrink-0 ${isTop3 ? rankColors[i] : 'text-white/40 group-hover:text-white/60'} transition-colors`}>{i + 1}</span>
+                          <div className="flex-1 flex flex-col min-w-0">
+                            <span className="text-[15px] font-bold text-white tracking-tight truncate">{creator.nickname}</span>
+                            <span className="text-[11px] text-white/50 truncate font-mono tracking-wider">ELO {creator.elo_score?.toLocaleString()} pt</span>
+                          </div>
+                          <div className="flex flex-col items-center gap-0.5 ml-2 shrink-0">
+                            <div className="w-9 h-9 flex items-center justify-center">
+                              <TierIcon tier={tierData.key} size="100%" />
+                            </div>
+                            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: tierData.color }}>
+                              {tierData.name}{tierData.subdivision ? ` ${tierData.subdivision}` : ''}
+                            </span>
+                          </div>
+                        </li>
+                      );
+                    }) : (
+                      <div className="text-[13px] text-white/40 p-4 text-center bg-white/[0.02] rounded-xl border border-white/[0.05]">
+                        아직 수집된 랭킹 데이터가 없습니다.
+                      </div>
+                    )}
+                  </ul>
+                </div>
+              )}
+
+              {/* 트렌딩 태그 탭 내용 */}
+              {mobileTab === 'tags' && (
+                <ul className="flex flex-col">
+                  {topTags.length > 0 ? topTags.map((item, i) => (
+                    <li key={item.tag}
+                      onClick={() => navigate('/ranking?tab=trend')}
+                      className="flex items-center py-3.5 border-b border-white/[0.03] last:border-b-0 cursor-pointer group hover:bg-white/[0.03] rounded-lg px-1 transition-all">
+                      <span className="font-display italic text-[24px] text-white/40 w-8 text-left group-hover:text-white/60 transition-colors">{i + 1}</span>
+                      <div className="flex-1 flex flex-col gap-0.5 ml-1 min-w-0">
+                        <span className="text-[16px] font-medium text-white tracking-[-0.01em] truncate group-hover:text-[var(--accent)] transition-colors">#{item.tag}</span>
+                        <span className="text-[12px] text-white/70 font-light">스코어 {item.score?.toLocaleString()}</span>
+                      </div>
+                      <ChevronRight size={14} className="text-white/20 group-hover:text-[var(--accent)] transition-colors shrink-0" />
+                    </li>
+                  )) : (
+                    [1, 2, 3].map(i => (
+                      <li key={i} className="flex items-center py-3.5 border-b border-white/[0.03] last:border-b-0">
+                        <div className="skeleton-bone w-6 h-6 rounded mr-3" />
+                        <div className="flex-1"><div className="skeleton-bone w-32 h-4 rounded mb-1" /><div className="skeleton-bone w-20 h-3 rounded" /></div>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              )}
+            </div>
+
+            {/* PC 전용: 글로벌 랭킹 (Top 5) */}
+            <section className="hidden lg:block mb-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
               <div className="flex justify-between items-end mb-2 pb-2 border-b border-white/[0.06]">
                 <span className="text-[12px] font-medium text-white/40 uppercase tracking-widest">Global Top Creators</span>
                 <button onClick={() => navigate('/ranking')} className="text-[12px] text-white/70 hover:text-white transition-colors flex items-center gap-1">
@@ -290,8 +396,8 @@ export default function HomePage() {
               </ul>
             </section>
 
-            {/* 오픈월드 탐험하기 버튼 */}
-            <div className="mb-12 animate-fade-in-up" style={{ animationDelay: '220ms' }}>
+            {/* 오픈월드 탐험하기 버튼 (모바일/PC 모두) */}
+            <div className="mb-8 animate-fade-in-up" style={{ animationDelay: '220ms' }}>
               <button
                 onClick={() => navigate('/world')}
                 className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 hover:bg-blue-500/20 hover:border-blue-400/40 transition-all text-sm font-medium text-blue-200/80 hover:text-blue-100"
@@ -301,8 +407,8 @@ export default function HomePage() {
               </button>
             </div>
 
-            {/* 트렌딩 태그 */}
-            <section className="mb-12 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
+            {/* PC 전용: 트렌딩 태그 */}
+            <section className="hidden lg:block mb-12 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
               <div className="flex justify-between items-end mb-2 pb-2 border-b border-white/[0.06]">
                 <span className="text-[12px] font-medium text-white/40 uppercase tracking-widest">Trending Tags</span>
               </div>
@@ -354,8 +460,8 @@ export default function HomePage() {
 
           </div>
 
-          {/* 오른쪽: 내 프로필 카드 + 주의사항 (PC에서 sticky) */}
-          <div className="mb-10 lg:mb-0 lg:sticky lg:top-8 animate-fade-in-up order-first lg:order-none" style={{ animationDelay: '210ms' }}>
+          {/* 오른쪽: 내 프로필 카드 + 주의사항 (PC에서 sticky, 모바일 숨김) */}
+          <div className="hidden lg:block mb-10 lg:mb-0 lg:sticky lg:top-8 animate-fade-in-up" style={{ animationDelay: '210ms' }}>
             <MyProfileCard />
             {/* 검색 전 주의사항 — PC 전용: 내 프로필 카드 아래 */}
             <div className="hidden lg:block mt-4">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, lazy, Suspense } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { AlertCircle, Loader2, RefreshCw, Archive, ChevronLeft } from 'lucide-react';
+import { AlertCircle, Loader2, RefreshCw, Archive, ChevronLeft, User, Sparkles, Trophy, BarChart2 } from 'lucide-react';
 import { computeEarnedTitles } from '../data/badges';
 import ProfileHeader from '../components/ProfileHeader';
 import SummaryTab from '../components/SummaryTab';
@@ -116,10 +116,10 @@ async function fetchRankingMap() {
 }
 
 const TABS = [
-  { key: 'summary',      label: '프로필' },
-  { key: 'characters',   label: '캐릭터' },
-  { key: 'achievements', label: '업적' },
-  { key: 'stats',        label: '통계' },
+  { key: 'summary',      label: '프로필', icon: User,    sub: 'Profile'      },
+  { key: 'characters',   label: '캐릭터', icon: Sparkles, sub: 'Characters'   },
+  { key: 'achievements', label: '업적',   icon: Trophy,  sub: 'Achievements'  },
+  { key: 'stats',        label: '통계',   icon: BarChart2, sub: 'Statistics'  },
 ];
 
 export default function ProfilePage() {
@@ -424,15 +424,20 @@ export default function ProfilePage() {
           {/* 탭 바 — 전체 너비 상단 */}
           <div className="profile-layout-tabbar">
             <div className="ph-tab-bar" ref={tabBarRef}>
-              {TABS.map(t => (
-                <button
-                  key={t.key}
-                  className={`ph-tab-item${tab === t.key ? ' active' : ''}`}
-                  onClick={() => setTab(t.key)}
-                >
-                  {t.label}
-                </button>
-              ))}
+              {TABS.map(t => {
+                const Icon = t.icon;
+                const isActive = tab === t.key;
+                return (
+                  <button
+                    key={t.key}
+                    className={`ph-tab-item${isActive ? ' active' : ''}`}
+                    onClick={() => setTab(t.key)}
+                  >
+                    <Icon size={15} className="shrink-0" />
+                    <span>{t.label}</span>
+                  </button>
+                );
+              })}
               <div
                 className="ph-tab-indicator"
                 style={{

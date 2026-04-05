@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
-import { formatCompactNumber } from '../utils/tierCalculator';
+import React, { useMemo, useState, useEffect } from 'react';
+import { formatCompactNumber, formatNumber, toKST } from '../utils/tierCalculator';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import { Globe, Crown, Medal, ChevronRight } from 'lucide-react';
+import { proxyImageUrl } from '../utils/imageUtils';
 
 const GENRE_BUCKETS = [
   {
@@ -63,6 +65,44 @@ function StatCard({ label, value, sub }) {
 
 export default function StatsTab({ stats, characters }) {
   const [showGenreHelp, setShowGenreHelp] = useState(false);
+
+  // 글로벌 랭킹 데이터
+  const [rankingUpdatedAt, setRankingUpdatedAt] = useState(null);
+  useEffect(() => {
+    fetch('/data/ranking_latest.json')
+      .then(res => res.json())
+      .then(data => { if (data?.updatedAt) setRankingUpdatedAt(toKST(data.updatedAt)); })
+      .catch(() => {});
+  }, []);
+
+  const rankedChars = useMemo(() =>
+    (characters || [])
+      .filter(c => c.trendingRank != null || c.bestRank != null || c.newRank != null)
+      .sort((a, b) => {
+        const ar = Math.min(...[a.trendingRank, a.bestRank, a.newRank].filter(x => x != null));
+        const br = Math.min(...[b.trendingRank, b.bestRank, b.newRank].filter(x => x != null));
+        return ar - br;
+      })
+  , [characters]);
+
+  const rankCardStyle = (idx) => {
+    if (idx === 0) return { background: 'linear-gradient(135deg, rgba(251,191,36,0.18), rgba(234,179,8,0.10))', border: '1px solid rgba(251,191,36,0.30)' };
+    if (idx === 1) return { background: 'linear-gradient(135deg, rgba(203,213,225,0.15), rgba(148,163,184,0.08))', border: '1px solid rgba(203,213,225,0.25)' };
+    if (idx === 2) return { background: 'linear-gradient(135deg, rgba(217,119,6,0.18), rgba(180,83,9,0.10))', border: '1px solid rgba(217,119,6,0.30)' };
+    return { background: 'linear-gradient(135deg, rgba(109,40,217,0.12), rgba(37,99,235,0.10))', border: '1px solid rgba(109,40,217,0.20)' };
+  };
+  const rankBadgeColor = (idx) => {
+    if (idx === 0) return 'text-yellow-400';
+    if (idx === 1) return 'text-slate-300';
+    if (idx === 2) return 'text-orange-500';
+    return 'text-violet-400';
+  };
+  const rankIcon = (idx) => {
+    if (idx === 0) return <Crown size={14} className="text-yellow-400" fill="currentColor" />;
+    if (idx === 1) return <Medal size={14} className="text-slate-300" fill="currentColor" />;
+    if (idx === 2) return <Medal size={14} className="text-orange-500" fill="currentColor" />;
+    return <span className="text-[11px] font-black text-violet-400">#{idx + 1}</span>;
+  };
 
   // ── 심화 수치 3종 ──────────────────────────────────────
   const advanced = useMemo(() => {
@@ -143,7 +183,64 @@ export default function StatsTab({ stats, characters }) {
         </div>
       )}
 
+      {/* 글로벌 랭킹 카드 — rankedChars 있을 때만 표시 */}
+      {rankedChars.length > 0 && (
+        <div className="stagger-1 glass-card-sm p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
+              <Globe size={14} className="text-violet-400" />
+              <span>글로벌 랭킹</span>
+            </h3>
+            {rankingUpdatedAt && (
+              <div className="text-[10px] text-[var(--text-tertiary)]">
+                {rankingUpdatedAt.getMonth() + 1}/{rankingUpdatedAt.getDate()} {String(rankingUpdatedAt.getHours()).padStart(2, '0')}:{String(rankingUpdatedAt.getMinutes()).padStart(2, '0')} 업데이트
+              </div>
+            )}
+          </div>
+          <div className="space-y-2">
+            {rankedChars.map((char, idx) => (
+              <a
+                key={char.id}
+                href={`https://zeta-ai.io/ko/plots/${char.id}/profile`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-xl transition-all hover:brightness-110 cursor-pointer group"
+                style={rankCardStyle(idx)}
+              >
+                <div className="w-7 flex items-center justify-center shrink-0">{rankIcon(idx)}</div>
+                {char.image ? (
+                  <img src={proxyImageUrl(char.image)} alt={char.name} className="w-9 h-9 rounded-full object-cover shrink-0 border border-white/10" />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-white/10 shrink-0 flex items-center justify-center">
+                    <span className="text-sm">{rankIcon(idx)}</span>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className={`text-[13px] font-bold truncate ${rankBadgeColor(idx)} group-hover:brightness-125 transition-all`}>{char.name}</div>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {char.trendingRank != null && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-violet-500/15 border border-violet-500/25 text-violet-400">
+                        트렌딩 #{char.trendingRank}
+                        {char.rankDiff !== 0 && <span className={char.rankDiff > 0 ? ' text-emerald-400 ml-0.5' : ' text-red-400 ml-0.5'}>{char.rankDiff > 0 ? '▲' : '▼'}{Math.abs(char.rankDiff)}</span>}
+                      </span>
+                    )}
+                    {char.bestRank != null && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/25 text-amber-400">베스트 #{char.bestRank}</span>}
+                    {char.newRank != null && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/25 text-emerald-400">신작 #{char.newRank}</span>}
+                  </div>
+                </div>
+                <div className="flex flex-col items-end shrink-0">
+                  <div className={`text-[13px] font-bold ${rankBadgeColor(idx)}`}>{formatNumber(char.interactionCount || 0)}</div>
+                  <div className="text-[10px] text-[var(--text-tertiary)] flex items-center gap-0.5 group-hover:text-[var(--accent)] transition-colors">
+                    <span>대화</span><ChevronRight size={10} className="group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 해시태그 다양성 레이더 */}
+
       {hashtagRadarData.length > 0 && (
         <div className="stagger-2 card p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-1">

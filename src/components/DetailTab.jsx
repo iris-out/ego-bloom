@@ -4,7 +4,8 @@ import { getCharacterTier, CHARACTER_TIERS, formatNumber, formatCompactNumber, f
 import { WordCloud } from './ExtraCharts';
 import CreatorRadarChart from './CreatorRadarChart';
 import TierIcon from './ui/TierIcon';
-import { MessageCircle, Users, BarChart3, Mic2, Zap } from 'lucide-react';
+import { MessageCircle, Users, BarChart3, Mic2, Zap, Globe, Crown, Medal, ChevronRight } from 'lucide-react';
+import { proxyImageUrl } from '../utils/imageUtils';
 
 export default function DetailTab({ stats, characters }) {
   return (
@@ -18,6 +19,9 @@ export default function DetailTab({ stats, characters }) {
         <CreatorRadarChart stats={stats} characters={characters} />
       </div>
 
+      {/* 2.5 글로벌 랭킹 (제작 히스토리 위) */}
+      <GlobalRankingInline characters={characters} />
+
       {/* 3. 생성 히스토리 */}
       <div className="stagger-3"><ContributionGraph characters={characters} /></div>
 
@@ -30,7 +34,80 @@ export default function DetailTab({ stats, characters }) {
   );
 }
 
-// ===== 티어 분포 =====
+// ===== 프로필 탭 내 글로벌 랭킹 (리스트 카드) =====
+function GlobalRankingInline({ characters }) {
+  const ranked = useMemo(() => {
+    return (characters || [])
+      .filter(c => c.trendingRank != null || c.bestRank != null || c.newRank != null)
+      .sort((a, b) => {
+        const ar = Math.min(...[a.trendingRank, a.bestRank, a.newRank].filter(x => x != null));
+        const br = Math.min(...[b.trendingRank, b.bestRank, b.newRank].filter(x => x != null));
+        return ar - br;
+      });
+  }, [characters]);
+
+  if (ranked.length === 0) return null;
+
+  const rankCardStyle = (idx) => {
+    if (idx === 0) return { background: 'linear-gradient(135deg, rgba(251,191,36,0.15), rgba(234,179,8,0.08))', border: '1px solid rgba(251,191,36,0.28)' };
+    if (idx === 1) return { background: 'linear-gradient(135deg, rgba(203,213,225,0.13), rgba(148,163,184,0.07))', border: '1px solid rgba(203,213,225,0.22)' };
+    if (idx === 2) return { background: 'linear-gradient(135deg, rgba(217,119,6,0.15), rgba(180,83,9,0.08))', border: '1px solid rgba(217,119,6,0.28)' };
+    return { background: 'linear-gradient(135deg, rgba(109,40,217,0.10), rgba(37,99,235,0.08))', border: '1px solid rgba(109,40,217,0.18)' };
+  };
+
+  const rankColor = (idx) => {
+    if (idx === 0) return 'text-yellow-400';
+    if (idx === 1) return 'text-slate-300';
+    if (idx === 2) return 'text-orange-500';
+    return 'text-violet-400';
+  };
+
+  const rankIcon = (idx) => {
+    if (idx === 0) return <Crown size={13} className="text-yellow-400" fill="currentColor" />;
+    if (idx === 1) return <Medal size={13} className="text-slate-300" fill="currentColor" />;
+    if (idx === 2) return <Medal size={13} className="text-orange-500" fill="currentColor" />;
+    return <span className={`text-[11px] font-black ${rankColor(idx)}`}>#{idx + 1}</span>;
+  };
+
+  return (
+    <div className="stagger-3 bg-white/[0.02] border border-white/[0.05] rounded-2xl backdrop-blur-sm px-4 sm:px-5 py-3 sm:py-4">
+      <h3 className="text-sm font-semibold text-white/70 mb-3 flex items-center gap-2">
+        <Globe size={14} className="text-violet-400" /> 글로벌 랭킹 진입 캐릭터
+      </h3>
+      <div className="space-y-2">
+        {ranked.map((char, idx) => (
+          <a
+            key={char.id}
+            href={`https://zeta-ai.io/ko/plots/${char.id}/profile`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 p-2.5 rounded-xl transition-all hover:brightness-110 group cursor-pointer"
+            style={rankCardStyle(idx)}
+          >
+            <div className="w-6 flex items-center justify-center shrink-0">{rankIcon(idx)}</div>
+            {char.image ? (
+              <img src={proxyImageUrl(char.image)} alt={char.name} className="w-8 h-8 rounded-full object-cover shrink-0 border border-white/10" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-white/10 shrink-0" />
+            )}
+            <div className="flex-1 min-w-0">
+              <div className={`text-[13px] font-bold truncate ${rankColor(idx)}`}>{char.name}</div>
+              <div className="flex flex-wrap gap-1 mt-0.5">
+                {char.trendingRank != null && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-violet-500/15 text-violet-400">트렌딩 #{char.trendingRank}</span>}
+                {char.bestRank != null && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400">베스트 #{char.bestRank}</span>}
+                {char.newRank != null && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">신작 #{char.newRank}</span>}
+              </div>
+            </div>
+            <div className="flex flex-col items-end shrink-0">
+              <span className={`text-[12px] font-bold ${rankColor(idx)}`}>{formatNumber(char.interactionCount || 0)}</span>
+              <ChevronRight size={12} className="text-white/20 group-hover:text-[var(--accent)] transition-colors mt-0.5" />
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
 function TierDistribution({ characters }) {
   const dist = useMemo(() => {
     const counts = {};

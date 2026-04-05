@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Users, MessageCircle, Crown, X, Info, Github, Mail, ChevronRight, Search } from 'lucide-react';
+import { Loader2, Users, MessageCircle, Crown, X, Info, Github, Mail, ChevronRight, Search, TrendingUp, FlaskConical } from 'lucide-react';
 import { formatNumber, getCreatorTier } from '../utils/tierCalculator';
 import TierIcon from './ui/TierIcon';
+
+// 🚧 개발 중인 기능 — 사용자에게 노출할 준비가 되면 true로 변경
+const SHOW_GROWTH_RANKING = false;
 
 export default function CreatorRankingView() {
   const navigate = useNavigate();
@@ -19,6 +22,14 @@ export default function CreatorRankingView() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
+
+  // 성장 랭킹 탭
+  const [rankTab, setRankTab] = useState('global'); // 'global' | 'growth'
+  const [growthRankings, setGrowthRankings] = useState([]);
+  const [growthLoading, setGrowthLoading] = useState(false);
+  const [growthLoaded, setGrowthLoaded] = useState(false);
+  const [growthError, setGrowthError] = useState(null);
+  const [growthDataAvailable, setGrowthDataAvailable] = useState(true);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -52,7 +63,7 @@ export default function CreatorRankingView() {
         return res.json();
       })
       .then(data => {
-        setRankings((data.rankings || []).slice(0, 40));
+        setRankings((data.rankings || []).slice(0, 50));
         setLoading(false);
       })
       .catch(err => {
@@ -61,6 +72,24 @@ export default function CreatorRankingView() {
         setLoading(false);
       });
   }, []);
+
+  // 성장 랭킹 — 탭 클릭 시 최초 1회만 로드
+  useEffect(() => {
+    if (rankTab !== 'growth' || growthLoaded) return;
+    setGrowthLoading(true);
+    fetch('/api/get-growth-ranking')
+      .then(res => res.ok ? res.json() : Promise.reject('로드 실패'))
+      .then(data => {
+        setGrowthRankings(data.rankings || []);
+        setGrowthDataAvailable(data.dataAvailable !== false);
+        setGrowthLoaded(true);
+        setGrowthLoading(false);
+      })
+      .catch(err => {
+        setGrowthError(String(err));
+        setGrowthLoading(false);
+      });
+  }, [rankTab, growthLoaded]);
 
   const paginatedRankings = rankings.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
@@ -91,20 +120,49 @@ export default function CreatorRankingView() {
 
   return (
     <div className="flex flex-col gap-4 pb-8 animate-enter relative">
-      <div className="flex items-center justify-between mb-2 px-1">
+      {/* 헤더: 제목 + 탭 pill + 정보 버튼 */}
+      <div className="flex items-center justify-between mb-4 px-1">
         <div className="flex items-center gap-2">
-          <Crown className="text-yellow-500" size={20} />
-          <h2 className="text-lg font-bold text-white tracking-wide">글로벌 크리에이터 랭킹 TOP 40</h2>
+          {/* 탭 pill 버튼 */}
+          <div className="flex gap-1.5 bg-white/[0.04] rounded-full p-1 border border-white/[0.07]">
+            <button
+              onClick={() => setRankTab('global')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold tracking-wide transition-all ${
+                rankTab === 'global'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20'
+                  : 'text-white/40 hover:text-white/70'
+              }`}
+            >
+              <Crown size={11} />
+              <span>전체 랭킹</span>
+            </button>
+            {SHOW_GROWTH_RANKING && (
+            <button
+              onClick={() => setRankTab('growth')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold tracking-wide transition-all ${
+                rankTab === 'growth'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/20'
+                  : 'text-white/40 hover:text-white/70'
+              }`}
+            >
+              <TrendingUp size={11} />
+              <span>성장 랭킹</span>
+              <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">β</span>
+            </button>
+            )}
+          </div>
         </div>
         <button
           onClick={() => setShowInfoModal(true)}
           className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-300/80 hover:text-blue-200 transition-all px-3 py-1.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/25 hover:border-blue-400/40 tracking-wide"
         >
           <Info size={14} />
-          <span>랭킹에 관하여 / 노출 금지 신청</span>
+          <span className="hidden sm:inline">랭킹에 관하여 / 노출 금지 신청</span>
+          <span className="sm:hidden">정보</span>
         </button>
       </div>
 
+      {rankTab === 'global' && (
       <form onSubmit={handleSearch} className="flex gap-2 mb-4 px-1">
         <div className="relative flex-1">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -126,6 +184,7 @@ export default function CreatorRankingView() {
           {searchLoading ? <Loader2 size={16} className="animate-spin" /> : '검색'}
         </button>
       </form>
+      )}
 
       {/* 랭킹 정보 모달 — createPortal로 viewport 기준 고정 */}
       {showInfoModal && createPortal(
@@ -194,6 +253,133 @@ export default function CreatorRankingView() {
         </div>
       , document.body)}
 
+      {/* ===== 성장 랭킹 탭 ===== */}
+      {SHOW_GROWTH_RANKING && rankTab === 'growth' && (
+        <div className="flex flex-col gap-3 pb-8">
+          {/* 베타 배너 */}
+          <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25">
+            <FlaskConical size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[12px] font-bold text-emerald-300">성장 랭킹 베타</p>
+              <p className="text-[11px] text-emerald-200/60 mt-0.5 leading-relaxed">
+                최근 3일간 ELO 상승폭 기준 · 상대 평가 티어 부여 · 데이터 누적에 따라 결과가 달라질 수 있습니다
+              </p>
+            </div>
+          </div>
+
+          {growthLoading && (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 size={28} className="animate-spin text-white/30" />
+            </div>
+          )}
+
+          {!growthLoading && growthError && (
+            <div className="text-center py-16 text-white/50 text-sm">{growthError}</div>
+          )}
+
+          {!growthLoading && !growthError && !growthDataAvailable && (
+            <div className="text-center py-16 text-white/40 text-sm">
+              <TrendingUp size={32} className="mx-auto mb-3 opacity-30" />
+              아직 성장 데이터가 충분하지 않습니다.<br />
+              <span className="text-[11px]">최소 2일 이상의 데이터가 필요합니다.</span>
+            </div>
+          )}
+
+          {!growthLoading && !growthError && growthRankings.length === 0 && growthDataAvailable && (
+            <div className="text-center py-16 text-white/40 text-sm">
+              이번 주 성장 데이터가 없습니다.
+            </div>
+          )}
+
+          {/* 3일 전 대비 헤더 */}
+          {!growthLoading && !growthError && growthRankings.length > 0 && (
+            <div className="flex items-center justify-between px-1 py-2">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.08]">
+                  <TrendingUp size={12} className="text-emerald-400" />
+                  <span className="text-[12px] font-black text-white/70 tracking-wide">3일 전 대비 성장</span>
+                </div>
+              </div>
+              <span className="text-[11px] text-white/30">TOP {growthRankings.length}</span>
+            </div>
+          )}
+
+          {!growthLoading && growthRankings.map((creator) => {
+            const RANK_BADGE = [
+              { bg: 'from-yellow-400/25 to-amber-500/15', border: 'border-yellow-400/50', textColor: '#FDE68A', glow: 'rgba(250,204,21,0.5)' },
+              { bg: 'from-gray-200/20 to-slate-400/15',   border: 'border-gray-300/45',   textColor: '#E2E8F0', glow: 'rgba(209,213,219,0.4)' },
+              { bg: 'from-amber-500/20 to-orange-600/15', border: 'border-amber-500/45',  textColor: '#FCA244', glow: 'rgba(217,119,6,0.4)' },
+              { bg: 'from-violet-500/18 to-purple-600/12',border: 'border-violet-400/40', textColor: '#C4B5FD', glow: 'rgba(139,92,246,0.3)' },
+              { bg: 'from-violet-500/18 to-purple-600/12',border: 'border-violet-400/40', textColor: '#C4B5FD', glow: 'rgba(139,92,246,0.3)' },
+              { bg: 'from-blue-500/18 to-indigo-600/12',  border: 'border-blue-400/40',   textColor: '#93C5FD', glow: 'rgba(59,130,246,0.28)' },
+              { bg: 'from-blue-500/18 to-indigo-600/12',  border: 'border-blue-400/40',   textColor: '#93C5FD', glow: 'rgba(59,130,246,0.28)' },
+              { bg: 'from-teal-500/15 to-cyan-600/10',    border: 'border-teal-400/35',   textColor: '#5EEAD4', glow: 'rgba(20,184,166,0.22)' },
+              { bg: 'from-teal-500/15 to-cyan-600/10',    border: 'border-teal-400/35',   textColor: '#5EEAD4', glow: 'rgba(20,184,166,0.22)' },
+              { bg: 'from-teal-500/15 to-cyan-600/10',    border: 'border-teal-400/35',   textColor: '#5EEAD4', glow: 'rgba(20,184,166,0.22)' },
+            ];
+            const badge = RANK_BADGE[Math.min((creator.growth_rank || 1) - 1, RANK_BADGE.length - 1)];
+            return (
+              <div
+                key={creator.id}
+                onClick={() => navigate(`/profile?creator=${encodeURIComponent(creator.handle ? `@${creator.handle}` : creator.id)}`)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer group relative overflow-hidden bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.05] hover:border-white/10"
+              >
+                {/* 등수 (좌측, 작게) */}
+                <div className="w-5 text-center text-sm font-bold shrink-0 text-white/20">
+                  {creator.growth_rank}
+                </div>
+
+                {/* 유저 정보 */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-bold text-[15px] text-white/90 truncate">{creator.nickname}</span>
+                    {creator.handle && (
+                      <span className="text-[11px] text-white/35 truncate hidden sm:inline">@{creator.handle}</span>
+                    )}
+                  </div>
+                  {(() => {
+                    const chatDelta = (creator.plot_interaction_count || 0) - (creator.plot_interaction_oldest || 0);
+                    const followerDelta = (creator.follower_count || 0) - (creator.follower_count_oldest || 0);
+                    const deltaClass = (d) => d > 0 ? 'text-emerald-400' : d < 0 ? 'text-red-400' : 'text-white/30';
+                    const deltaStr = (d) => (d > 0 ? '+' : '') + formatNumber(d);
+                    return (
+                      <div className="flex items-center flex-wrap gap-x-3 gap-y-0.5 text-[11px] font-medium mt-0.5">
+                        <div className="flex items-center gap-1">
+                          <MessageCircle size={10} className="text-white/30 shrink-0" />
+                          <span className={`font-bold ${deltaClass(chatDelta)}`}>{deltaStr(chatDelta)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users size={10} className="text-white/30 shrink-0" />
+                          <span className={`font-bold ${deltaClass(followerDelta)}`}>{deltaStr(followerDelta)}</span>
+                        </div>
+                        <span className="text-white/20 font-mono text-[10px]">ELO {formatNumber(creator.elo_score)}</span>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* 글로우 랜크 배지 */}
+                <div className="flex flex-col items-center gap-0.5 shrink-0">
+                  <div
+                    className={`w-11 h-11 rounded-2xl flex items-center justify-center bg-gradient-to-br ${badge.bg} border ${badge.border} transition-transform duration-300 group-hover:scale-105`}
+                    style={{ boxShadow: `0 0 18px ${badge.glow}, inset 0 1px 0 rgba(255,255,255,0.08)` }}
+                  >
+                    <span
+                      className="text-[18px] font-black leading-none"
+                      style={{ color: badge.textColor, textShadow: `0 0 12px ${badge.glow}` }}
+                    >
+                      {creator.growth_rank}
+                    </span>
+                  </div>
+                  <span className="text-[8px] text-white/20 font-bold tracking-widest">RANK</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {/* ===== 기존 전체 랭킹 탭 ===== */}
+      {rankTab === 'global' && (
       <div className="flex flex-col gap-3 pb-8">
         {paginatedRankings.map((creator, i) => {
             const index = (currentPage - 1) * ITEMS_PER_PAGE + i;
@@ -282,11 +468,12 @@ export default function CreatorRankingView() {
               </div>
             );
         })}
-      </div>
+      </div>)}
 
-      {/* 페이지네이션 */}
+      {/* 페이지네이션 (전체 랭킹 탭에서만) */}
+      {rankTab === 'global' && (
       <div className="flex items-center justify-center gap-2 mb-20 px-1">
-        {[1, 2, 3, 4].map(num => (
+        {[1, 2, 3, 4, 5].map(num => (
           <button
             key={num}
             onClick={() => {
@@ -302,7 +489,7 @@ export default function CreatorRankingView() {
             {num}
           </button>
         ))}
-      </div>
+      </div>)}
 
       {searchResult && searchResult.user && createPortal(
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-[632px] z-[9999] animate-slide-up">

@@ -181,7 +181,7 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
         {/* 메인 스탯 glass card */}
         <div className="ph-stat-card">
           {/* 티어 아이콘 + 이름 */}
-          <div className="flex flex-col items-center justify-center pt-[27px] pb-[24px] border-b border-white/[0.04] relative">
+          <div className="flex flex-col items-center justify-center pt-[22px] pb-[19px] border-b border-white/[0.04] relative">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full blur-2xl" style={{ background: `${tierColor}30` }} />
             <button
               onClick={() => navigate('/tier')}

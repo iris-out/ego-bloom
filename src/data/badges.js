@@ -9,42 +9,72 @@ const MEDIA_SET = new Set([
   ...mediaFranchises.tags,
 ].map(t => t.toLowerCase()));
 
-/** 칭호 메타: id, emoji, title, description(짧은 설명·모달용), desc(탭용 긴 설명), color(tailwind 색상명 또는 'gradient') */
+/** 칭호 메타: id, emoji, title, description, desc, color, category */
 export const BADGE_DEFINITIONS = [
-  { id: 'sunae', emoji: '💕', title: '순애보', description: '순애 태그, NTR 없음', desc: '#순애 태그가 있으며, NTR/NTL 태그 없음', color: 'pink' },
-  { id: 'ntr', emoji: '💔', title: '사랑 파괴자', description: 'NTR/NTL 등', desc: '#NTR, #NTL, #뺏기, #빼앗기 태그 보유', color: 'red' },
-  { id: 'fantasy', emoji: '🗡️', title: '판타지', description: '판타지·마법·기사 등', desc: '#판타지, #마법, #기사, #마왕 등 태그 보유', color: 'indigo' },
-  { id: 'newbie', emoji: '🌱', title: '뉴비', description: '활동 3개월 이하', desc: '활동 기간 3개월 이하', color: 'emerald' },
-  { id: 'military', emoji: '🎖️', title: '고인물', description: '활동 1년 6개월 이상', desc: '활동 기간 1년 6개월(548일) 이상', color: 'blue' },
-  { id: 'oneyear', emoji: '🎂', title: '벌써 1년', description: '활동 1년 이상', desc: '활동 기간 1년(365일) 이상', color: 'emerald' },
-  { id: 'cyber', emoji: '⚡', title: '사펑', description: '사이버펑크', desc: '#사이버펑크 태그 보유', color: 'gradient' },
-  { id: 'mesu', emoji: '🩷', title: '허접', description: '메스가키·도발', desc: '#메스가키 또는 #도발 태그 보유', color: 'pink' },
-  { id: 'unlimit', emoji: '🔮', title: '언리밋', description: 'Unlimited 설정', desc: 'Unlimited 설정된 캐릭터 보유', color: 'violet' },
-  { id: 'furry', emoji: '🐾', title: '털', description: '수인·퍼리', desc: '#수인, #수인형, #퍼리 태그 보유', color: 'amber' },
-  { id: 'hattrick', emoji: '🎩', title: '해트트릭', description: '100만 대화 캐릭터 3개+', desc: '100만 이상 대화량 캐릭터 3개 이상 보유', color: 'indigo' },
-  { id: 'platinum', emoji: '💿', title: '플래티넘 디스크', description: '100만 대화 캐릭터', desc: '100만 이상 대화량 캐릭터 보유', color: 'slate' },
-  { id: '10m', emoji: '🎬', title: '천만관객', description: '총 대화 1천만+', desc: '총 대화수 1,000만 이상', color: 'yellow' },
-  { id: '1m', emoji: '💬', title: '밀리언', description: '총 대화 100만+', desc: '총 대화수 100만 이상', color: 'amber' },
-  { id: 'superstar', emoji: '🌌', title: '우주대스타', description: '팔로워 1만+', desc: '팔로워 10,000명 이상', color: 'gradient' },
-  { id: 'fertile', emoji: '🌾', title: '다산의 상징', description: '캐릭터 100명+', desc: '100명 이상의 캐릭터 제작', color: 'lime' },
-  { id: 'iljin', emoji: '🏀', title: '일진', description: '#일진 태그', desc: '캐릭터 중 #일진 태그 보유', color: 'orange' },
-  { id: 'jjindda', emoji: '🚶', title: '찐따', description: '#찐따 태그', desc: '캐릭터 중 #찐따 태그 보유', color: 'slate' },
-  { id: 'hero', emoji: '🦸', title: '취미일 뿐', description: '#히어로 태그', desc: '캐릭터 중 #히어로 태그 보유', color: 'amber' },
-  { id: 'academy', emoji: '🎓', title: '아카데미', description: '#아카데미 태그', desc: '캐릭터 중 #아카데미 태그 보유', color: 'indigo' },
-  { id: 'hyeongwan', emoji: '🖤', title: '혐관', description: '#혐관 태그', desc: '캐릭터 중 #혐관 태그 보유', color: 'slate' },
-  { id: 'pipye', emoji: '😵', title: '피폐', description: '#피폐 태그', desc: '캐릭터 중 #피폐 태그 보유', color: 'violet' },
-  { id: 'sihanbu', emoji: '💧', title: '시한부', description: '#시한부 태그', desc: '캐릭터 중 #시한부 태그 보유', color: 'red' },
-  { id: 'guwon', emoji: '🩹', title: '구원', description: '#구원 태그', desc: '캐릭터 중 #구원 태그 보유', color: 'emerald' },
-  { id: 'original', emoji: '✨', title: '오리지널', description: '2차창작 태그 없음', desc: '게임/애니/영화 등 2차창작 태그 없이 오리지널만 제작', color: 'sky' },
+  // ─── 총 대화량 마일스톤 (category: 'interaction') ───
 
-  // 개그/재미 신규 종
-  { id: 'factory', emoji: '🏭', title: '공장장', description: '캐릭터 150명+', desc: '150명 이상의 수많은 캐릭터를 찍어낸 진정한 공장장', color: 'slate' },
-  { id: 'obsessive', emoji: '👀', title: '집착광', description: '집착 태그 비율 높음', desc: '#집착 태그 캐릭터를 5개 이상 제작', color: 'violet' },
-  { id: 'purelove', emoji: '💘', title: '오직 순애만', description: 'NTR 없이 순애 5개+', desc: 'NTR/NTL 관련 태그가 없으면서 #순애 태그 캐릭터를 5개 이상 제작', color: 'pink' },
-  { id: 'lonely', emoji: '🗣️', title: '말상대 구함', description: '대화량 높으나 팔로워 없음', desc: '총 대화수 1,000 이상이나 팔로워가 0명인 고독한 영혼', color: 'slate' },
-  { id: 'secret', emoji: '🤫', title: '신비주의', description: '비공개율 80% 이상', desc: '캐릭터 5개 이상이면서 상세 설정 비공개 비율이 80% 이상', color: 'slate' },
-  { id: 'expensive', emoji: '💸', title: '비싼 몸', description: '대화/팔로워 비율 10,000 이상', desc: '팔로워수 대비 대화량이 압도적으로 높음 (비율 1만 이상)', color: 'gradient' },
-  { id: '100m_zeta', emoji: '🌟', title: '1억제타', description: '대화수 1억 돌파', desc: '단일 캐릭터 대화수가 1억 회를 돌파한 경이로운 기록', color: 'rose' },
+  { id: '1k',        emoji: '🌱', title: '새싹',           description: '총 대화 1천+',   desc: '총 대화수 1,000 이상',          color: 'blue',    category: 'interaction' },
+  { id: '10k',       emoji: '✨', title: 'OVER 10000',    description: '총 대화 1만+',   desc: '총 대화수 10,000 이상',         color: 'cyan',    category: 'interaction' },
+  { id: '100k',      emoji: '🔥', title: '성장 중',         description: '총 대화 10만+',  desc: '총 대화수 100,000 이상',        color: 'orange',  category: 'interaction' },
+  { id: '1m',        emoji: '💬', title: '밀리언',           description: '총 대화 100만+', desc: '총 대화수 1,000,000 이상',      color: 'amber',   category: 'interaction' },
+  { id: '10m',       emoji: '🎬', title: '천만관객',         description: '총 대화 1천만+', desc: '총 대화수 10,000,000 이상',     color: 'yellow',  category: 'interaction' },
+  { id: '100m_total',emoji: '🐷', title: '돼지',             description: '총 대화 1억+',   desc: '총 대화수 100,000,000 이상',    color: 'violet',  category: 'interaction' },
+
+  // ─── 단일 캐릭터 대화량 마일스톤 (category: 'char_interaction') ───
+  { id: 'char_10k',  emoji: '📈', title: '1만 캐릭터',   description: '캐릭터 1만 대화', desc: '단일 캐릭터 대화수 10,000 이상',     color: 'teal',    category: 'char_interaction' },
+  { id: 'char_100k', emoji: '📊', title: '10만 캐릭터',  description: '캐릭터 10만 대화',desc: '단일 캐릭터 대화수 100,000 이상',    color: 'blue',    category: 'char_interaction' },
+  { id: 'char_500k', emoji: '🥇', title: '골든 디스크', description: '캐릭터 50만 대화',desc: '단일 캐릭터 대화수 500,000 이상',    color: 'yellow',  category: 'char_interaction' },
+  { id: 'platinum',  emoji: '💿', title: '플래티넘 디스크',  description: '캐릭터 100만 대화',desc: '단일 캐릭터 대화수 1,000,000 이상', color: 'slate',   category: 'char_interaction' },
+  { id: 'char_10m',  emoji: '🎤', title: '아이돌',           description: '캐릭터 1천만 대화',desc: '단일 캐릭터 대화수 10,000,000 이상', color: 'pink',  category: 'char_interaction' },
+  { id: '100m_zeta', emoji: '🌟', title: '1억 제타',          description: '캐릭터 1억 대화', desc: '단일 캐릭터 대화수 100,000,000 이상',color: 'rose',    category: 'char_interaction' },
+  { id: 'hattrick',  emoji: '🎩', title: '해트트릭',          description: '100만 캐릭터 3개+',desc: '100만 이상 대화량 캐릭터 3개 이상 보유',color: 'indigo', category: 'char_interaction' },
+
+  // ─── 팔로워 ───
+  { id: 'follower_100',  emoji: '🎙️', title: '지망생',   description: '팔로워 100+',  desc: '팔로워 100명 이상',       color: 'blue',    category: 'follower' },
+  { id: 'follower_1k',   emoji: '⭐', title: '스타',     description: '팔로워 1천+',  desc: '팔로워 1,000명 이상',     color: 'amber',   category: 'follower' },
+  { id: 'follower_5k',   emoji: '🌠', title: '대스타',   description: '팔로워 5천+',  desc: '팔로워 5,000명 이상',     color: 'yellow',  category: 'follower' },
+  { id: 'superstar',     emoji: '🌌', title: '우주대스타', description: '팔로워 1만+', desc: '팔로워 10,000명 이상',    color: 'gradient', category: 'follower' },
+
+  // ─── 제작 이력 ───
+  { id: 'fertile',   emoji: '🌾', title: '다산의 상징', description: '캐릭터 100명+', desc: '100명 이상의 캐릭터 제작', color: 'lime',  category: 'creation' },
+  { id: 'factory',   emoji: '🏭', title: '공장장',      description: '캐릭터 150명+', desc: '150명 이상의 캐릭터를 제작한 공장장', color: 'slate', category: 'creation' },
+  { id: 'secret',    emoji: '🤫', title: '신비주의',    description: '비공개율 80%+', desc: '캐릭터 5개 이상이면서 상세 설정 비공개 비율 80% 이상', color: 'slate', category: 'creation' },
+
+  // ─── 기타 (interaction 특이 업적) ───
+  { id: 'lonely',    emoji: '🗣️', title: '말상대 구함', description: '대화 있으나 팔로워 없음', desc: '총 대화수 1,000 이상이나 팔로워가 0명', color: 'slate',    category: 'interaction' },
+  { id: 'expensive', emoji: '💸', title: '비싼 몸',     description: '대화/팔로워 비율 1만+',  desc: '팔로워 대비 대화량이 압도적 (비율 10,000 이상)',color: 'gradient', category: 'interaction' },
+
+  // ─── 태그 ───
+  { id: 'sunae',     emoji: '💕', title: '순애보',      description: '순애 태그, NTR 없음',    desc: '#순애 태그가 있으며 NTR/NTL 없음',         color: 'pink',    category: 'tag' },
+  { id: 'ntr',       emoji: '💔', title: '사랑 파괴자', description: 'NTR/NTL 등',             desc: '#NTR, #NTL, #뺏기, #빼앗기 태그 보유',     color: 'red',     category: 'tag' },
+  { id: 'fantasy',   emoji: '🗡️', title: '판타지',      description: '판타지·마법·기사 등',    desc: '#판타지, #마법, #기사, #마왕 등 태그 보유', color: 'indigo',  category: 'tag' },
+  { id: 'cyber',     emoji: '⚡', title: '사펑',         description: '사이버펑크',              desc: '#사이버펑크 태그 보유',                     color: 'gradient',category: 'tag' },
+  { id: 'mesu',      emoji: '🩷', title: '허접',         description: '메스가키·소악마·도발',     desc: '#메스가키, #소악마, #도발 태그 보유',       color: 'pink',    category: 'tag' },
+  { id: 'unlimit',   emoji: '🔮', title: '언리밋',       description: 'Unlimited 설정',          desc: 'Unlimited 설정된 캐릭터 보유',              color: 'violet',  category: 'tag' },
+  { id: 'furry',     emoji: '🐾', title: '털',           description: '퍼리·수인',               desc: '#퍼리, #수인 태그 보유',                    color: 'amber',   category: 'tag' },
+  { id: 'obsessive', emoji: '👀', title: '집착광',       description: '집착 태그 5개+',          desc: '#집착 태그 캐릭터 5개 이상 제작',           color: 'violet',  category: 'tag' },
+  { id: 'purelove',  emoji: '💘', title: '오직 순애만',  description: 'NTR 없이 순애 5개+',      desc: 'NTR 없이 #순애 캐릭터 5개 이상',           color: 'pink',    category: 'tag' },
+  { id: 'iljin',     emoji: '🏀', title: '일진',         description: '#일진 태그',              desc: '캐릭터 중 #일진 태그 보유',                 color: 'orange',  category: 'tag' },
+  { id: 'jjindda',   emoji: '🚶', title: '찐따',         description: '#찐따 태그',              desc: '캐릭터 중 #찐따 태그 보유',                 color: 'slate',   category: 'tag' },
+  { id: 'hero',      emoji: '🦸', title: '취미일 뿐',   description: '#히어로 태그',             desc: '캐릭터 중 #히어로 태그 보유',               color: 'amber',   category: 'tag' },
+  { id: 'academy',   emoji: '🎓', title: '아카데미',     description: '#아카데미 태그',           desc: '캐릭터 중 #아카데미 태그 보유',             color: 'indigo',  category: 'tag' },
+  { id: 'hyeongwan', emoji: '🖤', title: '혐관',         description: '#혐관 태그',              desc: '캐릭터 중 #혐관 태그 보유',                 color: 'slate',   category: 'tag' },
+  { id: 'pipye',     emoji: '😵', title: '피폐',         description: '#피폐 태그',              desc: '캐릭터 중 #피폐 태그 보유',                 color: 'violet',  category: 'tag' },
+  { id: 'sihanbu',   emoji: '💧', title: '시한부',       description: '#시한부 태그',            desc: '캐릭터 중 #시한부 태그 보유',               color: 'red',     category: 'tag' },
+  { id: 'guwon',     emoji: '🩹', title: '구원',         description: '#구원 태그',              desc: '캐릭터 중 #구원 태그 보유',                 color: 'emerald', category: 'tag' },
+  { id: 'saikai',    emoji: '💌', title: 'S is not..', description: '#재회 태그',              desc: '캐릭터 중 #재회 태그 보유. ',    color: 'rose',    category: 'tag' },
+  { id: 'robot',     emoji: '🤖', title: '텅텅이',       description: '#로봇/#안드로이드 태그',  desc: '캐릭터 중 #로봇, #안드로이드 태그 보유.', color: 'slate',   category: 'tag' },
+    { id: 'original',  emoji: '✨', title: '오리지널',     description: '2차창작 태그 없음',        desc: '게임/애니/영화 2차창작 없이 오리지널만 제작', color: 'sky',     category: 'tag' },
+
+  // ─── 개그 태그 (bonus) ───
+  { id: 'truck',     emoji: '🚛', title: '트럭 주의',   description: '이세계/환생/회귀 태그',   desc: '#이세계, #환생, #회귀 등 태그 보유. "터엉-" ', color: 'orange',  category: 'tag' },
+  { id: 'yethwi',    emoji: '🔄', title: '또 회귀함',   description: '#회귀 태그',               desc: '#회귀 태그 보유. 오늘도 회귀하는 당신', color: 'violet',  category: 'tag' },
+  { id: 'healer',    emoji: '💊', title: '전문 힐러',   description: '#치유/힐링 태그',    desc: '#치유, #힐링 태그 보유.', color: 'emerald', category: 'tag' },
+
+  // ─── 활동 기간 ───
+  { id: 'newbie',    emoji: '🌱', title: '뉴비',         description: '활동 3개월 이하', desc: '활동 기간 3개월 이하',          color: 'emerald', category: 'activity' },
+  { id: 'oneyear',   emoji: '🎂', title: '벌써 1년',     description: '활동 1년 이상',   desc: '활동 기간 1년(365일) 이상',    color: 'emerald', category: 'activity' },
+  { id: 'military',  emoji: '🎖️', title: '고인물',       description: '활동 1년 6개월+', desc: '활동 기간 1년 6개월(548일) 이상', color: 'blue',  category: 'activity' },
 ];
 
 export const BADGE_DESCRIPTIONS = Object.fromEntries(
@@ -105,6 +135,7 @@ export function computeEarnedTitles(input) {
   const earliest = dates.length > 0 ? new Date(Math.min(...dates)) : null;
   const activityDays = earliest ? (toKST().getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24) : 0;
   const activityMonths = activityDays / 30;
+  const maxSingleChar = characters.reduce((max, c) => Math.max(max, c.interactionCount || 0), 0);
 
   const list = [];
   const allTags = characters.flatMap(c => (c.hashtags || c.tags || []).map(t => t.toLowerCase()));
@@ -113,66 +144,74 @@ export function computeEarnedTitles(input) {
   const ntrTags = ['ntr', 'ntl', '뺏기', '빼앗기', '뺏김', '빼앗김'];
   const hasNtr = ntrTags.some(t => tagSet.has(t));
   const unlimitedChars = characters.filter(c => c.unlimitedAllowed);
-
   const sunaeChars = charsWithTag(characters, '순애');
 
-  list.push({ id: 'sunae', emoji: '💕', title: '순애보', desc: BADGE_DEFINITIONS.find(b => b.id === 'sunae')?.desc ?? '', color: 'pink', earned: hasSunae && !hasNtr, chars: sunaeChars });
-  list.push({ id: 'ntr', emoji: '💔', title: '사랑 파괴자', desc: BADGE_DEFINITIONS.find(b => b.id === 'ntr')?.desc ?? '', color: 'red', earned: hasNtr, chars: charsWithAnyTag(characters, ntrTags) });
-  const fantasyChars = charsWithAnyTag(characters, ['판타지', '마법', '기사', '마왕', '용사', '엘프', '드래곤']);
-  list.push({ id: 'fantasy', emoji: '🗡️', title: '판타지', desc: BADGE_DEFINITIONS.find(b => b.id === 'fantasy')?.desc ?? '', color: 'indigo', earned: fantasyChars.length > 0, chars: fantasyChars });
-  list.push({ id: 'newbie', emoji: '🌱', title: '뉴비', desc: BADGE_DEFINITIONS.find(b => b.id === 'newbie')?.desc ?? '', color: 'emerald', earned: activityMonths <= 3 && activityMonths > 0 });
-  const cyberChars = charsWithAnyTag(characters, ['사이버펑크', 'cyberpunk']);
-  list.push({ id: 'cyber', emoji: '⚡', title: '사펑', desc: BADGE_DEFINITIONS.find(b => b.id === 'cyber')?.desc ?? '', color: 'gradient', earned: cyberChars.length > 0, chars: cyberChars });
-  const mesuChars = charsWithAnyTag(characters, ['메스가키', '도발']);
-  list.push({ id: 'mesu', emoji: '🩷', title: '허접', desc: BADGE_DEFINITIONS.find(b => b.id === 'mesu')?.desc ?? '', color: 'pink', earned: mesuChars.length > 0, chars: mesuChars });
-  list.push({ id: 'unlimit', emoji: '🔮', title: '언리밋', desc: BADGE_DEFINITIONS.find(b => b.id === 'unlimit')?.desc ?? '', color: 'violet', earned: unlimitedChars.length > 0, chars: unlimitedChars.map(c => c.name) });
+  // ─── BADGE_DEFINITIONS 빠른 접근용 맵 (id → definition) ───
+  const DEFS = Object.fromEntries(BADGE_DEFINITIONS.map(b => [b.id, b]));
+  const D = (id) => DEFS[id] || {};
 
-  list.push({ id: '1m', emoji: '💬', title: '밀리언', desc: BADGE_DEFINITIONS.find(b => b.id === '1m')?.desc ?? '', color: 'amber', earned: totalInteractions >= 1000000, progress: totalInteractions < 1000000 ? { current: totalInteractions, max: 1000000, label: '총 대화수' } : undefined });
-  list.push({ id: '10m', emoji: '🎬', title: '천만관객', desc: BADGE_DEFINITIONS.find(b => b.id === '10m')?.desc ?? '', color: 'yellow', earned: totalInteractions >= 10000000, progress: totalInteractions < 10000000 ? { current: totalInteractions, max: 10000000, label: '총 대화수' } : undefined });
-  list.push({ id: 'superstar', emoji: '🌌', title: '우주대스타', desc: BADGE_DEFINITIONS.find(b => b.id === 'superstar')?.desc ?? '', color: 'gradient', earned: followers >= 10000, progress: followers < 10000 ? { current: followers, max: 10000, label: '팔로워' } : undefined });
-  const hattrickChars = charactersWithInteraction(characters, 1000000);
-  list.push({ id: 'hattrick', emoji: '🎩', title: '해트트릭', desc: BADGE_DEFINITIONS.find(b => b.id === 'hattrick')?.desc ?? '', color: 'indigo', earned: hattrickChars.length >= 3, chars: hattrickChars.map(c => c.name), progress: hattrickChars.length < 3 ? { current: hattrickChars.length, max: 3, label: '100만+ 캐릭터' } : undefined });
+  // ─── 총 대화량 마일스톤 ───
+  list.push({ id: '1k',         emoji: D('1k').emoji,         title: D('1k').title,         desc: D('1k').desc ?? '',         color: 'blue',    earned: totalInteractions >= 1000,       progress: totalInteractions < 1000       ? { current: totalInteractions, max: 1000,        label: '총 대화수' } : undefined });
+  list.push({ id: '10k',        emoji: D('10k').emoji,        title: D('10k').title,        desc: D('10k').desc ?? '',        color: 'cyan',    earned: totalInteractions >= 10000,      progress: totalInteractions < 10000      ? { current: totalInteractions, max: 10000,       label: '총 대화수' } : undefined });
+  list.push({ id: '100k',       emoji: D('100k').emoji,       title: D('100k').title,       desc: D('100k').desc ?? '',       color: 'orange',  earned: totalInteractions >= 100000,     progress: totalInteractions < 100000     ? { current: totalInteractions, max: 100000,      label: '총 대화수' } : undefined });
+  list.push({ id: '1m',         emoji: D('1m').emoji,         title: D('1m').title,         desc: D('1m').desc ?? '',         color: 'amber',   earned: totalInteractions >= 1000000,    progress: totalInteractions < 1000000    ? { current: totalInteractions, max: 1000000,     label: '총 대화수' } : undefined });
+  list.push({ id: '10m',        emoji: D('10m').emoji,        title: D('10m').title,        desc: D('10m').desc ?? '',        color: 'yellow',  earned: totalInteractions >= 10000000,   progress: totalInteractions < 10000000   ? { current: totalInteractions, max: 10000000,    label: '총 대화수' } : undefined });
+  list.push({ id: '100m_total', emoji: D('100m_total').emoji, title: D('100m_total').title, desc: D('100m_total').desc ?? '', color: 'violet',  earned: totalInteractions >= 100000000,  progress: totalInteractions < 100000000  ? { current: totalInteractions, max: 100000000,   label: '총 대화수' } : undefined });
+  list.push({ id: 'lonely',     emoji: D('lonely').emoji,     title: D('lonely').title,     desc: D('lonely').desc ?? '',     color: 'slate',    earned: totalInteractions >= 1000 && followers === 0 });
+  list.push({ id: 'expensive',  emoji: D('expensive').emoji,  title: D('expensive').title,  desc: D('expensive').desc ?? '',  color: 'gradient', earned: followers > 0 ? (totalInteractions / followers) >= 10000 : false });
+
+  // ─── 단일 캐릭터 대화량 마일스톤 ───
+  list.push({ id: 'char_10k',  emoji: D('char_10k').emoji,  title: D('char_10k').title,  desc: D('char_10k').desc ?? '',  color: 'teal',   earned: maxSingleChar >= 10000,   progress: maxSingleChar < 10000   ? { current: maxSingleChar, max: 10000,   label: '최고 캐릭터 대화수' } : undefined });
+  list.push({ id: 'char_100k', emoji: D('char_100k').emoji, title: D('char_100k').title, desc: D('char_100k').desc ?? '', color: 'blue',   earned: maxSingleChar >= 100000,  progress: maxSingleChar < 100000  ? { current: maxSingleChar, max: 100000,  label: '최고 캐릭터 대화수' } : undefined });
+  list.push({ id: 'char_500k', emoji: D('char_500k').emoji, title: D('char_500k').title, desc: D('char_500k').desc ?? '', color: 'yellow', earned: maxSingleChar >= 500000,  progress: maxSingleChar < 500000  ? { current: maxSingleChar, max: 500000,  label: '최고 캐릭터 대화수' } : undefined });
   const platinumChars = charactersWithInteraction(characters, 1000000);
-  list.push({ id: 'platinum', emoji: '💿', title: '플래티넘 디스크', desc: BADGE_DEFINITIONS.find(b => b.id === 'platinum')?.desc ?? '', color: 'slate', earned: platinumChars.length > 0, chars: platinumChars.map(c => c.name) });
-  list.push({ id: 'furry', emoji: '🐾', title: '털', desc: BADGE_DEFINITIONS.find(b => b.id === 'furry')?.desc ?? '', color: 'amber', earned: ['수인', '수인형', '퍼리', 'furry'].some(t => tagSet.has(t)), chars: charsWithAnyTag(characters, ['수인', '수인형', '퍼리', 'furry']) });
-  list.push({ id: 'oneyear', emoji: '🎂', title: '벌써 1년', desc: BADGE_DEFINITIONS.find(b => b.id === 'oneyear')?.desc ?? '', color: 'emerald', earned: activityDays >= 365, progress: activityDays < 365 ? { current: Math.floor(activityDays), max: 365, label: '활동일' } : undefined });
-  list.push({ id: 'military', emoji: '🎖️', title: '고인물', desc: BADGE_DEFINITIONS.find(b => b.id === 'military')?.desc ?? '', color: 'blue', earned: activityDays >= 548, progress: activityDays < 548 ? { current: Math.floor(activityDays), max: 548, label: '활동일' } : undefined });
-
-  list.push({ id: 'fertile', emoji: '🌾', title: '다산의 상징', desc: BADGE_DEFINITIONS.find(b => b.id === 'fertile')?.desc ?? '', color: 'lime', earned: characters.length >= 100, progress: characters.length < 100 ? { current: characters.length, max: 100, label: '캐릭터' } : undefined });
-  list.push({ id: 'factory', emoji: '🏭', title: '공장장', desc: BADGE_DEFINITIONS.find(b => b.id === 'factory')?.desc ?? '', color: 'slate', earned: characters.length >= 150, progress: characters.length < 150 ? { current: characters.length, max: 150, label: '캐릭터' } : undefined });
-  list.push({ id: 'obsessive', emoji: '👀', title: '집착광', desc: BADGE_DEFINITIONS.find(b => b.id === 'obsessive')?.desc ?? '', color: 'violet', earned: tagSet.has('집착') && charsWithTag(characters, '집착').length >= 5, chars: charsWithTag(characters, '집착') });
-  list.push({ id: 'purelove', emoji: '💘', title: '오직 순애만', desc: BADGE_DEFINITIONS.find(b => b.id === 'purelove')?.desc ?? '', color: 'pink', earned: !hasNtr && sunaeChars.length >= 5, chars: sunaeChars });
-  list.push({ id: 'lonely', emoji: '🗣️', title: '말상대 구함', desc: BADGE_DEFINITIONS.find(b => b.id === 'lonely')?.desc ?? '', color: 'slate', earned: totalInteractions >= 1000 && followers === 0 });
-
-
-
-  const privateCount = characters.filter(c => !c.isLongDescriptionPublic).length;
-  const isSecret = characters.length >= 5 && (privateCount / characters.length) >= 0.8;
-  list.push({ id: 'secret', emoji: '🤫', title: '신비주의', desc: BADGE_DEFINITIONS.find(b => b.id === 'secret')?.desc ?? '', color: 'slate', earned: isSecret });
-
-  const followRatio = followers > 0 ? totalInteractions / followers : 0;
-  list.push({ id: 'expensive', emoji: '💸', title: '비싼 몸', desc: BADGE_DEFINITIONS.find(b => b.id === 'expensive')?.desc ?? '', color: 'gradient', earned: followRatio >= 10000 });
-
+  list.push({ id: 'platinum',  emoji: D('platinum').emoji,  title: D('platinum').title,  desc: D('platinum').desc ?? '',  color: 'slate',  earned: platinumChars.length > 0,    chars: platinumChars.map(c => c.name), progress: platinumChars.length === 0 ? { current: maxSingleChar, max: 1000000, label: '최고 캐릭터 대화수' } : undefined });
+  list.push({ id: 'char_10m',  emoji: D('char_10m').emoji,  title: D('char_10m').title,  desc: D('char_10m').desc ?? '',  color: D('char_10m').color || 'teal', earned: maxSingleChar >= 10000000, progress: maxSingleChar < 10000000 ? { current: maxSingleChar, max: 10000000, label: '최고 캐릭터 대화수' } : undefined });
   const zeta100MChars = characters.filter(c => (c.interactionCount || 0) >= 100000000);
-  const maxSingleChar = characters.reduce((max, c) => Math.max(max, c.interactionCount || 0), 0);
-  list.push({ id: '100m_zeta', emoji: '🌟', title: '1억제타', desc: BADGE_DEFINITIONS.find(b => b.id === '100m_zeta')?.desc ?? '', color: 'rose', earned: zeta100MChars.length > 0, chars: zeta100MChars.map(c => c.name), progress: zeta100MChars.length === 0 && maxSingleChar > 0 ? { current: maxSingleChar, max: 100000000, label: '최고 캐릭터 대화수' } : undefined });
+  list.push({ id: '100m_zeta', emoji: D('100m_zeta').emoji, title: D('100m_zeta').title, desc: D('100m_zeta').desc ?? '', color: 'rose',   earned: zeta100MChars.length > 0, chars: zeta100MChars.map(c => c.name), progress: zeta100MChars.length === 0 && maxSingleChar > 0 ? { current: maxSingleChar, max: 100000000, label: '최고 캐릭터 대화수' } : undefined });
+  const hattrickChars = charactersWithInteraction(characters, 1000000);
+  list.push({ id: 'hattrick',  emoji: D('hattrick').emoji,  title: D('hattrick').title,  desc: D('hattrick').desc ?? '',  color: 'indigo', earned: hattrickChars.length >= 3, chars: hattrickChars.map(c => c.name), progress: hattrickChars.length < 3 ? { current: hattrickChars.length, max: 3, label: '100만+ 캐릭터' } : undefined });
 
-  list.push({ id: 'iljin', emoji: '🏀', title: '일진', desc: BADGE_DEFINITIONS.find(b => b.id === 'iljin')?.desc ?? '', color: 'orange', earned: tagSet.has('일진'), chars: charsWithTag(characters, '일진') });
-  list.push({ id: 'jjindda', emoji: '🚶', title: '찐따', desc: BADGE_DEFINITIONS.find(b => b.id === 'jjindda')?.desc ?? '', color: 'slate', earned: tagSet.has('찐따'), chars: charsWithTag(characters, '찐따') });
-  list.push({ id: 'hero', emoji: '🦸', title: '취미일 뿐', desc: BADGE_DEFINITIONS.find(b => b.id === 'hero')?.desc ?? '', color: 'amber', earned: tagSet.has('히어로'), chars: charsWithTag(characters, '히어로') });
-  list.push({ id: 'academy', emoji: '🎓', title: '아카데미', desc: BADGE_DEFINITIONS.find(b => b.id === 'academy')?.desc ?? '', color: 'indigo', earned: tagSet.has('아카데미'), chars: charsWithTag(characters, '아카데미') });
-  list.push({ id: 'hyeongwan', emoji: '🖤', title: '혐관', desc: BADGE_DEFINITIONS.find(b => b.id === 'hyeongwan')?.desc ?? '', color: 'slate', earned: tagSet.has('혐관'), chars: charsWithTag(characters, '혐관') });
-  list.push({ id: 'pipye', emoji: '😵', title: '피폐', desc: BADGE_DEFINITIONS.find(b => b.id === 'pipye')?.desc ?? '', color: 'violet', earned: tagSet.has('피폐'), chars: charsWithTag(characters, '피폐') });
-  list.push({ id: 'sihanbu', emoji: '💧', title: '시한부', desc: BADGE_DEFINITIONS.find(b => b.id === 'sihanbu')?.desc ?? '', color: 'red', earned: tagSet.has('시한부'), chars: charsWithTag(characters, '시한부') });
-  list.push({ id: 'guwon', emoji: '🩹', title: '구원', desc: BADGE_DEFINITIONS.find(b => b.id === 'guwon')?.desc ?? '', color: 'emerald', earned: tagSet.has('구원'), chars: charsWithTag(characters, '구원') });
+  // ─── 팔로워 ───
+  list.push({ id: 'follower_100', emoji: D('follower_100').emoji, title: D('follower_100').title, desc: D('follower_100').desc ?? '', color: 'blue',     earned: followers >= 100,   progress: followers < 100   ? { current: followers, max: 100,   label: '팔로워' } : undefined });
+  list.push({ id: 'follower_1k',  emoji: D('follower_1k').emoji,  title: D('follower_1k').title,  desc: D('follower_1k').desc ?? '',  color: 'amber',    earned: followers >= 1000,  progress: followers < 1000  ? { current: followers, max: 1000,  label: '팔로워' } : undefined });
+  list.push({ id: 'follower_5k',  emoji: D('follower_5k').emoji,  title: D('follower_5k').title,  desc: D('follower_5k').desc ?? '',  color: 'yellow',   earned: followers >= 5000,  progress: followers < 5000  ? { current: followers, max: 5000,  label: '팔로워' } : undefined });
+  list.push({ id: 'superstar',    emoji: D('superstar').emoji,    title: D('superstar').title,    desc: D('superstar').desc ?? '',    color: 'gradient', earned: followers >= 10000, progress: followers < 10000 ? { current: followers, max: 10000, label: '팔로워' } : undefined });
 
-  const MEDIA_SET = new Set([
-    '블루아카이브', '원신', '명일방주', '붕괴', '페이트', '우마무스메', '명조', '니케',
-    '블루아카', '롤', '리그오브레전드', '코난', '주술회전', '하이큐', '귀멸의칼날',
-    '해리포터', '마블', '디시', 'dc'
-  ]);
-  const hasNo2nd = !characters.some(c => (c.hashtags || c.tags || []).some(t => MEDIA_SET.has(t.toLowerCase())));
+  // ─── 제작 이력 ───
+  list.push({ id: 'fertile',   emoji: '🌾', title: '다산의 상징', desc: BADGE_DEFINITIONS.find(b => b.id === 'fertile')?.desc ?? '',   color: 'lime',  earned: characters.length >= 100, progress: characters.length < 100 ? { current: characters.length, max: 100, label: '캐릭터' } : undefined });
+  list.push({ id: 'factory',   emoji: '🏭', title: '공장장',      desc: BADGE_DEFINITIONS.find(b => b.id === 'factory')?.desc ?? '',   color: 'slate', earned: characters.length >= 150, progress: characters.length < 150 ? { current: characters.length, max: 150, label: '캐릭터' } : undefined });
+  const privateCount = characters.filter(c => !c.isLongDescriptionPublic).length;
+  list.push({ id: 'secret',    emoji: '🤫', title: '신비주의',    desc: BADGE_DEFINITIONS.find(b => b.id === 'secret')?.desc ?? '',    color: 'slate', earned: characters.length >= 5 && (privateCount / characters.length) >= 0.8 });
+
+  // ─── 태그 ───
+  list.push({ id: 'sunae',     emoji: '💕', title: '순애보',      desc: BADGE_DEFINITIONS.find(b => b.id === 'sunae')?.desc ?? '',     color: 'pink',    earned: hasSunae && !hasNtr, chars: sunaeChars });
+  list.push({ id: 'ntr',       emoji: '💔', title: '사랑 파괴자', desc: BADGE_DEFINITIONS.find(b => b.id === 'ntr')?.desc ?? '',       color: 'red',     earned: hasNtr, chars: charsWithAnyTag(characters, ntrTags) });
+  const fantasyChars = charsWithAnyTag(characters, ['판타지', '마법', '기사', '마왕', '용사', '엘프', '드래곤']);
+  list.push({ id: 'fantasy',   emoji: '🗡️', title: '판타지',      desc: BADGE_DEFINITIONS.find(b => b.id === 'fantasy')?.desc ?? '',   color: 'indigo',  earned: fantasyChars.length > 0, chars: fantasyChars });
+  const cyberChars = charsWithAnyTag(characters, ['사이버펑크', 'cyberpunk']);
+  list.push({ id: 'cyber',     emoji: '⚡', title: '사펑',         desc: BADGE_DEFINITIONS.find(b => b.id === 'cyber')?.desc ?? '',     color: 'gradient',earned: cyberChars.length > 0, chars: cyberChars });
+  const mesuChars = charsWithAnyTag(characters, ['메스가키', '소악마', '도발']);
+  list.push({ id: 'guwon',     emoji: '🩹', title: '구원',         desc: BADGE_DEFINITIONS.find(b => b.id === 'guwon')?.desc ?? '',    color: 'emerald', earned: tagSet.has('구원'), chars: charsWithTag(characters, '구원') });
+
+  // ─── 개그 태그 (bonus) ───
+  const truckChars = charsWithAnyTag(characters, ['이세계', '환생', '회귀', '환생이세계']);
+  list.push({ id: 'truck',  emoji: '🚛', title: '트럭 주의',   desc: BADGE_DEFINITIONS.find(b => b.id === 'truck')?.desc ?? '',  color: 'orange',  earned: truckChars.length > 0, chars: truckChars });
+  const yethwiChars = charsWithTag(characters, '회귀');
+  list.push({ id: 'yethwi', emoji: '🔄', title: '또 회귀함',   desc: BADGE_DEFINITIONS.find(b => b.id === 'yethwi')?.desc ?? '', color: 'violet',  earned: yethwiChars.length > 0, chars: yethwiChars });
+  const healerChars = charsWithAnyTag(characters, ['치유', '힐링']);
+  list.push({ id: 'healer', emoji: '💊', title: '전문 힐러',   desc: BADGE_DEFINITIONS.find(b => b.id === 'healer')?.desc ?? '', color: 'emerald', earned: healerChars.length > 0, chars: healerChars });
+
+  const saikaiChars = charsWithTag(characters, '재회');
+  list.push({ id: 'saikai', emoji: '💌', title: 'S is not..', desc: BADGE_DEFINITIONS.find(b => b.id === 'saikai')?.desc ?? '', color: 'rose',  earned: saikaiChars.length > 0, chars: saikaiChars });
+  const robotChars = charsWithAnyTag(characters, ['로봇', '안드로이드']);
+  list.push({ id: 'robot',  emoji: '🤖', title: '텅텅이',       desc: BADGE_DEFINITIONS.find(b => b.id === 'robot')?.desc ?? '',  color: 'slate', earned: robotChars.length > 0,  chars: robotChars });
+
+    const hasNo2nd = !characters.some(c => (c.hashtags || c.tags || []).some(t => MEDIA_SET.has(t.toLowerCase())));
   list.push({ id: 'original', emoji: '✨', title: '오리지널', desc: BADGE_DEFINITIONS.find(b => b.id === 'original')?.desc ?? '', color: 'sky', earned: hasNo2nd && characters.length > 0 });
 
-  return list;
+
+  // BADGE_DEFINITIONS에서 category 필드 매핑 (list.push마다 category를 넣지 않았으므로 여기서 보완)
+  const BADGE_CAT_MAP = Object.fromEntries(BADGE_DEFINITIONS.map(b => [b.id, b.category || 'tag']));
+  return list.map(item => ({ ...item, category: BADGE_CAT_MAP[item.id] || 'tag' }));
 }
