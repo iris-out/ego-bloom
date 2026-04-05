@@ -41,15 +41,18 @@ export default async function handler(req, res) {
 
     const user = users[0];
 
-    // 이 유저보다 ELO가 높은 수 + 1 = 순위
-    const { count, error: rankErr } = await supabase
-      .from('account_current')
-      .select('*', { count: 'exact', head: true })
-      .gt('elo_score', user.elo_score);
+    // 이 유저보다 ELO가 높은 수 + 1 = 순위, 전체 수도 함께
+    const [rankRes, totalRes] = await Promise.all([
+      supabase.from('account_current').select('*', { count: 'exact', head: true }).gt('elo_score', user.elo_score),
+      supabase.from('account_current').select('*', { count: 'exact', head: true }),
+    ]);
 
-    if (rankErr) throw rankErr;
+    if (rankRes.error) throw rankRes.error;
 
-    return res.status(200).json({ user, rank: (count ?? 0) + 1 });
+    const rank = (rankRes.count ?? 0) + 1;
+    const total = totalRes.count ?? 0;
+
+    return res.status(200).json({ user, rank, total });
   } catch (error) {
     console.error('API Error:', error);
     return res.status(500).json({ error: 'Internal Server Error', details: error.message });

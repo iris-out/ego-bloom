@@ -45,6 +45,9 @@ export default function EmergencyToast({ status, message }) {
         </div>
         
         <div className="flex-1 min-w-0 pr-1">
+          <p className="text-[9px] font-bold uppercase tracking-[0.12em] mb-1" style={{ color: accentColor }}>
+            ZETA AI의 메시지
+          </p>
           <p className="text-[13px] font-semibold text-white/95 leading-snug break-keep">
             {message}
           </p>

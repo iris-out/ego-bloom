@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, ChevronRight, Database, AlertTriangle, Lock } from 'lucide-react';
 import { useServerStatus } from '../hooks/useServerStatus';
@@ -13,6 +13,82 @@ import { getRecentSearches, removeRecentSearch } from '../utils/storage';
 import { APP_VERSION } from '../data/changelog';
 import { getCreatorTier } from '../utils/tierCalculator';
 import TierIcon from '../components/ui/TierIcon';
+
+// 고정된 별 위치 (매 렌더마다 재생성 방지)
+const STAR_DATA = Array.from({ length: 72 }, (_, i) => ({
+  id: i,
+  x: ((i * 13.73 + 7.31) % 97) + 1.5,
+  y: ((i * 7.11 + 3.91) % 78) + 1,
+  size: i % 5 === 0 ? 1.8 : i % 3 === 0 ? 1.2 : 0.9,
+  baseOpacity: 0.12 + (i % 7) * 0.05,
+  peakOpacity: 0.35 + (i % 5) * 0.1,
+  dur: 2.4 + (i % 6) * 0.55,
+  delay: (i % 9) * 0.45,
+}));
+
+function StarField({ globalOpacity = 1 }) {
+  if (globalOpacity === 0) return null;
+  return (
+    <div className="absolute inset-0 overflow-hidden" style={{ opacity: globalOpacity, transition: 'opacity 1.5s ease' }}>
+      {STAR_DATA.map(s => (
+        <div
+          key={s.id}
+          className="absolute rounded-full bg-white star-twinkle"
+          style={{
+            left: `${s.x}%`,
+            top: `${s.y}%`,
+            width: `${s.size}px`,
+            height: `${s.size}px`,
+            '--star-base-opacity': s.baseOpacity,
+            '--star-peak-opacity': s.peakOpacity,
+            '--star-dur': `${s.dur}s`,
+            animationDelay: `${s.delay}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// 현재 시간대 계산 (로컬 시간 기준)
+function getTimeSegment() {
+  const h = new Date().getHours();
+  if (h >= 21 || h < 4)  return 'night';    // 밤 — 별 가득, 어두운 남색
+  if (h >= 4  && h < 7)  return 'dawn';     // 새벽 — 살짝 밝아짐, 별 희미
+  if (h >= 7  && h < 18) return 'day';      // 낮 — 별 없음, 밝은 네이비
+  return 'evening';                          // 저녁 — 노을 glow, 별 등장 시작
+}
+
+const TIME_BG = {
+  night: {
+    base:    'linear-gradient(to bottom, #04091A 0%, #081530 22%, #0C1D45 45%, #111840 68%, #0E1228 100%)',
+    horizon: 'radial-gradient(ellipse 130% 80% at 50% 115%, rgba(220,110,50,0.07) 0%, rgba(160,70,120,0.05) 40%, transparent 70%)',
+    topGlow: 'radial-gradient(ellipse, rgba(35,80,200,0.20) 0%, transparent 70%)',
+    extra:   null,
+    stars:   1,
+  },
+  dawn: {
+    base:    'linear-gradient(to bottom, #071427 0%, #0D1D40 22%, #102450 45%, #0E1E40 68%, #091324 100%)',
+    horizon: 'radial-gradient(ellipse 120% 70% at 50% 115%, rgba(130,190,255,0.09) 0%, rgba(80,130,220,0.05) 40%, transparent 70%)',
+    topGlow: 'radial-gradient(ellipse, rgba(70,120,230,0.18) 0%, transparent 70%)',
+    extra:   'radial-gradient(ellipse 70% 30% at 50% 0%, rgba(120,190,255,0.07) 0%, transparent 100%)',
+    stars:   0.3,
+  },
+  day: {
+    base:    'linear-gradient(to bottom, #0A1428 0%, #0E1C38 28%, #102248 55%, #0C1A36 100%)',
+    horizon: null,
+    topGlow: 'radial-gradient(ellipse, rgba(40,90,200,0.15) 0%, transparent 70%)',
+    extra:   null,
+    stars:   0,
+  },
+  evening: {
+    base:    'linear-gradient(to bottom, #04091A 0%, #081530 22%, #0C1D45 45%, #111840 68%, #0E1228 100%)',
+    horizon: 'radial-gradient(ellipse 150% 100% at 50% 120%, rgba(235,118,38,0.20) 0%, rgba(190,75,50,0.13) 35%, transparent 65%)',
+    topGlow: 'radial-gradient(ellipse, rgba(35,80,200,0.20) 0%, transparent 70%)',
+    extra:   'radial-gradient(ellipse 60% 35% at 30% 80%, rgba(200,85,25,0.09) 0%, transparent 80%)',
+    stars:   0.55,
+  },
+};
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -65,11 +141,38 @@ export default function HomePage() {
   return (
     <div className="min-h-[100dvh] flex flex-col relative overflow-hidden">
       <EmergencyToast status={serverStatus} message={serverMessage} />
-      {/* 배경 글로우 */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[rgba(121,155,196,0.15)] rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[60%] bg-[rgba(65,30,110,0.25)] rounded-full blur-[120px]" />
-      </div>
+      {/* 시간대별 동적 배경 */}
+      {(() => {
+        const seg = getTimeSegment();
+        const cfg = TIME_BG[seg];
+        return (
+          <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+            {/* 기본 하늘 그라디언트 */}
+            <div className="absolute inset-0" style={{ background: cfg.base }} />
+            {/* 지평선 glow (시간대별) */}
+            {cfg.horizon && (
+              <div className="absolute bottom-0 left-0 right-0" style={{
+                height: '55%',
+                background: cfg.horizon,
+              }} />
+            )}
+            {/* 상단 대기 글로우 */}
+            <div className="absolute top-[-10%] left-[-15%] w-[55%] h-[55%]" style={{
+              background: cfg.topGlow,
+            }} />
+            {/* 추가 glow (새벽/저녁) */}
+            {cfg.extra && (
+              <div className="absolute inset-0" style={{ background: cfg.extra }} />
+            )}
+            {/* 오른쪽 심야 보조 */}
+            <div className="absolute top-[20%] right-[-10%] w-[45%] h-[50%]" style={{
+              background: 'radial-gradient(ellipse, rgba(15,40,130,0.14) 0%, transparent 70%)',
+            }} />
+            {/* 별들 (낮에는 숨김) */}
+            <StarField globalOpacity={cfg.stars} />
+          </div>
+        );
+      })()}
 
       {/* 메인 콘텐츠 */}
       <div className="flex flex-col flex-1 px-6 pt-8 pb-[140px] lg:pb-16 relative z-10 max-w-[680px] mx-auto w-full lg:max-w-[1280px] lg:px-[10%]">
@@ -92,11 +195,13 @@ export default function HomePage() {
             {/* 서버 상태 */}
             {(() => {
               const color = serverStatus === 'ok' ? '#6CD97E' : serverStatus === 'warning' ? '#FBBF24' : serverStatus === 'checking' ? 'rgba(255,255,255,0.3)' : '#F87171';
-              const label = serverStatus === 'ok' ? 'ZETA 서버 정상' : serverStatus === 'warning' ? 'ZETA 서버 불안정' : serverStatus === 'checking' ? 'ZETA 서버 확인 중' : 'ZETA 서버 이상';
+              const fullLabel = serverStatus === 'ok' ? 'ZETA 서버 정상' : serverStatus === 'warning' ? 'ZETA 서버 불안정' : serverStatus === 'checking' ? 'ZETA 서버 확인 중' : 'ZETA 서버 이상';
+              const shortStatus = serverStatus === 'ok' ? '정상' : serverStatus === 'warning' ? '불안정' : serverStatus === 'checking' ? '확인 중' : '이상';
               return (
                 <div className="flex items-center gap-1.5 text-[11px] font-medium text-white/50 tracking-wide">
                   <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color, boxShadow: `0 0 6px ${color}88` }} />
-                  <span className="hidden sm:inline">{label}</span>
+                  <span className="sm:hidden">ZETA : {shortStatus}</span>
+                  <span className="hidden sm:inline">{fullLabel}</span>
                 </div>
               );
             })()}
@@ -104,7 +209,7 @@ export default function HomePage() {
               onClick={() => setShowDataModal(true)}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors text-[11px] font-medium text-white/70 tracking-wider"
             >
-              <Database size={11} className="text-purple-400" />
+              <Database size={11} className="text-blue-400" />
               <span className="hidden sm:inline">데이터 수집</span>
             </button>
           </div>
@@ -141,35 +246,6 @@ export default function HomePage() {
               </p>
             </section>
 
-            {/* 검색 전 주의사항 Pill */}
-            <div className="mb-6 animate-fade-in-up" style={{ animationDelay: '120ms' }}>
-              <button
-                onClick={() => setShowWarningModal(true)}
-                className={`flex items-center justify-between w-full p-4 rounded-2xl border transition-all group ${
-                  hasAgreedToWarning 
-                    ? 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06]' 
-                    : 'bg-orange-500/5 border-orange-500/20 hover:bg-orange-500/10'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl ${hasAgreedToWarning ? 'bg-white/5 text-white/40' : 'bg-orange-500/10 text-orange-400'}`}>
-                    <AlertTriangle size={18} />
-                  </div>
-                  <div className="text-left">
-                    <div className={`text-[14px] font-bold ${hasAgreedToWarning ? 'text-white/80' : 'text-orange-400'}`}>
-                      검색 전 주의사항 (필독)
-                    </div>
-                    <div className="text-[11px] text-white/40 mt-0.5">
-                      {hasAgreedToWarning ? '가이드라인에 동의했습니다' : '검색 기능을 이용하기 위해 동의가 필요합니다'}
-                    </div>
-                  </div>
-                </div>
-                <div className={`p-1.5 rounded-lg transition-colors ${hasAgreedToWarning ? 'text-white/20' : 'bg-orange-500/10 text-orange-400'}`}>
-                  <ChevronRight size={16} />
-                </div>
-              </button>
-            </div>
-
             {/* Zeta 소식 & 공지사항 (히어로 아래) */}
             <div className="mb-10 animate-fade-in-up" style={{ animationDelay: '140ms' }}>
               <ZetaBanners />
@@ -187,27 +263,23 @@ export default function HomePage() {
                 {topCreators.length > 0 ? topCreators.map((creator, i) => {
                   const isTop3 = i < 3;
                   const rankColors = ['text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]', 'text-gray-300 drop-shadow-[0_0_8px_rgba(209,213,219,0.5)]', 'text-amber-600 drop-shadow-[0_0_8px_rgba(217,119,6,0.5)]'];
+                  const tierData = getCreatorTier(creator.elo_score ?? 0);
                   return (
-                    <li key={creator.id} onClick={() => navigate(`/?creator=${creator.handle || creator.id}`)}
-                        className="flex items-center p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.08] cursor-pointer transition-all">
-                      <span className={`font-display italic text-[20px] w-8 text-center mr-2 ${isTop3 ? rankColors[i] : 'text-white/40'}`}>{i + 1}</span>
+                    <li key={creator.id} onClick={() => navigate(`/profile?creator=${encodeURIComponent(creator.handle ? `@${creator.handle}` : creator.id)}`)}
+                        className="flex items-center p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.08] cursor-pointer transition-all group">
+                      <span className={`w-8 text-center font-bold text-[18px] mr-2 shrink-0 ${isTop3 ? rankColors[i] : 'text-white/40 group-hover:text-white/60'} transition-colors`}>{i + 1}</span>
                       <div className="flex-1 flex flex-col min-w-0">
                         <span className="text-[15px] font-bold text-white tracking-tight truncate">{creator.nickname}</span>
                         <span className="text-[11px] text-white/50 truncate font-mono tracking-wider">ELO {creator.elo_score?.toLocaleString()} pt</span>
                       </div>
-                      {(() => {
-                        const tierData = getCreatorTier(creator.elo_score ?? 0);
-                        return (
-                          <div className="flex flex-col items-center gap-0.5 ml-2 shrink-0">
-                            <div className="w-9 h-9 flex items-center justify-center">
-                              <TierIcon tier={tierData.key} size="100%" />
-                            </div>
-                            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: tierData.color }}>
-                              {tierData.name}{tierData.subdivision ? ` ${tierData.subdivision}` : ''}
-                            </span>
-                          </div>
-                        );
-                      })()}
+                      <div className="flex flex-col items-center gap-0.5 ml-2 shrink-0">
+                        <div className="w-9 h-9 flex items-center justify-center">
+                          <TierIcon tier={tierData.key} size="100%" />
+                        </div>
+                        <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: tierData.color }}>
+                          {tierData.name}{tierData.subdivision ? ` ${tierData.subdivision}` : ''}
+                        </span>
+                      </div>
                     </li>
                   )
                 }) : (
@@ -222,7 +294,7 @@ export default function HomePage() {
             <div className="mb-12 animate-fade-in-up" style={{ animationDelay: '220ms' }}>
               <button
                 onClick={() => navigate('/world')}
-                className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/20 hover:bg-purple-500/20 hover:border-purple-500/40 transition-all text-sm font-medium text-purple-200/80 hover:text-purple-100"
+                className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 hover:bg-blue-500/20 hover:border-blue-400/40 transition-all text-sm font-medium text-blue-200/80 hover:text-blue-100"
               >
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                 오픈월드 탐험하기 (Beta)
@@ -236,12 +308,15 @@ export default function HomePage() {
               </div>
               <ul className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-x-4">
                 {topTags.length > 0 ? topTags.map((item, i) => (
-                  <li key={item.tag} className="flex items-center py-3.5 border-b border-white/[0.03] last:border-b-0 lg:border-b-0 lg:py-3">
-                    <span className="font-display italic text-[24px] text-white/40 w-8 text-left">{i + 1}</span>
+                  <li key={item.tag}
+                    onClick={() => navigate('/ranking?tab=trend')}
+                    className="flex items-center py-3.5 border-b border-white/[0.03] last:border-b-0 lg:border-b-0 lg:py-3 cursor-pointer group hover:bg-white/[0.03] rounded-lg px-1 transition-all">
+                    <span className="font-display italic text-[24px] text-white/40 w-8 text-left group-hover:text-white/60 transition-colors">{i + 1}</span>
                     <div className="flex-1 flex flex-col gap-0.5 ml-1 min-w-0">
-                      <span className="text-[16px] font-medium text-white tracking-[-0.01em] truncate">#{item.tag}</span>
+                      <span className="text-[16px] font-medium text-white tracking-[-0.01em] truncate group-hover:text-[var(--accent)] transition-colors">#{item.tag}</span>
                       <span className="text-[12px] text-white/70 font-light">스코어 {item.score?.toLocaleString()}</span>
                     </div>
+                    <ChevronRight size={14} className="text-white/20 group-hover:text-[var(--accent)] transition-colors shrink-0" />
                   </li>
                 )) : (
                   [1, 2, 3].map(i => (
@@ -276,12 +351,70 @@ export default function HomePage() {
                 </div>
               </section>
             )}
+
           </div>
 
-          {/* 오른쪽: 내 프로필 카드 (PC에서 sticky) */}
+          {/* 오른쪽: 내 프로필 카드 + 주의사항 (PC에서 sticky) */}
           <div className="mb-10 lg:mb-0 lg:sticky lg:top-8 animate-fade-in-up order-first lg:order-none" style={{ animationDelay: '210ms' }}>
             <MyProfileCard />
+            {/* 검색 전 주의사항 — PC 전용: 내 프로필 카드 아래 */}
+            <div className="hidden lg:block mt-4">
+              <button
+                onClick={() => setShowWarningModal(true)}
+                className={`flex items-center justify-between w-full p-4 rounded-2xl border transition-all group ${
+                  hasAgreedToWarning
+                    ? 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06]'
+                    : 'bg-orange-500/5 border-orange-500/20 hover:bg-orange-500/10'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl ${hasAgreedToWarning ? 'bg-white/5 text-white/40' : 'bg-orange-500/10 text-orange-400'}`}>
+                    <AlertTriangle size={18} />
+                  </div>
+                  <div className="text-left">
+                    <div className={`text-[14px] font-bold ${hasAgreedToWarning ? 'text-white/80' : 'text-orange-400'}`}>
+                      검색 전 주의사항 (필독)
+                    </div>
+                    <div className="text-[11px] text-white/40 mt-0.5">
+                      {hasAgreedToWarning ? '가이드라인에 동의했습니다' : '검색 기능을 이용하기 위해 동의가 필요합니다'}
+                    </div>
+                  </div>
+                </div>
+                <div className={`p-1.5 rounded-lg transition-colors ${hasAgreedToWarning ? 'text-white/20' : 'bg-orange-500/10 text-orange-400'}`}>
+                  <ChevronRight size={16} />
+                </div>
+              </button>
+            </div>
           </div>
+        </div>
+
+        {/* 검색 전 주의사항 — 모바일 전용: footer 바로 위 */}
+        <div className="lg:hidden mt-6 animate-fade-in-up" style={{ animationDelay: '320ms' }}>
+          <button
+            onClick={() => setShowWarningModal(true)}
+            className={`flex items-center justify-between w-full p-4 rounded-2xl border transition-all group ${
+              hasAgreedToWarning
+                ? 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06]'
+                : 'bg-orange-500/5 border-orange-500/20 hover:bg-orange-500/10'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-xl ${hasAgreedToWarning ? 'bg-white/5 text-white/40' : 'bg-orange-500/10 text-orange-400'}`}>
+                <AlertTriangle size={18} />
+              </div>
+              <div className="text-left">
+                <div className={`text-[14px] font-bold ${hasAgreedToWarning ? 'text-white/80' : 'text-orange-400'}`}>
+                  검색 전 주의사항 (필독)
+                </div>
+                <div className="text-[11px] text-white/40 mt-0.5">
+                  {hasAgreedToWarning ? '가이드라인에 동의했습니다' : '검색 기능을 이용하기 위해 동의가 필요합니다'}
+                </div>
+              </div>
+            </div>
+            <div className={`p-1.5 rounded-lg transition-colors ${hasAgreedToWarning ? 'text-white/20' : 'bg-orange-500/10 text-orange-400'}`}>
+              <ChevronRight size={16} />
+            </div>
+          </button>
         </div>
 
         {/* Footer */}

@@ -121,10 +121,10 @@ export default function StatsTab({ stats, characters }) {
   }, [characters]);
 
   return (
-    <div className="space-y-4 animate-fade-in-up">
+    <div className="space-y-4">
       {/* 심화 수치 3종 */}
       {advanced && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="stagger-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
           <StatCard
             label="매혹도"
             value={advanced.loyaltyRatio.toFixed(1)}
@@ -145,7 +145,7 @@ export default function StatsTab({ stats, characters }) {
 
       {/* 해시태그 다양성 레이더 */}
       {hashtagRadarData.length > 0 && (
-        <div className="card p-4 sm:p-5">
+        <div className="stagger-2 card p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="text-sm font-semibold text-[var(--text-secondary)]">해시태그 다양성</h3>
             <button
@@ -190,7 +190,7 @@ export default function StatsTab({ stats, characters }) {
                     );
                   }}
                 />
-                <Radar dataKey="value" stroke="#a855f7" strokeWidth={2} fill="#a855f7" fillOpacity={0.25} />
+                <Radar dataKey="value" stroke="#4A7FFF" strokeWidth={2} fill="#4A7FFF" fillOpacity={0.25} />
               </RadarChart>
             </ResponsiveContainer>
           </div>
@@ -199,7 +199,7 @@ export default function StatsTab({ stats, characters }) {
 
       {/* 태그별 평균 대화량 */}
       {tagAvgData.length > 0 && (
-        <div className="glass-card-sm p-4 sm:p-5">
+        <div className="stagger-3 glass-card-sm p-4 sm:p-5">
           <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-4">태그별 평균 대화량</h3>
           <div className="space-y-2">
             {tagAvgData.map(({ tag, avg, pct }) => (
@@ -218,6 +218,56 @@ export default function StatsTab({ stats, characters }) {
           <p className="text-[10px] text-[var(--text-tertiary)] mt-3">2개 이상 보유한 태그만 표시 · 태그 보유 캐릭터 기준 평균</p>
         </div>
       )}
+
+      {/* 태그 보유 비율 */}
+      <TagRatioChart characters={characters} />
+    </div>
+  );
+}
+
+function TagRatioChart({ characters }) {
+  const data = useMemo(() => {
+    if (!characters?.length) return [];
+    const total = characters.length;
+    const counts = {};
+    characters.forEach(c => {
+      const seen = new Set();
+      (c.hashtags || c.tags || []).forEach(tag => {
+        const t = String(tag).trim();
+        if (!t || seen.has(t)) return;
+        seen.add(t);
+        counts[t] = (counts[t] || 0) + 1;
+      });
+    });
+    return Object.entries(counts)
+      .map(([tag, count]) => ({ tag, count, pct: (count / total) * 100 }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 20);
+  }, [characters]);
+
+  if (!data.length) return null;
+
+  return (
+    <div className="stagger-4 glass-card-sm p-4 sm:p-5">
+      <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-1">태그 보유 비율</h3>
+      <p className="text-[10px] text-[var(--text-tertiary)] mb-4">전체 캐릭터 중 해당 태그를 보유한 비율 (상위 20개)</p>
+      <div className="space-y-1.5">
+        {data.map(({ tag, count, pct }) => (
+          <div key={tag} className="flex items-center gap-2">
+            <span className="text-[10px] text-[var(--text-secondary)] w-[88px] text-right shrink-0 truncate">#{tag}</span>
+            <div className="flex-1 h-4 bg-[var(--bg-secondary)] rounded-sm overflow-hidden">
+              <div
+                className="h-full rounded-sm transition-all duration-700"
+                style={{ width: `${pct}%`, background: 'var(--accent)', opacity: 0.7 }}
+              />
+            </div>
+            <span className="text-[10px] font-mono text-[var(--text-tertiary)] w-12 text-right shrink-0">
+              {pct.toFixed(1)}%
+            </span>
+          </div>
+        ))}
+      </div>
+      <p className="text-[10px] text-[var(--text-tertiary)] mt-3">캐릭터당 1회 집계 · 전체 {characters?.length ?? 0}개 기준</p>
     </div>
   );
 }

@@ -4,9 +4,54 @@ import { computeEarnedTitles } from '../data/badges';
 import { ChevronRight, Globe, Crown, Medal, BarChart3, Tag, PartyPopper, CheckCircle2, Lock, TrendingUp } from 'lucide-react';
 import { proxyImageUrl } from '../utils/imageUtils';
 
-// ===== 격려 메시지 (카드 위에 표시) =====
-export function EncouragementBanner({ tier, characters, stats }) {
-    return null;
+// ===== 격려 배너 — 가장 가까운 미획득 칭호 2개 표시 =====
+export function EncouragementBanner({ characters, stats }) {
+    const near = useMemo(() => {
+        const all = computeEarnedTitles({ characters, stats });
+        return all
+            .filter(t => !t.earned && t.progress && t.progress.max > 0)
+            .map(t => ({ ...t, ratio: t.progress.current / t.progress.max }))
+            .sort((a, b) => b.ratio - a.ratio)
+            .slice(0, 2);
+    }, [characters, stats]);
+
+    if (near.length === 0) return null;
+
+    return (
+        <div className="stagger-1 glass-card-sm p-4 border border-[var(--accent)]/20">
+            <p className="text-[10px] font-bold text-[var(--accent)] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <TrendingUp size={11} /> 이 칭호들이 가까워요
+            </p>
+            <div className="space-y-2.5">
+                {near.map(t => (
+                    <div key={t.title} className="flex items-center gap-3">
+                        <span className="text-lg shrink-0">{t.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-[12px] font-bold text-white/80 truncate">{t.title}</span>
+                                <span className="text-[10px] text-[var(--accent)] font-mono shrink-0 ml-2">
+                                    {Math.round(t.ratio * 100)}%
+                                </span>
+                            </div>
+                            <div className="h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
+                                <div
+                                    className="h-full rounded-full"
+                                    style={{
+                                        width: `${Math.round(t.ratio * 100)}%`,
+                                        background: `linear-gradient(to right, var(--accent), var(--accent-bright))`,
+                                        transition: 'width 1s cubic-bezier(0.4,0,0.2,1)',
+                                    }}
+                                />
+                            </div>
+                            <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">
+                                {t.progress.label}: {t.progress.current.toLocaleString()} / {t.progress.max.toLocaleString()}
+                            </p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 }
 
 // ===== 칭호/랭킹 탭 (단일 소스: src/data/badges.js) =====
@@ -15,6 +60,13 @@ export default function AchievementsTab({ stats, characters }) {
         () => computeEarnedTitles({ characters, stats }),
         [characters, stats]
     );
+
+    // A5: 진행 바 마운트 애니메이션용
+    const [barReady, setBarReady] = useState(false);
+    useEffect(() => {
+        const t = setTimeout(() => setBarReady(true), 100);
+        return () => clearTimeout(t);
+    }, []);
 
     const [rankingUpdatedAt, setRankingUpdatedAt] = useState(null);
 
@@ -65,11 +117,11 @@ export default function AchievementsTab({ stats, characters }) {
                         : `${c.bg} ${c.border} shadow-sm`
                     : 'bg-[var(--bg-secondary)]/30 border-white/[0.08] opacity-60'
                     }`}
-                style={t.earned && isGradient ? { background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(59,130,246,0.15))' } : {}}
+                style={t.earned && isGradient ? { background: 'linear-gradient(135deg, rgba(74,127,255,0.15), rgba(59,130,246,0.15))' } : {}}
             >
                 <div className={`text-xl shrink-0 mt-0.5 ${!t.earned ? 'grayscale' : ''}`}>{t.emoji}</div>
                 <div className="flex-1 min-w-0">
-                    <div className={`text-[13px] font-bold leading-tight ${t.earned ? (isGradient ? 'text-purple-300' : c.text) : 'text-white/40'}`}>
+                    <div className={`text-[13px] font-bold leading-tight ${t.earned ? (isGradient ? 'text-blue-300' : c.text) : 'text-white/40'}`}>
                         {t.title}
                     </div>
                     <div className="text-[11px] text-[var(--text-tertiary)] mt-1 leading-relaxed">
@@ -86,8 +138,12 @@ export default function AchievementsTab({ stats, characters }) {
                             </div>
                             <div className="h-1 bg-white/[0.08] rounded-full overflow-hidden">
                                 <div
-                                    className="h-full rounded-full bg-[var(--accent)] transition-all"
-                                    style={{ width: `${Math.min(100, (t.progress.current / t.progress.max) * 100)}%`, opacity: 0.7 }}
+                                    className="h-full rounded-full bg-[var(--accent)]"
+                                    style={{
+                                        width: barReady ? `${Math.min(100, (t.progress.current / t.progress.max) * 100)}%` : '0%',
+                                        opacity: 0.7,
+                                        transition: 'width 0.9s cubic-bezier(0.4,0,0.2,1)',
+                                    }}
                                 />
                             </div>
                         </div>
@@ -95,7 +151,7 @@ export default function AchievementsTab({ stats, characters }) {
                 </div>
                 {t.earned && (
                     <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${isGradient ? '' : c.dot}`}
-                        style={isGradient ? { background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' } : {}}
+                        style={isGradient ? { background: 'linear-gradient(135deg, #4A7FFF, #3B82F6)' } : {}}
                     >
                         <span className="text-white text-[10px] font-bold">✓</span>
                     </div>
@@ -105,7 +161,10 @@ export default function AchievementsTab({ stats, characters }) {
     };
 
     return (
-        <div className="space-y-4 animate-fade-in-up pb-8">
+        <div className="space-y-4 pb-8">
+            {/* B3: 격려 배너 — 미획득 중 가장 가까운 칭호 */}
+            <EncouragementBanner characters={characters} stats={stats} />
+
             {/* 글로벌 랭킹 섹션 */}
             {(() => {
                 const ranked = (characters || [])
@@ -120,7 +179,7 @@ export default function AchievementsTab({ stats, characters }) {
                 const rest = ranked.slice(3);
 
                 return (
-                    <div className="glass-card-sm p-4">
+                    <div className="stagger-1 glass-card-sm p-4">
                         <div className="flex items-center justify-between mb-3">
                             <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
                                 <Globe size={14} className="text-violet-400" /> <span>글로벌 랭킹</span>
@@ -234,7 +293,7 @@ export default function AchievementsTab({ stats, characters }) {
             })()}
 
             {/* 칭호 요약 */}
-            <div className="glass-card-sm p-4 sm:p-5">
+            <div className="stagger-2 glass-card-sm p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
                         <Tag size={14} className="text-[var(--text-tertiary)]" /> <span>칭호</span>
@@ -243,7 +302,7 @@ export default function AchievementsTab({ stats, characters }) {
                 </div>
                 <div className="w-full h-2 bg-[var(--bg-secondary)] rounded-full overflow-hidden">
                     <div
-                        className="h-full bg-gradient-to-r from-[var(--accent)] to-purple-400 rounded-full transition-all duration-700"
+                        className="h-full bg-gradient-to-r from-[var(--accent)] to-indigo-400 rounded-full transition-all duration-700"
                         style={{ width: `${titles.length > 0 ? (earned.length / titles.length) * 100 : 0}%` }}
                     />
                 </div>
@@ -257,7 +316,7 @@ export default function AchievementsTab({ stats, characters }) {
 
             {/* 획득한 칭호 */}
             {earned.length > 0 && (
-                <div className="glass-card-sm p-4 sm:p-5">
+                <div className="stagger-3 glass-card-sm p-4 sm:p-5">
                     <h4 className="text-xs font-bold text-[var(--text-secondary)] mb-3 flex items-center gap-1.5">
                         <CheckCircle2 size={14} className="text-emerald-400" /> 획득한 칭호 <span className="text-[var(--accent)]">({earned.length})</span>
                     </h4>
@@ -269,7 +328,7 @@ export default function AchievementsTab({ stats, characters }) {
 
             {/* 미획득 칭호 */}
             {unearned.length > 0 && (
-                <div className="glass-card-sm p-4 sm:p-5">
+                <div className="stagger-4 glass-card-sm p-4 sm:p-5">
                     <h4 className="text-xs font-bold text-[var(--text-tertiary)] mb-3 flex items-center gap-1.5">
                         <Lock size={14} className="text-[var(--text-tertiary)]" /> 미획득 칭호 <span className="opacity-60">({unearned.length})</span>
                     </h4>

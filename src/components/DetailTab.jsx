@@ -8,24 +8,24 @@ import { MessageCircle, Users, BarChart3, Mic2, Zap } from 'lucide-react';
 
 export default function DetailTab({ stats, characters }) {
   return (
-    <div className="space-y-4 animate-fade-in-up">
+    <div className="space-y-4">
       {/* 0. 요약 스탯 그리드 */}
-      <SummaryStatGrid stats={stats} characters={characters} />
+      <div className="stagger-1"><SummaryStatGrid stats={stats} characters={characters} /></div>
 
-      {/* 2. 크리에이터 스탯 레이더 (ProfileHeader에서 이동됨) */}
-      <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl backdrop-blur-sm px-4 sm:px-5 py-3 sm:py-3.5">
+      {/* 2. 크리에이터 스탯 레이더 */}
+      <div className="stagger-2 bg-white/[0.02] border border-white/[0.05] rounded-2xl backdrop-blur-sm px-4 sm:px-5 py-3 sm:py-3.5">
         <h3 className="text-sm font-semibold text-white/70 mb-3">크리에이터 스탯 레이더</h3>
         <CreatorRadarChart stats={stats} characters={characters} />
       </div>
 
-      {/* 3. 생성 히스토리 (GitHub style) */}
-      <ContributionGraph characters={characters} />
+      {/* 3. 생성 히스토리 */}
+      <div className="stagger-3"><ContributionGraph characters={characters} /></div>
 
       {/* 4. 티어 분포 */}
-      <TierDistribution characters={characters} />
+      <div className="stagger-4"><TierDistribution characters={characters} /></div>
 
       {/* 5. 해시태그 클라우드 */}
-      <WordCloud characters={characters} />
+      <div className="stagger-5"><WordCloud characters={characters} /></div>
     </div>
   );
 }

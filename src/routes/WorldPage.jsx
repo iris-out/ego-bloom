@@ -1428,7 +1428,7 @@ export default function WorldPage() {
               <div className="flex items-center justify-between mt-3">
                 <span className="text-white/70 text-xs">미니맵 표시</span>
                 <button onClick={() => setShowMinimap(!showMinimap)}
-                  className={`w-10 h-5 rounded-full transition-colors relative ${showMinimap?'bg-purple-600':'bg-white/10'}`}>
+                  className={`w-10 h-5 rounded-full transition-colors relative ${showMinimap?'bg-blue-600':'bg-white/10'}`}>
                   <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${showMinimap?'left-6':'left-1'}`}/>
                 </button>
               </div>
@@ -1439,7 +1439,7 @@ export default function WorldPage() {
                 <div className="grid grid-cols-4 gap-1">
                   {Object.entries(TIME_LABELS).map(([k,v]) => (
                     <button key={k} onClick={() => setTimeOfDay(k)}
-                      className={`py-1 rounded-lg text-[10px] font-medium transition-colors ${timeOfDay===k?'bg-purple-600 text-white':'bg-white/10 text-white/50 hover:bg-white/20'}`}>
+                      className={`py-1 rounded-lg text-[10px] font-medium transition-colors ${timeOfDay===k?'bg-blue-600 text-white':'bg-white/10 text-white/50 hover:bg-white/20'}`}>
                       {v}
                     </button>
                   ))}
@@ -1465,7 +1465,7 @@ export default function WorldPage() {
                 <div className="flex gap-1">
                   {[['low','낮음'],['medium','보통'],['high','높음']].map(([k,v]) => (
                     <button key={k} onClick={() => setQuality(k)}
-                      className={`flex-1 py-1 rounded-lg text-[10px] font-medium transition-colors ${quality===k?'bg-purple-600 text-white':'bg-white/10 text-white/50 hover:bg-white/20'}`}>
+                      className={`flex-1 py-1 rounded-lg text-[10px] font-medium transition-colors ${quality===k?'bg-blue-600 text-white':'bg-white/10 text-white/50 hover:bg-white/20'}`}>
                       {v}
                     </button>
                   ))}
@@ -1485,7 +1485,7 @@ export default function WorldPage() {
                     { l: '매우빠름', v: 2000 }
                   ].map(s => (
                     <button key={s.v} onClick={() => setAcceleration(s.v)}
-                      className={`py-1 rounded-lg text-[10px] font-medium transition-colors ${acceleration===s.v?'bg-purple-600 text-white':'bg-white/10 text-white/50 hover:bg-white/20'}`}>
+                      className={`py-1 rounded-lg text-[10px] font-medium transition-colors ${acceleration===s.v?'bg-blue-600 text-white':'bg-white/10 text-white/50 hover:bg-white/20'}`}>
                       {s.l}
                     </button>
                   ))}

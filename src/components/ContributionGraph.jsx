@@ -8,10 +8,10 @@ const WEEKS = 52;
 
 const COLORS_DARK = [
   'rgba(255,255,255,0.06)',
-  '#6B46C1',
-  '#805AD5',
-  '#9F7AEA',
-  '#B794F4',
+  '#1B3A7A',
+  '#2555B0',
+  '#3068D8',
+  '#4A7FFF',
 ];
 
 function getLevel(count, maxCount) {

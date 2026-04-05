@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, lazy, Suspense } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AlertCircle, Loader2, RefreshCw, Archive, ChevronLeft } from 'lucide-react';
 import { computeEarnedTitles } from '../data/badges';
@@ -136,6 +136,32 @@ export default function ProfilePage() {
   const [cacheRemaining, setCacheRemaining] = useState(null);
   const [showChangelog, setShowChangelog] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
+  const tabBarRef = useRef(null);
+  const [indicator, setIndicator] = useState({ left: 0, width: 0, ready: false });
+
+  // A1: 탭 슬라이딩 인디케이터
+  useLayoutEffect(() => {
+    if (!tabBarRef.current) return;
+    const activeBtn = tabBarRef.current.querySelector('.ph-tab-item.active');
+    if (!activeBtn) return;
+    const barRect = tabBarRef.current.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    setIndicator({ left: btnRect.left - barRect.left, width: btnRect.width, ready: true });
+  }, [tab]);
+
+  // A3: 티어별 배경 글로우 색조
+  const glowColor = useMemo(() => {
+    if (!data) return 'rgba(74,127,255,0.10)';
+    const s = calculateCreatorScore(data.stats, data.characters);
+    const t = getCreatorTier(s);
+    const map = {
+      champion: 'rgba(249,115,22,0.13)',
+      master:   'rgba(217,70,239,0.10)',
+      diamond:  'rgba(59,130,246,0.12)',
+      gold:     'rgba(251,191,36,0.10)',
+    };
+    return map[t.key] || 'rgba(74,127,255,0.10)';
+  }, [data]);
 
   const hasEarnedTitles = useMemo(() => {
     if (!data) return false;
@@ -368,8 +394,11 @@ export default function ProfilePage() {
 
   return (
     <div className="bg-profile min-h-[100dvh] relative">
-      {/* 배경 글로우 */}
-      <div className="fixed top-[10%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-purple-500/15 rounded-full blur-[120px] pointer-events-none" />
+      {/* 배경 글로우 — 티어에 따라 색조 변화 */}
+      <div
+        className="fixed top-[10%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] h-[360px] rounded-full blur-[130px] pointer-events-none"
+        style={{ background: glowColor, transition: 'background 1.2s ease' }}
+      />
 
       <Header />
 
@@ -385,7 +414,7 @@ export default function ProfilePage() {
               </span>
             </span>
             <button onClick={() => fetchData(initialCreator, true)}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:border-purple-500/40 hover:text-purple-400 transition-all font-medium text-gray-400">
+              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:border-blue-500/40 hover:text-blue-400 transition-all font-medium text-gray-400">
               <RefreshCw size={11} />새로고침
             </button>
           </div>
@@ -394,7 +423,7 @@ export default function ProfilePage() {
         <div className="profile-layout">
           {/* 탭 바 — 전체 너비 상단 */}
           <div className="profile-layout-tabbar">
-            <div className="ph-tab-bar">
+            <div className="ph-tab-bar" ref={tabBarRef}>
               {TABS.map(t => (
                 <button
                   key={t.key}
@@ -404,6 +433,14 @@ export default function ProfilePage() {
                   {t.label}
                 </button>
               ))}
+              <div
+                className="ph-tab-indicator"
+                style={{
+                  left: indicator.left,
+                  width: indicator.width,
+                  opacity: indicator.ready ? 1 : 0,
+                }}
+              />
             </div>
           </div>
 

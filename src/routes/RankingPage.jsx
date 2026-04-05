@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, ChevronLeft } from 'lucide-react';
 import { useServerStatus } from '../hooks/useServerStatus';
 
@@ -18,10 +18,13 @@ async function fetchHashtagTrends() {
 
 export default function RankingPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { status: serverStatus } = useServerStatus();
   const [hashtagData, setHashtagData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('creator'); // 'creator' | 'trend'
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get('tab') === 'trend' ? 'trend' : 'creator'
+  ); // 'creator' | 'trend'
 
   useEffect(() => {
     fetchHashtagTrends().then(d => {
@@ -33,15 +36,15 @@ export default function RankingPage() {
   const statusColor = serverStatus === 'ok' ? '#6CD97E' : serverStatus === 'warning' ? '#FBBF24' : '#F87171';
 
   return (
-    <div className="min-h-[100dvh] bg-[#1A0D30]">
+    <div className="min-h-[100dvh] bg-[#080F24]">
       {/* 배경 글로우 (fixed, pointer-events-none) */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-15%] left-[-8%] w-[55%] h-[55%] bg-[rgba(100,60,180,0.10)] rounded-full blur-[130px]" />
-        <div className="absolute bottom-[-15%] right-[-8%] w-[45%] h-[55%] bg-[rgba(55,20,100,0.12)] rounded-full blur-[130px]" />
+        <div className="absolute top-[-15%] left-[-8%] w-[55%] h-[55%] bg-[rgba(74,127,255,0.07)] rounded-full blur-[130px]" />
+        <div className="absolute bottom-[-15%] right-[-8%] w-[45%] h-[55%] bg-[rgba(30,60,140,0.10)] rounded-full blur-[130px]" />
       </div>
 
       {/* 헤더 */}
-      <header className="sticky top-0 z-50 bg-[#1A0D30] border-b border-white/[0.06]">
+      <header className="sticky top-0 z-50 bg-[#080F24] border-b border-white/[0.06]">
         <div className="max-w-[680px] mx-auto px-6 py-4 lg:max-w-[1280px] lg:px-12">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -67,7 +70,7 @@ export default function RankingPage() {
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex-1 py-2 rounded-lg text-xs font-bold tracking-wider transition-all ${
                   activeTab === tab.key
-                    ? 'bg-gradient-to-b from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/20'
+                    ? 'bg-gradient-to-b from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20'
                     : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
                 }`}
               >

@@ -121,12 +121,12 @@ export default function MyProfileCard() {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
                 placeholder="크리에이터 ID 또는 @핸들"
-                className="flex-1 min-w-0 rounded-lg bg-white/[0.05] border border-white/[0.08] px-3 py-1.5 text-sm text-white/80 placeholder-white/30 outline-none focus:border-purple-500/40 transition-colors"
+                className="flex-1 min-w-0 rounded-lg bg-white/[0.05] border border-white/[0.08] px-3 py-1.5 text-sm text-white/80 placeholder-white/30 outline-none focus:border-blue-500/40 transition-colors"
               />
               <button
                 onClick={handleRegister}
                 disabled={loading}
-                className="shrink-0 rounded-lg bg-purple-500/20 border border-purple-500/30 px-3 py-1.5 text-xs text-purple-300 hover:bg-purple-500/30 transition-colors disabled:opacity-50"
+                className="shrink-0 rounded-lg bg-blue-500/20 border border-blue-500/30 px-3 py-1.5 text-xs text-blue-300 hover:bg-blue-500/30 transition-colors disabled:opacity-50"
               >
                 {loading ? '...' : '등록'}
               </button>
@@ -187,7 +187,7 @@ export default function MyProfileCard() {
     >
       {/* Avatar + name */}
       <div className="flex items-center gap-3 mb-3">
-        <div className="shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/40 to-violet-600/40 p-[2px]">
+        <div className="shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/40 to-indigo-600/40 p-[2px]">
           {avatarUrl ? (
             <img
               src={avatarUrl}

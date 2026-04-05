@@ -102,15 +102,23 @@ export default function CreatorRadarChart({ stats, characters }) {
             if (subject === '다양성') desc = '다루는 장르(해시태그) 스펙트럼입니다.';
 
             return (
-                <div className="bg-[var(--card)] border border-[var(--border)] p-2.5 rounded-lg shadow-xl text-xs z-50 min-w-[140px]">
+                <div
+                    className="p-2.5 rounded-lg shadow-2xl text-xs z-50 min-w-[140px]"
+                    style={{
+                        background: 'rgba(6, 12, 28, 0.97)',
+                        border: '1px solid rgba(74, 127, 255, 0.35)',
+                        backdropFilter: 'blur(12px)',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
+                    }}
+                >
                     <div className="flex justify-between items-center mb-1">
                         <span className="font-bold text-[var(--accent)]">{subject}</span>
-                        <span className="font-mono text-[10px] bg-[var(--bg-secondary)] px-1.5 py-0.5 rounded text-[var(--text-secondary)]">
+                        <span className="font-mono text-[10px] px-1.5 py-0.5 rounded text-white/60" style={{ background: 'rgba(255,255,255,0.08)' }}>
                             {A}점
                         </span>
                     </div>
-                    <p className="text-[var(--text-primary)] font-bold mb-1.5 text-sm">{raw}</p>
-                    <p className="text-[var(--text-secondary)] opacity-80 text-[10px] leading-relaxed">{desc}</p>
+                    <p className="text-white font-bold mb-1.5 text-sm">{raw}</p>
+                    <p className="text-white/60 text-[10px] leading-relaxed">{desc}</p>
                 </div>
             );
         }
@@ -128,15 +136,15 @@ export default function CreatorRadarChart({ stats, characters }) {
                     <Radar
                         name="스탯"
                         dataKey="A"
-                        stroke="#a855f7"
+                        stroke="#4A7FFF"
                         strokeWidth={2}
                         fill="url(#colorGradient)"
                         fillOpacity={0.6}
                     />
                     <defs>
                         <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#a855f7" stopOpacity={0.8} />
-                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.4} />
+                            <stop offset="5%" stopColor="#4A7FFF" stopOpacity={0.8} />
+                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.35} />
                         </linearGradient>
                     </defs>
                 </RadarChart>

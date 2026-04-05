@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import {
-  formatCompactNumber, getCreatorTier,
+  formatCompactNumber, getCreatorTier, CREATOR_TIERS,
   calculateCreatorScore, toKST, getCharacterTier
 } from '../utils/tierCalculator';
 import TierIcon from './ui/TierIcon';
@@ -12,6 +12,34 @@ import { computeEarnedTitles, BADGE_COLOR_MAP, FIXED_BADGE_IDS } from '../data/b
 import ImageWithFallback from './ImageWithFallback';
 import { getCreatorBadge, saveCreatorBadge } from '../utils/storage';
 import LiveViewModal from './LiveViewModal';
+
+// A2: 카운트업 훅 — 0 → target easeOut 애니메이션
+function useCountUp(target, duration) {
+  const prefersReduced = useMemo(() =>
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches, []);
+  const isMobile = useMemo(() =>
+    typeof window !== 'undefined' && window.innerWidth < 640, []);
+  const d = prefersReduced ? 0 : (isMobile ? 800 : (duration || 1200));
+  const [val, setVal] = useState(prefersReduced ? target : 0);
+
+  useEffect(() => {
+    if (prefersReduced || d === 0) { setVal(target); return; }
+    setVal(0);
+    const start = performance.now();
+    let raf;
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / d);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setVal(Math.round(target * eased));
+      if (t < 1) raf = requestAnimationFrame(tick);
+      else setVal(target);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => raf && cancelAnimationFrame(raf);
+  }, [target]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return val;
+}
 
 const TIER_KO = {
   unranked: 'UNRANKED', bronze: 'BRONZE', silver: 'SILVER', gold: 'GOLD',
@@ -89,6 +117,21 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
 
   const score = calculateCreatorScore(stats, characters);
   const tier = getCreatorTier(score);
+
+  // A2: 카운트업 값
+  const animInteractions = useCountUp(stats.plotInteractionCount || 0);
+  const animFollowers = useCountUp(stats.followerCount || 0);
+  const animCharCount = useCountUp(characters?.length ?? stats.plotCount ?? 0);
+  const animScore = useCountUp(score, 1400);
+
+  // B2: 다음 티어 정보
+  const nextTierInfo = useMemo(() => {
+    if (tier.key === 'champion') return null;
+    const nextTier = CREATOR_TIERS.find(t => t.min === tier.nextGoalScore);
+    if (!nextTier) return null;
+    const remaining = Math.max(0, tier.nextGoalScore - score);
+    return { key: nextTier.key, name: nextTier.name, color: nextTier.color, remaining };
+  }, [tier, score]);
   const romanMap = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV' };
   const subRoman = tier.subdivision ? (romanMap[tier.subdivision] || '') : '';
   const tierName = TIER_KO[tier.key] || tier.name?.toUpperCase() || 'UNRANKED';
@@ -111,7 +154,7 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
                 {profile.profileImageUrl ? (
                   <img src={profile.profileImageUrl} alt={profile.nickname} crossOrigin="anonymous" loading="eager" />
                 ) : (
-                  <span className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-br from-purple-300 to-indigo-400">
+                  <span className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-br from-blue-300 to-indigo-400">
                     {(profile.nickname || '?')[0]}
                   </span>
                 )}
@@ -161,38 +204,38 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
           <div className="flex justify-between items-center py-6 px-4">
             <div className="flex flex-col items-center w-1/3">
               <span className="text-2xl font-black text-white tracking-tight">
-                <HoverNumber value={stats.plotInteractionCount || 0} />
+                <HoverNumber value={animInteractions} />
               </span>
               <span className="text-[11px] text-gray-500 mt-1 font-semibold uppercase tracking-widest">대화량</span>
             </div>
             <div className="w-[1px] h-10 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
             <div className="flex flex-col items-center w-1/3">
               <span className="text-2xl font-black text-white tracking-tight">
-                {(stats.followerCount || 0).toLocaleString()}
+                {animFollowers.toLocaleString()}
               </span>
               <span className="text-[11px] text-gray-500 mt-1 font-semibold uppercase tracking-widest">팔로워</span>
             </div>
             <div className="w-[1px] h-10 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
             <div className="flex flex-col items-center w-1/3">
               <span className="text-2xl font-black text-white tracking-tight">
-                <HoverNumber value={characters?.length ?? stats.plotCount ?? 0} />
+                <HoverNumber value={animCharCount} />
               </span>
               <span className="text-[11px] text-gray-500 mt-1 font-semibold uppercase tracking-widest">캐릭터</span>
             </div>
           </div>
 
-          {/* ELO 프로그레스 바 */}
+          {/* ELO 프로그레스 바 + B2 다음 티어 미터 */}
           <div className="pt-3 pb-5 px-6 border-t border-white/[0.04] bg-white/[0.01]">
             <div className="flex justify-between items-center mb-2">
               <span className="text-[10px] text-gray-500 font-semibold tracking-wider">ELO SCORE</span>
               <span className="text-[10px] text-gray-500 font-medium">
-                {formatCompactNumber(score)}
+                {formatCompactNumber(animScore)}
                 {tier.nextGoalScore && tier.key !== 'champion' && (
                   <span className="text-gray-600"> / {formatCompactNumber(tier.nextGoalScore)}</span>
                 )}
               </span>
             </div>
-            <div className="h-[4px] w-full bg-black/60 rounded-full overflow-hidden">
+            <div className="relative h-[4px] w-full bg-black/60 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-1000"
                 style={{
@@ -200,7 +243,22 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
                   background: `linear-gradient(to right, ${tierColor}99, ${tierColor}CC, ${tierColor})`,
                 }}
               />
+              {/* 다음 티어 목표 마커 */}
+              {nextTierInfo && (
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-[8px] rounded-full opacity-40" style={{ background: nextTierInfo.color }} />
+              )}
             </div>
+            {/* B2: 다음 티어까지 남은 거리 */}
+            {tier.key === 'champion' ? (
+              <p className="text-[10px] text-center mt-2 font-bold" style={{ color: tierColor }}>🏆 최고 티어 달성</p>
+            ) : nextTierInfo && (
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-[10px] text-gray-600">다음 티어</span>
+                <span className="text-[10px] font-semibold" style={{ color: nextTierInfo.color }}>
+                  {nextTierInfo.name} — {formatCompactNumber(nextTierInfo.remaining)} pt 더
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -229,13 +287,13 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
               onClick={onLiveClick || openRecap}
               className="ml-2 px-4 py-2 rounded-full text-[12px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0"
               style={{
-                background: 'linear-gradient(135deg, rgba(139,92,246,0.3), rgba(59,130,246,0.2))',
-                border: '1px solid rgba(139,92,246,0.5)',
-                color: '#C4B5FD',
-                boxShadow: '0 0 12px rgba(139,92,246,0.25), inset 0 1px 0 rgba(255,255,255,0.05)',
+                background: 'linear-gradient(135deg, rgba(74,127,255,0.3), rgba(59,130,246,0.2))',
+                border: '1px solid rgba(74,127,255,0.5)',
+                color: '#7AA3FF',
+                boxShadow: '0 0 12px rgba(74,127,255,0.25), inset 0 1px 0 rgba(255,255,255,0.05)',
               }}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
               LIVE
             </button>
           </div>
@@ -327,10 +385,10 @@ function CreatorPills({ characters, stats, creatorId, editing, setEditing }) {
         <span
           className={`px-3 py-1.5 rounded-full border text-[11px] font-medium inline-flex items-center gap-1.5 ${
             isGradient
-              ? 'text-white border-purple-400/30'
+              ? 'text-white border-blue-400/30'
               : `${style.bg} border-white/5 ${style.text}`
           }`}
-          style={isGradient ? { background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' } : { background: 'rgba(255,255,255,0.03)' }}
+          style={isGradient ? { background: 'linear-gradient(135deg, #4A7FFF, #3B82F6)' } : { background: 'rgba(255,255,255,0.03)' }}
         >
           {label}
         </span>
@@ -363,7 +421,7 @@ function CreatorPills({ characters, stats, creatorId, editing, setEditing }) {
                 <p className="text-[11px] text-gray-500 mt-0.5">최대 4개까지 표시됩니다</p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-[12px] font-semibold text-purple-400">{activeIds.length} / 4</span>
+                <span className="text-[12px] font-semibold text-blue-400">{activeIds.length} / 4</span>
                 <button
                   onClick={() => setEditing(false)}
                   className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-white transition-colors"
@@ -398,7 +456,7 @@ function CreatorPills({ characters, stats, creatorId, editing, setEditing }) {
                     {/* 체크박스 */}
                     <div
                       className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all ${
-                        checked ? 'bg-purple-500 border-purple-500' : 'border border-white/20'
+                        checked ? 'bg-blue-500 border-blue-500' : 'border border-white/20'
                       }`}
                     >
                       {checked && (

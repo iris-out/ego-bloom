@@ -98,7 +98,7 @@ export default function CreatorRankingView() {
         </div>
         <button
           onClick={() => setShowInfoModal(true)}
-          className="flex items-center gap-1.5 text-[11px] font-semibold text-purple-300/80 hover:text-purple-200 transition-all px-3 py-1.5 rounded-full bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/25 hover:border-purple-400/40 tracking-wide"
+          className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-300/80 hover:text-blue-200 transition-all px-3 py-1.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/25 hover:border-blue-400/40 tracking-wide"
         >
           <Info size={14} />
           <span>랭킹에 관하여 / 노출 금지 신청</span>
@@ -115,13 +115,13 @@ export default function CreatorRankingView() {
             placeholder="닉네임 또는 @핸들 검색..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-purple-500/50 focus:bg-white/[0.08] transition-all placeholder:text-white/30"
+            className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-blue-500/50 focus:bg-white/[0.08] transition-all placeholder:text-white/30"
           />
         </div>
         <button
           type="submit"
           disabled={searchLoading}
-          className="bg-purple-600/90 hover:bg-purple-500 text-white px-5 py-2.5 rounded-xl text-[13px] font-bold transition-colors disabled:opacity-50 flex items-center justify-center min-w-[72px]"
+          className="bg-blue-600/90 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-[13px] font-bold transition-colors disabled:opacity-50 flex items-center justify-center min-w-[72px]"
         >
           {searchLoading ? <Loader2 size={16} className="animate-spin" /> : '검색'}
         </button>
@@ -139,12 +139,12 @@ export default function CreatorRankingView() {
             onClick={e => e.stopPropagation()}
           >
             {/* 상단 컬러 바 */}
-            <div className="h-[3px] bg-gradient-to-r from-purple-500 to-indigo-500" />
+            <div className="h-[3px] bg-gradient-to-r from-blue-500 to-indigo-500" />
 
             {/* 헤더 */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
-                <Info size={15} className="text-purple-400" />
+                <Info size={15} className="text-blue-400" />
                 <span className="text-white font-bold text-[14px]">랭킹에 관하여 / 노출 금지 신청</span>
               </div>
               <button onClick={() => setShowInfoModal(false)} className="text-white/30 hover:text-white/80 transition-colors p-1">
@@ -156,7 +156,7 @@ export default function CreatorRankingView() {
               {/* 수집 원리 */}
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
                   <span className="text-white font-semibold text-[13px]">랭킹이 수집되는 원리</span>
                 </div>
                 <p className="text-white/55 text-[12px] leading-relaxed pl-3.5">
@@ -256,7 +256,7 @@ export default function CreatorRankingView() {
                     </div>
                     {/* 순위 변동 */}
                     {creator.rank_change === null ? (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/15 text-purple-400 border border-purple-500/20">NEW</span>
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/15 text-blue-400 border border-blue-500/20">NEW</span>
                     ) : creator.rank_change > 0 ? (
                       <span className="text-emerald-400 font-bold">↑{creator.rank_change}</span>
                     ) : creator.rank_change < 0 ? (
@@ -295,7 +295,7 @@ export default function CreatorRankingView() {
             }}
             className={`w-10 h-10 rounded-xl font-bold transition-all border ${
               currentPage === num
-                ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20'
+                ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20'
                 : 'bg-white/[0.04] border-white/5 text-white/30 hover:bg-white/[0.08] hover:text-white/60'
             }`}
           >
@@ -306,16 +306,16 @@ export default function CreatorRankingView() {
 
       {searchResult && searchResult.user && createPortal(
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-[632px] z-[9999] animate-slide-up">
-          <div className="relative bg-[#1A0D30] border border-purple-500/40 rounded-2xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(139,92,246,0.2)]">
+          <div className="relative bg-[#080F24] border border-blue-500/40 rounded-2xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(74,127,255,0.2)]">
             <button 
               onClick={() => setSearchResult(null)}
-              className="absolute -top-2 -right-2 w-7 h-7 bg-purple-600 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-purple-500 transition-colors z-10"
+              className="absolute -top-2 -right-2 w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-500 transition-colors z-10"
             >
               <X size={14} />
             </button>
 
-            <div className="text-[11px] font-bold text-purple-300 mb-2 px-1 flex items-center gap-1.5">
-              <div className="w-1 h-1 rounded-full bg-purple-400 animate-pulse" />
+            <div className="text-[11px] font-bold text-blue-300 mb-2 px-1 flex items-center gap-1.5">
+              <div className="w-1 h-1 rounded-full bg-blue-400 animate-pulse" />
               검색된 크리에이터 (내 랭킹)
             </div>
 
@@ -326,7 +326,7 @@ export default function CreatorRankingView() {
               }}
               className="flex items-center gap-4 px-4 py-3 rounded-xl transition-all cursor-pointer bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] hover:border-white/20 group"
             >
-              <div className="w-10 text-center text-2xl text-purple-300 font-bold group-hover:text-purple-200 transition-colors">
+              <div className="w-10 text-center text-2xl text-blue-300 font-bold group-hover:text-blue-200 transition-colors">
                 {searchResult.rank}
               </div>
 

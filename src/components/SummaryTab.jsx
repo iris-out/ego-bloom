@@ -26,7 +26,7 @@ function formatRelativeDate(dateStr) {
 
 // 캐릭터 아바타 그라디언트 팔레트
 const AVATAR_PALETTES = [
-  { bg: 'from-indigo-500/15 to-purple-500/15', text: '#A5B4FC' },
+  { bg: 'from-indigo-500/15 to-blue-500/15', text: '#93C5FD' },
   { bg: 'from-emerald-500/15 to-teal-500/15', text: '#6EE7B7' },
   { bg: 'from-rose-500/15 to-pink-500/15', text: '#FDA4AF' },
   { bg: 'from-amber-500/15 to-orange-500/15', text: '#FCD34D' },
@@ -116,7 +116,7 @@ export default function SummaryTab({ characters, stats }) {
       <div className="relative group">
         <Search
           size={16}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-purple-400 transition-colors pointer-events-none"
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors pointer-events-none"
         />
         <input
           type="text"
@@ -128,7 +128,7 @@ export default function SummaryTab({ characters, stats }) {
             background: 'rgba(26, 22, 37, 0.6)',
             border: '1px solid rgba(255,255,255,0.06)',
           }}
-          onFocus={e => { e.target.style.borderColor = 'rgba(139,92,246,0.4)'; e.target.style.background = 'rgba(26,22,37,0.9)'; }}
+          onFocus={e => { e.target.style.borderColor = 'rgba(74,127,255,0.4)'; e.target.style.background = 'rgba(8,15,36,0.9)'; }}
           onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.06)'; e.target.style.background = 'rgba(26,22,37,0.6)'; }}
         />
       </div>
@@ -346,7 +346,7 @@ function CharacterCard({ char, rank, paletteIdx, onTagClick, activeTags, onSelec
                 onClick={e => { e.stopPropagation(); onTagClick(tag); }}
                 className={`text-[11px] px-2 py-1 rounded-md transition-all ${
                   activeTags.includes(tag)
-                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
                     : 'bg-white/5 text-gray-400 hover:bg-white/10'
                 }`}
               >

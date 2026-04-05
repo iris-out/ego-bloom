@@ -21,7 +21,7 @@ const TIER_COLORS_MAP = {
 // ============================================================
 // Slide 1: 퍼플 그라디언트 — 메인 쇼케이스
 // ============================================================
-function Slide1({ profile, tier, score, stats, badges, activityDays, vh }) {
+function Slide1({ profile, tier, score, stats, badges, activityDays, characters, vh }) {
   const tierColor = TIER_COLORS_MAP[tier.key] || TIER_COLORS_MAP.unranked;
 
   return (
@@ -39,8 +39,8 @@ function Slide1({ profile, tier, score, stats, badges, activityDays, vh }) {
 
       {/* Avatar */}
       <div className="relative z-10">
-        <div className="absolute inset-0 rounded-full blur-xl opacity-50" style={{ background: 'linear-gradient(135deg, #7C3AED, #3B82F6)' }} />
-        <div className="w-24 h-24 rounded-full p-[3px] relative z-10" style={{ background: 'linear-gradient(135deg, #8B5CF6, #EC4899, #3B82F6)' }}>
+        <div className="absolute inset-0 rounded-full blur-xl opacity-50" style={{ background: 'linear-gradient(135deg, #2A52CC, #3B82F6)' }} />
+        <div className="w-24 h-24 rounded-full p-[3px] relative z-10" style={{ background: 'linear-gradient(135deg, #4A7FFF, #6366F1, #3B82F6)' }}>
           <div className="w-full h-full rounded-full bg-[#0B0812] flex items-center justify-center overflow-hidden">
             {profile.profileImageUrl ? (
               <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover rounded-full" crossOrigin="anonymous" />
@@ -125,7 +125,7 @@ function Slide1({ profile, tier, score, stats, badges, activityDays, vh }) {
 // ============================================================
 // Slide 2: 블랙 미니멀 — 타이포 중심
 // ============================================================
-function Slide2({ profile, tier, score, stats, badges, activityDays, vh }) {
+function Slide2({ profile, tier, score, stats, badges, activityDays, characters, vh }) {
   return (
     <div className="w-full flex flex-col pt-14 pb-6 px-8 relative overflow-y-auto scrollbar-hide bg-[#050505]" style={{ height: vh }}>
       {/* Header */}
@@ -205,7 +205,7 @@ function Slide2({ profile, tier, score, stats, badges, activityDays, vh }) {
 // ============================================================
 // Slide 3: 사이버펑크 그리드 — 게이밍
 // ============================================================
-function Slide3({ profile, tier, score, stats, badges, activityDays, vh }) {
+function Slide3({ profile, tier, score, stats, badges, activityDays, characters, vh }) {
   const tierColor = TIER_COLORS_MAP[tier.key] || TIER_COLORS_MAP.unranked;
 
   return (
@@ -346,7 +346,7 @@ function Slide3({ profile, tier, score, stats, badges, activityDays, vh }) {
 // ============================================================
 // Slide 4: 다크 애널리틱스 — 데이터 대시보드
 // ============================================================
-function Slide4({ profile, tier, score, stats, badges, activityDays, vh }) {
+function Slide4({ profile, tier, score, stats, badges, activityDays, characters, vh }) {
   const tierColor = TIER_COLORS_MAP[tier.key] || TIER_COLORS_MAP.unranked;
   const r = 45;
 
@@ -366,7 +366,7 @@ function Slide4({ profile, tier, score, stats, badges, activityDays, vh }) {
         style={{ background: '#13161f', border: '1px solid rgba(255,255,255,0.05)' }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full overflow-hidden p-[2px]" style={{ background: 'linear-gradient(135deg, #6366f1, #8B5CF6)' }}>
+          <div className="w-12 h-12 rounded-full overflow-hidden p-[2px]" style={{ background: 'linear-gradient(135deg, #4A7FFF, #6366f1)' }}>
             <div className="w-full h-full rounded-full bg-[#13161f] flex items-center justify-center overflow-hidden">
               {profile.profileImageUrl ? (
                 <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover rounded-full" crossOrigin="anonymous" />
@@ -583,6 +583,7 @@ export default function LiveViewModal({ isOpen, onClose, characters, stats, prof
     stats: stats || {},
     badges,
     activityDays,
+    characters: characters || [],
   };
 
   const VH = '100vh';
