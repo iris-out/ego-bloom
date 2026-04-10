@@ -2,9 +2,10 @@ import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
-// Load .env.local if it exists (local dev)
+// Load .env.local or .env if it exists (local dev)
 try {
-  const envPath = resolve(process.cwd(), '.env.local');
+  let envPath = resolve(process.cwd(), '.env.local');
+  try { readFileSync(envPath); } catch { envPath = resolve(process.cwd(), '.env'); }
   const lines = readFileSync(envPath, 'utf-8').split('\n');
   for (const line of lines) {
     const m = line.match(/^([^=]+)=(.*)$/);
@@ -35,7 +36,7 @@ async function snapshotHistory() {
   try {
     const { data, error } = await supabase
       .from('account_current')
-      .select('id, nickname, handle, elo_score, follower_count, plot_interaction_count, tier_name, voice_play_count')
+      .select('id, nickname, handle, elo_score, follower_count, plot_interaction_count, tier_name, voice_play_count, plot_count')
       .gt('elo_score', 0);
 
     if (error) throw error;
