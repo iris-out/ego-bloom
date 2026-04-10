@@ -10,14 +10,15 @@ const CARDS = [
 
 const NTR_TAGS_AGG = ['빼앗김', '뺏김', '불륜', '바람'];
 
-function getCombinedScore(card, combined) {
-  if (card.ntrAgg) {
-    return NTR_TAGS_AGG.reduce((sum, t) => sum + (combined.find(c => c.tag === t)?.score || 0), 0) || null;
-  }
+// tagScores: fetch_ranking.js에서 직접 계산한 현재 랭킹 점수 (combined top30 외 NTR 포함)
+// combined: top30 태그 배열 (fallback)
+function getCombinedScore(card, tagScores, combined) {
+  const fromTagScores = tagScores?.[card.key];
+  if (fromTagScores != null) return fromTagScores;
   return combined.find(c => c.tag === card.key)?.score ?? null;
 }
 
-export default function TagTrendStrip({ tagTrend = {}, combined = [] }) {
+export default function TagTrendStrip({ tagTrend = {}, combined = [], tagScores = null }) {
   const ref = useRef(null);
   const drag = useRef({ active: false, startX: 0, scrollLeft: 0 });
 
@@ -60,7 +61,7 @@ export default function TagTrendStrip({ tagTrend = {}, combined = [] }) {
           tooltip={card.tooltip}
           dataPoints={tagTrend[card.key] || []}
           maxDelta={maxDelta}
-          combinedScore={getCombinedScore(card, combined)}
+          combinedScore={getCombinedScore(card, tagScores, combined)}
         />
       ))}
     </div>

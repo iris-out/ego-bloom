@@ -286,6 +286,7 @@ async function generateRankingData() {
       bestPlots,
       newPlots,
       tagTrend,
+      tagScores: tagScoresToSave,
     };
 
     await fs.mkdir(path.dirname(OUTPUT_FILE), { recursive: true });

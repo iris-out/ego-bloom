@@ -26,20 +26,20 @@ function pctStr(delta, current) {
   return ((delta / base) * 100).toFixed(1) + '%';
 }
 
-const PlotSparkline = React.memo(function PlotSparkline({ delta, current }) {
+// delta: 이번 2시간 증가량, maxDelta: 목록 내 최대 증가량 (y축 기준 통일)
+// size: 'md'(데스크탑 38px) | 'sm'(모바일 28px)
+const PlotSparkline = React.memo(function PlotSparkline({ delta, maxDelta, size = 'md' }) {
   const isUp = delta != null && delta > 0;
-  const prev = isUp ? current - delta : current;
   const lineColor = isUp ? '#34d399' : '#818cf8';
-  const fillTop = isUp ? 'rgba(52,211,153,0.22)' : 'rgba(129,140,248,0.15)';
-  const minVal = Math.min(prev, current);
-  const maxVal = Math.max(prev, current);
-  const range = maxVal - minVal;
-  const yPad = range > 0 ? range * 0.4 : (maxVal > 0 ? maxVal * 0.01 : 1);
+  const fillTop = isUp ? 'rgba(52,211,153,0.22)' : 'rgba(129,140,248,0.12)';
+  const height = size === 'sm' ? 28 : 38;
+  // 목록 전체의 maxDelta를 y축 최대로 설정 → 상승폭이 클수록 기울기가 큼
+  const yMax = (maxDelta > 0 ? maxDelta : (delta || 1)) * 1.25;
 
   const options = useMemo(() => ({
     chart: {
       type: 'area',
-      height: 38,
+      height,
       backgroundColor: 'transparent',
       margin: [1, 0, 1, 0],
       animation: false,
@@ -47,11 +47,7 @@ const PlotSparkline = React.memo(function PlotSparkline({ delta, current }) {
     },
     title: { text: null },
     xAxis: { visible: false },
-    yAxis: {
-      visible: false,
-      min: Math.max(0, minVal - yPad),
-      max: maxVal + yPad,
-    },
+    yAxis: { visible: false, min: 0, max: yMax },
     legend: { enabled: false },
     tooltip: { enabled: false },
     credits: { enabled: false },
@@ -67,8 +63,8 @@ const PlotSparkline = React.memo(function PlotSparkline({ delta, current }) {
         },
       },
     },
-    series: [{ data: [prev, current] }],
-  }), [delta, current]); // eslint-disable-line react-hooks/exhaustive-deps
+    series: [{ data: [0, isUp ? delta : 0] }],
+  }), [delta, maxDelta, height, yMax, lineColor, fillTop, isUp]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return <HighchartsReact highcharts={Highcharts} options={options} />;
 });
@@ -158,7 +154,7 @@ export default function PlotRankingItem({ plot, rank, maxDelta }) {
         <div className="hidden sm:flex flex-col justify-center shrink-0 w-[96px]">
           {interactionDelta != null && interactionDelta > 0 ? (
             <>
-              <PlotSparkline delta={interactionDelta} current={interactionCount} />
+              <PlotSparkline delta={interactionDelta} maxDelta={maxDelta} size="md" />
               {pct && (
                 <span className="text-[12px] tabular-nums text-right" style={{ color: '#34d399', opacity: 0.75 }}>
                   +{pct}
@@ -190,22 +186,20 @@ export default function PlotRankingItem({ plot, rank, maxDelta }) {
               +{formatNumber(interactionDelta)}
             </span>
           )}
-          <div className="w-10 shrink-0">
-            <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: (interactionDelta != null && interactionDelta > 0 && maxDelta > 0)
-                    ? `${Math.max(4, (interactionDelta / maxDelta) * 100)}%`
-                    : '0%',
-                  backgroundColor: color,
-                }}
-              />
-            </div>
-            {pct && (
-              <span className="text-[10px] tabular-nums text-right block" style={{ color, opacity: 0.65 }}>
-                {pct}
-              </span>
+          <div className="w-12 shrink-0">
+            {interactionDelta != null && interactionDelta > 0 ? (
+              <>
+                <PlotSparkline delta={interactionDelta} maxDelta={maxDelta} size="sm" />
+                {pct && (
+                  <span className="text-[10px] tabular-nums text-right block" style={{ color: '#34d399', opacity: 0.75 }}>
+                    +{pct}
+                  </span>
+                )}
+              </>
+            ) : (
+              <div className="h-[28px] flex items-center justify-end">
+                <span className="text-[10px] text-white/15">—</span>
+              </div>
             )}
           </div>
         </div>

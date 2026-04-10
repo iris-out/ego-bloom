@@ -21,9 +21,11 @@ function getCyanColor(delta, maxDelta) {
 
 function formatDelta(n) {
   if (n == null) return null;
-  if (Math.abs(n) >= 10000) return `+${(n / 10000).toFixed(1)}만`;
-  if (Math.abs(n) >= 1000) return `+${(n / 1000).toFixed(1)}천`;
-  return `+${n.toLocaleString()}`;
+  const abs = Math.abs(n);
+  const sign = n >= 0 ? '+' : '-';
+  if (abs >= 10000) return `${sign}${(abs / 10000).toFixed(1)}만`;
+  if (abs >= 1000) return `${sign}${(abs / 1000).toFixed(1)}천`;
+  return `${sign}${abs.toLocaleString()}`;
 }
 
 export default function TagTrendCard({ label, tooltip, dataPoints, maxDelta, combinedScore }) {
@@ -32,7 +34,9 @@ export default function TagTrendCard({ label, tooltip, dataPoints, maxDelta, com
   const latestScore = rawScores[rawScores.length - 1] ?? null;
   const prevScore = rawScores[rawScores.length - 2] ?? null;
   const delta = (latestScore != null && prevScore != null) ? latestScore - prevScore : null;
-  const color = getCyanColor(delta, maxDelta);
+  const isUp = delta != null && delta > 0;
+  const isDown = delta != null && delta < 0;
+  const color = isDown ? '#f87171' : getCyanColor(delta, maxDelta);
 
   // 데이터가 부족해도 평탄한 그래프를 표시 (0점이면 [0,0], 1점이면 [score,score])
   const scores = rawScores.length >= 2
@@ -48,8 +52,6 @@ export default function TagTrendCard({ label, tooltip, dataPoints, maxDelta, com
   // 변화폭이 없으면 최댓값의 0.1%를 패딩으로 사용, 있으면 범위의 20%
   const yPad = scoreRange > 0 ? scoreRange * 0.20 : (maxScore > 0 ? maxScore * 0.001 : 1);
 
-  const isUp = delta != null && delta > 0;
-  const isDown = delta != null && delta < 0;
   const lineColor = isUp ? '#34d399' : isDown ? '#f87171' : '#818cf8';
   const fillTop = isUp ? 'rgba(52,211,153,0.25)' : isDown ? 'rgba(248,113,113,0.20)' : 'rgba(129,140,248,0.20)';
 
