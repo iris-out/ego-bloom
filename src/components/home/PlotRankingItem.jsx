@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import Highcharts from 'highcharts';
+import HighchartsReactOfficial from 'highcharts-react-official';
+const HighchartsReact = HighchartsReactOfficial?.default ?? HighchartsReactOfficial;
 import { proxyThumbnailUrl } from '../../utils/imageUtils';
 import { formatNumber } from '../../utils/tierCalculator';
 
@@ -22,6 +25,53 @@ function pctStr(delta, current) {
   if (base <= 0) return null;
   return ((delta / base) * 100).toFixed(1) + '%';
 }
+
+const PlotSparkline = React.memo(function PlotSparkline({ delta, current }) {
+  const isUp = delta != null && delta > 0;
+  const prev = isUp ? current - delta : current;
+  const lineColor = isUp ? '#34d399' : '#818cf8';
+  const fillTop = isUp ? 'rgba(52,211,153,0.22)' : 'rgba(129,140,248,0.15)';
+  const minVal = Math.min(prev, current);
+  const maxVal = Math.max(prev, current);
+  const range = maxVal - minVal;
+  const yPad = range > 0 ? range * 0.4 : (maxVal > 0 ? maxVal * 0.01 : 1);
+
+  const options = useMemo(() => ({
+    chart: {
+      type: 'area',
+      height: 38,
+      backgroundColor: 'transparent',
+      margin: [1, 0, 1, 0],
+      animation: false,
+      spacing: [0, 0, 0, 0],
+    },
+    title: { text: null },
+    xAxis: { visible: false },
+    yAxis: {
+      visible: false,
+      min: Math.max(0, minVal - yPad),
+      max: maxVal + yPad,
+    },
+    legend: { enabled: false },
+    tooltip: { enabled: false },
+    credits: { enabled: false },
+    plotOptions: {
+      area: {
+        marker: { enabled: false },
+        lineWidth: 1.5,
+        fillOpacity: 1,
+        color: lineColor,
+        fillColor: {
+          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+          stops: [[0, fillTop], [1, 'rgba(0,0,0,0)']],
+        },
+      },
+    },
+    series: [{ data: [prev, current] }],
+  }), [delta, current]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return <HighchartsReact highcharts={Highcharts} options={options} />;
+});
 
 export default function PlotRankingItem({ plot, rank, maxDelta }) {
   const { id, name, imageUrl, hashtags = [], interactionCount = 0, interactionDelta, rankChange, creatorHandle } = plot;
@@ -104,23 +154,21 @@ export default function PlotRankingItem({ plot, rank, maxDelta }) {
           )}
         </div>
 
-        {/* 데스크탑(sm+) 전용: 프로그레스 바 열 */}
-        <div className="hidden sm:flex flex-col justify-center gap-1 pl-1 shrink-0 w-[96px]">
-          <div className="w-full h-2.5 rounded-full bg-white/10 overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{
-                width: (interactionDelta != null && interactionDelta > 0 && maxDelta > 0)
-                  ? `${Math.max(4, (interactionDelta / maxDelta) * 100)}%`
-                  : '0%',
-                backgroundColor: color,
-              }}
-            />
-          </div>
-          {pct && (
-            <span className="text-[12px] tabular-nums text-right" style={{ color, opacity: 0.65 }}>
-              {pct}
-            </span>
+        {/* 데스크탑(sm+) 전용: 스파크라인 열 */}
+        <div className="hidden sm:flex flex-col justify-center shrink-0 w-[96px]">
+          {interactionDelta != null && interactionDelta > 0 ? (
+            <>
+              <PlotSparkline delta={interactionDelta} current={interactionCount} />
+              {pct && (
+                <span className="text-[12px] tabular-nums text-right" style={{ color: '#34d399', opacity: 0.75 }}>
+                  +{pct}
+                </span>
+              )}
+            </>
+          ) : (
+            <div className="h-[38px] flex items-center justify-end">
+              <span className="text-[12px] text-white/15">—</span>
+            </div>
           )}
         </div>
       </div>

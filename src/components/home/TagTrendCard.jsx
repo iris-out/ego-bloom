@@ -26,7 +26,7 @@ function formatDelta(n) {
   return `+${n.toLocaleString()}`;
 }
 
-export default function TagTrendCard({ label, tooltip, dataPoints, maxDelta }) {
+export default function TagTrendCard({ label, tooltip, dataPoints, maxDelta, combinedScore }) {
   const [showTooltip, setShowTooltip] = useState(false);
   const rawScores = (dataPoints || []).map(d => d.score);
   const latestScore = rawScores[rawScores.length - 1] ?? null;
@@ -88,17 +88,9 @@ export default function TagTrendCard({ label, tooltip, dataPoints, maxDelta }) {
 
   return (
     <div className="flex-none w-[160px] rounded-xl border border-white/10 bg-white/5 px-3 py-2 flex flex-col gap-1 shrink-0">
+      {/* 라벨 + 툴팁 */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="text-[12px] font-bold text-white/80 truncate">{label}</span>
-          {delta != null ? (
-            <span className="text-[11px] font-bold tabular-nums shrink-0" style={{ color }}>
-              {formatDelta(delta)}
-            </span>
-          ) : (
-            <span className="text-[11px] text-white/20 shrink-0">—</span>
-          )}
-        </div>
+        <span className="text-[12px] font-bold text-white/80 truncate">{label}</span>
         <div className="relative shrink-0 ml-1">
           <button
             onMouseEnter={() => setShowTooltip(true)}
@@ -113,6 +105,23 @@ export default function TagTrendCard({ label, tooltip, dataPoints, maxDelta }) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* 현재 점수 + 변동 */}
+      <div className="flex items-baseline justify-between gap-1">
+        <div className="min-w-0">
+          <span className="text-[14px] font-bold text-white/90 tabular-nums">
+            {combinedScore != null ? combinedScore.toLocaleString() : '—'}
+          </span>
+          <span className="text-[10px] text-white/30 ml-0.5">포인트</span>
+        </div>
+        {delta != null ? (
+          <span className="text-[11px] font-bold tabular-nums shrink-0" style={{ color }}>
+            {formatDelta(delta)}
+          </span>
+        ) : (
+          <span className="text-[11px] text-white/20 shrink-0">—</span>
+        )}
       </div>
 
       <div className="h-10">

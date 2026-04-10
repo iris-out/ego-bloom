@@ -64,9 +64,9 @@ function StrengthCard({ stats, characters }) {
       : null;
 
     return [
-      { key: 'avg',   label: '평균 캐릭터 대화', value: avg.toLocaleString(),                  unit: '회',  sub: charCount > 0 ? `${charCount}개 캐릭터 기준` : null },
-      { key: 'total', label: '총 대화량',         value: total.toLocaleString(),                unit: '회',  sub: null },
-      { key: 'top',   label: '최고 대화 캐릭터',  value: (top?.interactionCount || 0).toLocaleString(), unit: '회', sub: top?.name || null },
+      { key: 'avg',   label: '평균 캐릭터 대화', value: formatNumber(avg),                          unit: '회',  sub: charCount > 0 ? `${charCount}개 캐릭터 기준` : null },
+      { key: 'total', label: '총 대화량',         value: formatNumber(total),                        unit: '회',  sub: null },
+      { key: 'top',   label: '최고 대화 캐릭터',  value: formatNumber(top?.interactionCount || 0),   unit: '회',  sub: top?.name || null },
     ];
   }, [stats, characters]);
 

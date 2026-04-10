@@ -100,7 +100,7 @@ export default function FavoritesPanel() {
               </span>
               <button
                 onClick={(e) => handleRemove(e, creator.id || creator.handle)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-white/30 hover:text-red-400 shrink-0"
+                className="opacity-40 hover:opacity-100 transition-opacity text-white/40 hover:text-red-400 shrink-0"
               >
                 <X size={13} />
               </button>

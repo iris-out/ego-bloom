@@ -200,7 +200,7 @@ export default function HomePage() {
             </div>
 
             {/* Tag Trend Strip */}
-            <TagTrendStrip tagTrend={rankingData?.tagTrend || {}} />
+            <TagTrendStrip tagTrend={rankingData?.tagTrend || {}} combined={rankingData?.combined || []} />
 
             {/* Main Tabs */}
             <div className="flex flex-col flex-1">

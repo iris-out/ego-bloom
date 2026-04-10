@@ -3,12 +3,21 @@ import TagTrendCard from './TagTrendCard';
 
 const CARDS = [
   { key: '순애', label: '순애', tooltip: '순수한 사랑/애정 장르 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
-  { key: 'ntr_agg', label: 'NTR·NTL', tooltip: '빼앗김, 뺏김, 불륜, 바람 등 NTR/NTL 계열 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
+  { key: 'ntr_agg', label: 'NTR·NTL', tooltip: '빼앗김, 뺏김, 불륜, 바람 등 NTR/NTL 계열 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)', ntrAgg: true },
   { key: 'bl', label: 'BL', tooltip: 'Boys Love 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
   { key: 'gl', label: 'GL', tooltip: 'Girls Love (백합) 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
 ];
 
-export default function TagTrendStrip({ tagTrend = {} }) {
+const NTR_TAGS_AGG = ['빼앗김', '뺏김', '불륜', '바람'];
+
+function getCombinedScore(card, combined) {
+  if (card.ntrAgg) {
+    return NTR_TAGS_AGG.reduce((sum, t) => sum + (combined.find(c => c.tag === t)?.score || 0), 0) || null;
+  }
+  return combined.find(c => c.tag === card.key)?.score ?? null;
+}
+
+export default function TagTrendStrip({ tagTrend = {}, combined = [] }) {
   const ref = useRef(null);
   const drag = useRef({ active: false, startX: 0, scrollLeft: 0 });
 
@@ -51,6 +60,7 @@ export default function TagTrendStrip({ tagTrend = {} }) {
           tooltip={card.tooltip}
           dataPoints={tagTrend[card.key] || []}
           maxDelta={maxDelta}
+          combinedScore={getCombinedScore(card, combined)}
         />
       ))}
     </div>
