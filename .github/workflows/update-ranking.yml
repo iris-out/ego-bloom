@@ -30,6 +30,9 @@ jobs:
 
       - name: Generate ranking_latest.json
         run: node scripts/fetch_ranking.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
       - name: Snapshot account_current → account_history
         run: node scripts/snapshot_history.js
