@@ -1,0 +1,77 @@
+{
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist",
+    "framework": "vite",
+    "rewrites": [
+        {
+            "source": "/api/resolve-handle",
+            "destination": "/api/resolve-handle"
+        },
+        {
+            "source": "/api/get-season-rankings",
+            "destination": "/api/get-season-rankings"
+        },
+        {
+            "source": "/api/get-growth-ranking",
+            "destination": "/api/get-growth-ranking"
+        },
+        {
+            "source": "/api/zeta/:path*",
+            "destination": "https://api.zeta-ai.io/v1/:path*"
+        },
+        {
+            "source": "/zeta-image/:path*",
+            "destination": "https://image.zeta-ai.io/:path*"
+        },
+        {
+            "source": "/zeta-s3/:path*",
+            "destination": "https://zeta-image.s3.ap-northeast-2.amazonaws.com/:path*"
+        }
+    ],
+    "headers": [
+        {
+            "source": "/api/(.*)",
+            "headers": [
+                {
+                    "key": "Access-Control-Allow-Origin",
+                    "value": "https://ego-bloom.vercel.app"
+                },
+                {
+                    "key": "Access-Control-Allow-Methods",
+                    "value": "GET, OPTIONS"
+                },
+                {
+                    "key": "Access-Control-Allow-Headers",
+                    "value": "Content-Type"
+                }
+            ]
+        },
+        {
+            "source": "/api/zeta/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=0, s-maxage=300, stale-while-revalidate=86400"
+                }
+            ]
+        },
+        {
+            "source": "/zeta-image/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000"
+                }
+            ]
+        },
+        {
+            "source": "/zeta-s3/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,55 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+api.md
+feedback.md
+stat.md
+
+# ai agent
+.plan/
+CLAUDE.md
+checklist.md
+produce.md
+.mcp.json
+
+# prototype
+prototype/
+plan/
+design_ai/
+docs/
+.superpowers/
+SKILL.md
+
+# environment
+.env
+plan.md
+todo.md
+.agent/
+
+scan_pii.sh
+*.sh
+.playwright-mcp/
+.claude/
+
+live-design/
