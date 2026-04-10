@@ -28,12 +28,11 @@ function formatDelta(n) {
   return `${sign}${abs.toLocaleString()}`;
 }
 
-export default function TagTrendCard({ label, tooltip, dataPoints, maxDelta, combinedScore }) {
+export default function TagTrendCard({ label, tooltip, dataPoints, maxDelta, combinedScore, scoreDelta }) {
   const [showTooltip, setShowTooltip] = useState(false);
   const rawScores = (dataPoints || []).map(d => d.score);
-  const latestScore = rawScores[rawScores.length - 1] ?? null;
-  const prevScore = rawScores[rawScores.length - 2] ?? null;
-  const delta = (latestScore != null && prevScore != null) ? latestScore - prevScore : null;
+  // delta는 tagScoresDelta (ranking score 기반) 사용, 없으면 null
+  const delta = scoreDelta ?? null;
   const isUp = delta != null && delta > 0;
   const isDown = delta != null && delta < 0;
   const color = isDown ? '#f87171' : getCyanColor(delta, maxDelta);

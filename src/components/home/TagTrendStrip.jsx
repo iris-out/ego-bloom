@@ -18,7 +18,7 @@ function getCombinedScore(card, tagScores, combined) {
   return combined.find(c => c.tag === card.key)?.score ?? null;
 }
 
-export default function TagTrendStrip({ tagTrend = {}, combined = [], tagScores = null }) {
+export default function TagTrendStrip({ tagTrend = {}, combined = [], tagScores = null, tagScoresDelta = null }) {
   const ref = useRef(null);
   const drag = useRef({ active: false, startX: 0, scrollLeft: 0 });
 
@@ -35,14 +35,9 @@ export default function TagTrendStrip({ tagTrend = {}, combined = [], tagScores 
     if (ref.current) ref.current.style.cursor = '';
   };
 
-  const deltas = CARDS.map(card => {
-    const pts = tagTrend[card.key] || [];
-    const scores = pts.map(d => d.score);
-    const l = scores[scores.length - 1];
-    const p = scores[scores.length - 2];
-    return l != null && p != null ? l - p : null;
-  });
-  const maxDelta = Math.max(0, ...deltas.filter(d => d != null));
+  // maxDelta: tagScoresDelta 기반 (신뢰할 수 있는 ranking score 변동)
+  const deltas = CARDS.map(card => tagScoresDelta?.[card.key] ?? null);
+  const maxDelta = Math.max(0, ...deltas.filter(d => d != null && d > 0));
 
   return (
     <div
@@ -62,6 +57,7 @@ export default function TagTrendStrip({ tagTrend = {}, combined = [], tagScores 
           dataPoints={tagTrend[card.key] || []}
           maxDelta={maxDelta}
           combinedScore={getCombinedScore(card, tagScores, combined)}
+          scoreDelta={tagScoresDelta?.[card.key] ?? null}
         />
       ))}
     </div>

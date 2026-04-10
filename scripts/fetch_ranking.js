@@ -114,7 +114,32 @@ async function savePlotHistory(plots, rankType) {
 const TREND_TARGET_HOURS = [10, 8, 6, 4, 2];
 
 async function saveAndFetchTagHistory(tagScores) {
-  if (!supabase) return {};
+  if (!supabase) return { trend: {}, tagScoresDelta: {} };
+
+  // INSERT 전에 직전 ranking score 조회 (delta 계산용)
+  // 현재 tagScores와 비슷한 단위의 값만 신뢰 (대화량 기반 오염 데이터 무시)
+  const { data: prevRows } = await supabase
+    .from('tag_history')
+    .select('tag, score, captured_at')
+    .in('tag', TREND_TAG_KEYS)
+    .order('captured_at', { ascending: false })
+    .limit(TREND_TAG_KEYS.length * 3);
+
+  // 태그별 가장 최신 이전 값 (오염 데이터 필터: tagScores 대비 100배 초과면 무시)
+  const prevScoreMap = {};
+  for (const row of (prevRows || [])) {
+    if (prevScoreMap[row.tag] != null) continue;
+    const curScore = tagScores[row.tag];
+    if (curScore != null && row.score > curScore * 100) continue; // 오염 데이터 스킵
+    prevScoreMap[row.tag] = row.score;
+  }
+
+  const tagScoresDelta = {};
+  for (const [tag, score] of Object.entries(tagScores)) {
+    const prev = prevScoreMap[tag];
+    tagScoresDelta[tag] = prev != null ? score - prev : null;
+  }
+
   const now = new Date().toISOString();
   const rows = Object.entries(tagScores).map(([tag, score]) => ({ tag, score, captured_at: now }));
   const { error: insertErr } = await supabase.from('tag_history').insert(rows);
@@ -155,7 +180,7 @@ async function saveAndFetchTagHistory(tagScores) {
       return { score: closest.score, ts: closest.ts };
     });
   }
-  return trend;
+  return { trend, tagScoresDelta };
 }
 
 /**
@@ -272,7 +297,7 @@ async function generateRankingData() {
       'gl':   combined['gl'] || 0,
       'ntr_agg': ntrScore,
     };
-    const tagTrend = await saveAndFetchTagHistory(tagScoresToSave);
+    const { trend: tagTrend, tagScoresDelta } = await saveAndFetchTagHistory(tagScoresToSave);
 
     const finalData = {
       updatedAt: new Date().toISOString(),
@@ -287,6 +312,7 @@ async function generateRankingData() {
       newPlots,
       tagTrend,
       tagScores: tagScoresToSave,
+      tagScoresDelta,
     };
 
     await fs.mkdir(path.dirname(OUTPUT_FILE), { recursive: true });
