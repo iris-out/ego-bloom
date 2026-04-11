@@ -27,7 +27,7 @@ function formatDelta(n) {
   return `${sign}${abs.toLocaleString()}`;
 }
 
-export default function TagTrendCard({ label, hoverLabel, dataPoints, timeWindow = '4h', maxDelta, combinedScore, scoreDelta, deltaRefHours }) {
+export default function TagTrendCard({ label, hoverLabel, dataPoints, timeWindow = '6h', maxDelta, combinedScore, scoreDelta, deltaRefHours }) {
   // timeWindow 기준으로 timestamp 필터링
   const windowedPoints = useMemo(() => {
     const pts = dataPoints || [];

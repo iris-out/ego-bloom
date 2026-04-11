@@ -11,9 +11,9 @@ const CARDS = [
   { key: 'fantasy_agg',label: '판타지',   tooltip: '판타지, 현대판타지 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
 ];
 
-const TIME_WINDOWS = ['4h', '12h', '24h', '48h'];
+const TIME_WINDOWS = ['6h', '12h', '24h', '48h'];
 // 탭별 시간(시간 단위) — timestamp 기반 필터링에 사용
-const WINDOW_HOURS = { '4h': 4, '12h': 12, '24h': 24, '48h': 48 };
+const WINDOW_HOURS = { '6h': 6, '12h': 12, '24h': 24, '48h': 48 };
 
 // tagScores: fetch_ranking.js에서 직접 계산한 현재 랭킹 점수 (combined top30 외 NTR 포함)
 // combined: top30 태그 배열 (fallback)
@@ -27,7 +27,7 @@ export default function TagTrendStrip({ tagTrend = {}, combined = [], tagScores 
   const ref = useRef(null);
   const drag = useRef({ active: false, startX: 0, scrollLeft: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
-  const [timeWindow, setTimeWindow] = useState('4h');
+  const [timeWindow, setTimeWindow] = useState('6h');
 
   const onMouseDown = (e) => {
     drag.current = { active: true, startX: e.pageX, scrollLeft: ref.current.scrollLeft };

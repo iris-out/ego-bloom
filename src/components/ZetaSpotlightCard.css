@@ -447,4 +447,16 @@
     .rank-number span {
         font-size: 18px;
     }
+
+    .badge-row {
+        flex-wrap: nowrap;
+        overflow: hidden;
+    }
+
+    .pill-badge {
+        font-size: 10px;
+        padding: 3px 7px;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
 }
