@@ -3,8 +3,8 @@ name: Update ranking data
 
 on:
   schedule:
-    # 2시간마다 실행
-    - cron: '0 */2 * * *'
+    # 1시간마다 실행
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 jobs:

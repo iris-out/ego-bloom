@@ -27,7 +27,7 @@ function formatDelta(n) {
   return `${sign}${abs.toLocaleString()}`;
 }
 
-export default function TagTrendCard({ label, hoverLabel, dataPoints, timeWindow = '6h', maxDelta, combinedScore, scoreDelta, deltaRefHours }) {
+export default function TagTrendCard({ label, hoverLabel, dataPoints, timeWindow = '6h', maxDelta, combinedScore, scoreDelta, deltaRefHours, onClick = null }) {
   // timeWindow 기준으로 timestamp 필터링
   const windowedPoints = useMemo(() => {
     const pts = dataPoints || [];
@@ -99,7 +99,10 @@ export default function TagTrendCard({ label, hoverLabel, dataPoints, timeWindow
   }, [windowedPoints, isUp, isDown]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="flex-none w-[196px] rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 flex flex-row items-center gap-3 shrink-0">
+    <div
+      className={`flex-none w-[196px] rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 flex flex-row items-center gap-3 shrink-0 ${onClick ? 'cursor-pointer hover:border-[rgba(74,127,255,0.4)] hover:bg-white/[0.07] transition-all' : ''}`}
+      onClick={onClick ?? undefined}
+    >
       {/* 차트 — 좌측 */}
       <div className="shrink-0">
         <HighchartsReact highcharts={Highcharts} options={chartOptions} />

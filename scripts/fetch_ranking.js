@@ -27,8 +27,17 @@ const HPJ_TAGS = ['후회', '피폐', '집착'];
 // 판타지 계열 태그 (fantasy_agg로 합산)
 const FANTASY_TAGS = ['판타지', '현대판타지'];
 
+const HAREM_TAGS    = ['하렘', '역하렘'];
+const ISEKAI_TAGS   = ['이세계', '전생', '회귀', '빙의'];
+const THRILLER_TAGS = ['스릴러', '공포'];
+
 // tag_history에서 추이를 추적할 태그 키
-const TREND_TAG_KEYS = ['순애', 'bl', 'gl', 'ntr_agg', 'hpj_agg', 'fantasy_agg'];
+const TREND_TAG_KEYS = [
+  '순애', 'bl', 'gl', 'ntr_agg', 'hpj_agg', 'harem_agg',
+  '혐관', '능글', '소꿉친구', '배신', '오지콤', '짝사랑',
+  'fantasy_agg', 'isekai_agg', '무협', 'sf', 'thriller_agg', '학원', '현대', '수인',
+  '재벌', '연예계', '게임', '일상', '대학생', '일진', '조직', '정략결혼',
+];
 
 // ── Supabase 초기화 (환경 변수 없으면 null — graceful fallback) ──
 for (const file of ['.env.local', '.env']) {
@@ -307,16 +316,39 @@ async function generateRankingData() {
       savePlotHistory(newItems, 'new'),
     ]);
 
-    const ntrScore     = NTR_TAGS.reduce((sum, t) => sum + (combined[t.toLowerCase()] || 0), 0);
-    const hpjScore     = HPJ_TAGS.reduce((sum, t) => sum + (combined[t.toLowerCase()] || 0), 0);
-    const fantasyScore = FANTASY_TAGS.reduce((sum, t) => sum + (combined[t.toLowerCase()] || 0), 0);
+    // 태그별 순위 기반 가중치 점수 (대화량 제거 — combined 재사용)
+    // combined[tag] = Σ (101 - rank) × typeWeight  (trending×3, best×2, new×1)
+    const ts = combined; // alias for readability
+
     const tagScoresToSave = {
-      '순애':        combined['순애'] || 0,
-      'bl':          combined['bl'] || 0,
-      'gl':          combined['gl'] || 0,
-      'ntr_agg':     ntrScore,
-      'hpj_agg':     hpjScore,
-      'fantasy_agg': fantasyScore,
+      '순애':         ts['순애'] || 0,
+      'bl':           ts['bl'] || 0,
+      'gl':           ts['gl'] || 0,
+      'ntr_agg':      NTR_TAGS.reduce((s, t) => s + (ts[t.toLowerCase()] || 0), 0),
+      'hpj_agg':      HPJ_TAGS.reduce((s, t) => s + (ts[t.toLowerCase()] || 0), 0),
+      'harem_agg':    HAREM_TAGS.reduce((s, t) => s + (ts[t.toLowerCase()] || 0), 0),
+      '혐관':         ts['혐관'] || 0,
+      '능글':         ts['능글'] || 0,
+      '소꿉친구':     ts['소꿉친구'] || 0,
+      '배신':         ts['배신'] || 0,
+      '오지콤':       ts['오지콤'] || 0,
+      '짝사랑':       ts['짝사랑'] || 0,
+      'fantasy_agg':  FANTASY_TAGS.reduce((s, t) => s + (ts[t.toLowerCase()] || 0), 0),
+      'isekai_agg':   ISEKAI_TAGS.reduce((s, t) => s + (ts[t.toLowerCase()] || 0), 0),
+      '무협':         ts['무협'] || 0,
+      'sf':           ts['sf'] || 0,
+      'thriller_agg': THRILLER_TAGS.reduce((s, t) => s + (ts[t.toLowerCase()] || 0), 0),
+      '학원':         ts['학원'] || 0,
+      '현대':         ts['현대'] || 0,
+      '수인':         ts['수인'] || 0,
+      '재벌':         ts['재벌'] || 0,
+      '연예계':       ts['연예계'] || 0,
+      '게임':         ts['게임'] || 0,
+      '일상':         ts['일상'] || 0,
+      '대학생':       ts['대학생'] || 0,
+      '일진':         ts['일진'] || 0,
+      '조직':         ts['조직'] || 0,
+      '정략결혼':     ts['정략결혼'] || 0,
     };
     const { trend: tagTrend, tagScoresDelta, tagScoresDeltaRef } = await saveAndFetchTagHistory(tagScoresToSave);
 
@@ -384,4 +416,28 @@ async function generateRankingData() {
   }
 }
 
-generateRankingData();
+// --reset-tag-history 플래그: tag_history 전체 삭제 후 수집 실행
+async function resetTagHistory() {
+  if (!supabase) {
+    console.error('❌ Supabase 환경 변수가 없어 tag_history 초기화를 건너뜁니다.');
+    return;
+  }
+  const { error, count } = await supabase
+    .from('tag_history')
+    .delete({ count: 'exact' })
+    .gte('captured_at', '2000-01-01T00:00:00Z'); // 전체 삭제
+  if (error) {
+    console.error('❌ tag_history 초기화 실패:', error.message);
+    process.exit(1);
+  }
+  console.log(`🗑️  tag_history 초기화 완료: ${count ?? '?'}건 삭제`);
+}
+
+const shouldReset = process.argv.includes('--reset-tag-history');
+
+if (shouldReset) {
+  console.log('🔄 tag_history 초기화 모드로 실행합니다...');
+  resetTagHistory().then(() => generateRankingData());
+} else {
+  generateRankingData();
+}

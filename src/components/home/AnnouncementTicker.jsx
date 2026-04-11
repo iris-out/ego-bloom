@@ -4,7 +4,7 @@ import { Megaphone } from 'lucide-react';
 const CACHE_KEY = 'zeta_banners_v1';
 const TTL = 60 * 60 * 1000;
 
-export default function AnnouncementTicker() {
+export default function AnnouncementTicker({ compact = false }) {
   const [banners, setBanners] = useState([]);
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function AnnouncementTicker() {
   const combined = [...banners, ...banners];
 
   return (
-    <div className="flex items-center gap-2 overflow-hidden py-2 px-4 border-b border-white/5">
+    <div className={`flex items-center gap-2 overflow-hidden ${compact ? 'py-0.5' : 'py-2'} px-4 border-b border-white/5`}>
       <Megaphone size={14} className="text-indigo-400 shrink-0" />
       <div className="overflow-hidden flex-1 relative h-5">
         <div

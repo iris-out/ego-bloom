@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Database, Lock, BarChart2, Hash, Trophy, Star, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Database, Lock, BarChart2, Hash, Trophy, Star, Zap, PanelRight, PanelRightClose } from 'lucide-react';
 import { useServerStatus } from '../hooks/useServerStatus';
 import ChangelogModal from '../components/ChangelogModal';
 import DataCollectionModal from '../components/DataCollectionModal';
@@ -10,6 +11,7 @@ import ServerAlertCard from '../components/ServerAlertCard';
 import SearchPill from '../components/SearchPill';
 import AnnouncementTicker from '../components/home/AnnouncementTicker';
 import TagTrendStrip from '../components/home/TagTrendStrip';
+import TagBubbleSection from '../components/home/TagBubbleSection';
 import PlotRankingList from '../components/home/PlotRankingList';
 import TagTrendingList from '../components/home/TagTrendingList';
 import CreatorRankingList from '../components/home/CreatorRankingList';
@@ -115,7 +117,24 @@ export default function HomePage() {
     () => localStorage.getItem('ego-bloom-warning-agreed') === 'true'
   );
   const [activeTab, setActiveTab] = useState(0);
+  const [bubbleTabOverride, setBubbleTabOverride] = useState(null);
   const [rankingData, setRankingData] = useState(null);
+  const [showTimeline, setShowTimeline] = useState(() =>
+    localStorage.getItem('ego-bloom-timeline-visible') !== 'false'
+  );
+
+  const handleTagStripClick = (bubbleTab) => {
+    setActiveTab(1);
+    setBubbleTabOverride(bubbleTab);
+  };
+
+  const handleTimelineToggle = () => {
+    setShowTimeline(prev => {
+      const next = !prev;
+      localStorage.setItem('ego-bloom-timeline-visible', String(next));
+      return next;
+    });
+  };
 
   const bg = TIME_BG[timeSegment];
 
@@ -209,11 +228,11 @@ export default function HomePage() {
           </div>
         </header>
 
-        {/* Ticker */}
+        {/* Announcement Ticker */}
         <AnnouncementTicker />
 
         {/* Content */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-4 px-4 pt-4 pb-8 max-w-7xl w-full mx-auto">
+        <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-0 px-4 pt-4 pb-8 max-w-7xl w-full mx-auto">
           {/* Left column: main content */}
           <div className="flex flex-col gap-4 flex-1 min-w-0">
             {/* Mobile-only search */}
@@ -222,7 +241,7 @@ export default function HomePage() {
             </div>
 
             {/* Tag Trend Strip */}
-            <TagTrendStrip tagTrend={rankingData?.tagTrend || {}} combined={rankingData?.combined || []} tagScores={rankingData?.tagScores ?? null} tagScoresDelta={rankingData?.tagScoresDelta ?? null} tagScoresDeltaRef={rankingData?.tagScoresDeltaRef ?? null} />
+            <TagTrendStrip tagTrend={rankingData?.tagTrend || {}} combined={rankingData?.combined || []} tagScores={rankingData?.tagScores ?? null} tagScoresDelta={rankingData?.tagScoresDelta ?? null} tagScoresDeltaRef={rankingData?.tagScoresDeltaRef ?? null} onTagClick={handleTagStripClick} />
 
             {/* Main Tabs */}
             <div className="flex flex-col flex-1">
@@ -249,10 +268,25 @@ export default function HomePage() {
                     <span className="hidden lg:inline text-[13px]">{label}</span>
                   </button>
                 ))}
+                {/* PC 전용: 인사이트 패널 토글 버튼 */}
+                <div className="hidden lg:flex items-center ml-auto self-center pl-2">
+                  <button
+                    onClick={handleTimelineToggle}
+                    title={showTimeline ? '인사이트 패널 숨기기' : '인사이트 패널 보기'}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all duration-200 text-[12px] font-semibold hover:brightness-110"
+                    style={showTimeline
+                      ? { background: 'rgba(99,102,241,0.15)', borderStyle: 'solid', borderColor: 'rgba(99,102,241,0.4)', color: 'rgba(165,180,252,0.9)' }
+                      : { background: 'rgba(255,255,255,0.06)', borderStyle: 'solid', borderColor: 'rgba(255,255,255,0.18)', color: 'rgba(255,255,255,0.65)' }
+                    }
+                  >
+                    {showTimeline ? <PanelRightClose size={13} /> : <PanelRight size={13} />}
+                    <span>{showTimeline ? '타임라인 접기' : '타임라인 펴기'}</span>
+                  </button>
+                </div>
               </div>
 
               {activeTab === 0 && <PlotRankingList rankingData={rankingData} />}
-              {activeTab === 1 && <TagTrendingList combined={rankingData?.combined || []} interaction={rankingData?.interaction || []} />}
+              {activeTab === 1 && <TagBubbleSection tagTrend={rankingData?.tagTrend || {}} tagScores={rankingData?.tagScores ?? null} tagScoresDelta={rankingData?.tagScoresDelta ?? null} activeTabOverride={bubbleTabOverride} />}
               {activeTab === 2 && <CreatorRankingList />}
               {activeTab === 3 && <FavoritesPanel />}
               {/* 인사이트 탭: 모바일 전용 (PC는 사이드바로 표시) */}
@@ -264,11 +298,22 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Right column: PC-only timeline */}
-          <div className="hidden lg:flex flex-col lg:w-80 xl:w-[352px] shrink-0">
-            <div className="sticky top-4 bg-white/[0.03] border border-white/[0.07] rounded-xl p-4 max-h-[calc(100vh-80px)] overflow-y-auto flex flex-col scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
-              <RankingTimeline rankingData={rankingData} />
-            </div>
+          {/* Right column: PC-only timeline (토글 가능) */}
+          <div className="hidden lg:flex shrink-0">
+            <motion.div
+              className="flex flex-col overflow-hidden"
+              animate={{
+                width: showTimeline ? 368 : 0,
+                opacity: showTimeline ? 1 : 0,
+              }}
+              transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+            >
+              <div style={{ width: '368px' }} className="pl-4">
+                <div className="sticky top-4 bg-white/[0.03] border border-white/[0.07] rounded-xl p-4 max-h-[calc(100vh-80px)] overflow-y-auto flex flex-col scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+                  <RankingTimeline rankingData={rankingData} />
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>

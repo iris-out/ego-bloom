@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import {
   formatCompactNumber, getCreatorTier, CREATOR_TIERS,
-  calculateCreatorScore, toKST, getCharacterTier
+  calculateCreatorScore, toKST, getCharacterTier, formatNumber
 } from '../utils/tierCalculator';
 import TierIcon from './ui/TierIcon';
 import HoverNumber from './HoverNumber';
@@ -12,6 +12,7 @@ import { computeEarnedTitles, BADGE_COLOR_MAP, FIXED_BADGE_IDS } from '../data/b
 import ImageWithFallback from './ImageWithFallback';
 import { getCreatorBadge, saveCreatorBadge } from '../utils/storage';
 import LiveViewModal from './LiveViewModal';
+import { Star, ChatTeardropDots, Users, Trophy } from '@phosphor-icons/react';
 
 // A2: 카운트업 훅 — 0 → target easeOut 애니메이션
 function useCountUp(target, duration) {
@@ -164,6 +165,11 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
     };
   }, [stats, characters, profile]);
 
+  const topCharacter = useMemo(() => {
+    if (!characters || characters.length === 0) return null;
+    return [...characters].sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0))[0];
+  }, [characters]);
+
   // 상위 해시태그
   const topTags = useMemo(() => {
     if (!characters) return [];
@@ -222,7 +228,7 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative shrink-0">
             <div
-              className="w-[46px] h-[46px] rounded-2xl overflow-hidden"
+              className="w-[46px] h-[46px] lg:w-[56px] lg:h-[56px] rounded-2xl overflow-hidden"
               style={{
                 boxShadow: tierVisible
                   ? `0 0 0 1.5px ${tierColor}60`
@@ -248,7 +254,7 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
 
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 min-w-0">
-              <h1 className="text-[15px] font-bold text-white leading-tight truncate min-w-0">
+              <h1 className="text-[15px] lg:text-[18px] font-bold text-white leading-tight truncate min-w-0">
                 {profile.nickname}
               </h1>
               {breakdown?.activityDays > 0 && (
@@ -276,14 +282,14 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
                 </span>
               )}
             </div>
-            <p className="text-[12px] text-white/40 mt-0.5">@{profile.username}</p>
+            <p className="text-[12px] lg:text-[14px] text-white/40 mt-0.5">@{profile.username}</p>
           </div>
         </div>
 
         {/* 우: 티어 아이콘 블록 */}
         <div className="flex flex-col items-center gap-1 shrink-0">
           {/* 이펙트 기준 래퍼 — 버튼(46×46)에만 centered */}
-          <div className="relative w-[46px] h-[46px]">
+          <div className="relative w-[46px] h-[46px] lg:w-[56px] lg:h-[56px]">
             {/* 티어 링 + 아이콘 */}
             <button
               onClick={() => navigate('/tier')}
@@ -299,13 +305,13 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
               }}
               title="티어 가이드 보기"
             >
-              <TierIcon tier={tier.key} size={28} rank={globalRank} />
+              <TierIcon tier={tier.key} size={32} rank={globalRank} />
             </button>
           </div>
 
           {/* 등급명 */}
           <span
-            className="text-[10px] font-black tracking-wide uppercase z-10 relative"
+            className="text-[10px] lg:text-[12px] font-black tracking-wide uppercase z-10 relative"
             style={{
               color: tierColor,
               opacity: tierVisible ? 1 : 0,
@@ -316,6 +322,76 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
           </span>
         </div>
       </div>
+
+      {/* Fintech KPI Strip */}
+      {breakdown && (
+        <div
+          className="grid grid-cols-2 gap-px mb-4 rounded-xl overflow-hidden"
+          style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)' }}
+        >
+          {/* ELO Score */}
+          <div className="flex flex-col gap-0.5 px-4 py-3 lg:px-5 lg:py-4" style={{ background: 'rgba(255,255,255,0.02)' }}>
+            <div className="flex items-center gap-1.5" style={{ color: 'var(--c-label)', fontSize: '10px', letterSpacing: 'var(--label-tracking)', textTransform: 'uppercase' }}>
+              <Star size={12} weight="fill" style={{ color: 'var(--accent)' }} />
+              ELO SCORE
+            </div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 900, color: 'var(--accent-bright)', letterSpacing: '-0.04em', lineHeight: 1 }}>
+              {formatNumber(animScore)}
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--c-label)' }}>{tierLabel}</div>
+          </div>
+
+          {/* Total Chats */}
+          <div className="flex flex-col gap-0.5 px-4 py-3 lg:px-5 lg:py-4" style={{ background: 'rgba(255,255,255,0.02)' }}>
+            <div className="flex items-center gap-1.5" style={{ color: 'var(--c-label)', fontSize: '10px', letterSpacing: 'var(--label-tracking)', textTransform: 'uppercase' }}>
+              <ChatTeardropDots size={12} weight="fill" style={{ color: 'rgba(99,102,241,0.8)' }} />
+              TOTAL CHATS
+            </div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1 }}>
+              {formatNumber(animInteractions)}
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--c-label)' }}>{formatNumber(Math.floor(breakdown.avgInteractions || 0))} avg/캐릭터</div>
+          </div>
+
+          {/* Followers */}
+          <div className="flex flex-col gap-0.5 px-4 py-3 lg:px-5 lg:py-4" style={{ background: 'rgba(255,255,255,0.02)' }}>
+            <div className="flex items-center gap-1.5" style={{ color: 'var(--c-label)', fontSize: '10px', letterSpacing: 'var(--label-tracking)', textTransform: 'uppercase' }}>
+              <Users size={12} weight="fill" style={{ color: 'rgba(74,222,128,0.8)' }} />
+              FOLLOWERS
+            </div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1 }}>
+              {formatNumber(animFollowers)}
+            </div>
+            {globalRank && (
+              <div style={{ fontSize: '11px', color: 'var(--c-label)' }}>전체 #{globalRank}위</div>
+            )}
+          </div>
+
+          {/* Top Character */}
+          <div className="flex flex-col gap-0.5 px-4 py-3 lg:px-5 lg:py-4" style={{ background: 'rgba(255,255,255,0.02)' }}>
+            <div className="flex items-center gap-1.5" style={{ color: 'var(--c-label)', fontSize: '10px', letterSpacing: 'var(--label-tracking)', textTransform: 'uppercase' }}>
+              <Trophy size={12} weight="fill" style={{ color: 'rgba(251,191,36,0.8)' }} />
+              TOP CHARACTER
+            </div>
+            <div style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '15px',
+              fontWeight: 700,
+              color: 'var(--accent-bright)',
+              lineHeight: 1.3,
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+            }}>
+              {topCharacter?.name || '—'}
+            </div>
+            {topCharacter && (
+              <div style={{ fontSize: '11px', color: 'var(--c-label)' }}>{formatNumber(topCharacter.interactionCount)} chats</div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* 칭호 편집 모달 (유지) */}
       <CreatorPills

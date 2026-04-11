@@ -2,13 +2,14 @@ import React, { useRef, useState, useMemo } from 'react';
 import { Info } from 'lucide-react';
 import TagTrendCard from './TagTrendCard';
 
+// bubbleTab: 이 카드 클릭 시 이동할 TagBubbleSection의 장르 탭 key
 const CARDS = [
-  { key: '순애',        label: '순애',    tooltip: '순수한 사랑/애정 장르 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
-  { key: 'ntr_agg',    label: 'NTR·NTL', tooltip: '빼앗김, 뺏김, 불륜, 바람 등 NTR/NTL 계열 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
-  { key: 'bl',         label: 'BL',      tooltip: 'Boys Love 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
-  { key: 'gl',         label: 'GL',      tooltip: 'Girls Love (백합) 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
-  { key: 'hpj_agg',    label: '후/피/집', tooltip: '후회, 피폐, 집착 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)', hoverLabel: '후회 · 피폐 · 집착' },
-  { key: 'fantasy_agg',label: '판타지',   tooltip: '판타지, 현대판타지 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
+  { key: '순애',        label: '순애',    bubbleTab: 'romance', tooltip: '순수한 사랑/애정 장르 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
+  { key: 'ntr_agg',    label: 'NTR·NTL', bubbleTab: 'romance', tooltip: '빼앗김, 뺏김, 불륜, 바람 등 NTR/NTL 계열 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
+  { key: 'bl',         label: 'BL',      bubbleTab: 'romance', tooltip: 'Boys Love 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
+  { key: 'gl',         label: 'GL',      bubbleTab: 'romance', tooltip: 'Girls Love (백합) 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
+  { key: 'hpj_agg',    label: '후/피/집', bubbleTab: 'romance', tooltip: '후회, 피폐, 집착 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)', hoverLabel: '후회 · 피폐 · 집착' },
+  { key: 'fantasy_agg',label: '판타지',   bubbleTab: 'genre',   tooltip: '판타지, 현대판타지 태그 랭킹 점수 합산 (트렌딩·베스트·신작 순위 반영)' },
 ];
 
 const TIME_WINDOWS = ['6h', '12h', '24h', '48h'];
@@ -23,7 +24,7 @@ function getCombinedScore(card, tagScores, combined) {
   return combined.find(c => c.tag === card.key)?.score ?? null;
 }
 
-export default function TagTrendStrip({ tagTrend = {}, combined = [], tagScores = null, tagScoresDelta = null, tagScoresDeltaRef = null }) {
+export default function TagTrendStrip({ tagTrend = {}, combined = [], tagScores = null, tagScoresDelta = null, tagScoresDeltaRef = null, onTagClick = null }) {
   const ref = useRef(null);
   const drag = useRef({ active: false, startX: 0, scrollLeft: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
@@ -125,6 +126,7 @@ export default function TagTrendStrip({ tagTrend = {}, combined = [], tagScores 
             combinedScore={getCombinedScore(card, tagScores, combined)}
             scoreDelta={tagScoresDelta?.[card.key] ?? null}
             deltaRefHours={tagScoresDeltaRef?.[card.key] ?? null}
+            onClick={onTagClick ? () => onTagClick(card.bubbleTab) : null}
           />
         ))}
       </div>

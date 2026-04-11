@@ -1,6 +1,7 @@
 import React from 'react';
 import { proxyThumbnailUrl } from '../../utils/imageUtils';
 import { formatNumber } from '../../utils/tierCalculator';
+import { ArrowUp, ArrowDown } from '@phosphor-icons/react';
 
 const GENRE_TAGS = new Set(['로맨스','판타지','무협','sf','스릴러','공포','현대','게임','스포츠','일상','학원','이세계','전생','회귀','빙의','시스템','성좌','대체역사','밀리터리','추리','착각','아포칼립스','디스토피아','사이버펑크','스팀펑크','로판','무가','하렘','역하렘','피카레스크','군상극','먼치킨','착각계','전문직','인방','재벌','연예계','요리','음악','미술']);
 const ORIENTATION_TAGS = new Set(['hl','bl','gl','백합','비엘','언리밋']);
@@ -66,7 +67,13 @@ export default function PlotRankingItem({ plot, rank, maxDelta }) {
       href={zetaUrl || undefined}
       target={zetaUrl ? '_blank' : undefined}
       rel={zetaUrl ? 'noopener noreferrer' : undefined}
-      className={`block py-3 px-2 rounded hover:bg-white/5 transition-colors cursor-pointer no-underline ${medalBg}`}
+      className={`block py-3 pr-3 sm:pr-0 rounded transition-colors cursor-pointer no-underline hover:bg-white/[0.04] ${medalBg}`}
+      style={{
+        borderLeft: maxDelta > 0 && interactionDelta > 0
+          ? `2px solid rgba(74,222,128,${Math.max(0.12, Math.min(0.85, interactionDelta / maxDelta))})`
+          : '2px solid transparent',
+        paddingLeft: '10px',
+      }}
     >
       {/* Row 1: 순위 + 이미지 + 이름/핸들 (항상 표시) */}
       <div className="flex items-center gap-2.5 lg:gap-2">
@@ -96,11 +103,15 @@ export default function PlotRankingItem({ plot, rank, maxDelta }) {
           <div className="flex items-center gap-1.5 min-w-0">
             <p className="text-[16px] sm:text-[15px] font-semibold sm:font-medium text-white truncate min-w-0 leading-tight">{name}</p>
             {rankChange === null ? (
-              <span className="shrink-0 text-[10px] font-bold px-1 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">NEW</span>
+              <span className="shrink-0 text-[10px] font-bold px-1 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30" style={{ fontFamily: 'var(--font-mono)' }}>NEW</span>
             ) : rankChange > 0 ? (
-              <span className="shrink-0 text-[11px] font-bold text-emerald-400">↑{rankChange}</span>
+              <span className="shrink-0 flex items-center gap-0.5 text-[11px] font-bold" style={{ color: 'var(--c-up)' }}>
+                <ArrowUp size={10} weight="bold" />{rankChange}
+              </span>
             ) : rankChange < 0 ? (
-              <span className="shrink-0 text-[11px] font-bold text-red-400">↓{Math.abs(rankChange)}</span>
+              <span className="shrink-0 flex items-center gap-0.5 text-[11px] font-bold" style={{ color: 'var(--c-down)' }}>
+                <ArrowDown size={10} weight="bold" />{Math.abs(rankChange)}
+              </span>
             ) : null}
           </div>
           {creatorHandle && (
@@ -109,9 +120,13 @@ export default function PlotRankingItem({ plot, rank, maxDelta }) {
         </div>
 
         {/* 데스크탑(sm+) 전용: 태그 열 */}
-        <div className="hidden sm:grid grid-cols-3 gap-0.5 shrink-0 w-[156px]">
+        <div className="hidden sm:flex gap-1 shrink-0 w-[188px] overflow-hidden items-center justify-end">
           {tags.map((t, i) => (
-            <span key={i} className="text-[11px] px-1 py-0.5 rounded-full bg-white/[0.08] text-white/50 truncate text-center">
+            <span
+              key={i}
+              className="text-[11px] px-1.5 py-0.5 rounded-full bg-white/[0.08] text-white/50 whitespace-nowrap overflow-hidden text-ellipsis shrink"
+              style={{ maxWidth: '72px', minWidth: '24px' }}
+            >
               {t}
             </span>
           ))}
@@ -120,36 +135,36 @@ export default function PlotRankingItem({ plot, rank, maxDelta }) {
         {/* 데스크탑(sm+) 전용: 대화량 열 */}
         <div className="hidden sm:block text-right shrink-0 w-[88px]">
           {(() => { const { num, unit } = splitFormatted(formatNumber(interactionCount)); return (
-            <span className="tabular-nums" style={{ letterSpacing: '-0.02em' }}>
-              <span className="text-[19px] font-bold text-white/85">{num}</span>
-              {unit && <span className="text-[12px] font-semibold text-white/50 ml-[1px]">{unit}</span>}
+            <span className="tabular-nums" style={{ letterSpacing: '-0.03em', fontFamily: 'var(--font-mono)' }}>
+              <span className="text-[20px] font-bold" style={{ color: '#fff' }}>{num}</span>
+              {unit && <span className="text-[13px] font-semibold text-white/50 ml-[1px]">{unit}</span>}
             </span>
           ); })()}
         </div>
 
         {/* 데스크탑(sm+) 전용: 상승량+상승률 열 */}
-        <div className="hidden sm:flex flex-col items-end justify-center shrink-0 w-[80px]">
+        <div className="hidden sm:flex flex-col items-end justify-center shrink-0 w-[80px] pr-2">
           {interactionDelta != null && interactionDelta > 0 ? (
             <>
               {pct && (
-                <span className="text-[14px] font-bold tabular-nums" style={{ color: '#34d399' }}>
+                <span className="text-[15px] font-bold tabular-nums" style={{ color: 'var(--c-up)', fontFamily: 'var(--font-mono)' }}>
                   +{pct}
                 </span>
               )}
-              <span className="text-[12px] tabular-nums leading-tight" style={{ color }}>
+              <span className="text-[13px] tabular-nums leading-tight" style={{ color, fontFamily: 'var(--font-mono)' }}>
                 +{formatNumber(interactionDelta)}
               </span>
             </>
           ) : (
-            <span className="text-[12px] text-white/15">—</span>
+            <span className="text-[13px]" style={{ color: 'var(--c-neutral)' }}>—</span>
           )}
         </div>
 
         {/* 모바일 전용: 대화량 (Row 1 우측, 크게) */}
         <div className="sm:hidden shrink-0 ml-auto text-right">
           {(() => { const { num, unit } = splitFormatted(formatNumber(interactionCount)); return (
-            <span className="tabular-nums" style={{ letterSpacing: '-0.02em' }}>
-              <span className="text-[22px] font-bold text-white/85">{num}</span>
+            <span className="tabular-nums" style={{ letterSpacing: '-0.03em', fontFamily: 'var(--font-mono)' }}>
+              <span className="text-[22px] font-bold" style={{ color: '#fff' }}>{num}</span>
               {unit && <span className="text-[13px] font-semibold text-white/50 ml-[1px]">{unit}</span>}
             </span>
           ); })()}

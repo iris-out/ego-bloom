@@ -350,8 +350,7 @@ export default function AchievementsTab({ stats, characters }) {
                   {isNtr && (
                     <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                       style={{ background: 'rgba(185,28,28,0.82)' }}>
-                      <span className="text-[12px] text-white text-center px-2 leading-snug"
-                        style={{ fontFamily: '"Noto Serif KR", "Hahmlet", "Gowun Batang", Georgia, serif', fontWeight: 600 }}>
+                      <span className="text-[12px] text-white text-center px-2 leading-snug">
                         순애기사가 당신을<br />기억할 것입니다
                       </span>
                     </div>

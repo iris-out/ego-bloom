@@ -278,7 +278,7 @@ export default function CharacterDetailModal({ char, isOpen, onClose }) {
                   ) : (
                     <>
                       <div className="absolute inset-0" style={{ background: `${tc}18` }} />
-                      <span className="font-serif-kr text-2xl font-bold z-10" style={{ color: `${tc}CC` }}>
+                      <span className="font-sans text-2xl font-bold z-10" style={{ color: `${tc}CC` }}>
                         {(char.name || '?')[0]}
                       </span>
                     </>
@@ -316,7 +316,7 @@ export default function CharacterDetailModal({ char, isOpen, onClose }) {
 
           {/* 이름 */}
           <div className="mt-8">
-            <h1 className="font-serif-kr font-bold text-[27px] text-gray-100 tracking-tight leading-tight">{char.name}</h1>
+            <h1 className="font-sans font-bold text-[27px] text-gray-100 tracking-tight leading-tight">{char.name}</h1>
           </div>
 
           {/* 태그 */}
@@ -342,7 +342,7 @@ export default function CharacterDetailModal({ char, isOpen, onClose }) {
             ) : description ? (
               <>
                 <span className="text-5xl font-serif leading-none" style={{ color: `${tc}25` }}>"</span>
-                <p className="font-serif-kr text-[16px] text-gray-300 leading-[1.9] -mt-2 ml-4 line-clamp-6">
+                <p className="font-sans text-[16px] text-gray-300 leading-[1.6] -mt-2 ml-4 line-clamp-6">
                   {description}
                 </p>
               </>
@@ -386,7 +386,7 @@ export default function CharacterDetailModal({ char, isOpen, onClose }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
-              className="w-full flex items-center justify-center gap-3 py-[15px] font-serif-kr font-medium text-[14px] tracking-widest transition-all relative overflow-hidden group"
+              className="w-full flex items-center justify-center gap-3 py-[15px] font-sans font-medium text-[14px] tracking-widest transition-all relative overflow-hidden group"
               style={{ border: `1px solid ${tc}40`, color: `${tc}CC` }}
             >
               <div

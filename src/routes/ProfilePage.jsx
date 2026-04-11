@@ -494,7 +494,7 @@ export default function ProfilePage() {
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key)}
-                  className="flex-1 py-[6px] rounded-[7px] text-[11px] font-semibold transition-all"
+                  className="flex-1 py-[6px] lg:py-2 rounded-[7px] text-[11px] lg:text-[13px] font-semibold transition-all"
                   style={tab === t.key
                     ? { background: '#2c2c34', color: '#fff' }
                     : { color: 'rgba(255,255,255,0.35)' }
