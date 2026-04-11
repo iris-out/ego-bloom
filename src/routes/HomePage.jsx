@@ -6,6 +6,7 @@ import ChangelogModal from '../components/ChangelogModal';
 import DataCollectionModal from '../components/DataCollectionModal';
 import SearchWarningModal from '../components/SearchWarningModal';
 import EmergencyToast from '../components/EmergencyToast';
+import ServerAlertCard from '../components/ServerAlertCard';
 import SearchPill from '../components/SearchPill';
 import AnnouncementTicker from '../components/home/AnnouncementTicker';
 import TagTrendStrip from '../components/home/TagTrendStrip';
@@ -86,7 +87,7 @@ function ServerStatusBadge({ status }) {
   return (
     <div className="flex items-center gap-1.5 text-[11px] font-medium text-white/50">
       <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
-      <span>{label}</span>
+      <span className="hidden sm:inline whitespace-nowrap">{label}</span>
     </div>
   );
 }
@@ -105,7 +106,7 @@ function DataCollectionButton({ onClick }) {
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { status: serverStatus } = useServerStatus();
+  const { status: serverStatus, message: serverMessage } = useServerStatus();
   const [timeSegment] = useState(getTimeSegment);
   const [showChangelogModal, setShowChangelogModal] = useState(false);
   const [showDataModal, setShowDataModal] = useState(false);
@@ -155,6 +156,11 @@ export default function HomePage() {
       <StarField globalOpacity={bg.stars} />
 
       <div className="relative z-10 flex flex-col min-h-dvh">
+        {/* 서버 불안정/이상 알림 */}
+        {(serverStatus === 'warning' || serverStatus === 'error') && (
+          <ServerAlertCard status={serverStatus} message={serverMessage} />
+        )}
+
         {/* Header */}
         <header className="flex items-center justify-between px-4 py-3 border-b border-white/5">
           {/* Left: logo + (PC) data btn + server status */}
@@ -164,7 +170,7 @@ export default function HomePage() {
                 <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
                 <path d="M8 12 L12 8 L16 12 L12 16 Z" fill="rgba(129,140,248,0.8)" />
               </svg>
-              <h1 className="font-medium text-[18px] tracking-[-0.02em] text-white">EGO-BLOOM</h1>
+              <h1 className="font-medium text-[18px] tracking-[-0.02em] text-white whitespace-nowrap">EGO-BLOOM</h1>
             </div>
             {/* PC-only: data btn + server status */}
             <div className="hidden lg:flex items-center gap-2">
