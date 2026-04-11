@@ -91,30 +91,6 @@ function getInitial(nickname) {
   return '?';
 }
 
-// 별 파티클 생성 — 매 마운트마다 무작위
-function generateSparkles() {
-  return Array.from({ length: 9 }, (_, i) => {
-    const angle = (i / 9) * Math.PI * 2 + (Math.random() * 0.9 - 0.45);
-    const r = 30 + Math.random() * 38;
-    return {
-      tx: `${Math.round(Math.cos(angle) * r)}px`,
-      ty: `${Math.round(Math.sin(angle) * r)}px`,
-      size: (1.5 + Math.random() * 2.5).toFixed(1),
-      dur: `${(2.2 + Math.random() * 2.4).toFixed(1)}s`,
-      delay: `-${(Math.random() * 3).toFixed(1)}s`, // 음수 딜레이로 이미 진행 중인 것처럼
-      op: (0.35 + Math.random() * 0.45).toFixed(2),
-    };
-  });
-}
-
-// 오로라 블롭 생성 — 매 마운트마다 무작위
-function generateAuroras() {
-  return [
-    { tx: `${-18 + Math.round(Math.random() * 12)}px`, ty: `${-38 + Math.round(Math.random() * 10)}px`, w: 82 + Math.round(Math.random() * 30), h: 52 + Math.round(Math.random() * 18), dur: `${(6.5 + Math.random() * 2).toFixed(1)}s`, delay: '0s',    op: (0.14 + Math.random() * 0.08).toFixed(2) },
-    { tx: `${28 + Math.round(Math.random() * 14)}px`,  ty: `${12 + Math.round(Math.random() * 10)}px`,  w: 62 + Math.round(Math.random() * 24), h: 44 + Math.round(Math.random() * 16), dur: `${(8 + Math.random() * 2).toFixed(1)}s`,   delay: '-2.1s', op: (0.11 + Math.random() * 0.07).toFixed(2) },
-    { tx: `${-32 + Math.round(Math.random() * 10)}px`, ty: `${18 + Math.round(Math.random() * 12)}px`,  w: 54 + Math.round(Math.random() * 20), h: 38 + Math.round(Math.random() * 14), dur: `${(5.5 + Math.random() * 2).toFixed(1)}s`, delay: '-1.3s', op: (0.10 + Math.random() * 0.06).toFixed(2) },
-  ];
-}
 
 const TIER_COLORS = {
   unranked: '#6B7280',
@@ -131,10 +107,7 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
   const navigate = useNavigate();
   const [showRecap, setShowRecap] = useState(false);
   const [editingInternal, setEditingInternal] = useState(false);
-  const [revealPhase, setRevealPhase] = useState(0); // 0=초기 1=프로필인 2=카운팅 3=잠금 4=티어등장
   const [tierVisible, setTierVisible] = useState(false);
-  const sparkleParticles = useMemo(() => generateSparkles(), []); // eslint-disable-line react-hooks/exhaustive-deps
-  const auroraBlobs      = useMemo(() => generateAuroras(),  []); // eslint-disable-line react-hooks/exhaustive-deps
   const editing = editingProp !== undefined ? editingProp : editingInternal;
   const setEditing = setEditingProp || setEditingInternal;
   const [copied, setCopied] = useState(false);
@@ -210,21 +183,15 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
   const animCharCount = useCountUp(characters?.length ?? stats.plotCount ?? 0);
 
   const handleScoreDone = useCallback(() => {
-    // 카운팅 완료 → 즉시 티어 등장 (효과는 이미 phase 3에서 시작됨)
-    setRevealPhase(4);
     setTierVisible(true);
     onTierReveal?.();
   }, [onTierReveal]);
 
   const { val: animScore, start: startScore } = useTierRevealScore(score, handleScoreDone);
 
-  // 타이밍: 50ms(딜레이) + 300ms(카운팅) = ~350ms에 카운팅 끝
-  // 효과(phase 3)는 200ms에 시작 → 효과 보이고 150ms 뒤 티어 등장 (총 ~0.5s)
   useEffect(() => {
-    setRevealPhase(1);
-    const tCount   = setTimeout(() => { setRevealPhase(2); startScore(); }, 50);
-    const tEffects = setTimeout(() => { setRevealPhase(3); },              200);
-    return () => { clearTimeout(tCount); clearTimeout(tEffects); };
+    const tCount = setTimeout(() => { startScore(); }, 50);
+    return () => { clearTimeout(tCount); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // B2: 다음 티어 정보
@@ -258,7 +225,7 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
               className="w-[46px] h-[46px] rounded-2xl overflow-hidden"
               style={{
                 boxShadow: tierVisible
-                  ? `0 0 0 2px ${tierColor}, 0 0 12px ${tierColor}55`
+                  ? `0 0 0 1.5px ${tierColor}60`
                   : '0 0 0 1.5px rgba(255,255,255,0.08)',
                 transition: 'box-shadow 0.8s ease',
               }}
@@ -317,49 +284,6 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
         <div className="flex flex-col items-center gap-1 shrink-0">
           {/* 이펙트 기준 래퍼 — 버튼(46×46)에만 centered */}
           <div className="relative w-[46px] h-[46px]">
-            {/* 오로라 블롭 */}
-            <div
-              className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl"
-              style={{ opacity: revealPhase >= 3 ? 1 : 0, transition: 'opacity 0.5s ease' }}
-            >
-              {auroraBlobs.map((a, i) => (
-                <div
-                  key={`au-${i}`}
-                  className="aurora-blob"
-                  style={{
-                    '--au-tx': a.tx, '--au-ty': a.ty, '--au-op': a.op,
-                    '--au-dur': a.dur, '--au-delay': a.delay,
-                    width: `${a.w * 0.6}px`, height: `${a.h * 0.6}px`,
-                    marginLeft: `${-(a.w * 0.6) / 2}px`, marginTop: `${-(a.h * 0.6) / 2}px`,
-                    background: tierColor, filter: 'blur(10px)',
-                    animationDelay: a.delay, animationDuration: a.dur,
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* 별 파티클 */}
-            <div
-              className="absolute pointer-events-none overflow-hidden"
-              style={{ inset: '-36px', opacity: revealPhase >= 3 ? 1 : 0, transition: 'opacity 0.5s ease', borderRadius: '50%' }}
-            >
-              {sparkleParticles.map((p, i) => (
-                <div
-                  key={`st-${i}`}
-                  className="sp-star"
-                  style={{
-                    '--sp-tx': p.tx, '--sp-ty': p.ty,
-                    '--sp-dur': p.dur, '--sp-delay': p.delay, '--sp-op': p.op,
-                    width: `${p.size}px`, height: `${p.size}px`,
-                    marginLeft: `${-p.size / 2}px`, marginTop: `${-p.size / 2}px`,
-                    background: i % 3 === 0 ? '#ffffff' : tierColor,
-                    boxShadow: `0 0 ${parseFloat(p.size) * 3}px ${i % 3 === 0 ? '#ffffff88' : `${tierColor}99`}`,
-                    animationDelay: p.delay, animationDuration: p.dur,
-                  }}
-                />
-              ))}
-            </div>
-
             {/* 티어 링 + 아이콘 */}
             <button
               onClick={() => navigate('/tier')}
@@ -367,7 +291,7 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
               style={{
                 background: `${tierColor}12`,
                 border: 'none',
-                boxShadow: tierVisible ? `0 0 0 1.5px ${tierColor}30, 0 0 18px ${tierColor}40` : 'none',
+                boxShadow: tierVisible ? `0 0 0 1.5px ${tierColor}30` : 'none',
                 opacity: tierVisible ? undefined : 0,
                 animationPlayState: tierVisible ? 'running' : 'paused',
                 pointerEvents: tierVisible ? 'auto' : 'none',

@@ -9,7 +9,7 @@ import HeroCard from '../components/HeroCard';
 import SkeletonUI from '../components/SkeletonUI';
 import ChangelogModal from '../components/ChangelogModal';
 import { proxyImageUrl, getPlotImageUrl, getPlotImageUrls } from '../utils/imageUtils';
-import { getCreatorTier, calculateCreatorScore, getCharacterTier, formatCompactNumber } from '../utils/tierCalculator';
+import { getCharacterTier, formatCompactNumber } from '../utils/tierCalculator';
 import ImageWithFallback from '../components/ImageWithFallback';
 import { useServerStatus } from '../hooks/useServerStatus';
 
@@ -203,20 +203,6 @@ export default function ProfilePage() {
   const [showChangelog, setShowChangelog] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [tierRevealed, setTierRevealed] = useState(false);
-
-  // A3: 티어별 배경 글로우 색조
-  const glowColor = useMemo(() => {
-    if (!data) return 'rgba(74,127,255,0.10)';
-    const s = calculateCreatorScore(data.stats, data.characters);
-    const t = getCreatorTier(s);
-    const map = {
-      champion: 'rgba(249,115,22,0.13)',
-      master:   'rgba(217,70,239,0.10)',
-      diamond:  'rgba(59,130,246,0.12)',
-      gold:     'rgba(251,191,36,0.10)',
-    };
-    return map[t.key] || 'rgba(74,127,255,0.10)';
-  }, [data]);
 
   const rankedCharacters = useMemo(() => {
     if (!data?.characters) return [];
@@ -477,16 +463,6 @@ export default function ProfilePage() {
 
   return (
     <div className="bg-profile min-h-[100dvh] relative">
-      {/* 배경 글로우 — 티어 공개 후에만 표시 */}
-      <div
-        className="fixed top-[10%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full blur-[130px] pointer-events-none"
-        style={{
-          background: glowColor,
-          opacity: tierRevealed ? 1 : 0,
-          transition: 'opacity 1.4s ease, background 1.2s ease',
-        }}
-      />
-
       <Header />
 
       <main className="max-w-[680px] mx-auto px-6 pb-20 relative z-10 lg:max-w-[1280px] lg:px-[6%]">

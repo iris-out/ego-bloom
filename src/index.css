@@ -287,47 +287,9 @@ img { display: block; }
 .glow-burst-ring { animation: glow-burst 0.65s ease-out both; }
 .tier-lock-flash { animation: score-lock-flash 0.4s ease-out both; }
 
-/* 은은한 별 파티클 */
-.sp-star {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: sp-star-twinkle var(--sp-dur, 3s) ease-in-out var(--sp-delay, 0s) infinite both;
-}
-@keyframes sp-star-twinkle {
-  0%, 100% { opacity: 0;                    transform: translate(var(--sp-tx, 0px), var(--sp-ty, 0px)) scale(0.4); }
-  45%, 55%  { opacity: var(--sp-op, 0.55); transform: translate(var(--sp-tx, 0px), var(--sp-ty, 0px)) scale(1.1); filter: brightness(2.2); }
-}
-
-/* 오로라 블롭 */
-.aurora-blob {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: aurora-drift var(--au-dur, 7s) ease-in-out var(--au-delay, 0s) infinite;
-}
-@keyframes aurora-drift {
-  0%, 100% {
-    opacity: var(--au-op, 0.15);
-    transform: translate(var(--au-tx, 0px), var(--au-ty, 0px)) scale(1) rotate(0deg);
-  }
-  33% {
-    opacity: calc(var(--au-op, 0.15) * 1.5);
-    transform: translate(calc(var(--au-tx, 0px) + 9px), calc(var(--au-ty, 0px) - 7px)) scale(1.18) rotate(6deg);
-  }
-  66% {
-    opacity: calc(var(--au-op, 0.15) * 0.6);
-    transform: translate(calc(var(--au-tx, 0px) - 7px), calc(var(--au-ty, 0px) + 9px)) scale(0.86) rotate(-5deg);
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
-  .tier-erupt, .glow-burst-ring, .tier-lock-flash,
-  .sp-star, .aurora-blob { animation: none; }
+  .tier-erupt, .glow-burst-ring, .tier-lock-flash { animation: none; }
 }
 
 /* 에디토리얼 유틸리티 */

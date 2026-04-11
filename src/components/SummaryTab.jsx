@@ -7,20 +7,6 @@ import { Search } from 'lucide-react';
 const ITEMS_PER_PAGE = 30;
 
 
-function paletteIndex(name) {
-  let h = 0;
-  for (let i = 0; i < (name || '').length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff;
-  return h % 6;
-}
-
-const PALETTES = [
-  'from-indigo-500/20 to-blue-500/20',
-  'from-emerald-500/20 to-teal-500/20',
-  'from-rose-500/20 to-pink-500/20',
-  'from-amber-500/20 to-orange-500/20',
-  'from-sky-500/20 to-blue-500/20',
-  'from-violet-500/20 to-fuchsia-500/20',
-];
 
 const TIER_BADGE_STYLES = {
   B:  { color: '#A0AEC0', bg: 'rgba(160,174,192,0.15)', border: 'rgba(160,174,192,0.3)' },
@@ -157,7 +143,7 @@ export default function SummaryTab({ characters, stats }) {
           const hasRank = char.globalRank != null;
           const rankDiff = char.rankDiff ?? 0;
           const rankBadge = getRankTypeBadge(char);
-          const pal = PALETTES[paletteIndex(char.name)];
+
           const isLast = idx === paged.length - 1;
           const hashtags = (char.hashtags || char.tags || []).slice(0, 4);
 
@@ -181,8 +167,8 @@ export default function SummaryTab({ characters, stats }) {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className={`w-full h-full bg-gradient-to-br ${pal} flex items-center justify-center`}>
-                    <span className="text-sm font-bold text-white/60">
+                  <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                    <span className="text-sm font-bold text-white/40">
                       {(char.name || '?')[0]}
                     </span>
                   </div>

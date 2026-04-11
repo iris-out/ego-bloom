@@ -493,6 +493,16 @@ export default defineConfig(({ mode }) => {
         },
       }),
     ],
+    build: {
+      rolldownOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('highcharts')) return 'vendor-highcharts';
+            if (id.includes('three') || id.includes('@react-three')) return 'vendor-three';
+          },
+        },
+      },
+    },
     server: {
       proxy: {
         '/api/zeta': {

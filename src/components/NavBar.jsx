@@ -1,13 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, Trophy } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import { APP_VERSION } from '../data/changelog';
 
 /**
  * variant:
- *   'home'    – 로고 + 랭킹/티어 링크
+ *   'home'    – 로고 + 티어 링크
  *   'profile' – 뒤로가기 + 로고 + LIVE 버튼
- *   'ranking' – 뒤로가기 + 로고
  */
 export default function NavBar({ variant = 'home', onBack, serverStatus, onStatusClick, onLiveClick }) {
   const navigate = useNavigate();
@@ -38,7 +37,7 @@ export default function NavBar({ variant = 'home', onBack, serverStatus, onStatu
             <em>Ego</em>Bloom
           </button>
         )}
-        {(variant === 'profile' || variant === 'ranking') && (
+        {variant === 'profile' && (
           <button className="nav-back" onClick={handleBack}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
@@ -48,7 +47,7 @@ export default function NavBar({ variant = 'home', onBack, serverStatus, onStatu
         )}
 
         {/* 데이터 수집 및 서버 상태 (home/ranking 에서 표시) */}
-        {serverStatus && variant !== 'profile' && (
+        {serverStatus && variant === 'home' && (
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowDataModal(true)}
@@ -92,14 +91,6 @@ export default function NavBar({ variant = 'home', onBack, serverStatus, onStatu
                 aria-label="티어 가이드"
               >
                 <Trophy size={16} />
-              </button>
-              <button
-                className="nav-btn"
-                onClick={() => navigate('/ranking')}
-                title="트렌드 랭킹"
-                aria-label="트렌드 랭킹"
-              >
-                <BarChart3 size={16} />
               </button>
             </>
           )}

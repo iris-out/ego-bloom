@@ -38,6 +38,8 @@ prototype/
 plan/
 design_ai/
 docs/
+tests/
+test-results/
 .superpowers/
 SKILL.md
 

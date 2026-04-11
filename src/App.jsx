@@ -2,8 +2,6 @@ import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
 import HomePage from './routes/HomePage';
 import ProfilePage from './routes/ProfilePage';
-import RankingPage from './routes/RankingPage';
-
 const TierPage = lazy(() => import('./routes/TierPage'));
 const WorldPage = lazy(() => import('./routes/WorldPage'));
 
@@ -23,8 +21,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LegacyRedirect />} />
         <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/ranking" element={<RankingPage />} />
-        <Route path="/tier" element={<TierPage />} />
+<Route path="/tier" element={<TierPage />} />
         <Route path="/world" element={<WorldPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
