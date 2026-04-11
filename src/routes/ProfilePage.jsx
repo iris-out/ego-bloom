@@ -90,21 +90,21 @@ async function fetchRankingMap() {
   const cached = getCachedRankingMap();
   if (cached) return cached;
   try {
-    const [tRes, bRes, nRes] = await Promise.all([
-      fetch('/api/zeta/plots/ranking?type=TRENDING&limit=100&filterType=GENRE&filterValues=all'),
-      fetch('/api/zeta/plots/ranking?type=BEST&limit=100&filterType=GENRE&filterValues=all'),
-      fetch('/api/zeta/plots/ranking?type=NEW&limit=100&filterType=GENRE&filterValues=all'),
-    ]);
-    const parseRanking = async (res) => {
-      if (!res.ok) return [];
-      const data = await res.json();
-      return data.rankings || data.plots || [];
-    };
-    const [trending, best, newItems] = await Promise.all([parseRanking(tRes), parseRanking(bRes), parseRanking(nRes)]);
+    // ranking_latest.json을 재활용 — 3개 Zeta API 호출 대신 이미 캐싱된 정적 파일 1회 요청
+    const res = await fetch('/data/ranking_latest.json');
+    if (!res.ok) throw new Error('ranking JSON fetch failed');
+    const rankingData = await res.json();
     const map = {};
-    trending.forEach(p => { map[p.id] = { ...map[p.id], trendingRank: p.rank, rankDiff: p.rankDiff ?? 0 }; });
-    best.forEach(p => { map[p.id] = { ...map[p.id], bestRank: p.rank }; });
-    newItems.forEach(p => { map[p.id] = { ...map[p.id], newRank: p.rank }; });
+    // ranking_latest.json은 rankChange 필드 사용 (API의 rankDiff와 동일 의미)
+    (rankingData.trendingPlots || []).forEach(p => {
+      map[p.id] = { ...map[p.id], trendingRank: p.rank, rankDiff: p.rankChange ?? 0 };
+    });
+    (rankingData.bestPlots || []).forEach(p => {
+      map[p.id] = { ...map[p.id], bestRank: p.rank };
+    });
+    (rankingData.newPlots || []).forEach(p => {
+      map[p.id] = { ...map[p.id], newRank: p.rank };
+    });
     Object.values(map).forEach(r => {
       const ranks = [r.trendingRank, r.bestRank, r.newRank].filter(x => x != null);
       r.globalRank = ranks.length > 0 ? Math.min(...ranks) : null;
@@ -289,11 +289,14 @@ export default function ProfilePage() {
       if (profile.profileImageUrl) profile.profileImageUrl = proxyImageUrl(profile.profileImageUrl);
 
       // --- 백그라운드 랭킹 데이터 수집 시작 ---
-      // 주의: 아직 rankingMap이 병합되지 않은 상태의 allPlots를 기준으로 점수를 계산합니다.
-      const eloScore = calculateCreatorScore(stats, allPlots);
-      const tierInfo = getCreatorTier(eloScore);
-      
-      // 유저의 데이터를 DB에 업데이트합니다 (결과를 기다리지 않고 비동기로 찔러주기만 함)
+      // eloScore/tierName은 서버에서 raw stats로 재계산하므로 전송하지 않음
+      const sortedByInteraction = [...allPlots].sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0));
+      const oldestCharDate = allPlots.reduce((oldest, c) => {
+        const d = c.createdAt || c.createdDate;
+        if (!d) return oldest;
+        return !oldest || d < oldest ? d : oldest;
+      }, null);
+
       fetch('/api/update-creator', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -305,8 +308,9 @@ export default function ProfilePage() {
           followerCount: stats.followerCount || 0,
           plotInteractionCount: stats.plotInteractionCount || 0,
           voicePlayCount: stats.voicePlayCount || 0,
-          eloScore: eloScore,
-          tierName: tierInfo.name
+          plotCount: allPlots.length,
+          topCharInteractions: sortedByInteraction.slice(0, 20).map(c => c.interactionCount || 0),
+          oldestCharCreatedAt: oldestCharDate,
         })
       }).catch(err => console.error('[Ranking Update Error]:', err));
       // --- 백그라운드 랭킹 데이터 수집 끝 ---

@@ -1,7 +1,4 @@
-import React, { useMemo } from 'react';
-import Highcharts from 'highcharts';
-import HighchartsReactOfficial from 'highcharts-react-official';
-const HighchartsReact = HighchartsReactOfficial?.default ?? HighchartsReactOfficial;
+import React from 'react';
 import { proxyThumbnailUrl } from '../../utils/imageUtils';
 import { formatNumber } from '../../utils/tierCalculator';
 
@@ -25,49 +22,6 @@ function pctStr(delta, current) {
   if (base <= 0) return null;
   return ((delta / base) * 100).toFixed(1) + '%';
 }
-
-// delta: 이번 2시간 증가량, maxDelta: 목록 내 최대 증가량 (y축 기준 통일)
-// size: 'md'(데스크탑 38px) | 'sm'(모바일 28px)
-const PlotSparkline = React.memo(function PlotSparkline({ delta, maxDelta, size = 'md' }) {
-  const isUp = delta != null && delta > 0;
-  const lineColor = isUp ? '#34d399' : '#818cf8';
-  const fillTop = isUp ? 'rgba(52,211,153,0.22)' : 'rgba(129,140,248,0.12)';
-  const height = size === 'sm' ? 28 : 38;
-  // 목록 전체의 maxDelta를 y축 최대로 설정 → 상승폭이 클수록 기울기가 큼
-  const yMax = (maxDelta > 0 ? maxDelta : (delta || 1)) * 1.25;
-
-  const options = useMemo(() => ({
-    chart: {
-      type: 'area',
-      height,
-      backgroundColor: 'transparent',
-      margin: [1, 0, 1, 0],
-      animation: false,
-      spacing: [0, 0, 0, 0],
-    },
-    title: { text: null },
-    xAxis: { visible: false },
-    yAxis: { visible: false, min: 0, max: yMax },
-    legend: { enabled: false },
-    tooltip: { enabled: false },
-    credits: { enabled: false },
-    plotOptions: {
-      area: {
-        marker: { enabled: false },
-        lineWidth: 1.5,
-        fillOpacity: 1,
-        color: lineColor,
-        fillColor: {
-          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-          stops: [[0, fillTop], [1, 'rgba(0,0,0,0)']],
-        },
-      },
-    },
-    series: [{ data: [0, isUp ? delta : 0] }],
-  }), [delta, maxDelta, height, yMax, lineColor, fillTop, isUp]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  return <HighchartsReact highcharts={Highcharts} options={options} />;
-});
 
 export default function PlotRankingItem({ plot, rank, maxDelta }) {
   const { id, name, imageUrl, hashtags = [], interactionCount = 0, interactionDelta, rankChange, creatorHandle } = plot;
@@ -138,71 +92,58 @@ export default function PlotRankingItem({ plot, rank, maxDelta }) {
           ))}
         </div>
 
-        {/* 데스크탑(sm+) 전용: 대화량+증가 열 */}
-        <div className="hidden sm:block text-right shrink-0 w-[100px]">
+        {/* 데스크탑(sm+) 전용: 대화량 열 */}
+        <div className="hidden sm:block text-right shrink-0 w-[88px]">
           <span className="text-[17px] font-bold text-white/80 tabular-nums">
             {formatNumber(interactionCount)}
           </span>
-          {interactionDelta != null && interactionDelta > 0 && (
-            <div className="text-[13px] tabular-nums leading-tight" style={{ color }}>
-              (+{formatNumber(interactionDelta)})
-            </div>
-          )}
         </div>
 
-        {/* 데스크탑(sm+) 전용: 스파크라인 열 */}
-        <div className="hidden sm:flex flex-col justify-center shrink-0 w-[96px]">
+        {/* 데스크탑(sm+) 전용: 상승량+상승률 열 */}
+        <div className="hidden sm:flex flex-col items-end justify-center shrink-0 w-[80px]">
           {interactionDelta != null && interactionDelta > 0 ? (
             <>
-              <PlotSparkline delta={interactionDelta} maxDelta={maxDelta} size="md" />
               {pct && (
-                <span className="text-[12px] tabular-nums text-right" style={{ color: '#34d399', opacity: 0.75 }}>
+                <span className="text-[14px] font-bold tabular-nums" style={{ color: '#34d399' }}>
                   +{pct}
                 </span>
               )}
+              <span className="text-[12px] tabular-nums leading-tight" style={{ color }}>
+                +{formatNumber(interactionDelta)}
+              </span>
             </>
           ) : (
-            <div className="h-[38px] flex items-center justify-end">
-              <span className="text-[12px] text-white/15">—</span>
-            </div>
+            <span className="text-[12px] text-white/15">—</span>
           )}
+        </div>
+
+        {/* 모바일 전용: 대화량 (Row 1 우측, 크게) */}
+        <div className="sm:hidden shrink-0 ml-auto text-right">
+          <span className="text-[18px] font-bold text-white/85 tabular-nums">
+            {formatNumber(interactionCount)}
+          </span>
         </div>
       </div>
 
-      {/* Row 2: 모바일(< sm) 전용 — 태그 + 대화량 + 증가 + 바 */}
-      {/* pl-20(80px) = rank w-5(20px) + gap-2.5(10px) + avatar w-10(40px) + gap-2.5(10px) */}
-      <div className="sm:hidden flex items-center gap-2 mt-1.5 pl-20">
+      {/* Row 2: 모바일(< sm) 전용 — 태그(좌) + 상승률·상승량(우) */}
+      <div className="sm:hidden flex items-center gap-1.5 mt-1 pl-20">
         {tags.slice(0, 2).map((t, i) => (
-          <span key={i} className="text-[11px] px-1.5 py-0.5 rounded-full bg-white/[0.08] text-white/50 truncate max-w-[72px]">
+          <span key={i} className="text-[11px] px-1.5 py-0.5 rounded-full bg-white/[0.08] text-white/50 truncate max-w-[80px]">
             {t}
           </span>
         ))}
-        <div className="ml-auto flex items-center gap-2 shrink-0">
-          <span className="text-[13px] font-medium text-white/80 tabular-nums">
-            {formatNumber(interactionCount)}
-          </span>
-          {interactionDelta != null && interactionDelta > 0 && (
-            <span className="text-[12px] tabular-nums" style={{ color }}>
+        {interactionDelta != null && interactionDelta > 0 && (
+          <div className="ml-auto flex items-baseline gap-1.5 shrink-0">
+            {pct && (
+              <span className="text-[12px] font-bold tabular-nums" style={{ color: '#34d399' }}>
+                +{pct}
+              </span>
+            )}
+            <span className="text-[11px] tabular-nums" style={{ color }}>
               +{formatNumber(interactionDelta)}
             </span>
-          )}
-          <div className="w-12 shrink-0">
-            {interactionDelta != null && interactionDelta > 0 ? (
-              <>
-                <PlotSparkline delta={interactionDelta} maxDelta={maxDelta} size="sm" />
-                {pct && (
-                  <span className="text-[10px] tabular-nums text-right block" style={{ color: '#34d399', opacity: 0.75 }}>
-                    +{pct}
-                  </span>
-                )}
-              </>
-            ) : (
-              <div className="h-[28px] flex items-center justify-end">
-                <span className="text-[10px] text-white/15">—</span>
-              </div>
-            )}
           </div>
-        </div>
+        )}
       </div>
     </a>
   );

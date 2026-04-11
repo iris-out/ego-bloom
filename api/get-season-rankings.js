@@ -45,17 +45,23 @@ export default async function handler(req, res) {
     const ids = current.map(r => r.id);
 
     // Get earliest history records at/after season start for each creator
-    // Fetch in chunks to avoid IN clause limit
+    // 청크를 병렬로 실행하여 응답 지연 최소화
     const CHUNK = 400;
-    let allHistory = [];
+    const chunkPromises = [];
     for (let i = 0; i < ids.length; i += CHUNK) {
       const chunk = ids.slice(i, i + CHUNK);
-      const { data: rows, error: histErr } = await supabase
-        .from('account_history')
-        .select('id, elo_score, record_date')
-        .gte('record_date', seasonStart)
-        .in('id', chunk)
-        .order('record_date', { ascending: true });
+      chunkPromises.push(
+        supabase
+          .from('account_history')
+          .select('id, elo_score, record_date')
+          .gte('record_date', seasonStart)
+          .in('id', chunk)
+          .order('record_date', { ascending: true })
+      );
+    }
+    const chunkResults = await Promise.all(chunkPromises);
+    let allHistory = [];
+    for (const { data: rows, error: histErr } of chunkResults) {
       if (histErr) throw histErr;
       allHistory = allHistory.concat(rows || []);
     }

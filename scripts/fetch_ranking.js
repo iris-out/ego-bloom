@@ -114,30 +114,40 @@ async function savePlotHistory(plots, rankType) {
 const TREND_TARGET_HOURS = [10, 8, 6, 4, 2];
 
 async function saveAndFetchTagHistory(tagScores) {
-  if (!supabase) return { trend: {}, tagScoresDelta: {} };
+  if (!supabase) return { trend: {}, tagScoresDelta: {}, tagScoresDeltaRef: {} };
 
-  // INSERT 전에 직전 ranking score 조회 (delta 계산용)
-  // 현재 tagScores와 비슷한 단위의 값만 신뢰 (대화량 기반 오염 데이터 무시)
+  // INSERT 전에 1시간 이상 전 ranking score 조회 (delta 계산용)
+  // 직전 값이 아닌 1h+ 이전 값과 비교 → 연속 실행 시에도 의미 있는 delta 보장
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
   const { data: prevRows } = await supabase
     .from('tag_history')
     .select('tag, score, captured_at')
     .in('tag', TREND_TAG_KEYS)
+    .lte('captured_at', oneHourAgo)
     .order('captured_at', { ascending: false })
-    .limit(TREND_TAG_KEYS.length * 3);
+    .limit(TREND_TAG_KEYS.length);
 
   // 태그별 가장 최신 이전 값 (오염 데이터 필터: tagScores 대비 100배 초과면 무시)
   const prevScoreMap = {};
+  const prevCapturedAtMap = {};
   for (const row of (prevRows || [])) {
     if (prevScoreMap[row.tag] != null) continue;
     const curScore = tagScores[row.tag];
     if (curScore != null && row.score > curScore * 100) continue; // 오염 데이터 스킵
     prevScoreMap[row.tag] = row.score;
+    prevCapturedAtMap[row.tag] = row.captured_at;
   }
 
+  const nowMs = Date.now();
   const tagScoresDelta = {};
+  const tagScoresDeltaRef = {}; // 기준점까지의 시간(시간 단위, 반올림)
   for (const [tag, score] of Object.entries(tagScores)) {
     const prev = prevScoreMap[tag];
     tagScoresDelta[tag] = prev != null ? score - prev : null;
+    if (prevCapturedAtMap[tag]) {
+      const diffMs = nowMs - new Date(prevCapturedAtMap[tag]).getTime();
+      tagScoresDeltaRef[tag] = Math.max(1, Math.round(diffMs / (60 * 60 * 1000)));
+    }
   }
 
   const now = new Date().toISOString();
@@ -154,7 +164,7 @@ async function saveAndFetchTagHistory(tagScores) {
     .gte('captured_at', since)
     .order('captured_at', { ascending: true });
 
-  const nowMs = Date.now();
+  const trendNowMs = Date.now();
 
   // 태그별로 모든 포인트 그룹화
   const byTag = {};
@@ -173,14 +183,16 @@ async function saveAndFetchTagHistory(tagScores) {
     if (!tagRows.length) continue;
     // 각 타겟 시간(오래된→최신 순)에 가장 가까운 포인트 선택
     trend[tag] = TREND_TARGET_HOURS.map(h => {
-      const target = nowMs - h * 60 * 60 * 1000;
+      const target = trendNowMs - h * 60 * 60 * 1000;
       const closest = tagRows.reduce((best, r) =>
         Math.abs(r.time - target) < Math.abs(best.time - target) ? r : best
       , tagRows[0]);
       return { score: closest.score, ts: closest.ts };
     });
+    // 현재값을 마지막 포인트로 append (DB 스냅샷 대신 실시간 값 반영)
+    trend[tag].push({ score: tagScores[tag], ts: now });
   }
-  return { trend, tagScoresDelta };
+  return { trend, tagScoresDelta, tagScoresDeltaRef };
 }
 
 /**
@@ -297,7 +309,42 @@ async function generateRankingData() {
       'gl':   combined['gl'] || 0,
       'ntr_agg': ntrScore,
     };
-    const { trend: tagTrend, tagScoresDelta } = await saveAndFetchTagHistory(tagScoresToSave);
+    const { trend: tagTrend, tagScoresDelta, tagScoresDeltaRef } = await saveAndFetchTagHistory(tagScoresToSave);
+
+    // 플롯별 interactionHistory 조회 (PlotSparkline 컴포넌트용 시계열 데이터)
+    const allPlots = [...trendingPlots, ...bestPlots, ...newPlots];
+    const plotIds = [...new Set(allPlots.map(p => p.id).filter(Boolean))];
+
+    if (supabase && plotIds.length > 0) {
+      const since = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
+      const { data: histRows } = await supabase
+        .from('plot_history')
+        .select('plot_id, interaction_count, captured_at')
+        .in('plot_id', plotIds)
+        .gte('captured_at', since)
+        .order('captured_at', { ascending: true });
+
+      // plot_id별 그룹화 (최대 6포인트)
+      const histByPlot = {};
+      for (const row of (histRows || [])) {
+        if (!histByPlot[row.plot_id]) histByPlot[row.plot_id] = [];
+        histByPlot[row.plot_id].push(row.interaction_count);
+      }
+      // 최대 6개 균등 샘플링
+      for (const id of Object.keys(histByPlot)) {
+        const arr = histByPlot[id];
+        if (arr.length > 6) {
+          const step = (arr.length - 1) / 5;
+          histByPlot[id] = Array.from({ length: 6 }, (_, i) => arr[Math.round(i * step)]);
+        }
+      }
+      // 각 플롯에 추가
+      for (const p of allPlots) {
+        if (p.id && histByPlot[p.id]) {
+          p.interactionHistory = histByPlot[p.id];
+        }
+      }
+    }
 
     const finalData = {
       updatedAt: new Date().toISOString(),
@@ -313,6 +360,7 @@ async function generateRankingData() {
       tagTrend,
       tagScores: tagScoresToSave,
       tagScoresDelta,
+      tagScoresDeltaRef,
     };
 
     await fs.mkdir(path.dirname(OUTPUT_FILE), { recursive: true });

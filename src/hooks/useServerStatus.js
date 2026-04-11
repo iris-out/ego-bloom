@@ -22,16 +22,9 @@ export function useServerStatus() {
       if (Date.now() - lastCheckTs < SERVER_STATUS_CACHE_TTL) return;
       lastCheckTs = Date.now();
       try {
-        const [sRes, mRes] = await Promise.all([
-          fetch('https://emergency.zeta-ai.io/ko/status').then(r => r.text()),
-          fetch('https://emergency.zeta-ai.io/ko/message').then(r => r.text()),
-        ]);
-        let status = 'error';
-        const s = sRes.trim();
-        if (s === 'green') status = 'ok';
-        else if (s === 'yellow') status = 'warning';
-        const message = mRes.trim();
-        const result = { status, message: status === 'ok' ? null : (message || null) };
+        // /api/server-status: Vercel CDN 2분 공유 캐시 → external API 직접 호출 회피
+        const data = await fetch('/api/server-status').then(r => r.json());
+        const result = { status: data.status ?? 'error', message: data.message ?? null };
         setData(result);
         try { sessionStorage.setItem(SERVER_STATUS_CACHE_KEY, JSON.stringify({ ...result, ts: Date.now() })); } catch { /* ignore */ }
       } catch {

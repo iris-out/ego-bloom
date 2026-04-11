@@ -6,7 +6,13 @@ export default async function handler(req, res) {
     }
 
     const cleanHandle = handle.replace(/^@/, '');
-    const targetUrl = `https://zeta-ai.io/@${cleanHandle}`;
+
+    // 허용 문자: 알파뉴메릭·한글·하이픈·언더스코어·점 (1~50자)
+    if (!/^[a-zA-Z0-9\uAC00-\uD7A3._-]{1,50}$/.test(cleanHandle)) {
+      return res.status(400).json({ error: 'Invalid handle format' });
+    }
+
+    const targetUrl = `https://zeta-ai.io/@${encodeURIComponent(cleanHandle)}`;
 
     try {
         const response = await fetch(targetUrl, {

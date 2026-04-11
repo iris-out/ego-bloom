@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { createClient } from '@supabase/supabase-js'
+import { spawn } from 'child_process'
 
 // Vite plugin: @handle → UUID resolver middleware
 function handleResolverPlugin() {
@@ -343,6 +344,26 @@ function supabaseApiPlugin(env) {
         }
       });
 
+      // Dev 전용: /api/server-status → emergency.zeta-ai.io 프록시
+      server.middlewares.use('/api/server-status', async (req, res) => {
+        try {
+          const [sRes, mRes] = await Promise.all([
+            fetch('https://emergency.zeta-ai.io/ko/status'),
+            fetch('https://emergency.zeta-ai.io/ko/message'),
+          ]);
+          const statusText = (await sRes.text()).trim();
+          const message = (await mRes.text()).trim();
+          let status = 'error';
+          if (statusText === 'green') status = 'ok';
+          else if (statusText === 'yellow') status = 'warning';
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ status, message: status === 'ok' ? null : (message || null) }));
+        } catch {
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ status: 'error', message: null }));
+        }
+      });
+
       server.middlewares.use('/api/get-world-data', async (req, res, next) => {
         try {
           if (!supabase) throw new Error('Supabase not configured');
@@ -405,6 +426,29 @@ function supabaseApiPlugin(env) {
   }
 }
 
+// Vite plugin: dev 서버 시작 시 fetch_ranking.js 자동 실행 → ranking_latest.json을 Supabase 최신 데이터로 갱신
+function devFetchRankingPlugin(env) {
+  return {
+    name: 'dev-fetch-ranking',
+    apply: 'serve',
+    configureServer() {
+      if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+        console.warn('[ego-bloom] ⚠️  SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 없음 → ranking 자동 갱신 스킵');
+        return;
+      }
+      console.log('[ego-bloom] 🔄 ranking_latest.json 갱신 중 (Supabase)...');
+      const child = spawn('node', ['scripts/fetch_ranking.js'], {
+        env: { ...process.env, ...env },
+        stdio: 'inherit',
+      });
+      child.on('exit', (code) => {
+        if (code === 0) console.log('[ego-bloom] ✅ ranking_latest.json 갱신 완료');
+        else console.error(`[ego-bloom] ❌ fetch_ranking.js 실패 (exit ${code})`);
+      });
+    },
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -414,6 +458,7 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       handleResolverPlugin(),
       supabaseApiPlugin(env),
+      devFetchRankingPlugin(env),
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['icons/apple-touch-icon.png', 'icons/icon.svg'],
@@ -435,7 +480,8 @@ export default defineConfig(({ mode }) => {
           globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
           runtimeCaching: [
             {
-              urlPattern: /^https:\/\/api\.zeta-ai\.io\//,
+              // /api/zeta/* 프록시 경로 매칭 (직접 CDN URL이 아닌 실제 요청 경로)
+              urlPattern: ({ url }) => url.pathname.startsWith('/api/zeta/'),
               handler: 'NetworkFirst',
               options: {
                 cacheName: 'zeta-api',

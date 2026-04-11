@@ -9,28 +9,34 @@ if (supabaseUrl && supabaseServiceKey) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed' });
   if (!supabase) return res.status(500).json({ error: 'Database connection not configured' });
 
   // 검색어에서 @ 기호를 완전히 제거하고 앞뒤 공백 제거
   const raw = (req.query.q || '').toString().replace(/@/g, '').trim();
-  
+
   // 기호 제거 후 실질적인 검색어가 2자 이상인지 확인
   if (!raw || raw.length < 2) {
     return res.status(400).json({ error: '검색어는 2자 이상 입력해주세요.' });
   }
 
+  // PostgREST .or() 필터 문자열 injection 방지:
+  // 알파뉴메릭·한글·공백·하이픈·언더스코어·점 외 문자 제거
+  const sanitized = raw.replace(/[^a-zA-Z0-9\uAC00-\uD7A3\s._-]/g, '').trim();
+  if (!sanitized || sanitized.length < 2) {
+    return res.status(400).json({ error: '유효하지 않은 검색어입니다.' });
+  }
+
+  // LIKE 와일드카드(%, _)를 이스케이프하여 패턴 오작동 방지
+  const escaped = sanitized.replace(/%/g, '\\%').replace(/_/g, '\\_');
+
   try {
-    // 닉네임 또는 핸들 통합 검색 (기호가 제거된 키워드로)
+    // 닉네임 또는 핸들 통합 검색
     const { data: users, error: searchErr } = await supabase
       .from('account_current')
       .select('*')
-      .or(`nickname.ilike.%${raw}%,handle.ilike.%${raw}%`)
+      .or(`nickname.ilike.%${escaped}%,handle.ilike.%${escaped}%`)
       .order('elo_score', { ascending: false })
       .limit(1);
 

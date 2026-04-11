@@ -157,7 +157,7 @@ export default function HomePage() {
       <div className="relative z-10 flex flex-col min-h-dvh">
         {/* Header */}
         <header className="flex items-center justify-between px-4 py-3 border-b border-white/5">
-          {/* Left: logo + (PC) status + data btn */}
+          {/* Left: logo + (PC) data btn + server status */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 cursor-pointer select-none" onClick={() => setShowChangelogModal(true)}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -166,23 +166,39 @@ export default function HomePage() {
               </svg>
               <h1 className="font-medium text-[18px] tracking-[-0.02em] text-white">EGO-BLOOM</h1>
             </div>
-            {/* PC-only: status + data btn in header left */}
+            {/* PC-only: data btn + server status */}
             <div className="hidden lg:flex items-center gap-2">
-              <ServerStatusBadge status={serverStatus} />
               <DataCollectionButton onClick={() => setShowDataModal(true)} />
+              <ServerStatusBadge status={serverStatus} />
             </div>
           </div>
 
-          {/* Right: mobile = status+data btn; PC = search bar */}
+          {/* Right: mobile = status+openworld+data btn; PC = openworld btn + search bar */}
           <div className="flex items-center gap-2">
-            {/* Mobile: status + data btn */}
+            {/* Mobile: status + openworld + data btn */}
             <div className="flex lg:hidden items-center gap-2">
               <ServerStatusBadge status={serverStatus} />
+              <button
+                onClick={() => navigate('/world')}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition-colors text-[11px] font-semibold"
+                style={{ background: 'rgba(99,102,241,0.15)', borderColor: 'rgba(99,102,241,0.4)', color: 'rgba(165,180,252,0.9)' }}
+              >
+                오픈월드<span className="text-[9px] opacity-70">베타</span>
+              </button>
               <DataCollectionButton onClick={() => setShowDataModal(true)} />
             </div>
-            {/* PC: search bar in header */}
-            <div className="hidden lg:block w-72">
-              <SearchWithLock compact />
+            {/* PC: openworld btn + search bar in header */}
+            <div className="hidden lg:flex items-center gap-2">
+              <button
+                onClick={() => navigate('/world')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all duration-200 text-[12px] font-semibold hover:brightness-110"
+                style={{ background: 'rgba(99,102,241,0.15)', borderColor: 'rgba(99,102,241,0.4)', color: 'rgba(165,180,252,0.9)' }}
+              >
+                오픈월드 <span className="text-[10px] opacity-60">(베타)</span> 입장
+              </button>
+              <div className="w-72">
+                <SearchWithLock compact />
+              </div>
             </div>
           </div>
         </header>
@@ -200,7 +216,7 @@ export default function HomePage() {
             </div>
 
             {/* Tag Trend Strip */}
-            <TagTrendStrip tagTrend={rankingData?.tagTrend || {}} combined={rankingData?.combined || []} tagScores={rankingData?.tagScores ?? null} tagScoresDelta={rankingData?.tagScoresDelta ?? null} />
+            <TagTrendStrip tagTrend={rankingData?.tagTrend || {}} combined={rankingData?.combined || []} tagScores={rankingData?.tagScores ?? null} tagScoresDelta={rankingData?.tagScoresDelta ?? null} tagScoresDeltaRef={rankingData?.tagScoresDeltaRef ?? null} />
 
             {/* Main Tabs */}
             <div className="flex flex-col flex-1">

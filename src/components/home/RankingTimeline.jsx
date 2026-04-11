@@ -14,8 +14,10 @@ function PlotRow({ plot, rank, extra, hideRank = false }) {
       className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors text-left w-full no-underline"
     >
       {!hideRank && (
-        <span className={`text-[12px] font-bold w-5 text-center tabular-nums shrink-0 ${
-          rank === 1 ? 'text-yellow-400' : rank === 2 ? 'text-white/60' : rank === 3 ? 'text-white/50' : 'text-white/25'
+        <span className={`text-[12px] font-bold w-5 text-center shrink-0 ${
+          typeof rank === 'number'
+            ? rank === 1 ? 'text-yellow-400 tabular-nums' : rank === 2 ? 'text-white/60 tabular-nums' : rank === 3 ? 'text-white/50 tabular-nums' : 'text-white/25 tabular-nums'
+            : 'text-indigo-400/80'
         }`}>{rank}</span>
       )}
 
@@ -127,7 +129,7 @@ export default function RankingTimeline({ rankingData }) {
         <Section title="카테고리별 1위">
           {categoryTop.length > 0
             ? categoryTop.map((item) => (
-                <PlotRow key={item.plot.id} plot={item.plot} extra={item.label} hideRank />
+                <PlotRow key={item.plot.id} plot={item.plot} rank={item.label[0]} extra={item.label} />
               ))
             : <p className="text-[11px] text-white/20 px-2 py-1">데이터 없음</p>
           }

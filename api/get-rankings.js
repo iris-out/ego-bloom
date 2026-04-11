@@ -16,10 +16,6 @@ function getYesterdayKST() {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
@@ -39,7 +35,7 @@ export default async function handler(req, res) {
     
     let query = supabase
       .from('account_current')
-      .select('*')
+      .select('id, nickname, handle, elo_score, tier_name, profile_image_url, follower_count, plot_interaction_count, voice_play_count, updated_at')
       .order('elo_score', { ascending: false });
 
     if (blacklist.length > 0) {

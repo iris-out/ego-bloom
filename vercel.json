@@ -47,6 +47,15 @@
             ]
         },
         {
+            "source": "/api/server-status",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, s-maxage=120, stale-while-revalidate=600"
+                }
+            ]
+        },
+        {
             "source": "/api/zeta/(.*)",
             "headers": [
                 {
