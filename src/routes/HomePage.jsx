@@ -51,22 +51,22 @@ function getTimeSegment() {
 
 const TIME_BG = {
   night: {
-    base: 'linear-gradient(to bottom, #04091A 0%, #081530 22%, #0C1D45 45%, #111840 68%, #0E1228 100%)',
+    base: 'linear-gradient(to bottom, #02050F 0%, #040C1C 22%, #071028 45%, #090E26 68%, #080A18 100%)',
     horizon: 'radial-gradient(ellipse 130% 80% at 50% 115%, rgba(220,110,50,0.07) 0%, rgba(160,70,120,0.05) 40%, transparent 70%)',
     topGlow: 'radial-gradient(ellipse, rgba(35,80,200,0.20) 0%, transparent 70%)', stars: 1,
   },
   dawn: {
-    base: 'linear-gradient(to bottom, #071427 0%, #0D1D40 22%, #102450 45%, #0E1E40 68%, #091324 100%)',
+    base: 'linear-gradient(to bottom, #040C17 0%, #071026 22%, #091530 45%, #081126 68%, #040B15 100%)',
     horizon: 'radial-gradient(ellipse 120% 70% at 50% 115%, rgba(130,190,255,0.09) 0%, rgba(80,130,220,0.05) 40%, transparent 70%)',
     topGlow: 'radial-gradient(ellipse, rgba(20,60,180,0.15) 0%, transparent 70%)', stars: 0.3,
   },
   day: {
-    base: 'linear-gradient(to bottom, #0A1628 0%, #0D1E3A 30%, #102348 60%, #0E1E38 100%)',
+    base: 'linear-gradient(to bottom, #050C18 0%, #071122 30%, #09142B 60%, #081121 100%)',
     horizon: 'radial-gradient(ellipse 100% 60% at 50% 120%, rgba(100,160,255,0.06) 0%, transparent 60%)',
     topGlow: 'radial-gradient(ellipse, rgba(20,50,150,0.12) 0%, transparent 70%)', stars: 0,
   },
   evening: {
-    base: 'linear-gradient(to bottom, #060D1F 0%, #0A1530 22%, #0E1C42 45%, #101A3A 68%, #0A1020 100%)',
+    base: 'linear-gradient(to bottom, #030712 0%, #050C1C 22%, #081027 45%, #090F22 68%, #050913 100%)',
     horizon: 'radial-gradient(ellipse 140% 80% at 50% 110%, rgba(255,120,50,0.10) 0%, rgba(200,80,140,0.07) 35%, transparent 65%)',
     topGlow: 'radial-gradient(ellipse, rgba(30,70,180,0.18) 0%, transparent 70%)', stars: 0.6,
   },

@@ -59,7 +59,7 @@ const ZetaSpotlightCard = ({ characters }) => {
             {/* Character Info */}
             <div className="character-info">
               <div className="badge-row">
-                {(current.hashtags || current.tags || []).slice(0, 2).map((tag, i) => (
+                {(current.hashtags || current.tags || []).slice(0, 3).map((tag, i) => (
                   <span key={i} className="pill-badge">
                     #{tag}
                   </span>

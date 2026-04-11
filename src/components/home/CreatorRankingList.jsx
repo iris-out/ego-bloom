@@ -68,6 +68,23 @@ const SPARKLE_COLOR = [
   '#b45309', // 동
 ];
 
+function splitFormatted(str) {
+  const match = str.match(/^(-?[0-9,.]+)([만천억]?)$/);
+  if (match) return { num: match[1], unit: match[2] };
+  return { num: str, unit: '' };
+}
+
+function StatVal({ count, label, numSize = '17px', labelSize = '11px' }) {
+  const { num, unit } = splitFormatted(formatNumber(count ?? 0));
+  return (
+    <span className="tabular-nums" style={{ letterSpacing: '-0.02em' }}>
+      <span style={{ fontSize: numSize, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>{num}</span>
+      {unit && <span style={{ fontSize: labelSize, fontWeight: 600, color: 'rgba(255,255,255,0.45)', marginLeft: '1px' }}>{unit}</span>}
+      <span style={{ fontSize: labelSize, fontWeight: 500, color: 'rgba(255,255,255,0.35)', marginLeft: '3px' }}>{label}</span>
+    </span>
+  );
+}
+
 function getTierKey(tierName = '') {
   const t = tierName.toUpperCase();
   if (t.startsWith('CHAMPION')) return 'champion';
@@ -249,27 +266,17 @@ export default function CreatorRankingList() {
               {/* 모바일 전용: 스탯 */}
               <div className="sm:hidden mt-1.5 pl-[84px]">
                 <div className="flex items-center gap-3">
-                  <span className="text-[16px] font-bold text-white/90 tabular-nums">
-                    {formatNumber(creator.plot_interaction_count)}
-                    <span className="text-[12px] font-normal text-white/40 ml-0.5">대화</span>
-                  </span>
-                  <span className="text-[15px] font-semibold text-white/55 tabular-nums">
-                    팔로워 {formatNumber(creator.follower_count)}
-                  </span>
+                  <StatVal count={creator.plot_interaction_count} label="대화" numSize="16px" />
+                  <StatVal count={creator.follower_count} label="팔로워" numSize="16px" />
                 </div>
               </div>
 
               {/* 데스크탑(sm+) 전용: 우측 스탯 블록 */}
               <div className="hidden sm:flex items-center gap-4 shrink-0 ml-auto">
                 <div className="flex items-center gap-2">
-                  <span className="text-[17px] font-bold text-white/90 tabular-nums">
-                    {formatNumber(creator.plot_interaction_count)}
-                    <span className="text-[12px] font-normal text-white/40 ml-0.5">대화</span>
-                  </span>
+                  <StatVal count={creator.plot_interaction_count} label="대화" />
                   <span className="text-white/20 text-[12px]">·</span>
-                  <span className="text-[16px] font-bold text-white/60 tabular-nums">
-                    팔로워 {formatNumber(creator.follower_count)}
-                  </span>
+                  <StatVal count={creator.follower_count} label="팔로워" />
                 </div>
                 <div className="flex flex-col items-center justify-center gap-0.5 w-[64px]"
                   style={{ marginTop: '6px', marginRight: '10px' }}>

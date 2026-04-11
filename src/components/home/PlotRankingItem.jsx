@@ -2,7 +2,32 @@ import React from 'react';
 import { proxyThumbnailUrl } from '../../utils/imageUtils';
 import { formatNumber } from '../../utils/tierCalculator';
 
+const GENRE_TAGS = new Set(['로맨스','판타지','무협','sf','스릴러','공포','현대','게임','스포츠','일상','학원','이세계','전생','회귀','빙의','시스템','성좌','대체역사','밀리터리','추리','착각','아포칼립스','디스토피아','사이버펑크','스팀펑크','로판','무가','하렘','역하렘','피카레스크','군상극','먼치킨','착각계','전문직','인방','재벌','연예계','요리','음악','미술']);
+const ORIENTATION_TAGS = new Set(['hl','bl','gl','백합','비엘','언리밋']);
+const DYNAMIC_TAGS = new Set(['순애','빼앗김','뺏김','불륜','배신','바람','ntr']);
+
+function prioritizeTags(hashtags) {
+  if (!hashtags || hashtags.length === 0) return [];
+  let genre = null, orientation = null, dynamic = null;
+  const rest = [];
+  for (const tag of hashtags) {
+    if (!tag) continue;
+    const lower = tag.toLowerCase();
+    if (!genre && GENRE_TAGS.has(lower)) { genre = tag; continue; }
+    if (!orientation && ORIENTATION_TAGS.has(lower)) { orientation = tag; continue; }
+    if (!dynamic && DYNAMIC_TAGS.has(lower)) { dynamic = tag; continue; }
+    rest.push(tag);
+  }
+  return [genre, orientation, dynamic, ...rest].filter(Boolean).slice(0, 3);
+}
+
 const CYAN_COLORS = ['#22d3ee', '#5eead4', '#67e8f9', '#a5f3fc', '#cffafe', '#d9f9f9', '#e8fbfb'];
+
+function splitFormatted(str) {
+  const match = str.match(/^(-?[0-9,.]+)([만천억]?)$/);
+  if (match) return { num: match[1], unit: match[2] };
+  return { num: str, unit: '' };
+}
 
 function getCyanColor(delta, maxDelta) {
   if (!maxDelta || delta == null || delta <= 0) return '#e8fbfb';
@@ -27,13 +52,13 @@ export default function PlotRankingItem({ plot, rank, maxDelta }) {
   const { id, name, imageUrl, hashtags = [], interactionCount = 0, interactionDelta, rankChange, creatorHandle } = plot;
   const color = getCyanColor(interactionDelta, maxDelta);
   const pct = pctStr(interactionDelta, interactionCount);
-  const tags = hashtags.filter(t => t).slice(0, 3);
+  const tags = prioritizeTags(hashtags);
   const zetaUrl = id ? `https://zeta-ai.io/ko/plots/${id}/profile` : null;
 
   const medalBg =
-    rank === 1 ? 'bg-yellow-400/[0.05] border border-yellow-400/[0.15]' :
-    rank === 2 ? 'bg-slate-300/[0.04] border border-slate-300/[0.12]' :
-    rank === 3 ? 'bg-amber-600/[0.05] border border-amber-600/[0.15]' :
+    rank === 1 ? 'bg-yellow-400/[0.05]' :
+    rank === 2 ? 'bg-slate-300/[0.04]' :
+    rank === 3 ? 'bg-amber-600/[0.05]' :
     '';
 
   return (
@@ -41,7 +66,7 @@ export default function PlotRankingItem({ plot, rank, maxDelta }) {
       href={zetaUrl || undefined}
       target={zetaUrl ? '_blank' : undefined}
       rel={zetaUrl ? 'noopener noreferrer' : undefined}
-      className={`block py-3 px-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer no-underline ${medalBg}`}
+      className={`block py-3 px-2 rounded hover:bg-white/5 transition-colors cursor-pointer no-underline ${medalBg}`}
     >
       {/* Row 1: 순위 + 이미지 + 이름/핸들 (항상 표시) */}
       <div className="flex items-center gap-2.5 lg:gap-2">
@@ -94,9 +119,12 @@ export default function PlotRankingItem({ plot, rank, maxDelta }) {
 
         {/* 데스크탑(sm+) 전용: 대화량 열 */}
         <div className="hidden sm:block text-right shrink-0 w-[88px]">
-          <span className="text-[17px] font-bold text-white/80 tabular-nums">
-            {formatNumber(interactionCount)}
-          </span>
+          {(() => { const { num, unit } = splitFormatted(formatNumber(interactionCount)); return (
+            <span className="tabular-nums" style={{ letterSpacing: '-0.02em' }}>
+              <span className="text-[19px] font-bold text-white/85">{num}</span>
+              {unit && <span className="text-[12px] font-semibold text-white/50 ml-[1px]">{unit}</span>}
+            </span>
+          ); })()}
         </div>
 
         {/* 데스크탑(sm+) 전용: 상승량+상승률 열 */}
@@ -119,9 +147,12 @@ export default function PlotRankingItem({ plot, rank, maxDelta }) {
 
         {/* 모바일 전용: 대화량 (Row 1 우측, 크게) */}
         <div className="sm:hidden shrink-0 ml-auto text-right">
-          <span className="text-[18px] font-bold text-white/85 tabular-nums">
-            {formatNumber(interactionCount)}
-          </span>
+          {(() => { const { num, unit } = splitFormatted(formatNumber(interactionCount)); return (
+            <span className="tabular-nums" style={{ letterSpacing: '-0.02em' }}>
+              <span className="text-[22px] font-bold text-white/85">{num}</span>
+              {unit && <span className="text-[13px] font-semibold text-white/50 ml-[1px]">{unit}</span>}
+            </span>
+          ); })()}
         </div>
       </div>
 

@@ -122,13 +122,16 @@ export default function PlotRankingList({ rankingData }) {
         <span className="text-[13px] text-white/20">플롯</span>
         <span className="text-[13px] text-white/20 text-right">태그</span>
         <span className="text-[13px] text-white/20 text-right">대화량</span>
-        <span className="text-[13px] text-white/20 text-right">상승</span>
+        <div className="text-right">
+          <div className="text-[13px] text-white/20">상승</div>
+          <div className="text-[10px] text-white/15">2시간 전 대비</div>
+        </div>
       </div>
       {/* 모바일 헤더 (< sm): 2열 단순화 */}
       <div className="sm:hidden flex items-center px-2 mb-1 gap-x-2">
         <span className="text-[11px] text-white/20 w-5 text-center shrink-0">#</span>
         <span className="text-[11px] text-white/20 flex-1">플롯</span>
-        <span className="text-[11px] text-white/20">대화량 / 상승</span>
+        <span className="text-[11px] text-white/20">대화량 / 상승 <span className="text-white/15">(2h)</span></span>
       </div>
 
       {!rankingData ? (

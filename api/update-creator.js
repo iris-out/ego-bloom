@@ -153,21 +153,21 @@ export default async function handler(req, res) {
 
     if (currentError) throw currentError;
 
-    const { error: historyError } = await supabase
-      .from('account_history')
-      .upsert({
-        id,
-        record_date: recordDate,
-        handle: handle || null,
-        nickname: String(nickname).slice(0, 100),
-        follower_count:         safeFollower,
-        plot_interaction_count: safeInteraction,
-        voice_play_count:       safeVoice,
-        elo_score: eloScore,
-        tier_name: tierName,
-      }, { onConflict: 'id, record_date' });
-
-    if (historyError) throw historyError;
+    // [비활성화] account_history 쓰기 중단 — 시즌/성장 랭킹 기능 미사용 중
+    // const { error: historyError } = await supabase
+    //   .from('account_history')
+    //   .upsert({
+    //     id,
+    //     record_date: recordDate,
+    //     handle: handle || null,
+    //     nickname: String(nickname).slice(0, 100),
+    //     follower_count:         safeFollower,
+    //     plot_interaction_count: safeInteraction,
+    //     voice_play_count:       safeVoice,
+    //     elo_score: eloScore,
+    //     tier_name: tierName,
+    //   }, { onConflict: 'id, record_date' });
+    // if (historyError) throw historyError;
 
     return res.status(200).json({ success: true, message: 'Creator ranking updated' });
   } catch (error) {

@@ -34,11 +34,12 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
-      - name: Snapshot account_current → account_history
-        run: node scripts/snapshot_history.js
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # [비활성화] account_history 쓰기 중단 — 시즌/성장 랭킹 기능 미사용 중
+      # - name: Snapshot account_current → account_history
+      #   run: node scripts/snapshot_history.js
+      #   env:
+      #     SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      #     SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
       - name: Commit and push if changed
         run: |

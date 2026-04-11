@@ -21,8 +21,14 @@ const RANKING_SKIP_TAGS = ['언리밋'];
 // NTR 계열 태그 (tag_history에서 ntr_agg로 합산)
 const NTR_TAGS = ['빼앗김', '뺏김', '불륜', '바람'];
 
+// 후회/피폐/집착 계열 태그 (hpj_agg로 합산)
+const HPJ_TAGS = ['후회', '피폐', '집착'];
+
+// 판타지 계열 태그 (fantasy_agg로 합산)
+const FANTASY_TAGS = ['판타지', '현대판타지'];
+
 // tag_history에서 추이를 추적할 태그 키
-const TREND_TAG_KEYS = ['순애', 'bl', 'gl', 'ntr_agg'];
+const TREND_TAG_KEYS = ['순애', 'bl', 'gl', 'ntr_agg', 'hpj_agg', 'fantasy_agg'];
 
 // ── Supabase 초기화 (환경 변수 없으면 null — graceful fallback) ──
 for (const file of ['.env.local', '.env']) {
@@ -45,7 +51,7 @@ async function fetchApi(endpoint) {
   const url = `${ZETA_API_BASE}${endpoint}`;
   console.log(`Fetching ${url}...`);
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'EGO-BLOOM Datalab Crawler/1.0' }
+    headers: { 'User-Agent': 'EGO-BLOOM Ranking Service/1.0' }
   });
   if (!res.ok) throw new Error(`API fetch failed: ${res.status}`);
   const data = await res.json();
@@ -110,8 +116,8 @@ async function savePlotHistory(plots, rankType) {
   else console.log(`✅ plot_history: saved ${rows.length} rows for ${rankType}`);
 }
 
-// 차트 데이터 포인트 기준: 2, 4, 6, 8, 10시간 전 (2시간 간격 5개)
-const TREND_TARGET_HOURS = [10, 8, 6, 4, 2];
+// 차트 데이터 포인트 기준: 2~46시간 전 (총 8개 타겟, 48h 탭까지 지원)
+const TREND_TARGET_HOURS = [46, 36, 24, 16, 10, 6, 4, 2];
 
 async function saveAndFetchTagHistory(tagScores) {
   if (!supabase) return { trend: {}, tagScoresDelta: {}, tagScoresDeltaRef: {} };
@@ -155,8 +161,8 @@ async function saveAndFetchTagHistory(tagScores) {
   const { error: insertErr } = await supabase.from('tag_history').insert(rows);
   if (insertErr) console.error('tag_history insert error:', insertErr.message);
 
-  // 11시간 이내 데이터 조회 → 2, 4, 6, 8, 10시간 전 각각 가장 가까운 포인트 선택
-  const since = new Date(Date.now() - 11 * 60 * 60 * 1000).toISOString();
+  // 49시간 이내 데이터 조회 → TREND_TARGET_HOURS 각각 가장 가까운 포인트 선택 (48h 탭 지원)
+  const since = new Date(Date.now() - 49 * 60 * 60 * 1000).toISOString();
   const { data } = await supabase
     .from('tag_history')
     .select('tag, score, captured_at')
@@ -197,30 +203,29 @@ async function saveAndFetchTagHistory(tagScores) {
 
 /**
  * 오래된 히스토리 행 정리
- * - plot_history : 12시간 이상 경과 → 삭제 (delta 계산은 최대 6시간 범위만 사용)
- * - tag_history  : 26시간 이상 경과 → 삭제 (트렌드 차트가 25시간 조회)
+ * - plot_history : 48시간 이상 경과 → 삭제
+ * - tag_history  : 48시간 이상 경과 → 삭제 (트렌드 차트가 최대 48h 조회)
  */
 async function cleanOldHistory() {
   if (!supabase) return;
 
-  const cutoff12h = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
-  const cutoff11h = new Date(Date.now() - 11 * 60 * 60 * 1000).toISOString();
+  const cutoff48h = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
 
   const [plotResult, tagResult] = await Promise.all([
-    supabase.from('plot_history').delete({ count: 'exact' }).lt('captured_at', cutoff12h),
-    supabase.from('tag_history').delete({ count: 'exact' }).lt('captured_at', cutoff11h),
+    supabase.from('plot_history').delete({ count: 'exact' }).lt('captured_at', cutoff48h),
+    supabase.from('tag_history').delete({ count: 'exact' }).lt('captured_at', cutoff48h),
   ]);
 
   if (plotResult.error) {
     console.error('🧹 plot_history 정리 실패:', plotResult.error.message);
   } else {
-    console.log(`🧹 plot_history: ${plotResult.count ?? '?'}건 삭제 (12h 초과)`);
+    console.log(`🧹 plot_history: ${plotResult.count ?? '?'}건 삭제 (48h 초과)`);
   }
 
   if (tagResult.error) {
     console.error('🧹 tag_history 정리 실패:', tagResult.error.message);
   } else {
-    console.log(`🧹 tag_history: ${tagResult.count ?? '?'}건 삭제 (11h 초과)`);
+    console.log(`🧹 tag_history: ${tagResult.count ?? '?'}건 삭제 (48h 초과)`);
   }
 }
 
@@ -302,12 +307,16 @@ async function generateRankingData() {
       savePlotHistory(newItems, 'new'),
     ]);
 
-    const ntrScore = NTR_TAGS.reduce((sum, t) => sum + (combined[t.toLowerCase()] || 0), 0);
+    const ntrScore     = NTR_TAGS.reduce((sum, t) => sum + (combined[t.toLowerCase()] || 0), 0);
+    const hpjScore     = HPJ_TAGS.reduce((sum, t) => sum + (combined[t.toLowerCase()] || 0), 0);
+    const fantasyScore = FANTASY_TAGS.reduce((sum, t) => sum + (combined[t.toLowerCase()] || 0), 0);
     const tagScoresToSave = {
-      '순애': combined['순애'] || 0,
-      'bl':   combined['bl'] || 0,
-      'gl':   combined['gl'] || 0,
-      'ntr_agg': ntrScore,
+      '순애':        combined['순애'] || 0,
+      'bl':          combined['bl'] || 0,
+      'gl':          combined['gl'] || 0,
+      'ntr_agg':     ntrScore,
+      'hpj_agg':     hpjScore,
+      'fantasy_agg': fantasyScore,
     };
     const { trend: tagTrend, tagScoresDelta, tagScoresDeltaRef } = await saveAndFetchTagHistory(tagScoresToSave);
 

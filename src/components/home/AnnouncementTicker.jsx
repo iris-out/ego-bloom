@@ -41,10 +41,16 @@ export default function AnnouncementTicker() {
           style={{ animation: 'ticker-scroll 40s linear infinite' }}
         >
           {combined.map((banner, i) => {
-            const url =
-              banner.redirectUrl || banner.url || banner.link ||
-              banner.targetUrl || banner.linkUrl || banner.deepLink ||
-              (banner.id ? `https://zeta-ai.io/ko/notices/${banner.id}` : null);
+            let url = null;
+            if (banner.clickAction) {
+              if (banner.clickAction.type === 'externalLink') {
+                url = banner.clickAction.url;
+              } else if (banner.clickAction.href) {
+                const rawHref = banner.clickAction.href;
+                const localHref = rawHref.startsWith('/ko') ? rawHref : `/ko${rawHref}`;
+                url = `https://zeta-ai.io${localHref}`;
+              }
+            }
             const cls = "text-[13px] font-medium text-white/85 tracking-wide";
             return url ? (
               <a key={i} href={url} target="_blank" rel="noopener noreferrer"

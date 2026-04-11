@@ -248,235 +248,159 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
 
   return (
     <>
-      <div className="ph-wrap">
-        {/* 아바타 + 이름/핸들 */}
-        <div className="flex flex-col items-center">
-          <div className="relative">
-            <div className="ph-avatar-ring" style={{ '--tier-color': tierColor }}>
-              <div className="ph-avatar">
-                {profile.profileImageUrl ? (
-                  <img src={profile.profileImageUrl} alt={profile.nickname} crossOrigin="anonymous" loading="eager" />
-                ) : (
-                  <span className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-br from-blue-300 to-indigo-400">
-                    {getInitial(profile.nickname)}
-                  </span>
-                )}
-              </div>
+      {/* 수평 프로필 헤더 */}
+      <div className="flex items-center justify-between mb-3 px-0">
+
+        {/* 좌: 아바타 + 핸들/닉네임 */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="relative shrink-0">
+            <div
+              className="w-[46px] h-[46px] rounded-2xl overflow-hidden"
+              style={{
+                boxShadow: tierVisible
+                  ? `0 0 0 2px ${tierColor}, 0 0 12px ${tierColor}55`
+                  : '0 0 0 1.5px rgba(255,255,255,0.08)',
+                transition: 'box-shadow 0.8s ease',
+              }}
+            >
+              {profile.profileImageUrl ? (
+                <img
+                  src={profile.profileImageUrl}
+                  alt={profile.nickname}
+                  crossOrigin="anonymous"
+                  loading="eager"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-indigo-500/30 to-blue-500/30 flex items-center justify-center">
+                  <span className="text-xl font-black text-white/70">{getInitial(profile.nickname)}</span>
+                </div>
+              )}
             </div>
           </div>
 
-          <h1 className="font-serif-kr text-[22px] mt-4 font-bold tracking-tight text-white">{profile.nickname}</h1>
-          <span className="text-[13px] text-gray-500 mt-1">@{profile.username}</span>
-
-
-          {/* 칭호 pills */}
-          <div className="mt-4">
-            <CreatorPills
-              characters={characters}
-              stats={stats}
-              creatorId={profile.id || profile.username || 'unknown'}
-              editing={editing}
-              setEditing={setEditing}
-            />
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h1 className="text-[15px] font-bold text-white leading-tight truncate min-w-0">
+                {profile.nickname}
+              </h1>
+              {breakdown?.activityDays > 0 && (
+                <span
+                  className="shrink-0 text-[10px] font-bold px-1.5 py-[2px] rounded-md"
+                  style={{
+                    color: '#a5b4fc',
+                    background: 'rgba(99,102,241,0.12)',
+                    border: '1px solid rgba(139,92,246,0.2)',
+                  }}
+                >
+                  D+{breakdown.activityDays}
+                </span>
+              )}
+              {globalRank != null && globalRank <= 50 && (
+                <span
+                  className="shrink-0 text-[10px] font-bold px-1.5 py-[2px] rounded-md"
+                  style={{
+                    color: '#fbbf24',
+                    background: 'rgba(251,191,36,0.12)',
+                    border: '1px solid rgba(251,191,36,0.25)',
+                  }}
+                >
+                  #{globalRank}
+                </span>
+              )}
+            </div>
+            <p className="text-[12px] text-white/40 mt-0.5">@{profile.username}</p>
           </div>
         </div>
 
-        {/* 메인 스탯 glass card */}
-        <div className="ph-stat-card">
-          {/* 티어 아이콘 + 이름 */}
-          <div className="flex flex-col items-center justify-center pt-[22px] pb-[19px] border-b border-white/[0.04] relative">
-            {/* 앰비언트 글로우 — 티어 공개 후에만 */}
+        {/* 우: 티어 아이콘 블록 */}
+        <div className="flex flex-col items-center gap-1 shrink-0">
+          {/* 이펙트 기준 래퍼 — 버튼(46×46)에만 centered */}
+          <div className="relative w-[46px] h-[46px]">
+            {/* 오로라 블롭 */}
             <div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full pointer-events-none"
-              style={{
-                background: `${tierColor}40`,
-                filter: 'blur(32px)',
-                opacity: tierVisible ? 1 : 0,
-                transition: 'opacity 0.9s ease',
-              }}
-            />
-
-            {/* 별 + 오로라 — phase 3부터 페이드인, 이후 계속 유지 */}
-            <div
-              className="absolute inset-0 pointer-events-none"
+              className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl"
               style={{ opacity: revealPhase >= 3 ? 1 : 0, transition: 'opacity 0.5s ease' }}
             >
-              {/* 오로라 블롭 */}
               {auroraBlobs.map((a, i) => (
                 <div
                   key={`au-${i}`}
                   className="aurora-blob"
                   style={{
-                    '--au-tx': a.tx,
-                    '--au-ty': a.ty,
-                    '--au-op': a.op,
-                    '--au-dur': a.dur,
-                    '--au-delay': a.delay,
-                    width: `${a.w}px`,
-                    height: `${a.h}px`,
-                    marginLeft: `${-a.w / 2}px`,
-                    marginTop: `${-a.h / 2}px`,
-                    background: tierColor,
-                    filter: 'blur(14px)',
-                    animationDelay: a.delay,
-                    animationDuration: a.dur,
+                    '--au-tx': a.tx, '--au-ty': a.ty, '--au-op': a.op,
+                    '--au-dur': a.dur, '--au-delay': a.delay,
+                    width: `${a.w * 0.6}px`, height: `${a.h * 0.6}px`,
+                    marginLeft: `${-(a.w * 0.6) / 2}px`, marginTop: `${-(a.h * 0.6) / 2}px`,
+                    background: tierColor, filter: 'blur(10px)',
+                    animationDelay: a.delay, animationDuration: a.dur,
                   }}
                 />
               ))}
-              {/* 별 파티클 */}
+            </div>
+
+            {/* 별 파티클 */}
+            <div
+              className="absolute pointer-events-none overflow-hidden"
+              style={{ inset: '-36px', opacity: revealPhase >= 3 ? 1 : 0, transition: 'opacity 0.5s ease', borderRadius: '50%' }}
+            >
               {sparkleParticles.map((p, i) => (
                 <div
                   key={`st-${i}`}
                   className="sp-star"
                   style={{
-                    '--sp-tx': p.tx,
-                    '--sp-ty': p.ty,
-                    '--sp-dur': p.dur,
-                    '--sp-delay': p.delay,
-                    '--sp-op': p.op,
-                    width: `${p.size}px`,
-                    height: `${p.size}px`,
-                    marginLeft: `${-p.size / 2}px`,
-                    marginTop: `${-p.size / 2}px`,
+                    '--sp-tx': p.tx, '--sp-ty': p.ty,
+                    '--sp-dur': p.dur, '--sp-delay': p.delay, '--sp-op': p.op,
+                    width: `${p.size}px`, height: `${p.size}px`,
+                    marginLeft: `${-p.size / 2}px`, marginTop: `${-p.size / 2}px`,
                     background: i % 3 === 0 ? '#ffffff' : tierColor,
                     boxShadow: `0 0 ${parseFloat(p.size) * 3}px ${i % 3 === 0 ? '#ffffff88' : `${tierColor}99`}`,
-                    animationDelay: p.delay,
-                    animationDuration: p.dur,
+                    animationDelay: p.delay, animationDuration: p.dur,
                   }}
                 />
               ))}
             </div>
 
-            {/* 티어 아이콘 — 공개 전까지 숨김 */}
+            {/* 티어 링 + 아이콘 */}
             <button
               onClick={() => navigate('/tier')}
-              className={`relative z-10 cursor-pointer hover:scale-110 active:scale-95 transition-transform ${
-                tierVisible ? 'tier-erupt' : 'opacity-0 pointer-events-none'
-              }`}
-              title="티어 가이드 보기"
-              style={{ transformOrigin: 'center center' }}
-            >
-              <TierIcon tier={tier.key} size={70} rank={globalRank} />
-            </button>
-            <div
-              className="mt-4 flex flex-col items-center z-10"
-              style={{ opacity: tierVisible ? 1 : 0, transition: 'opacity 0.5s ease 0.2s' }}
-            >
-              <span
-                className="text-[12px] sm:text-[16px] font-black tracking-[0.15em] sm:tracking-[0.25em] uppercase bg-clip-text text-transparent"
-                style={
-                  globalRank && globalRank <= 10
-                    ? { backgroundImage: `linear-gradient(to right, #FFFFFF, #E2E8F0)`, textShadow: '0 0 10px rgba(255,255,255,0.5), 0 0 4px #FFFFFF' }
-                    : { backgroundImage: `linear-gradient(to right, ${tierColor}, ${tierColor}CC)` }
-                }
-              >
-                {globalRank && globalRank <= 10 ? `TOP ${globalRank}` : tierLabel}
-              </span>
-            </div>
-          </div>
-
-          {/* 3열 통계 */}
-          <div className="flex justify-between items-center py-6 px-4">
-            <div className="flex flex-col items-center w-1/3">
-              <span className="text-2xl font-black text-white tracking-tight">
-                <HoverNumber value={animInteractions} />
-              </span>
-              <span className="text-[11px] text-gray-500 mt-1 font-semibold uppercase tracking-widest">대화량</span>
-            </div>
-            <div className="w-[1px] h-10 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
-            <div className="flex flex-col items-center w-1/3">
-              <span className="text-2xl font-black text-white tracking-tight">
-                {animFollowers.toLocaleString()}
-              </span>
-              <span className="text-[11px] text-gray-500 mt-1 font-semibold uppercase tracking-widest">팔로워</span>
-            </div>
-            <div className="w-[1px] h-10 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
-            <div className="flex flex-col items-center w-1/3">
-              <span className="text-2xl font-black text-white tracking-tight">
-                <HoverNumber value={animCharCount} />
-              </span>
-              <span className="text-[11px] text-gray-500 mt-1 font-semibold uppercase tracking-widest">캐릭터</span>
-            </div>
-          </div>
-
-          {/* ELO 프로그레스 바 + B2 다음 티어 미터 */}
-          <div className="pt-3 pb-5 px-6 border-t border-white/[0.04] bg-white/[0.01]">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] text-gray-500 font-semibold tracking-wider">ELO SCORE</span>
-              <span
-                className={`text-[10px] font-medium transition-colors ${revealPhase === 3 ? 'tier-lock-flash' : ''}`}
-                style={{ color: revealPhase >= 3 ? tierColor : 'rgb(107 114 128)' }}
-              >
-                {formatCompactNumber(animScore)}
-                {tier.nextGoalScore && tier.key !== 'champion' && (
-                  <span style={{ color: revealPhase >= 3 ? `${tierColor}66` : 'rgb(75 85 99)' }}> / {formatCompactNumber(tier.nextGoalScore)}</span>
-                )}
-              </span>
-            </div>
-            <div className="relative h-[4px] w-full bg-black/60 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-1000"
-                style={{
-                  width: `${Math.min(100, Math.max(2, progressPct))}%`,
-                  background: `linear-gradient(to right, ${tierColor}99, ${tierColor}CC, ${tierColor})`,
-                }}
-              />
-              {/* 다음 티어 목표 마커 */}
-              {nextTierInfo && (
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-[8px] rounded-full opacity-40" style={{ background: nextTierInfo.color }} />
-              )}
-            </div>
-            {/* B2: 다음 티어까지 남은 거리 */}
-            {tier.key === 'champion' ? (
-              <p className="text-[10px] text-center mt-2 font-bold" style={{ color: tierColor }}>🏆 최고 티어 달성</p>
-            ) : nextTierInfo && (
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-[10px] text-gray-600">다음 티어</span>
-                <span className="text-[10px] font-semibold" style={{ color: nextTierInfo.color }}>
-                  {nextTierInfo.name} — {formatCompactNumber(nextTierInfo.remaining)} pt 더
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* 링크 복사 버튼 (카드 하단 이동) */}
-        <div className="mt-3 flex justify-center">
-          <button
-            onClick={handleCopyLink}
-            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.08] hover:border-white/[0.15] text-sm font-semibold text-white/70 hover:text-white transition-all active:scale-95"
-          >
-            {copied ? <Check size={16} className="text-emerald-400" /> : <Link2 size={16} />}
-            <span>{copied ? '프로필 링크가 복사되었습니다!' : '프로필 링크 복사'}</span>
-          </button>
-        </div>
-
-        {/* 프로필 태그 + LIVE 버튼 */}
-        {(topTags.length > 0 || onLiveClick) && (
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex flex-nowrap gap-1.5 overflow-hidden flex-1">
-              {topTags.map(tag => (
-                <span key={tag} className="px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/5 text-[12px] text-gray-400 shrink-0">
-                  #{tag}
-                </span>
-              ))}
-            </div>
-            <button
-              onClick={onLiveClick || openRecap}
-              className="ml-2 px-4 py-2 rounded-full text-[12px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0"
+              className="tier-erupt absolute inset-0 w-full h-full rounded-2xl flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 z-10"
               style={{
-                background: 'linear-gradient(135deg, rgba(74,127,255,0.3), rgba(59,130,246,0.2))',
-                border: '1px solid rgba(74,127,255,0.5)',
-                color: '#7AA3FF',
-                boxShadow: '0 0 12px rgba(74,127,255,0.25), inset 0 1px 0 rgba(255,255,255,0.05)',
+                background: `${tierColor}12`,
+                border: 'none',
+                boxShadow: tierVisible ? `0 0 0 1.5px ${tierColor}30, 0 0 18px ${tierColor}40` : 'none',
+                opacity: tierVisible ? undefined : 0,
+                animationPlayState: tierVisible ? 'running' : 'paused',
+                pointerEvents: tierVisible ? 'auto' : 'none',
+                transition: 'box-shadow 0.8s ease',
               }}
+              title="티어 가이드 보기"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-              LIVE
+              <TierIcon tier={tier.key} size={28} rank={globalRank} />
             </button>
           </div>
-        )}
+
+          {/* 등급명 */}
+          <span
+            className="text-[10px] font-black tracking-wide uppercase z-10 relative"
+            style={{
+              color: tierColor,
+              opacity: tierVisible ? 1 : 0,
+              transition: 'opacity 0.5s ease 0.2s',
+            }}
+          >
+            {globalRank && globalRank <= 10 ? `TOP ${globalRank}` : tierLabel}
+          </span>
+        </div>
       </div>
+
+      {/* 칭호 편집 모달 (유지) */}
+      <CreatorPills
+        characters={characters}
+        stats={stats}
+        creatorId={profile.id || profile.username || 'unknown'}
+        editing={editing}
+        setEditing={setEditing}
+      />
 
       {/* LiveView 모달 — portal로 document.body에 렌더링 */}
       {showRecap && createPortal(
@@ -590,7 +514,7 @@ function CreatorPills({ characters, stats, creatorId, editing, setEditing }) {
   });
 
   return (
-    <div className="flex flex-wrap justify-center gap-2">
+    <div className="flex flex-wrap justify-start gap-2 mt-3 mb-3">
       {pillNodes}
 
       {/* 편집 모달 */}

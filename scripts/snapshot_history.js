@@ -30,6 +30,10 @@ function getTodayKST() {
 }
 
 async function snapshotHistory() {
+  // [비활성화] account_history 쓰기 중단 — 시즌/성장 랭킹 기능 미사용 중
+  console.log('ℹ️  account_history snapshot disabled. Skipping.');
+  return;
+
   const today = getTodayKST();
   console.log(`📸 Snapshotting account_current → account_history for ${today}`);
 

@@ -92,11 +92,12 @@ function supabaseApiPlugin(env) {
                 elo_score: data.eloScore, tier_name: data.tierName, updated_at: new Date().toISOString()
               }, { onConflict: 'id' });
 
-              await supabase.from('account_history').upsert({
-                id: data.id, record_date: recordDate, handle: data.handle, nickname: data.nickname,
-                follower_count: data.followerCount, plot_interaction_count: data.plotInteractionCount,
-                voice_play_count: data.voicePlayCount, elo_score: data.eloScore, tier_name: data.tierName
-              }, { onConflict: 'id, record_date' });
+              // [비활성화] account_history 쓰기 중단 — 시즌/성장 랭킹 기능 미사용 중
+              // await supabase.from('account_history').upsert({
+              //   id: data.id, record_date: recordDate, handle: data.handle, nickname: data.nickname,
+              //   follower_count: data.followerCount, plot_interaction_count: data.plotInteractionCount,
+              //   voice_play_count: data.voicePlayCount, elo_score: data.eloScore, tier_name: data.tierName
+              // }, { onConflict: 'id, record_date' });
 
               res.setHeader('Content-Type', 'application/json');
               res.end(JSON.stringify({ success: true }));

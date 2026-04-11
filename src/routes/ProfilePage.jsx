@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { AlertCircle, Loader2, RefreshCw, Archive, ChevronLeft, User, Sparkles, Trophy, BarChart2 } from 'lucide-react';
+import { AlertCircle, Loader2, RefreshCw, Archive, ChevronLeft } from 'lucide-react';
 import { computeEarnedTitles } from '../data/badges';
 import ProfileHeader from '../components/ProfileHeader';
 import SummaryTab from '../components/SummaryTab';
 import ZetaSpotlightCard from '../components/ZetaSpotlightCard';
+import HeroCard from '../components/HeroCard';
 import SkeletonUI from '../components/SkeletonUI';
 import ChangelogModal from '../components/ChangelogModal';
 import { proxyImageUrl, getPlotImageUrl, getPlotImageUrls } from '../utils/imageUtils';
-import { getCreatorTier, calculateCreatorScore } from '../utils/tierCalculator';
+import { getCreatorTier, calculateCreatorScore, getCharacterTier, formatCompactNumber } from '../utils/tierCalculator';
+import ImageWithFallback from '../components/ImageWithFallback';
 import { useServerStatus } from '../hooks/useServerStatus';
 
-const DetailTab = lazy(() => import('../components/DetailTab'));
 const AchievementsTab = lazy(() => import('../components/AchievementsTab'));
 const StatsTab = lazy(() => import('../components/StatsTab'));
 
@@ -117,11 +118,75 @@ async function fetchRankingMap() {
 }
 
 const TABS = [
-  { key: 'summary',      label: '프로필', icon: User,      sub: 'Profile'      },
-  { key: 'achievements', label: '업적',   icon: Trophy,    sub: 'Achievements' },
-  { key: 'characters',   label: '캐릭터', icon: Sparkles,  sub: 'Characters'   },
-  { key: 'stats',        label: '통계',   icon: BarChart2, sub: 'Statistics'   },
+  { key: 'characters',   label: '캐릭터' },
+  { key: 'achievements', label: '업적'   },
+  { key: 'stats',        label: '통계'   },
 ];
+
+const TIER_BADGE_STYLES = {
+  B:  { color: '#A0AEC0', bg: 'rgba(160,174,192,0.15)', border: 'rgba(160,174,192,0.3)' },
+  A:  { color: '#48BB78', bg: 'rgba(72,187,120,0.15)',  border: 'rgba(72,187,120,0.3)' },
+  S:  { color: '#4299E1', bg: 'rgba(66,153,225,0.15)',  border: 'rgba(66,153,225,0.3)' },
+  R:  { color: '#9F7AEA', bg: 'rgba(159,122,234,0.15)', border: 'rgba(159,122,234,0.3)' },
+  SR: { color: '#ED8936', bg: 'rgba(237,137,54,0.15)',  border: 'rgba(237,137,54,0.3)' },
+  X:  { color: '#F56565', bg: 'rgba(245,101,101,0.15)', border: 'rgba(245,101,101,0.3)' },
+};
+
+const PALETTES = [
+  'from-indigo-500/20 to-blue-500/20',
+  'from-emerald-500/20 to-teal-500/20',
+  'from-rose-500/20 to-pink-500/20',
+  'from-amber-500/20 to-orange-500/20',
+  'from-sky-500/20 to-blue-500/20',
+  'from-violet-500/20 to-fuchsia-500/20',
+];
+
+function paletteIndex(name) {
+  let h = 0;
+  for (let i = 0; i < (name || '').length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff;
+  return h % PALETTES.length;
+}
+
+function SidebarCharCards({ characters }) {
+  const top20 = useMemo(() => {
+    if (!characters?.length) return [];
+    return [...characters]
+      .sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0))
+      .slice(0, 20);
+  }, [characters]);
+
+  if (top20.length === 0) return null;
+
+  return (
+    <div
+      className="hidden lg:block mt-4 rounded-2xl overflow-hidden"
+      style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+    >
+      <p
+        className="text-[10px] font-bold uppercase tracking-wider text-white/30 px-4 pt-3 pb-2"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+      >
+        캐릭터 TOP 20
+      </p>
+      <div className="flex flex-wrap gap-1.5 px-4 py-3">
+        {top20.map(char => {
+          const tier = getCharacterTier(char.interactionCount || 0);
+          const ts = TIER_BADGE_STYLES[tier.name] || TIER_BADGE_STYLES.B;
+          return (
+            <span
+              key={char.id}
+              title={char.name}
+              className="text-[11px] font-bold px-2 py-[3px] rounded-full"
+              style={{ color: ts.color, background: ts.bg, border: `1px solid ${ts.border}` }}
+            >
+              {tier.name}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function ProfilePage() {
   const [searchParams] = useSearchParams();
@@ -132,24 +197,12 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
-  const [tab, setTab] = useState('summary');
+  const [tab, setTab] = useState('characters');
   const [cacheInfo, setCacheInfo] = useState(null);
   const [cacheRemaining, setCacheRemaining] = useState(null);
   const [showChangelog, setShowChangelog] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [tierRevealed, setTierRevealed] = useState(false);
-  const tabBarRef = useRef(null);
-  const [indicator, setIndicator] = useState({ left: 0, width: 0, ready: false });
-
-  // A1: 탭 슬라이딩 인디케이터
-  useLayoutEffect(() => {
-    if (!tabBarRef.current) return;
-    const activeBtn = tabBarRef.current.querySelector('.ph-tab-item.active');
-    if (!activeBtn) return;
-    const barRect = tabBarRef.current.getBoundingClientRect();
-    const btnRect = activeBtn.getBoundingClientRect();
-    setIndicator({ left: btnRect.left - barRect.left, width: btnRect.width, ready: true });
-  }, [tab]);
 
   // A3: 티어별 배경 글로우 색조
   const glowColor = useMemo(() => {
@@ -205,7 +258,7 @@ export default function ProfilePage() {
 
   const fetchData = async (inputStr, forceRefresh = false) => {
     let id = inputStr.trim();
-    setLoading(true); setError(null); setData(null); setCacheInfo(null); setTab('summary');
+    setLoading(true); setError(null); setData(null); setCacheInfo(null); setTab('characters');
 
     try {
       // UUID 형식이 아니면서, URL 형태도 아니라면 핸들(@) 검색으로 간주함
@@ -282,6 +335,9 @@ export default function ProfilePage() {
 
       if (stats.voicePlaySeconds != null && stats.voicePlayCount == null) {
         stats.voicePlayCount = Math.round(stats.voicePlaySeconds);
+        stats.voicePlayUnit = '초'; // seconds fallback — unit is 초, not 회
+      } else {
+        stats.voicePlayUnit = '회';
       }
       // 삭제되거나 비공개된 캐릭터 개수가 통계에 반영되는 문제를 막기 위해 실제 목록과 동기화
       stats.plotCount = allPlots ? allPlots.length : 0;
@@ -367,17 +423,28 @@ export default function ProfilePage() {
         </svg>
         <span className="font-bold tracking-[0.15em] text-xs text-white uppercase">Ego-Bloom</span>
       </div>
-      {hasEarnedTitles ? (
+      <div className="flex items-center gap-2">
         <button
-          onClick={() => setEditingTitle(true)}
-          className="px-3 py-1.5 rounded-full text-[11px] font-semibold text-white/70 hover:text-white transition-all"
-          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+          onClick={() => { window.location.hash = 'recap'; }}
+          className="px-3 py-1.5 rounded-full text-[11px] font-bold transition-all hover:opacity-80"
+          style={{
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.25))',
+            border: '1px solid rgba(139,92,246,0.35)',
+            color: '#c4b5fd',
+          }}
         >
-          칭호 변경
+          LIVE
         </button>
-      ) : (
-        <div className="w-10" />
-      )}
+        {hasEarnedTitles && (
+          <button
+            onClick={() => setEditingTitle(true)}
+            className="px-3 py-1.5 rounded-full text-[11px] font-semibold text-white/70 hover:text-white transition-all"
+            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            칭호 변경
+          </button>
+        )}
+      </div>
     </header>
   );
 
@@ -443,33 +510,27 @@ export default function ProfilePage() {
         <div className="profile-layout">
           {/* 탭 바 — 전체 너비 상단 */}
           <div className="profile-layout-tabbar">
-            <div className="ph-tab-bar" ref={tabBarRef}>
-              {TABS.map(t => {
-                const Icon = t.icon;
-                const isActive = tab === t.key;
-                return (
-                  <button
-                    key={t.key}
-                    className={`ph-tab-item${isActive ? ' active' : ''}`}
-                    onClick={() => setTab(t.key)}
-                  >
-                    <Icon size={15} className="shrink-0" />
-                    <span>{t.label}</span>
-                  </button>
-                );
-              })}
-              <div
-                className="ph-tab-indicator"
-                style={{
-                  left: indicator.left,
-                  width: indicator.width,
-                  opacity: indicator.ready ? 1 : 0,
-                }}
-              />
+            <div
+              className="flex p-[3px] rounded-[9px] mb-4"
+              style={{ background: 'rgba(255,255,255,0.04)' }}
+            >
+              {TABS.map(t => (
+                <button
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  className="flex-1 py-[6px] rounded-[7px] text-[11px] font-semibold transition-all"
+                  style={tab === t.key
+                    ? { background: '#2c2c34', color: '#fff' }
+                    : { color: 'rgba(255,255,255,0.35)' }
+                  }
+                >
+                  {t.label}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* 왼쪽 사이드바 — 프로필 헤더 */}
+          {/* 왼쪽 사이드바 — 프로필 헤더 + HeroCard + 캐릭터 카드(PC) */}
           <aside className="profile-layout-sidebar">
             <ProfileHeader
               profile={data.profile}
@@ -479,34 +540,31 @@ export default function ProfilePage() {
               setEditing={setEditingTitle}
               onTierReveal={() => setTierRevealed(true)}
             />
+            <HeroCard stats={data.stats} characters={data.characters} />
+            <SidebarCharCards characters={data.characters} />
           </aside>
 
           {/* 오른쪽 — 탭 컨텐츠 */}
           <div className="profile-layout-main">
             <Suspense fallback={<div className="flex justify-center py-10"><Loader2 size={24} className="animate-spin text-gray-600" /></div>}>
-              {tab === 'summary' && (
+              {tab === 'characters' && (
                 <div className="animate-enter">
                   {rankedCharacters.length > 0 && (
-                    <div className="mb-6">
+                    <div className="mb-4">
                       <ZetaSpotlightCard characters={rankedCharacters} />
                     </div>
                   )}
-                  <DetailTab stats={data.stats} characters={data.characters} />
-                </div>
-              )}
-              {tab === 'characters' && (
-                <div className="animate-enter">
                   <SummaryTab characters={data.characters} stats={data.stats} />
-                </div>
-              )}
-              {tab === 'achievements' && (
-                <div className="animate-enter">
-                  <AchievementsTab stats={data.stats} characters={data.characters} />
                 </div>
               )}
               {tab === 'stats' && (
                 <div className="animate-enter">
                   <StatsTab stats={data.stats} characters={data.characters} />
+                </div>
+              )}
+              {tab === 'achievements' && (
+                <div className="animate-enter">
+                  <AchievementsTab stats={data.stats} characters={data.characters} />
                 </div>
               )}
             </Suspense>

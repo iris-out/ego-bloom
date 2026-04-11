@@ -90,111 +90,68 @@ function ProgressHeader({ earned, total }) {
   );
 }
 
-// ===== ③ 발자취 계열 카드 =====
+// ===== ③ 발자취 계열 카드 — 노드-라인 트랙 =====
 function MilestoneGroupCard({ group, titleMap }) {
-  const [open, setOpen] = useState(false);
   const steps = group.ids.map((id, i) => ({
     id,
     badge: titleMap[id],
     threshold: group.thresholds[i],
     earned: titleMap[id]?.earned ?? false,
   }));
-  const earnedCount = steps.filter(s => s.earned).length;
-  const bestEarned = [...steps].reverse().find(s => s.earned);
   const c = group.color; // e.g. 'rgba(96,165,250,'
-
-  // rgb() 추출 헬퍼 — rgba(R,G,B, → rgb(R,G,B)
   const toRgb = (rgba) => rgba.replace('rgba(', 'rgb(').replace(/,$/, ')');
+  const colorSolid = toRgb(c);
 
   return (
     <div
-      className="rounded-xl overflow-hidden"
-      style={{ background: `${c}0.08)`, border: `1px solid ${c}0.25)` }}
+      className="rounded-xl overflow-hidden mb-2"
+      style={{ background: `${c}0.06)`, border: `1px solid ${c}0.20)` }}
     >
       {/* 헤더 */}
-      <button
-        className="w-full flex items-center gap-2 px-3 py-2.5 text-left"
-        onClick={() => setOpen(o => !o)}
-      >
+      <div className="flex items-center gap-2 px-3 py-2.5" style={{ borderBottom: `1px solid ${c}0.12)` }}>
         <span className="text-sm">{group.emoji}</span>
-        <span className="text-[12px] font-bold" style={{ color: toRgb(c) }}>
+        <span className="text-[11px] font-bold" style={{ color: colorSolid }}>
           {group.label}
         </span>
-        {bestEarned && (
-          <div
-            className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold"
-            style={{ background: `${c}0.2)`, border: `1px solid ${c}0.4)`, color: toRgb(c) }}
-          >
-            <span style={{ filter: `drop-shadow(0 0 3px ${c}0.5))` }}>{bestEarned.badge?.emoji}</span>
-            <span>{bestEarned.badge?.title}</span>
-          </div>
-        )}
-        {!bestEarned && (
-          <span className="ml-auto text-[10px] text-[var(--text-tertiary)]">미달성</span>
-        )}
-        <span className="ml-2 text-[var(--text-tertiary)]">
-          {open ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-        </span>
-      </button>
+      </div>
 
-      {/* 접힌 상태 — 진행 바 */}
-      {!open && (
-        <div className="px-3 pb-2.5 flex items-center gap-2">
-          <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-700"
-              style={{
-                width: `${(earnedCount / steps.length) * 100}%`,
-                background: `linear-gradient(to right, ${c}0.6), ${c}0.9))`,
-              }}
-            />
-          </div>
-          <span className="text-[10px] font-mono text-[var(--text-tertiary)] shrink-0">{earnedCount}/{steps.length}</span>
-        </div>
-      )}
-
-      {/* 펼친 상태 — 단계 카드 가로 나열 */}
-      {open && (
-        <div className="px-2.5 pb-2.5 grid grid-cols-3 gap-2">
-          {steps.map((s) => (
-            <div
-              key={s.id}
-              className="text-center rounded-lg py-2 px-1 relative"
-              style={s.earned
-                ? {
-                    background: `linear-gradient(135deg, ${c}0.22), ${c}0.08))`,
-                    border: `1.5px solid ${c}0.5)`,
-                    boxShadow: s.id === bestEarned?.id ? `0 0 10px ${c}0.2)` : undefined,
-                  }
-                : { background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)' }
-              }
-            >
-              {/* 현재 최고 단계 표시 점 */}
-              {s.id === bestEarned?.id && (
-                <div
-                  className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full"
-                  style={{ background: `${c}0.9)`, boxShadow: `0 0 4px ${c}0.8)` }}
-                />
-              )}
+      {/* 노드-라인 트랙 */}
+      <div className="px-3 py-3 flex items-start gap-0">
+        {steps.map((s, i) => (
+          <React.Fragment key={s.id}>
+            {/* 노드 */}
+            <div className="flex flex-col items-center gap-1.5" style={{ minWidth: 0, flex: 1 }}>
               <div
-                className={`text-xl mb-1 ${!s.earned ? 'grayscale opacity-40' : ''}`}
-                style={s.earned ? { filter: `drop-shadow(0 0 4px ${c}0.5))` } : {}}
+                className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-black shrink-0"
+                style={s.earned
+                  ? { background: colorSolid, color: '#fff', boxShadow: `0 0 6px ${c}0.6)` }
+                  : { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.25)' }
+                }
               >
-                {s.badge?.emoji ?? '?'}
+                {s.earned ? '✓' : i + 1}
               </div>
-              <div
-                className="text-[11px] font-bold leading-tight mb-1"
-                style={{ color: s.earned ? toRgb(c) : 'rgba(255,255,255,0.3)' }}
+              <span
+                className="text-[9px] text-center leading-tight px-0.5 truncate w-full"
+                style={{ color: s.earned ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.28)' }}
               >
-                {s.badge?.title ?? s.id}
-              </div>
-              <div className="text-[10px] text-[var(--text-tertiary)] leading-tight">
                 {s.threshold}
-              </div>
+              </span>
             </div>
-          ))}
-        </div>
-      )}
+
+            {/* 라인 (마지막 노드 뒤엔 없음) */}
+            {i < steps.length - 1 && (
+              <div
+                className="h-[2px] mt-[9px] rounded-full shrink-0"
+                style={{
+                  flex: 0.4,
+                  minWidth: 8,
+                  background: s.earned ? colorSolid : 'rgba(255,255,255,0.06)',
+                }}
+              />
+            )}
+          </React.Fragment>
+        ))}
+      </div>
     </div>
   );
 }

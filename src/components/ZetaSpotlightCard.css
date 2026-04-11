@@ -400,44 +400,51 @@
 
 @media (max-width: 768px) {
     .spotlight-card {
-        flex-direction: column;
-        text-align: center;
-        padding: 32px 24px;
-        gap: 24px;
-        border-radius: 30px;
+        flex-direction: row;
+        padding: 14px 16px;
+        gap: 14px;
+        border-radius: 24px;
+        align-items: center;
     }
 
-    .badge-row {
-        justify-content: center;
+    .character-portal {
+        width: 72px;
+        height: 72px;
     }
 
     .character-name {
-        font-size: 24px;
+        font-size: 16px;
+        white-space: nowrap;
     }
 
     .character-desc {
-        max-width: 100%;
+        display: none;
     }
 
     .interaction-meter {
-        margin: 4px auto 0;
+        padding: 5px 10px;
+    }
+
+    .interaction-text {
+        font-size: 12px;
     }
 
     .rank-display {
-        border-left: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        padding-left: 0;
-        padding-top: 24px;
-        align-items: center;
-        width: 100%;
+        border-left: 1px solid rgba(255, 255, 255, 0.05);
+        padding-left: 14px;
         min-width: 0;
+        flex-shrink: 0;
+    }
+
+    .rank-label {
+        font-size: 10px;
     }
 
     .rank-number {
-        font-size: 48px;
+        font-size: 36px;
     }
 
     .rank-number span {
-        font-size: 24px;
+        font-size: 18px;
     }
 }

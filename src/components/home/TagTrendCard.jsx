@@ -27,17 +27,31 @@ function formatDelta(n) {
   return `${sign}${abs.toLocaleString()}`;
 }
 
-export default function TagTrendCard({ label, dataPoints, maxDelta, combinedScore, scoreDelta, deltaRefHours }) {
-  // delta, isUp, isDown은 JSX 렌더링에도 사용 → useMemo 밖에 유지
-  const delta = scoreDelta ?? null;
+export default function TagTrendCard({ label, hoverLabel, dataPoints, timeWindow = '4h', maxDelta, combinedScore, scoreDelta, deltaRefHours }) {
+  // timeWindow 기준으로 timestamp 필터링
+  const windowedPoints = useMemo(() => {
+    const pts = dataPoints || [];
+    const hours = parseInt(timeWindow, 10) || 4;
+    const cutoff = Date.now() - hours * 60 * 60 * 1000;
+    const filtered = pts.filter(p => new Date(p.ts).getTime() >= cutoff);
+    // 데이터 부족 시 있는 것 중 최근 2개 이상 사용
+    return filtered.length >= 1 ? filtered : pts.slice(-2);
+  }, [dataPoints, timeWindow]);
+
+  // windowed delta: 슬라이스의 첫 → 마지막 점수 차이
+  const windowedDelta = useMemo(() => {
+    if (windowedPoints.length < 2) return scoreDelta ?? null;
+    return windowedPoints[windowedPoints.length - 1].score - windowedPoints[0].score;
+  }, [windowedPoints, scoreDelta]);
+
+  const delta = windowedDelta;
   const isUp = delta != null && delta > 0;
   const isDown = delta != null && delta < 0;
   const color = isDown ? '#f87171' : getCyanColor(delta, maxDelta);
 
-  // Highcharts 옵션은 dataPoints·isUp·isDown이 바뀔 때만 재생성
+  // Highcharts 옵션은 windowedPoints·isUp·isDown이 바뀔 때만 재생성
   const chartOptions = useMemo(() => {
-    const rawScores = (dataPoints || []).map(d => d.score);
-    // 데이터가 부족해도 평탄한 그래프를 표시 (0점이면 [0,0], 1점이면 [score,score])
+    const rawScores = windowedPoints.map(d => d.score);
     const scores = rawScores.length >= 2
       ? rawScores
       : rawScores.length === 1
@@ -46,14 +60,14 @@ export default function TagTrendCard({ label, dataPoints, maxDelta, combinedScor
     const minScore = Math.min(...scores);
     const maxScore = Math.max(...scores);
     const scoreRange = maxScore - minScore;
-    // 변화폭이 없으면 최댓값의 0.1%를 패딩으로 사용, 있으면 범위의 20%
     const yPad = scoreRange > 0 ? scoreRange * 0.20 : (maxScore > 0 ? maxScore * 0.001 : 1);
     const lineColor = isUp ? '#34d399' : isDown ? '#f87171' : '#818cf8';
-    const fillTop = isUp ? 'rgba(52,211,153,0.25)' : isDown ? 'rgba(248,113,113,0.20)' : 'rgba(129,140,248,0.20)';
+    const fillTop = isUp ? 'rgba(52,211,153,0.18)' : isDown ? 'rgba(248,113,113,0.15)' : 'rgba(129,140,248,0.15)';
     return {
       chart: {
         type: 'areaspline',
-        height: 40,
+        width: 68,
+        height: 44,
         backgroundColor: 'transparent',
         margin: [2, 2, 2, 2],
         animation: false,
@@ -71,7 +85,7 @@ export default function TagTrendCard({ label, dataPoints, maxDelta, combinedScor
       plotOptions: {
         areaspline: {
           marker: { enabled: false },
-          lineWidth: 2,
+          lineWidth: 1.5,
           fillOpacity: 1,
           color: lineColor,
           fillColor: {
@@ -82,39 +96,41 @@ export default function TagTrendCard({ label, dataPoints, maxDelta, combinedScor
       },
       series: [{ data: scores }],
     };
-  }, [dataPoints, isUp, isDown]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [windowedPoints, isUp, isDown]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="flex-none w-[160px] rounded-xl border border-white/10 bg-white/5 px-3 py-2 flex flex-col gap-1 shrink-0">
-      {/* 라벨 */}
-      <div className="flex items-center">
-        <span className="text-[12px] font-bold text-white/80 truncate">{label}</span>
-      </div>
-
-      {/* 현재 점수 + 변동 */}
-      <div className="flex items-baseline justify-between gap-1">
-        <div className="min-w-0">
-          <span className="text-[14px] font-bold text-white/90 tabular-nums">
-            {combinedScore != null ? combinedScore.toLocaleString() : '—'}
-          </span>
-          <span className="text-[10px] text-white/30 ml-0.5">포인트</span>
-        </div>
-        {delta != null && delta !== 0 ? (
-          <div className="flex flex-col items-end shrink-0">
-            <span className="text-[11px] font-bold tabular-nums" style={{ color }}>
-              {formatDelta(delta)}
-            </span>
-            {deltaRefHours != null && (
-              <span className="text-[9px] text-white/25 leading-none">{deltaRefHours}시간 전</span>
-            )}
-          </div>
-        ) : (
-          <span className="text-[11px] text-white/20 shrink-0">—</span>
-        )}
-      </div>
-
-      <div className="h-10">
+    <div className="flex-none w-[196px] rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 flex flex-row items-center gap-3 shrink-0">
+      {/* 차트 — 좌측 */}
+      <div className="shrink-0">
         <HighchartsReact highcharts={Highcharts} options={chartOptions} />
+      </div>
+
+      {/* 텍스트 — 우측 */}
+      <div className="flex flex-col min-w-0 flex-1">
+        {/* 라벨 */}
+        <div className="relative group/label">
+          <span className="text-[11px] text-white/45 truncate block">{label}</span>
+          {hoverLabel && (
+            <div className="pointer-events-none absolute left-0 top-full mt-1 z-50 hidden group-hover/label:block whitespace-nowrap rounded-md bg-[#1e1b4b] border border-indigo-500/30 px-2 py-1 text-[11px] text-white/70 shadow-lg">
+              {hoverLabel}
+            </div>
+          )}
+        </div>
+
+        {/* 점수 */}
+        <span className="text-[15px] font-bold text-white/90 tabular-nums leading-tight">
+          {combinedScore != null ? combinedScore.toLocaleString() : '—'}
+        </span>
+
+        {/* 변동 + 기준 시각 */}
+        {delta != null && delta !== 0 ? (
+          <span className="text-[12px] font-semibold tabular-nums leading-tight" style={{ color }}>
+            {formatDelta(delta)}
+            <span className="text-[9px] font-normal text-white/25 ml-1">({timeWindow})</span>
+          </span>
+        ) : (
+          <span className="text-[11px] text-white/20">—</span>
+        )}
       </div>
     </div>
   );
