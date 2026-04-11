@@ -27,11 +27,6 @@ function assignGrowthTier(rank, total) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed' });
 
@@ -40,7 +35,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const blacklist = (process.env.RANK_BLACKLIST || '').split(',').map(s => s.trim()).filter(Boolean);
+    const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    const blacklist = (process.env.RANK_BLACKLIST || '')
+      .split(',').map(s => s.trim()).filter(s => UUID_RE.test(s));
 
     const todayKST     = getKSTDateString(0);
     const threeDaysAgo = getKSTDateString(3);

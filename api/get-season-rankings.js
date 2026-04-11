@@ -9,10 +9,6 @@ if (supabaseUrl && supabaseServiceKey) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed' });
   if (!supabase) return res.status(500).json({ error: 'Database connection not configured' });
@@ -23,7 +19,9 @@ export default async function handler(req, res) {
     const month = parseInt(req.query.month) || (now.getUTCMonth() + 1);
     const seasonStart = `${year}-${String(month).padStart(2, '0')}-01`;
 
-    const blacklist = (process.env.RANK_BLACKLIST || '').split(',').map(s => s.trim()).filter(Boolean);
+    const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    const blacklist = (process.env.RANK_BLACKLIST || '')
+      .split(',').map(s => s.trim()).filter(s => UUID_RE.test(s));
 
     // Get all current scores
     let query = supabase

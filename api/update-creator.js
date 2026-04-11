@@ -54,6 +54,24 @@ function calculateEloScore({ followerCount, plotInteractionCount, voicePlayCount
   return Math.floor(score);
 }
 
+const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+const HANDLE_RE = /^[a-zA-Z0-9\uAC00-\uD7A3._-]{1,50}$/;
+
+function isAllowedOrigin(origin) {
+  if (!origin) return false;
+  const allowed = (process.env.ALLOWED_ORIGINS || 'https://ego-bloom.vercel.app,http://localhost:5173')
+    .split(',').map(s => s.trim()).filter(Boolean);
+  return allowed.includes(origin);
+}
+
+function sanitizeProfileImageUrl(url) {
+  if (typeof url !== 'string' || url.length === 0 || url.length > 500) return null;
+  if (url.startsWith('/zeta-image/') || url.startsWith('/zeta-s3/')) return url;
+  if (url.startsWith('https://image.zeta-ai.io/') ||
+      url.startsWith('https://zeta-image.s3.ap-northeast-2.amazonaws.com/')) return url;
+  return null;
+}
+
 const CREATOR_TIERS = [
   { name: 'BRONZE', min: 0 },
   { name: 'SILVER', min: 12000 },
@@ -82,6 +100,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  // 출처 검증 — 브라우저가 보내는 Origin 헤더가 허용 목록에 있어야 함
+  if (!isAllowedOrigin(req.headers.origin)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
   if (!supabase) {
     console.error('Supabase credentials are not set in environment variables.');
     return res.status(500).json({ error: 'Database connection not configured' });
@@ -99,15 +122,23 @@ export default async function handler(req, res) {
       plotCount,
       topCharInteractions,
       oldestCharCreatedAt,
-    } = req.body;
+    } = req.body || {};
 
     // 입력값 검증
-    if (!id || typeof id !== 'string' || !/^[0-9a-fA-F-]{36}$/.test(id)) {
+    if (!id || typeof id !== 'string' || !UUID_RE.test(id)) {
       return res.status(400).json({ error: 'Invalid creator ID' });
     }
     if (!nickname || typeof nickname !== 'string') {
       return res.status(400).json({ error: 'Missing required field: nickname' });
     }
+
+    // handle: 제공 시 정규식 통과해야 저장
+    const safeHandle = (typeof handle === 'string' && HANDLE_RE.test(handle.replace(/^@/, '')))
+      ? handle.replace(/^@/, '').slice(0, 50)
+      : null;
+
+    // profileImageUrl: 허용된 프록시 경로 또는 zeta CDN만 저장
+    const safeProfileImage = sanitizeProfileImageUrl(profileImageUrl);
 
     const safeFollower     = Math.max(0, Math.floor(Number(followerCount)        || 0));
     const safeInteraction  = Math.max(0, Math.floor(Number(plotInteractionCount) || 0));
@@ -117,7 +148,8 @@ export default async function handler(req, res) {
       ? topCharInteractions.slice(0, 20).map(n => Math.max(0, Math.floor(Number(n) || 0)))
       : [];
 
-    const blacklist = (process.env.RANK_BLACKLIST || '').split(',').map(s => s.trim()).filter(Boolean);
+    const blacklist = (process.env.RANK_BLACKLIST || '')
+      .split(',').map(s => s.trim()).filter(s => UUID_RE.test(s));
     if (blacklist.includes(id)) {
       return res.status(200).json({ success: true, message: 'Creator is blacklisted, skipping update' });
     }
@@ -140,9 +172,9 @@ export default async function handler(req, res) {
       .from('account_current')
       .upsert({
         id,
-        handle: handle || null,
+        handle: safeHandle,
         nickname: String(nickname).slice(0, 100),
-        profile_image_url: profileImageUrl || null,
+        profile_image_url: safeProfileImage,
         follower_count:         safeFollower,
         plot_interaction_count: safeInteraction,
         voice_play_count:       safeVoice,

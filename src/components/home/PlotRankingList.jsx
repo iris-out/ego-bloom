@@ -234,8 +234,9 @@ function SnapshotRankingItem({ plot, rank, maxDelta }) {
         }}>
           {imageUrl && (
             <img
-              src={proxyThumbnailUrl(imageUrl, 96)}
+              src={proxyThumbnailUrl(imageUrl, 64)}
               alt=""
+              crossOrigin="anonymous"
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           )}
@@ -452,12 +453,27 @@ export default function PlotRankingList({ rankingData }) {
   }, [loadMore]);
 
   async function captureSnapshot() {
-    if (!snapshotRef.current || capturing || !rankingData) return;
+    if (capturing || !rankingData) return;
     setCapturing(true);
     let origSrcs = null;
     try {
-      // 스냅샷 div 안의 img를 data URL로 교체 → toPng 내부 fetch 차단
+      // capturing=true 이후 React가 스냅샷 트리를 마운트할 때까지 대기
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      if (!snapshotRef.current) throw new Error('snapshot node not mounted');
+
+      // 이미지가 모두 로드될 때까지 대기 (visible list와 동일 URL이므로 캐시에서 즉시 로드되는 경우가 대부분)
       const imgEls = snapshotRef.current.querySelectorAll('img');
+      await Promise.all([...imgEls].map(img => {
+        if (img.complete && img.naturalWidth > 0) return null;
+        return new Promise(res => {
+          const done = () => { img.onload = null; img.onerror = null; res(); };
+          img.onload = done;
+          img.onerror = done;
+          setTimeout(done, 2000);
+        });
+      }));
+
+      // 스냅샷 div 안의 img를 data URL로 교체 → toBlob 내부 fetch 차단
       origSrcs = await inlineImages(imgEls);
 
       const node = snapshotRef.current;
@@ -466,7 +482,7 @@ export default function PlotRankingList({ rankingData }) {
       node.offsetHeight;
 
       const blob = await toBlob(node, {
-        pixelRatio: 1.5,
+        pixelRatio: 1,
         backgroundColor: '#0F0B1F',
         cacheBust: false,
         skipFonts: true,
@@ -644,9 +660,8 @@ export default function PlotRankingList({ rankingData }) {
         </>
       )}
 
-      {/* ── 캡처용 스냅샷 (parent wrapper: opacity 0 → 유저에게 불가시,
-            children은 뷰포트 내이므로 lazy-load 정상 동작) ── */}
-      {rankingData && plots.length > 0 && (
+      {/* ── 캡처용 스냅샷 (capturing 중에만 마운트 — 상시 렌더 시 모바일 메모리 압박 및 불필요한 이미지 다운로드) ── */}
+      {capturing && rankingData && plots.length > 0 && (
         <div
           aria-hidden="true"
           style={{

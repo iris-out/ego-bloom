@@ -31,7 +31,9 @@ export default async function handler(req, res) {
 
   try {
     // Today's top 30
-    const blacklist = (process.env.RANK_BLACKLIST || '').split(',').map(s => s.trim()).filter(Boolean);
+    const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    const blacklist = (process.env.RANK_BLACKLIST || '')
+      .split(',').map(s => s.trim()).filter(s => UUID_RE.test(s));
     
     let query = supabase
       .from('account_current')

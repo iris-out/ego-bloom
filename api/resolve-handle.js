@@ -24,6 +24,13 @@ export default async function handler(req, res) {
             }
         });
 
+        // 리다이렉트 최종 호스트가 zeta-ai.io 도메인이어야 함 (SSRF 완화)
+        let finalHost = '';
+        try { finalHost = new URL(response.url).hostname; } catch { finalHost = ''; }
+        if (!finalHost.endsWith('zeta-ai.io')) {
+            return res.status(502).json({ error: 'Unexpected redirect target' });
+        }
+
         const finalUrl = response.url;
         let match = finalUrl.match(/creators\/([a-f0-9-]{36})/i);
 
