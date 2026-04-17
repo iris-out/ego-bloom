@@ -1,13 +1,22 @@
-/** Proxies image URLs through dev server to avoid CORS and support multiple origins */
-export function proxyImageUrl(url) {
+const IMAGE_ORIGIN = 'https://image.zeta-ai.io';
+const S3_ORIGIN = 'https://zeta-image.s3.ap-northeast-2.amazonaws.com';
+
+/**
+ * 기본: Zeta CDN에서 직접 로드하는 URL을 반환 (Vercel Fast Data Transfer 대역폭 절약).
+ * forExport: true → html-to-image 캡처 또는 canvas 픽셀 읽기용 동일 오리진 프록시 URL 반환.
+ */
+export function proxyImageUrl(url, { forExport = false } = {}) {
   if (!url) return null;
-  if (url.startsWith('/zeta-image') || url.startsWith('/zeta-s3')) return url;
-  if (url.startsWith('https://image.zeta-ai.io')) {
-    return url.replace('https://image.zeta-ai.io', '/zeta-image');
+
+  if (forExport) {
+    if (url.startsWith('/zeta-image') || url.startsWith('/zeta-s3')) return url;
+    if (url.startsWith(IMAGE_ORIGIN)) return url.replace(IMAGE_ORIGIN, '/zeta-image');
+    if (url.startsWith(S3_ORIGIN)) return url.replace(S3_ORIGIN, '/zeta-s3');
+    return url;
   }
-  if (url.startsWith('https://zeta-image.s3.ap-northeast-2.amazonaws.com')) {
-    return url.replace('https://zeta-image.s3.ap-northeast-2.amazonaws.com', '/zeta-s3');
-  }
+
+  if (url.startsWith('/zeta-image')) return IMAGE_ORIGIN + url.slice('/zeta-image'.length);
+  if (url.startsWith('/zeta-s3')) return S3_ORIGIN + url.slice('/zeta-s3'.length);
   return url;
 }
 
@@ -16,17 +25,17 @@ export function proxyImageUrl(url) {
  * S3 assets don't support query-string resize — returned as-is.
  * @param {string} url - original image URL
  * @param {number} width - desired pixel width (default 128)
+ * @param {{forExport?: boolean}} [opts]
  */
-export function proxyThumbnailUrl(url, width = 128) {
-  const proxied = proxyImageUrl(url);
+export function proxyThumbnailUrl(url, width = 128, opts) {
+  const proxied = proxyImageUrl(url, opts);
   if (!proxied) return null;
-  if (proxied.startsWith('/zeta-s3')) return proxied;
+  if (proxied.startsWith('/zeta-s3') || proxied.startsWith(S3_ORIGIN)) return proxied;
   const sep = proxied.includes('?') ? '&' : '?';
   return `${proxied}${sep}width=${width}`;
 }
 
-/** Collects all candidate image URLs from plot, in order of preference. All proxied. */
-function collectPlotImageUrls(plot) {
+function collectPlotImageUrls(plot, opts) {
   if (!plot) return [];
   const raw = [
     plot.imageUrl,
@@ -36,17 +45,15 @@ function collectPlotImageUrls(plot) {
   ].filter(Boolean);
   const seen = new Set();
   return raw
-    .map(proxyImageUrl)
+    .map(u => proxyImageUrl(u, opts))
     .filter(u => u && !seen.has(u) && (seen.add(u), true));
 }
 
-/** Primary image URL for plot */
-export function getPlotImageUrl(plot) {
-  const urls = collectPlotImageUrls(plot);
+export function getPlotImageUrl(plot, opts) {
+  const urls = collectPlotImageUrls(plot, opts);
   return urls[0] || null;
 }
 
-/** All image URLs for fallback chain */
-export function getPlotImageUrls(plot) {
-  return collectPlotImageUrls(plot);
+export function getPlotImageUrls(plot, opts) {
+  return collectPlotImageUrls(plot, opts);
 }

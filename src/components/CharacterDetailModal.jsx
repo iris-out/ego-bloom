@@ -3,9 +3,12 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { getCharacterTier, formatCompactNumber, toKST } from '../utils/tierCalculator';
 import ImageWithFallback from './ImageWithFallback';
+import { proxyImageUrl } from '../utils/imageUtils';
 
 const CACHE_PREFIX = 'char_detail_v1_';
 const CACHE_TTL = 4 * 60 * 60 * 1000; // 4시간
+
+const _paletteCache = new Map();
 
 /**
  * 이미지에서 지배적인 색조(hue)와 채도(saturation)를 추출한다.
@@ -15,6 +18,9 @@ const CACHE_TTL = 4 * 60 * 60 * 1000; // 4시간
  * - 인접 버킷을 병합하여 넓은 색상군에서 대표 hue 계산
  */
 function extractImagePalette(imageUrl) {
+  if (_paletteCache.has(imageUrl)) {
+    return Promise.resolve(_paletteCache.get(imageUrl));
+  }
   return new Promise(resolve => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -97,7 +103,9 @@ function extractImagePalette(imageUrl) {
         // 지배 색상의 평균 채도 (0~1)
         const avgSat = wSum > 0 ? (satAcc[bestBucket] / Math.max(1, buckets[bestBucket] / (wSum / candidates.length))) : 0.5;
 
-        resolve({ hue: Math.round(hue), sat: Math.min(1, avgSat) });
+        const result = { hue: Math.round(hue), sat: Math.min(1, avgSat) };
+        _paletteCache.set(imageUrl, result);
+        resolve(result);
       } catch { resolve(null); }
     };
     img.onerror = () => resolve(null);
@@ -164,7 +172,7 @@ export default function CharacterDetailModal({ char, isOpen, onClose }) {
     if (!isOpen) { setBgPalette(null); return; }
     if (!char?.imageUrl) { setBgPalette(null); return; }
     setBgPalette(null);
-    extractImagePalette(char.imageUrl).then(setBgPalette);
+    extractImagePalette(proxyImageUrl(char.imageUrl, { forExport: true })).then(setBgPalette);
   }, [isOpen, char?.imageUrl]);
 
   useEffect(() => {

@@ -134,7 +134,7 @@ function Slide1({ profile, tier, score, stats, badges, activityDays, characters,
           <div className="w-24 h-24 rounded-full p-[3px] relative z-10" style={{ background: 'linear-gradient(135deg, #4A7FFF, #6366F1, #3B82F6)' }}>
             <div className="w-full h-full rounded-full bg-[#0B0812] flex items-center justify-center overflow-hidden">
               {profile.profileImageUrl ? (
-                <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover rounded-full" crossOrigin="anonymous" />
+                <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover rounded-full" />
               ) : (
                 <span className="text-3xl font-bold text-white">{(profile.nickname || '?')[0]}</span>
               )}
@@ -236,7 +236,7 @@ function Slide1({ profile, tier, score, stats, badges, activityDays, characters,
                   >
                     <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 bg-white/5">
                       {c.imageUrl ? (
-                        <img src={proxyImageUrl(c.imageUrl)} alt="" className="w-full h-full object-cover" crossOrigin="anonymous" />
+                        <img src={proxyImageUrl(c.imageUrl)} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-white/30 text-base font-bold">{c.name?.[0]}</div>
                       )}
@@ -280,7 +280,7 @@ function Slide2({ profile, tier, score, stats, badges, activityDays, characters,
         <div className="flex items-center gap-4 mb-8">
           <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center overflow-hidden shrink-0">
             {profile.profileImageUrl ? (
-              <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover" crossOrigin="anonymous" />
+              <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover" />
             ) : (
               <span className="text-xl font-black text-black">{(profile.nickname || '?')[0]}</span>
             )}
@@ -391,7 +391,7 @@ function Slide3({ profile, tier, score, stats, badges, activityDays, characters,
           {/* 배경에 깔리는 거대한 프로필 이미지 워터마크 */}
           <div className="absolute top-1/4 -left-16 w-80 h-80 rounded-full overflow-hidden opacity-10 pointer-events-none transform -rotate-12 border-[16px] border-blue-950/20 mix-blend-multiply">
             {profile.profileImageUrl ? (
-              <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover" crossOrigin="anonymous" />
+              <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full bg-blue-200 flex items-center justify-center text-9xl font-black text-blue-950">
                 {(profile.nickname || '?')[0]}
@@ -402,7 +402,7 @@ function Slide3({ profile, tier, score, stats, badges, activityDays, characters,
           <div className="relative z-10 mt-auto pb-4 flex flex-col gap-4">
             <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-blue-950 shadow-sm shrink-0 bg-white">
               {profile.profileImageUrl ? (
-                <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover" crossOrigin="anonymous" />
+                <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-blue-200 flex items-center justify-center text-3xl font-black text-blue-950">
                   {(profile.nickname || '?')[0]}
@@ -528,7 +528,7 @@ function Slide4({ profile, tier, score, stats, badges, activityDays, characters,
             <div className="w-12 h-12 rounded-full overflow-hidden p-[2px]" style={{ background: 'linear-gradient(135deg, #4A7FFF, #6366f1)' }}>
               <div className="w-full h-full rounded-full bg-[#13161f] flex items-center justify-center overflow-hidden">
                 {profile.profileImageUrl ? (
-                  <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover rounded-full" crossOrigin="anonymous" />
+                  <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover rounded-full" />
                 ) : (
                   <span className="font-bold text-lg text-white">{(profile.nickname || '?')[0]}</span>
                 )}

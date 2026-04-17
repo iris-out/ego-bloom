@@ -62,7 +62,14 @@ async function fetchAllPlots(creatorId) {
   const MAX_PLOTS = 2000;
 
   while (offset < MAX_PLOTS) {
-    const batchOffsets = [offset, offset + limit, offset + limit * 2];
+    const batchOffsets = [
+      offset,
+      offset + limit,
+      offset + limit * 2,
+      offset + limit * 3,
+      offset + limit * 4,
+      offset + limit * 5,
+    ];
     const batchResults = await Promise.all(
       batchOffsets.map(o =>
         fetch(`${baseUrl}&offset=${o}`)
@@ -82,7 +89,7 @@ async function fetchAllPlots(creatorId) {
       if (done) break;
     }
     if (done) break;
-    offset += limit * 3;
+    offset += limit * 6;
   }
   return all;
 }
@@ -188,6 +195,54 @@ function SidebarCharCards({ characters }) {
   );
 }
 
+function ProfilePageHeader({ onBack, hasEarnedTitles, onEditTitle }) {
+  return (
+    <header className="flex justify-between items-center px-6 pt-5 pb-2 relative z-20 lg:px-12">
+      <button
+        onClick={onBack}
+        className="w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+      >
+        <ChevronLeft size={20} className="text-gray-300" />
+      </button>
+      <div className="flex items-center gap-2">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M7 17 L17 17 L15 22 L9 22 Z" />
+          <line x1="6" y1="17" x2="18" y2="17" />
+          <line x1="12" y1="17" x2="12" y2="11" />
+          <path d="M12 6 Q10 2 12 1 Q14 2 12 6" />
+          <path d="M12 6 Q17 4 18 6 Q17 8 12 6" />
+          <path d="M12 6 Q14 10 12 11 Q10 10 12 6" />
+          <path d="M12 6 Q7 8 6 6 Q7 4 12 6" />
+          <circle cx="12" cy="6" r="1.2" />
+        </svg>
+        <span className="font-bold tracking-[0.15em] text-xs text-white uppercase">Ego-Bloom</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => { window.location.hash = 'recap'; }}
+          className="px-3 py-1.5 rounded-full text-[11px] font-bold transition-all hover:opacity-80"
+          style={{
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.25))',
+            border: '1px solid rgba(139,92,246,0.35)',
+            color: '#c4b5fd',
+          }}
+        >
+          LIVE
+        </button>
+        {hasEarnedTitles && (
+          <button
+            onClick={onEditTitle}
+            className="px-3 py-1.5 rounded-full text-[11px] font-semibold text-white/70 hover:text-white transition-all"
+            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            칭호 변경
+          </button>
+        )}
+      </div>
+    </header>
+  );
+}
+
 export default function ProfilePage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -257,7 +312,7 @@ export default function ProfilePage() {
 
       if (id.startsWith('@')) {
         const handleCacheKey = 'HANDLE_MAP_' + id;
-        const HANDLE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+        const HANDLE_TTL_MS = 1 * 24 * 60 * 60 * 1000;
         let cachedHandleId = null;
         try {
           const raw = localStorage.getItem(handleCacheKey);
@@ -387,57 +442,10 @@ export default function ProfilePage() {
     } finally { setLoading(false); }
   };
 
-  // 공통 헤더
-  const Header = () => (
-    <header className="flex justify-between items-center px-6 pt-5 pb-2 relative z-20 lg:px-12">
-      <button
-        onClick={onBack}
-        className="w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
-      >
-        <ChevronLeft size={20} className="text-gray-300" />
-      </button>
-      <div className="flex items-center gap-2">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M7 17 L17 17 L15 22 L9 22 Z" />
-          <line x1="6" y1="17" x2="18" y2="17" />
-          <line x1="12" y1="17" x2="12" y2="11" />
-          <path d="M12 6 Q10 2 12 1 Q14 2 12 6" />
-          <path d="M12 6 Q17 4 18 6 Q17 8 12 6" />
-          <path d="M12 6 Q14 10 12 11 Q10 10 12 6" />
-          <path d="M12 6 Q7 8 6 6 Q7 4 12 6" />
-          <circle cx="12" cy="6" r="1.2" />
-        </svg>
-        <span className="font-bold tracking-[0.15em] text-xs text-white uppercase">Ego-Bloom</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => { window.location.hash = 'recap'; }}
-          className="px-3 py-1.5 rounded-full text-[11px] font-bold transition-all hover:opacity-80"
-          style={{
-            background: 'linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.25))',
-            border: '1px solid rgba(139,92,246,0.35)',
-            color: '#c4b5fd',
-          }}
-        >
-          LIVE
-        </button>
-        {hasEarnedTitles && (
-          <button
-            onClick={() => setEditingTitle(true)}
-            className="px-3 py-1.5 rounded-full text-[11px] font-semibold text-white/70 hover:text-white transition-all"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
-          >
-            칭호 변경
-          </button>
-        )}
-      </div>
-    </header>
-  );
-
   if (loading) {
     return (
       <div className="bg-profile min-h-[100dvh]">
-        <Header />
+        <ProfilePageHeader onBack={onBack} hasEarnedTitles={hasEarnedTitles} onEditTitle={() => setEditingTitle(true)} />
         <main className="max-w-[680px] mx-auto px-6 py-4 lg:max-w-[1280px] lg:px-[6%]"><SkeletonUI /></main>
       </div>
     );
@@ -446,7 +454,7 @@ export default function ProfilePage() {
   if (error) {
     return (
       <div className="bg-profile min-h-[100dvh]">
-        <Header />
+        <ProfilePageHeader onBack={onBack} hasEarnedTitles={hasEarnedTitles} onEditTitle={() => setEditingTitle(true)} />
         <main className="max-w-[680px] mx-auto px-6 py-8 flex flex-col items-center gap-4 lg:max-w-[1280px] lg:px-[6%]">
           <div className="flex items-center gap-2 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl border border-red-400/20">
             <AlertCircle size={16} /><span>{error}</span>

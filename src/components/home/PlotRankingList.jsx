@@ -71,6 +71,7 @@ function computeNtrCount(plots) {
  * 가능하면 이미 로드된 HTMLImageElement를 바로 canvas로 그려서(fetch 없이) 처리.
  */
 const DATA_URL_CACHE = new Map(); // src → data URL (세션 내 재사용)
+const MAX_DATA_URL_CACHE_SIZE = 100;
 
 function drawLoadedImg(img, size = 48, quality = 0.85) {
   if (!img.complete || img.naturalWidth === 0) return null;
@@ -130,6 +131,9 @@ async function inlineImages(imgElements) {
     if (cached) { img.src = cached; continue; }
     const drawn = drawLoadedImg(img);
     if (drawn) {
+      if (DATA_URL_CACHE.size >= MAX_DATA_URL_CACHE_SIZE) {
+        DATA_URL_CACHE.delete(DATA_URL_CACHE.keys().next().value);
+      }
       DATA_URL_CACHE.set(origSrcs.get(img), drawn);
       img.src = drawn;
       continue;
@@ -144,6 +148,9 @@ async function inlineImages(imgElements) {
     await Promise.all([...needFetch.entries()].map(async ([url, targets]) => {
       const dataUrl = await fetchToDataUrl(url);
       if (dataUrl) {
+        if (DATA_URL_CACHE.size >= MAX_DATA_URL_CACHE_SIZE) {
+          DATA_URL_CACHE.delete(DATA_URL_CACHE.keys().next().value);
+        }
         DATA_URL_CACHE.set(url, dataUrl);
         for (const t of targets) t.src = dataUrl;
       } else {
@@ -234,7 +241,7 @@ function SnapshotRankingItem({ plot, rank, maxDelta }) {
         }}>
           {imageUrl && (
             <img
-              src={proxyThumbnailUrl(imageUrl, 64)}
+              src={proxyThumbnailUrl(imageUrl, 64, { forExport: true })}
               alt=""
               crossOrigin="anonymous"
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}

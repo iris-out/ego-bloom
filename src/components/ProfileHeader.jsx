@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import {
@@ -11,7 +11,7 @@ import { Pin, Link2, Check, Heart } from 'lucide-react';
 import { computeEarnedTitles, BADGE_COLOR_MAP, FIXED_BADGE_IDS } from '../data/badges';
 import ImageWithFallback from './ImageWithFallback';
 import { getCreatorBadge, saveCreatorBadge } from '../utils/storage';
-import LiveViewModal from './LiveViewModal';
+const LiveViewModal = lazy(() => import('./LiveViewModal'));
 import { Star, ChatTeardropDots, Users, Trophy } from '@phosphor-icons/react';
 
 // A2: 카운트업 훅 — 0 → target easeOut 애니메이션
@@ -240,7 +240,6 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
                 <img
                   src={profile.profileImageUrl}
                   alt={profile.nickname}
-                  crossOrigin="anonymous"
                   loading="eager"
                   className="w-full h-full object-cover"
                 />
@@ -404,15 +403,17 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
 
       {/* LiveView 모달 — portal로 document.body에 렌더링 */}
       {showRecap && createPortal(
-        <LiveViewModal
-          isOpen={showRecap}
-          onClose={closeRecap}
-          characters={characters || []}
-          stats={stats}
-          profile={profile}
-          tier={tier}
-          score={score}
-        />,
+        <Suspense fallback={null}>
+          <LiveViewModal
+            isOpen={showRecap}
+            onClose={closeRecap}
+            characters={characters || []}
+            stats={stats}
+            profile={profile}
+            tier={tier}
+            score={score}
+          />
+        </Suspense>,
         document.body
       )}
     </>
