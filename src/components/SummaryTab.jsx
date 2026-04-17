@@ -132,7 +132,7 @@ export default function SummaryTab({ characters, stats }) {
         {filtered.length}개 캐릭터
       </p>
 
-      {/* 리스트 */}
+      {/* 리스트 — V4 좌측 rank-box ticker */}
       <div
         className="rounded-2xl overflow-hidden"
         style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
@@ -140,26 +140,51 @@ export default function SummaryTab({ characters, stats }) {
         {paged.map((char, idx) => {
           const tier = getCharacterTier(char.interactionCount || 0);
           const tierStyle = TIER_BADGE_STYLES[tier.name] || TIER_BADGE_STYLES.B;
-          const hasRank = char.globalRank != null;
-          const rankDiff = char.rankDiff ?? 0;
           const rankBadge = getRankTypeBadge(char);
 
           const isLast = idx === paged.length - 1;
-          const hashtags = (char.hashtags || char.tags || []).slice(0, 4);
+          const hashtags = (char.hashtags || char.tags || []).slice(0, 2);
+          const globalIndex = (page - 1) * ITEMS_PER_PAGE + idx + 1;
+          const rankLabel = `#${String(globalIndex).padStart(2, '0')}`;
 
           return (
             <button
               key={char.id}
               onClick={() => setSelectedChar(char)}
-              className="w-full flex items-center gap-3 px-4 text-left transition-colors hover:bg-white/[0.03]"
+              className="summary-row w-full grid items-center text-left transition-colors hover:bg-white/[0.03]"
               style={{
-                borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.04)',
-                paddingTop: '13px',
-                paddingBottom: '13px',
+                borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)',
+                gridTemplateColumns: 'var(--summary-rank-col) var(--summary-thumb-col) 1fr auto',
+                minHeight: 'var(--summary-row-h)',
+                columnGap: '12px',
+                paddingRight: '16px',
               }}
             >
-              {/* 썸네일 46×46 */}
-              <div className="w-[46px] h-[46px] rounded-[12px] overflow-hidden shrink-0 self-start mt-0.5">
+              {/* 1. rank-box */}
+              <div
+                className="h-full flex items-center justify-center"
+                style={{
+                  fontFamily: "'Toss Product Sans', 'Pretendard Variable', system-ui, sans-serif",
+                  fontSize: 'var(--summary-rank-fs)',
+                  fontWeight: 700,
+                  color: 'rgba(255,255,255,0.85)',
+                  background: 'rgba(255,255,255,0.02)',
+                  borderRight: '1px solid rgba(255,255,255,0.06)',
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                {rankLabel}
+              </div>
+
+              {/* 2. 썸네일 */}
+              <div
+                className="rounded-full overflow-hidden shrink-0"
+                style={{
+                  width: 'var(--summary-thumb-size)',
+                  height: 'var(--summary-thumb-size)',
+                  marginLeft: '12px',
+                }}
+              >
                 {char.imageUrl ? (
                   <ImageWithFallback
                     src={char.imageUrl}
@@ -175,11 +200,16 @@ export default function SummaryTab({ characters, stats }) {
                 )}
               </div>
 
-              {/* 정보 영역 */}
+              {/* 3. 정보 블록 */}
               <div className="flex-1 min-w-0">
-                {/* Row 1: 이름 + 티어 배지 + 언리밋 닷 */}
-                <div className="flex items-center gap-1.5 mb-1">
-                  <p className="text-[14px] font-semibold text-white truncate min-w-0">{char.name}</p>
+                <p
+                  className="text-white truncate font-semibold"
+                  style={{ fontSize: 'var(--summary-name-fs)' }}
+                >
+                  {char.name}
+                </p>
+                <div className="flex items-center gap-1 mt-1 min-w-0">
+                  {/* 티어 pill */}
                   <span
                     className="shrink-0 text-[11px] font-bold px-1.5 py-[2px] rounded-full"
                     style={{
@@ -190,98 +220,115 @@ export default function SummaryTab({ characters, stats }) {
                   >
                     {tier.name}
                   </span>
+                  {/* 랭크 타입 pill */}
+                  {rankBadge && (
+                    <span
+                      className="shrink-0 font-bold rounded"
+                      style={{
+                        fontSize: '10px',
+                        padding: '2px 6px',
+                        color: rankBadge.style.color,
+                        background: rankBadge.style.bg,
+                        border: `1px solid ${rankBadge.style.border}`,
+                      }}
+                    >
+                      {rankBadge.label}
+                    </span>
+                  )}
+                  {/* 언리밋 pill */}
+                  {char.unlimitedAllowed && (
+                    <span
+                      className="shrink-0 font-semibold rounded"
+                      style={{
+                        fontSize: '10px',
+                        padding: '2px 6px',
+                        color: '#a5b4fc',
+                        background: 'rgba(99,102,241,0.12)',
+                        border: '1px solid rgba(139,92,246,0.25)',
+                      }}
+                    >
+                      언리밋
+                    </span>
+                  )}
+                  {/* 해시태그 pill — 모바일에서는 숨김 */}
+                  {hashtags.length > 0 && (
+                    <div className="summary-hashtags items-center gap-1 min-w-0 overflow-hidden">
+                      {hashtags.map((tag, ti) => (
+                        <span
+                          key={ti}
+                          className="shrink-0 rounded truncate"
+                          style={{
+                            fontSize: '11px',
+                            padding: '2px 6px',
+                            color: 'rgba(255,255,255,0.6)',
+                            background: 'rgba(255,255,255,0.05)',
+                          }}
+                        >
+                          #{String(tag).replace(/^#/, '')}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-
-                {/* Row 2: 대화량 */}
-                <div className="flex items-baseline gap-1 mb-1.5">
-                  <span className="text-[14px] font-bold text-white">
-                    {formatCompactNumber(char.interactionCount || 0)}
-                  </span>
-                  <span className="text-[11px] text-white/35">대화</span>
-                </div>
-
-                {/* Row 3: 해시태그 */}
-                {hashtags.length > 0 && (
-                  <div className="flex items-center gap-1 flex-wrap">
-                    {hashtags.map((tag, ti) => (
-                      <span
-                        key={ti}
-                        className="text-[10px] rounded"
-                        style={{
-                          color: 'rgba(255,255,255,0.4)',
-                          background: 'rgba(255,255,255,0.05)',
-                          padding: '1px 5px',
-                        }}
-                      >
-                        #{String(tag).replace(/^#/, '')}
-                      </span>
-                    ))}
-                  </div>
-                )}
               </div>
 
-
-              {/* 순위 + 등락 + 랭킹 타입 */}
-              <div className="shrink-0 text-right self-start mt-0.5" style={{ minWidth: '52px' }}>
-                {hasRank ? (
-                  <>
-                    <p className="text-[14px] font-bold text-white">{char.globalRank}위</p>
-                    {rankDiff !== 0 ? (
-                      <p
-                        className="text-[11px] font-semibold mt-0.5"
-                        style={{ color: rankDiff > 0 ? '#ef4444' : '#3b82f6' }}
-                      >
-                        {rankDiff > 0 ? `▲ ${rankDiff}` : `▼ ${Math.abs(rankDiff)}`}
-                      </p>
-                    ) : (
-                      <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.28)' }}>— 유지</p>
-                    )}
-                    {rankBadge && (
-                      <span
-                        className="inline-block text-[10px] font-bold mt-1 px-1.5 py-[1px] rounded"
-                        style={{
-                          color: rankBadge.style.color,
-                          background: rankBadge.style.bg,
-                          border: `1px solid ${rankBadge.style.border}`,
-                        }}
-                      >
-                        {rankBadge.label}
-                      </span>
-                    )}
-                    {char.unlimitedAllowed && (
-                      <span
-                        className="inline-block text-[10px] font-semibold mt-1 px-1.5 py-[1px] rounded"
-                        style={{
-                          color: '#a5b4fc',
-                          background: 'rgba(99,102,241,0.12)',
-                          border: '1px solid rgba(139,92,246,0.25)',
-                        }}
-                      >
-                        언리밋
-                      </span>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    {char.unlimitedAllowed && (
-                      <span
-                        className="inline-block text-[10px] font-semibold px-1.5 py-[1px] rounded"
-                        style={{
-                          color: '#a5b4fc',
-                          background: 'rgba(99,102,241,0.12)',
-                          border: '1px solid rgba(139,92,246,0.25)',
-                        }}
-                      >
-                        언리밋
-                      </span>
-                    )}
-                  </>
-                )}
+              {/* 4. 우측 지표 */}
+              <div className="shrink-0 text-right flex flex-col items-end">
+                <span
+                  style={{
+                    fontFamily: "'Toss Product Sans', 'Pretendard Variable', system-ui, sans-serif",
+                    fontSize: 'var(--summary-stat-fs)',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                    lineHeight: 1.1,
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  {formatCompactNumber(char.interactionCount || 0)}
+                </span>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    color: 'rgba(255,255,255,0.4)',
+                    marginTop: '2px',
+                  }}
+                >
+                  대화
+                </span>
               </div>
             </button>
           );
         })}
       </div>
+
+      <style>{`
+        .summary-row {
+          --summary-rank-col: 60px;
+          --summary-thumb-col: 60px;
+          --summary-thumb-size: 48px;
+          --summary-row-h: 72px;
+          --summary-rank-fs: 22px;
+          --summary-name-fs: 15px;
+          --summary-stat-fs: 17px;
+        }
+        .summary-hashtags {
+          display: flex;
+        }
+        @media (max-width: 640px) {
+          .summary-row {
+            --summary-rank-col: 44px;
+            --summary-thumb-col: 52px;
+            --summary-thumb-size: 40px;
+            --summary-row-h: 64px;
+            --summary-rank-fs: 18px;
+            --summary-name-fs: 14px;
+            --summary-stat-fs: 16px;
+          }
+          .summary-hashtags {
+            display: none;
+          }
+        }
+      `}</style>
 
       {/* 페이지네이션 */}
       {totalPages > 1 && (

@@ -18,55 +18,10 @@ const TIER_KO = {
   Champion: '챔피언',
 };
 
-// 각 등수별 스파클 설정 (랜덤성을 위해 미리 분산 배치)
-const SPARKLES_BY_RANK = [
-  // 1위 금색
-  [
-    { x: '5%',  y: '20%', s: 2,   dur: 5.2, delay: 0    },
-    { x: '12%', y: '70%', s: 3,   dur: 4.1, delay: 2.3  },
-    { x: '23%', y: '35%', s: 1.5, dur: 6.0, delay: 1.0  },
-    { x: '31%', y: '80%', s: 2.5, dur: 4.7, delay: 3.4  },
-    { x: '44%', y: '15%', s: 2,   dur: 5.5, delay: 0.6  },
-    { x: '55%', y: '65%', s: 3,   dur: 4.3, delay: 2.8  },
-    { x: '66%', y: '25%', s: 1.5, dur: 6.2, delay: 1.5  },
-    { x: '74%', y: '75%', s: 2,   dur: 4.9, delay: 4.0  },
-    { x: '83%', y: '40%', s: 2.5, dur: 5.1, delay: 0.3  },
-    { x: '91%', y: '18%', s: 2,   dur: 4.6, delay: 3.1  },
-    { x: '96%', y: '62%', s: 3,   dur: 5.8, delay: 1.8  },
-  ],
-  // 2위 은색
-  [
-    { x: '4%',  y: '55%', s: 2,   dur: 5.4, delay: 0.8  },
-    { x: '14%', y: '22%', s: 2.5, dur: 4.2, delay: 2.6  },
-    { x: '27%', y: '72%', s: 1.5, dur: 6.1, delay: 0.2  },
-    { x: '38%', y: '30%', s: 2,   dur: 5.0, delay: 3.7  },
-    { x: '48%', y: '78%', s: 3,   dur: 4.5, delay: 1.3  },
-    { x: '59%', y: '18%', s: 1.5, dur: 5.7, delay: 0.5  },
-    { x: '70%', y: '60%', s: 2.5, dur: 4.8, delay: 2.9  },
-    { x: '79%', y: '28%', s: 2,   dur: 6.3, delay: 1.1  },
-    { x: '88%', y: '75%', s: 3,   dur: 4.4, delay: 3.5  },
-    { x: '94%', y: '38%', s: 1.5, dur: 5.3, delay: 0.7  },
-  ],
-  // 3위 동색
-  [
-    { x: '7%',  y: '40%', s: 2.5, dur: 4.9, delay: 1.4  },
-    { x: '16%', y: '15%', s: 2,   dur: 5.6, delay: 0.3  },
-    { x: '25%', y: '68%', s: 3,   dur: 4.2, delay: 2.7  },
-    { x: '36%', y: '25%', s: 1.5, dur: 6.0, delay: 3.9  },
-    { x: '46%', y: '82%', s: 2,   dur: 4.7, delay: 0.9  },
-    { x: '57%', y: '35%', s: 2.5, dur: 5.3, delay: 2.1  },
-    { x: '68%', y: '72%', s: 2,   dur: 4.5, delay: 1.6  },
-    { x: '76%', y: '20%', s: 3,   dur: 5.9, delay: 3.2  },
-    { x: '85%', y: '58%', s: 1.5, dur: 4.3, delay: 0.5  },
-    { x: '93%', y: '30%', s: 2,   dur: 5.7, delay: 4.1  },
-  ],
-];
-
-const SPARKLE_COLOR = [
-  '#fbbf24', // 금
-  '#cbd5e1', // 은
-  '#b45309', // 동
-];
+// Top 1~3 스트라이프 + rank-box 색상
+const STRIPE_COLORS = ['#e9c46a', '#c9c6c0', '#c08457'];
+const RANK_BOX_FONT = "'Toss Product Sans', 'Pretendard Variable', system-ui, sans-serif";
+const RANK_BOX_BORDER = '1px solid rgba(255,255,255,0.06)';
 
 function splitFormatted(str) {
   const match = str.match(/^(-?[0-9,.]+)([만천억]?)$/);
@@ -118,8 +73,8 @@ export default function CreatorRankingList() {
           <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-3 py-2.5 px-2">
             {/* Row 1 스켈레톤 */}
             <div className="flex items-center gap-3 w-full">
-              <div className="w-6 h-4 rounded bg-white/10 animate-pulse shrink-0" />
-              <div className="w-9 h-9 rounded-full bg-white/10 animate-pulse shrink-0" />
+              <div className="w-16 h-6 rounded bg-white/10 animate-pulse shrink-0" />
+              <div className="w-11 h-11 rounded-full bg-white/10 animate-pulse shrink-0" />
               <div className="flex-1 space-y-1.5">
                 <div className="h-4 rounded bg-white/10 animate-pulse w-2/3" />
                 <div className="h-3 rounded bg-white/5 animate-pulse w-1/3" />
@@ -127,7 +82,7 @@ export default function CreatorRankingList() {
               <div className="sm:hidden w-7 h-7 rounded-full bg-white/10 animate-pulse shrink-0" />
             </div>
             {/* Row 2 스켈레톤 (모바일) */}
-            <div className="sm:hidden flex items-center gap-3 mt-1.5 pl-[84px]">
+            <div className="sm:hidden flex items-center gap-3 mt-1.5 pl-[124px]">
               <div className="h-3 w-16 rounded bg-white/10 animate-pulse" />
               <div className="h-3 w-12 rounded bg-white/5 animate-pulse" />
             </div>
@@ -174,66 +129,59 @@ export default function CreatorRankingList() {
           const tierKey = getTierKey(creator.tier_name);
           const tierData = getCreatorTier(creator.elo_score ?? 0);
           const tierKoName = TIER_KO[tierData.name] ?? tierData.name;
-          const tierLabel = globalRank < 10
-            ? `TOP ${globalRank + 1}`
+          const tierLabel = globalRank < 3
+            ? `${globalRank + 1}위`
             : `${tierKoName}${tierData.subdivision !== null ? ' ' + tierData.subdivision : ''}`;
-          const tierLabelStyle = globalRank < 10
-            ? { color: '#FFF', textShadow: '0 0 8px rgba(255,255,255,0.6)' }
+          const tierLabelStyle = globalRank < 3
+            ? { color: STRIPE_COLORS[globalRank] }
             : { color: tierData.color };
 
-          const medalBg =
-            globalRank === 0 ? 'border border-yellow-400/[0.18]' :
-            globalRank === 1 ? 'border border-slate-300/[0.14]' :
-            globalRank === 2 ? 'border border-amber-600/[0.18]' :
-            '';
-
-          const medalGradient =
-            globalRank === 0 ? 'linear-gradient(120deg, rgba(251,191,36,0.08) 0%, rgba(253,224,71,0.04) 50%, rgba(245,158,11,0.07) 100%)' :
-            globalRank === 1 ? 'linear-gradient(120deg, rgba(203,213,225,0.07) 0%, rgba(241,245,249,0.03) 50%, rgba(148,163,184,0.06) 100%)' :
-            globalRank === 2 ? 'linear-gradient(120deg, rgba(217,119,6,0.07) 0%, rgba(253,186,116,0.04) 50%, rgba(194,65,12,0.06) 100%)' :
-            '';
-
-          const sparkles = globalRank < 3 ? SPARKLES_BY_RANK[globalRank] : null;
-          const sparkleColor = globalRank < 3 ? SPARKLE_COLOR[globalRank] : null;
+          const stripeColor = globalRank < 3 ? STRIPE_COLORS[globalRank] : null;
+          const rankBoxColor = globalRank < 3 ? STRIPE_COLORS[globalRank] : 'rgba(255,255,255,0.35)';
 
           return (
             <button
               key={creator.id}
               onClick={() => creator.handle && navigate(`/profile?creator=${encodeURIComponent(creator.handle)}`)}
-              className={`relative flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-3 py-2.5 px-2 rounded-lg hover:bg-white/5 transition-colors text-left w-full ${medalBg} ${creator.handle ? 'cursor-pointer' : 'cursor-default'}`}
-              style={medalGradient ? { background: medalGradient } : undefined}
+              className={`relative flex flex-col sm:flex-row sm:items-stretch gap-0 sm:gap-3 py-2.5 pr-2 rounded-lg hover:bg-white/5 transition-colors text-left w-full ${creator.handle ? 'cursor-pointer' : 'cursor-default'}`}
             >
-              {/* 스파클 이펙트 (overflow-hidden 전용 레이어) */}
-              {sparkles && (
-                <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none">
-                  {sparkles.map((sp, si) => (
-                    <span
-                      key={si}
-                      className="sparkle-dot"
-                      style={{
-                        left: sp.x,
-                        top: sp.y,
-                        width: sp.s,
-                        height: sp.s,
-                        backgroundColor: sparkleColor,
-                        boxShadow: `0 0 ${sp.s * 2}px ${sparkleColor}`,
-                        '--dur': `${sp.dur}s`,
-                        '--delay': `${sp.delay}s`,
-                        opacity: 0.35,
-                      }}
-                    />
-                  ))}
-                </div>
+              {/* 좌측 3px 컬러 스트라이프 (top 1~3) */}
+              {stripeColor && (
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 4,
+                    bottom: 4,
+                    width: '3px',
+                    background: stripeColor,
+                    borderRadius: '2px',
+                    pointerEvents: 'none',
+                  }}
+                />
               )}
-              {/* Row 1 (항상): 순위 + 아바타 + 닉네임/핸들 + 티어 아이콘 */}
-              <div className="flex items-center gap-3 w-full">
-                <span className={`text-[15px] font-bold w-6 text-center tabular-nums shrink-0 ${
-                  globalRank === 0 ? 'text-yellow-400' : globalRank < 3 ? 'text-white/70' : 'text-white/30'
-                }`}>
-                  {globalRank + 1}
-                </span>
 
-                <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 bg-white/10">
+              {/* Row 1 (항상): rank-box + 아바타 + 닉네임/핸들 + (모바일)티어 */}
+              <div className="flex items-stretch gap-3 w-full">
+                {/* rank-box 64px */}
+                <div
+                  className="shrink-0 flex items-center justify-center"
+                  style={{
+                    width: '64px',
+                    borderRight: RANK_BOX_BORDER,
+                    fontFamily: RANK_BOX_FONT,
+                    fontSize: '22px',
+                    fontWeight: 700,
+                    color: rankBoxColor,
+                    letterSpacing: '-0.02em',
+                    lineHeight: 1,
+                  }}
+                >
+                  {globalRank + 1}
+                </div>
+
+                <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 bg-white/10 self-center">
                   {imageUrl ? (
                     <img
                       src={proxyThumbnailUrl(imageUrl, 64)}
@@ -249,22 +197,22 @@ export default function CreatorRankingList() {
                   )}
                 </div>
 
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 self-center">
                   <p className="text-[14px] font-medium text-white truncate">{creator.nickname}</p>
                   <p className="text-[12px] text-white/35 truncate">@{creator.handle}</p>
                 </div>
 
                 {/* 티어 아이콘 + 라벨: 모바일에서는 Row 1 끝 */}
-                <div className="sm:hidden flex flex-col items-center gap-0.5 shrink-0">
+                <div className="sm:hidden flex flex-col items-center gap-0.5 shrink-0 self-center">
                   <TierIcon tier={tierKey} rank={globalRank + 1} size={30} />
-                  <span className="text-[9px] font-black uppercase tracking-wider" style={tierLabelStyle}>
+                  <span className="text-[9px] font-semibold tracking-wider" style={tierLabelStyle}>
                     {tierLabel}
                   </span>
                 </div>
               </div>
 
               {/* 모바일 전용: 스탯 */}
-              <div className="sm:hidden mt-1.5 pl-[84px]">
+              <div className="sm:hidden mt-1.5 pl-[124px]">
                 <div className="flex items-center gap-3">
                   <StatVal count={creator.plot_interaction_count} label="대화" numSize="16px" />
                   <StatVal count={creator.follower_count} label="팔로워" numSize="16px" />
@@ -279,9 +227,9 @@ export default function CreatorRankingList() {
                   <StatVal count={creator.follower_count} label="팔로워" />
                 </div>
                 <div className="flex flex-col items-center justify-center gap-0.5 w-[64px]"
-                  style={{ marginTop: '6px', marginRight: '10px' }}>
-                  <TierIcon tier={tierKey} rank={globalRank + 1} size={44} />
-                  <p className="text-[10px] font-black uppercase tracking-wider leading-none text-center w-full" style={tierLabelStyle}>
+                  style={{ marginRight: '6px' }}>
+                  <TierIcon tier={tierKey} rank={globalRank + 1} size={40} />
+                  <p className="text-[10px] font-semibold leading-none text-center w-full" style={tierLabelStyle}>
                     {tierLabel}
                   </p>
                 </div>

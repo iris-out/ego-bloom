@@ -12,7 +12,6 @@ import { computeEarnedTitles, BADGE_COLOR_MAP, FIXED_BADGE_IDS } from '../data/b
 import ImageWithFallback from './ImageWithFallback';
 import { getCreatorBadge, saveCreatorBadge } from '../utils/storage';
 const LiveViewModal = lazy(() => import('./LiveViewModal'));
-import { Star, ChatTeardropDots, Users, Trophy } from '@phosphor-icons/react';
 
 // A2: 카운트업 훅 — 0 → target easeOut 애니메이션
 function useCountUp(target, duration) {
@@ -79,8 +78,8 @@ function useTierRevealScore(target, onComplete) {
 }
 
 const TIER_KO = {
-  unranked: 'UNRANKED', bronze: 'BRONZE', silver: 'SILVER', gold: 'GOLD',
-  platinum: 'PLATINUM', diamond: 'DIAMOND', master: 'MASTER', champion: 'CHAMPION',
+  unranked: '언랭크', bronze: '브론즈', silver: '실버', gold: '골드',
+  platinum: '플래티넘', diamond: '다이아몬드', master: '마스터', champion: '챔피언',
 };
 
 // _ 로 시작하면 첫 번째 비-underscore 글자 반환
@@ -322,71 +321,115 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
         </div>
       </div>
 
-      {/* Fintech KPI Strip */}
+      {/* Fintech KPI Strip — K5 가로 4열 strip + 모바일 2×2 */}
       {breakdown && (
         <div
           className="grid grid-cols-2 gap-px mb-4 rounded-xl overflow-hidden"
-          style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)' }}
+          style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.04)' }}
         >
-          {/* ELO Score */}
-          <div className="flex flex-col gap-0.5 px-4 py-3 lg:px-5 lg:py-4" style={{ background: 'rgba(255,255,255,0.02)' }}>
-            <div className="flex items-center gap-1.5" style={{ color: 'var(--c-label)', fontSize: '10px', letterSpacing: 'var(--label-tracking)', textTransform: 'uppercase' }}>
-              <Star size={12} weight="fill" style={{ color: 'var(--accent)' }} />
-              ELO SCORE
+          {/* ELO 점수 */}
+          <div
+            className="flex flex-col gap-1.5 px-[18px] py-4 sm:px-6 sm:py-5"
+            style={{ background: 'rgba(255,255,255,0.02)' }}
+          >
+            <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              ELO 점수
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 900, color: 'var(--accent-bright)', letterSpacing: '-0.04em', lineHeight: 1 }}>
+            <div
+              className="text-[24px] sm:text-[28px]"
+              style={{
+                fontFamily: "'Toss Product Sans', 'Pretendard Variable', system-ui, sans-serif",
+                fontWeight: 700,
+                color: 'var(--accent-bright)',
+                letterSpacing: '-0.03em',
+                lineHeight: 1,
+              }}
+            >
               {formatNumber(animScore)}
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--c-label)' }}>{tierLabel}</div>
+            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>
+              {tierLabel}{globalRank ? ` · 전체 #${globalRank}위` : ''}
+            </div>
           </div>
 
-          {/* Total Chats */}
-          <div className="flex flex-col gap-0.5 px-4 py-3 lg:px-5 lg:py-4" style={{ background: 'rgba(255,255,255,0.02)' }}>
-            <div className="flex items-center gap-1.5" style={{ color: 'var(--c-label)', fontSize: '10px', letterSpacing: 'var(--label-tracking)', textTransform: 'uppercase' }}>
-              <ChatTeardropDots size={12} weight="fill" style={{ color: 'rgba(99,102,241,0.8)' }} />
-              TOTAL CHATS
+          {/* 누적 대화 */}
+          <div
+            className="flex flex-col gap-1.5 px-[18px] py-4 sm:px-6 sm:py-5"
+            style={{ background: 'rgba(255,255,255,0.02)' }}
+          >
+            <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              누적 대화
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1 }}>
+            <div
+              className="text-[24px] sm:text-[28px]"
+              style={{
+                fontFamily: "'Toss Product Sans', 'Pretendard Variable', system-ui, sans-serif",
+                fontWeight: 700,
+                color: '#fff',
+                letterSpacing: '-0.03em',
+                lineHeight: 1,
+              }}
+            >
               {formatNumber(animInteractions)}
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--c-label)' }}>{formatNumber(Math.floor(breakdown.avgInteractions || 0))} avg/캐릭터</div>
+            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>
+              평균 {formatNumber(Math.floor(breakdown.avgInteractions || 0))}/캐릭터
+            </div>
           </div>
 
-          {/* Followers */}
-          <div className="flex flex-col gap-0.5 px-4 py-3 lg:px-5 lg:py-4" style={{ background: 'rgba(255,255,255,0.02)' }}>
-            <div className="flex items-center gap-1.5" style={{ color: 'var(--c-label)', fontSize: '10px', letterSpacing: 'var(--label-tracking)', textTransform: 'uppercase' }}>
-              <Users size={12} weight="fill" style={{ color: 'rgba(74,222,128,0.8)' }} />
-              FOLLOWERS
+          {/* 팔로워 */}
+          <div
+            className="flex flex-col gap-1.5 px-[18px] py-4 sm:px-6 sm:py-5"
+            style={{ background: 'rgba(255,255,255,0.02)' }}
+          >
+            <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              팔로워
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1 }}>
+            <div
+              className="text-[24px] sm:text-[28px]"
+              style={{
+                fontFamily: "'Toss Product Sans', 'Pretendard Variable', system-ui, sans-serif",
+                fontWeight: 700,
+                color: '#fff',
+                letterSpacing: '-0.03em',
+                lineHeight: 1,
+              }}
+            >
               {formatNumber(animFollowers)}
             </div>
-            {globalRank && (
-              <div style={{ fontSize: '11px', color: 'var(--c-label)' }}>전체 #{globalRank}위</div>
-            )}
+            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>
+              팔로잉 {formatNumber(stats?.followingCount || 0)}
+            </div>
           </div>
 
-          {/* Top Character */}
-          <div className="flex flex-col gap-0.5 px-4 py-3 lg:px-5 lg:py-4" style={{ background: 'rgba(255,255,255,0.02)' }}>
-            <div className="flex items-center gap-1.5" style={{ color: 'var(--c-label)', fontSize: '10px', letterSpacing: 'var(--label-tracking)', textTransform: 'uppercase' }}>
-              <Trophy size={12} weight="fill" style={{ color: 'rgba(251,191,36,0.8)' }} />
-              TOP CHARACTER
+          {/* 대표 캐릭터 */}
+          <div
+            className="flex flex-col gap-1.5 px-[18px] py-4 sm:px-6 sm:py-5"
+            style={{ background: 'rgba(255,255,255,0.02)' }}
+          >
+            <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              대표 캐릭터
             </div>
-            <div style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '15px',
-              fontWeight: 700,
-              color: 'var(--accent-bright)',
-              lineHeight: 1.3,
-              overflow: 'hidden',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-            }}>
+            <div
+              className="text-[17px] sm:text-[18px]"
+              style={{
+                fontFamily: "'Pretendard Variable', system-ui, sans-serif",
+                fontWeight: 700,
+                color: 'var(--accent-bright)',
+                lineHeight: 1.25,
+                letterSpacing: '-0.02em',
+                overflow: 'hidden',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+              }}
+            >
               {topCharacter?.name || '—'}
             </div>
             {topCharacter && (
-              <div style={{ fontSize: '11px', color: 'var(--c-label)' }}>{formatNumber(topCharacter.interactionCount)} chats</div>
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>
+                {formatNumber(topCharacter.interactionCount)} 대화
+              </div>
             )}
           </div>
         </div>

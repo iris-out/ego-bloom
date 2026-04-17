@@ -575,20 +575,18 @@ export default function PlotRankingList({ rankingData }) {
       </div>
 
       {/* 데스크탑 헤더 (sm+): 5열 그리드 */}
-      <div className="hidden sm:grid plot-ranking-grid items-center gap-x-2 mb-1" style={{ paddingLeft: '10px' }}>
-        <span style={{ fontSize: '9px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)', textAlign: 'center' }}>#</span>
-        <span style={{ fontSize: '9px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)' }}>NAME</span>
-        <span style={{ fontSize: '9px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)', textAlign: 'right' }}>TAGS</span>
-        <span style={{ fontSize: '9px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)', textAlign: 'right' }}>CHATS</span>
-        <div className="text-right">
-          <span style={{ fontSize: '9px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)' }}>2H CHG</span>
-        </div>
+      <div className="hidden sm:grid plot-ranking-grid items-center gap-x-2 mb-1">
+        <span style={{ fontSize: '11px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)', textAlign: 'center' }}>순위</span>
+        <span style={{ fontSize: '11px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)' }}>플롯</span>
+        <span style={{ fontSize: '11px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)', textAlign: 'right', width: '188px' }}>태그</span>
+        <span style={{ fontSize: '11px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)', textAlign: 'right' }}>대화</span>
+        <span style={{ fontSize: '11px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)', textAlign: 'right', paddingRight: '8px' }}>2시간</span>
       </div>
-      {/* 모바일 헤더 (< sm): 2열 단순화 */}
+      {/* 모바일 헤더 (< sm): 간단 2열 */}
       <div className="sm:hidden flex items-center px-2 mb-1 gap-x-2">
-        <span className="text-[11px] text-white/20 w-5 text-center shrink-0">#</span>
+        <span className="text-[11px] text-white/20 w-16 text-center shrink-0">순위</span>
         <span className="text-[11px] text-white/20 flex-1">플롯</span>
-        <span className="text-[11px] text-white/20">대화량 / 상승 <span className="text-white/15">(2h)</span></span>
+        <span className="text-[11px] text-white/20">대화 / 2시간</span>
       </div>
 
       {!rankingData ? (
@@ -596,8 +594,8 @@ export default function PlotRankingList({ rankingData }) {
         <div className="flex flex-col">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="border-b border-white/5">
-              <div className="hidden sm:grid plot-ranking-grid items-center gap-x-2 py-3 px-2">
-                <div className="h-4 w-4 rounded bg-white/10 animate-pulse mx-auto" />
+              <div className="hidden sm:grid plot-ranking-grid items-center gap-x-2 py-3">
+                <div className="h-6 w-10 rounded bg-white/10 animate-pulse mx-auto" />
                 <div className="flex items-center gap-2.5">
                   <div className="w-10 h-10 rounded-full bg-white/10 animate-pulse shrink-0" />
                   <div className="flex-1 space-y-1.5">
@@ -605,20 +603,20 @@ export default function PlotRankingList({ rankingData }) {
                     <div className="h-3 rounded bg-white/5 animate-pulse w-1/2" />
                   </div>
                 </div>
-                <div className="h-5 rounded-full bg-white/5 animate-pulse" />
+                <div className="h-5 rounded-full bg-white/5 animate-pulse" style={{ width: '188px' }} />
                 <div className="h-4 rounded bg-white/10 animate-pulse" />
-                <div className="h-2 rounded-full bg-white/5 animate-pulse" />
+                <div className="h-4 rounded bg-white/5 animate-pulse mr-2" />
               </div>
               <div className="sm:hidden py-3 px-2">
                 <div className="flex items-center gap-2.5 mb-1.5">
-                  <div className="w-5 h-4 rounded bg-white/10 animate-pulse shrink-0" />
+                  <div className="w-16 h-6 rounded bg-white/10 animate-pulse shrink-0" />
                   <div className="w-10 h-10 rounded-full bg-white/10 animate-pulse shrink-0" />
                   <div className="flex-1 space-y-1.5">
                     <div className="h-4 rounded bg-white/10 animate-pulse w-3/4" />
                     <div className="h-3 rounded bg-white/5 animate-pulse w-1/2" />
                   </div>
                 </div>
-                <div className="flex items-center gap-2 pl-20">
+                <div className="flex items-center gap-2 pl-[108px]">
                   <div className="h-3 w-12 rounded-full bg-white/5 animate-pulse" />
                   <div className="h-3 w-10 rounded bg-white/10 animate-pulse ml-auto" />
                   <div className="w-10 h-2 rounded-full bg-white/5 animate-pulse" />
