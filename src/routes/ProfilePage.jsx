@@ -471,7 +471,7 @@ export default function ProfilePage() {
 
   return (
     <div className="bg-profile min-h-[100dvh] relative">
-      <Header />
+      <ProfilePageHeader onBack={onBack} hasEarnedTitles={hasEarnedTitles} onEditTitle={() => setEditingTitle(true)} />
 
       <main className="max-w-[680px] mx-auto px-6 pb-20 relative z-10 lg:max-w-[1280px] lg:px-[6%]">
         {/* 캐시 알림 */}
