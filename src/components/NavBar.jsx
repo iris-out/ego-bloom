@@ -6,7 +6,7 @@ import { APP_VERSION } from '../data/changelog';
 /**
  * variant:
  *   'home'    – 로고 + 티어 링크
- *   'profile' – 뒤로가기 + 로고 + LIVE 버튼
+ *   'profile' – 뒤로가기 + 로고 + CARD 버튼
  */
 export default function NavBar({ variant = 'home', onBack, serverStatus, onStatusClick, onLiveClick }) {
   const navigate = useNavigate();
@@ -99,11 +99,11 @@ export default function NavBar({ variant = 'home', onBack, serverStatus, onStatu
             <button
               className="nav-btn text-[10px] font-bold tracking-wider"
               onClick={onLiveClick}
-              title="LIVE 공유"
-              aria-label="LIVE 공유"
+              title="카드 공유"
+              aria-label="카드 공유"
               style={{ width: 'auto', padding: '0 10px', color: 'var(--accent-bright)' }}
             >
-              LIVE
+              CARD
             </button>
           )}
         </div>

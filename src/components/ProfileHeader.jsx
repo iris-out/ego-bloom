@@ -455,6 +455,7 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
             profile={profile}
             tier={tier}
             score={score}
+            globalRank={globalRank}
           />
         </Suspense>,
         document.body

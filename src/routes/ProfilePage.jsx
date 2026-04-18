@@ -227,7 +227,7 @@ function ProfilePageHeader({ onBack, hasEarnedTitles, onEditTitle }) {
             color: '#c4b5fd',
           }}
         >
-          LIVE
+          CARD
         </button>
         {hasEarnedTitles && (
           <button

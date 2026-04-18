@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
-import { X, ChevronDown } from 'lucide-react';
-import { formatCompactNumber, toKST } from '../utils/tierCalculator';
+import { X, ChevronDown, RefreshCw } from 'lucide-react';
+import { formatCompactNumber, toKST, getCharacterTier } from '../utils/tierCalculator';
 import { proxyImageUrl } from '../utils/imageUtils';
 import { computeEarnedTitles } from '../data/badges';
 import TierIcon from './ui/TierIcon';
@@ -83,182 +83,654 @@ function ScrollDownHint({ show, light = false }) {
 }
 
 // ============================================================
-// Slide 1: 퍼플 그라디언트 — 메인 쇼케이스
+// Slide 1: Ivory Planetarium — 밤하늘 + 프로필 카드 (앞/뒷면 flip)
 // ============================================================
-function Slide1({ profile, tier, score, stats, badges, activityDays, characters, vh }) {
-  const tierColor = TIER_COLORS_MAP[tier.key] || TIER_COLORS_MAP.unranked;
-  const scrollRef = useRef(null);
-  const showHint = useScrollIndicator(scrollRef);
+const IVORY = '#f5ecd9';
+const IVORY_DIM = 'rgba(245,236,217,0.55)';
+const IVORY_LINE = 'rgba(245,236,217,0.28)';
+const IVORY_DOT = 'rgba(245,236,217,0.2)';
 
-  const rankedChars = useMemo(() => {
-    if (!characters?.length) return [];
-    return characters
-      .filter(c => c.trendingRank || c.bestRank || c.newRank)
-      .sort((a, b) => {
-        const aRank = Math.min(
-          a.trendingRank || 999,
-          a.bestRank || 999,
-          a.newRank || 999,
-        );
-        const bRank = Math.min(
-          b.trendingRank || 999,
-          b.bestRank || 999,
-          b.newRank || 999,
-        );
-        return aRank - bRank;
-      })
-      .slice(0, 4);
-  }, [characters]);
+// 마일스톤 카테고리별 우선순위 (높은 등급 → 낮은 등급). 첫번째 earned 를 선택.
+const MILESTONE_PRIORITY = {
+  interaction:      ['100m_total', '10m', '1m', '100k', '10k', '1k'],
+  char_interaction: ['100m_zeta', 'char_10m', 'platinum', 'char_500k', 'char_100k', 'char_10k'],
+  follower:         ['superstar', 'follower_5k', 'follower_1k', 'follower_100'],
+  creation:         ['factory', 'fertile', 'streak_14', 'streak_7', 'streak_3', 'daily_6', 'daily_4', 'daily_2'],
+};
+const TAG_PRIORITY = ['sunae', 'ntr'];
+
+function StarField() {
+  return (
+    <>
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: [
+            'radial-gradient(0.7px 0.7px at 5% 7%, rgba(255,255,255,0.9), transparent)',
+            'radial-gradient(0.7px 0.7px at 12% 22%, rgba(255,255,255,0.9), transparent)',
+            'radial-gradient(1px 1px at 22% 12%, #fff, transparent)',
+            'radial-gradient(0.7px 0.7px at 31% 38%, rgba(255,255,255,0.85), transparent)',
+            'radial-gradient(0.7px 0.7px at 40% 8%, rgba(255,255,255,0.9), transparent)',
+            'radial-gradient(1.2px 1.2px at 48% 58%, #fff, transparent)',
+            'radial-gradient(0.7px 0.7px at 57% 16%, rgba(255,255,255,0.85), transparent)',
+            'radial-gradient(0.7px 0.7px at 66% 44%, rgba(255,255,255,0.9), transparent)',
+            'radial-gradient(0.9px 0.9px at 74% 24%, #fff, transparent)',
+            'radial-gradient(0.7px 0.7px at 83% 68%, rgba(255,255,255,0.85), transparent)',
+            'radial-gradient(0.7px 0.7px at 91% 14%, rgba(255,255,255,0.9), transparent)',
+            'radial-gradient(0.8px 0.8px at 97% 45%, #fff, transparent)',
+            'radial-gradient(0.7px 0.7px at 8% 55%, rgba(255,255,255,0.85), transparent)',
+            'radial-gradient(0.7px 0.7px at 17% 72%, rgba(255,255,255,0.9), transparent)',
+            'radial-gradient(1px 1px at 27% 85%, #fff, transparent)',
+            'radial-gradient(0.7px 0.7px at 36% 92%, rgba(255,255,255,0.85), transparent)',
+            'radial-gradient(0.9px 0.9px at 45% 78%, rgba(255,255,255,0.9), transparent)',
+            'radial-gradient(0.7px 0.7px at 55% 88%, rgba(255,255,255,0.85), transparent)',
+            'radial-gradient(0.7px 0.7px at 63% 95%, rgba(255,255,255,0.9), transparent)',
+            'radial-gradient(1.1px 1.1px at 72% 80%, #fff, transparent)',
+            'radial-gradient(0.7px 0.7px at 80% 90%, rgba(255,255,255,0.85), transparent)',
+            'radial-gradient(0.8px 0.8px at 88% 78%, rgba(255,255,255,0.9), transparent)',
+            'radial-gradient(0.7px 0.7px at 95% 94%, rgba(255,255,255,0.85), transparent)',
+          ].join(', '),
+          opacity: 0.85,
+        }}
+      />
+      {[
+        { top: '11%', left: '16%' },
+        { top: '26%', right: '20%' },
+        { top: '62%', left: '8%' },
+        { bottom: '16%', right: '13%' },
+      ].map((pos, i) => (
+        <div
+          key={i}
+          className="absolute pointer-events-none"
+          style={{
+            ...pos,
+            width: 3,
+            height: 3,
+            borderRadius: '50%',
+            background: '#fff',
+            boxShadow: '0 0 6px #fff, 0 0 14px rgba(255,255,255,0.35)',
+          }}
+        />
+      ))}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse 55% 32% at 28% 80%, rgba(90,78,140,0.22), transparent),' +
+            'radial-gradient(ellipse 42% 28% at 76% 22%, rgba(78,95,140,0.2), transparent)',
+        }}
+      />
+    </>
+  );
+}
+
+function StatRow({ label, value, unit }) {
+  return (
+    <div className="flex items-baseline justify-between gap-2.5">
+      <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(245,236,217,0.6)', flexShrink: 0, letterSpacing: '-0.01em' }}>
+        {label}
+      </span>
+      <span
+        style={{
+          flex: 1,
+          borderBottom: `1px dotted ${IVORY_DOT}`,
+          height: 0,
+          alignSelf: 'flex-end',
+          marginBottom: 9,
+        }}
+      />
+      <span
+        style={{
+          fontSize: 26,
+          fontWeight: 800,
+          color: '#fff',
+          letterSpacing: '-0.03em',
+          lineHeight: 1,
+          fontVariantNumeric: 'tabular-nums',
+          flexShrink: 0,
+        }}
+      >
+        {value}
+        {unit && (
+          <span style={{ fontSize: 13, fontWeight: 600, color: IVORY_DIM, marginLeft: 3, letterSpacing: 0 }}>
+            {unit}
+          </span>
+        )}
+      </span>
+    </div>
+  );
+}
+
+function BadgePill({ badge }) {
+  return (
+    <div
+      className="flex items-center"
+      style={{
+        gap: 5,
+        padding: '4px 10px',
+        borderRadius: 999,
+        background: 'rgba(245,236,217,0.06)',
+        border: '1px solid rgba(245,236,217,0.2)',
+        fontSize: 11.5,
+        fontWeight: 600,
+        color: IVORY,
+        letterSpacing: '-0.01em',
+        lineHeight: 1.2,
+      }}
+    >
+      <span style={{ fontSize: 13 }}>{badge.emoji}</span>
+      <span>{badge.title}</span>
+    </div>
+  );
+}
+
+function BadgeRow({ label, items }) {
+  if (!items || items.length === 0) return null;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span
+        style={{
+          fontSize: 9,
+          fontWeight: 700,
+          letterSpacing: '0.22em',
+          color: 'rgba(245,236,217,0.4)',
+          flexShrink: 0,
+          width: 38,
+          textAlign: 'right',
+        }}
+      >
+        {label}
+      </span>
+      <div style={{ flex: 1, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+        {items.map((b) => (
+          <BadgePill key={b.id} badge={b} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CardFront({ profile, tier, stats, activityDays, characters, badges, globalRank, todayKST, onFlip }) {
+  const tierName = (tier.name || 'UNRANKED').toUpperCase();
+  const tierSub = ROMAN[tier.subdivision] || '';
+  const charCount = characters?.length ?? stats.plotCount ?? 0;
+
+  const milestones = useMemo(() => {
+    const byId = Object.fromEntries((badges || []).map((b) => [b.id, b]));
+    return Object.values(MILESTONE_PRIORITY)
+      .map((ids) => ids.find((id) => byId[id]))
+      .filter(Boolean)
+      .map((id) => byId[id]);
+  }, [badges]);
+
+  const tagBadges = useMemo(() => {
+    const earnedTags = (badges || []).filter((b) => b.category === 'tag');
+    const byId = Object.fromEntries(earnedTags.map((b) => [b.id, b]));
+    const pinned = TAG_PRIORITY.map((id) => byId[id]).filter(Boolean);
+    const rest = earnedTags.filter((b) => !TAG_PRIORITY.includes(b.id));
+    return [...pinned, ...rest].slice(0, 4);
+  }, [badges]);
 
   return (
     <div
-      className="w-full relative overflow-hidden"
-      style={{ height: vh, background: 'radial-gradient(ellipse at top, rgba(88,28,135,0.4) 0%, #0B0812 60%), #0B0812' }}
+      className="absolute inset-0 flex flex-col"
+      style={{
+        padding: '52px 22px 56px',
+        color: IVORY,
+        fontFamily: "'SUIT Variable', 'SUIT', 'Pretendard', system-ui, sans-serif",
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
+      }}
     >
-      {/* Noise overlay */}
-      <div
-        className="absolute inset-0 opacity-50 mix-blend-overlay pointer-events-none z-0"
-        style={{
-          backgroundImage: `url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiIvPjwvc3ZnPg==")`,
-        }}
-      />
-
-      {/* Scrollable content */}
-      <div
-        ref={scrollRef}
-        className="w-full h-full flex flex-col items-center justify-start pt-14 pb-10 px-6 gap-4 overflow-y-auto scrollbar-hide relative z-10"
-      >
-        {/* Avatar */}
-        <div className="relative">
-          <div className="absolute inset-0 rounded-full blur-xl opacity-50" style={{ background: 'linear-gradient(135deg, #2A52CC, #3B82F6)' }} />
-          <div className="w-24 h-24 rounded-full p-[3px] relative z-10" style={{ background: 'linear-gradient(135deg, #4A7FFF, #6366F1, #3B82F6)' }}>
-            <div className="w-full h-full rounded-full bg-[#0B0812] flex items-center justify-center overflow-hidden">
+      {/* 프로필 + 이름 */}
+      <div className="flex items-start gap-3.5 mb-[18px]">
+        <div className="relative shrink-0" style={{ width: 62, height: 62 }}>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: '50%',
+              background:
+                'conic-gradient(from 140deg, #f5ecd9 0deg, rgba(245,236,217,0.15) 90deg, #e8d28a 180deg, rgba(245,236,217,0.15) 270deg, #f5ecd9 360deg)',
+              padding: 1.5,
+            }}
+          >
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #2d2a3f, #4a4563)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: IVORY,
+                fontSize: 22,
+                fontWeight: 800,
+                letterSpacing: '-0.02em',
+                overflow: 'hidden',
+                boxShadow: 'inset 0 0 20px rgba(0,0,0,0.3)',
+              }}
+            >
               {profile.profileImageUrl ? (
-                <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover rounded-full" />
+                <img
+                  src={proxyImageUrl(profile.profileImageUrl)}
+                  alt=""
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                />
               ) : (
-                <span className="text-3xl font-bold text-white">{(profile.nickname || '?')[0]}</span>
+                (profile.nickname || '?')[0]
               )}
             </div>
           </div>
         </div>
-
-        {/* Name */}
-        <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-white">{profile.nickname}</h1>
-          <p className="text-sm text-purple-200/60 font-medium mt-1">@{profile.username}</p>
-        </div>
-
-        {/* Badges */}
-        {badges.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-2 max-w-[280px]">
-            {badges.slice(0, 4).map(b => (
-              <div
-                key={b.id}
-                className="px-3 py-1.5 rounded-full text-xs font-medium text-white flex items-center gap-1.5"
-                style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255,255,255,0.05)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-                }}
-              >
-                {b.emoji} {b.title}
-              </div>
-            ))}
+        <div className="flex-1 min-w-0" style={{ paddingTop: 4 }}>
+          <div
+            style={{
+              fontSize: 22,
+              fontWeight: 800,
+              letterSpacing: '-0.03em',
+              lineHeight: 1.05,
+              color: IVORY,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {profile.nickname || '—'}
           </div>
-        )}
-
-        {/* Tier icon */}
-        <div className="flex flex-col items-center gap-2 relative">
-          <div className="absolute inset-0 rounded-full blur-[30px] opacity-20" style={{ background: tierColor }} />
-          <div style={{ filter: `drop-shadow(0 0 15px ${tierColor}88)` }}>
-            <TierIcon tier={tier.key} size={64} />
-          </div>
-          <div className="text-[11px] font-bold tracking-[0.2em] uppercase" style={{ color: tierColor }}>
-            {tier.name} {ROMAN[tier.subdivision] || ''}
+          <div style={{ marginTop: 6, fontSize: 12, fontWeight: 500, color: IVORY_DIM }}>
+            @{profile.username || 'unknown'}
           </div>
         </div>
-
-        {/* Stats */}
-        <div className="w-full space-y-3">
-          {activityDays > 0 && (
-            <div className="text-center">
-              <span className="text-xs font-medium text-purple-200/50 uppercase tracking-widest relative inline-block">
-                <span className="absolute top-1/2 -left-8 w-6 h-[1px] bg-purple-200/20" />
-                제작 {activityDays}일째
-                <span className="absolute top-1/2 -right-8 w-6 h-[1px] bg-purple-200/20" />
-              </span>
-            </div>
-          )}
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { label: '대화량', val: stats.plotInteractionCount },
-              { label: '팔로워', val: stats.followerCount },
-              { label: '캐릭터', val: characters?.length ?? stats.plotCount },
-            ].map(s => (
-              <div
-                key={s.label}
-                className="rounded-2xl p-3 flex flex-col items-center justify-center"
-                style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.05)' }}
-              >
-                <span className="text-[10px] text-gray-400 mb-1 font-medium">{s.label}</span>
-                <span className="text-lg font-bold text-white tracking-tight">{formatCompactNumber(s.val)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 랭킹 등재 캐릭터 */}
-        {rankedChars.length > 0 && (
-          <div className="w-full">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="flex-1 h-[1px] bg-purple-200/10" />
-              <p className="text-[10px] font-bold text-purple-200/40 uppercase tracking-widest shrink-0">랭킹 등재</p>
-              <span className="flex-1 h-[1px] bg-purple-200/10" />
-            </div>
-            <div className="flex flex-col gap-2">
-              {rankedChars.map(c => {
-                const rankLabel = c.trendingRank
-                  ? `트렌딩 ${c.trendingRank}위`
-                  : c.bestRank
-                  ? `베스트 ${c.bestRank}위`
-                  : `신규 ${c.newRank}위`;
-                const rankColor = c.trendingRank
-                  ? { bg: 'rgba(234,179,8,0.15)', text: '#fbbf24', border: 'rgba(234,179,8,0.25)' }
-                  : c.bestRank
-                  ? { bg: 'rgba(59,130,246,0.15)', text: '#60a5fa', border: 'rgba(59,130,246,0.25)' }
-                  : { bg: 'rgba(34,197,94,0.15)', text: '#4ade80', border: 'rgba(34,197,94,0.25)' };
-                return (
-                  <div
-                    key={c.id}
-                    className="flex items-center gap-3 rounded-2xl px-3 py-2.5"
-                    style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.06)' }}
-                  >
-                    <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 bg-white/5">
-                      {c.imageUrl ? (
-                        <img src={proxyImageUrl(c.imageUrl)} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white/30 text-base font-bold">{c.name?.[0]}</div>
-                      )}
-                    </div>
-                    <p className="flex-1 min-w-0 text-sm font-semibold text-white truncate">{c.name}</p>
-                    <span
-                      className="text-[10px] font-bold px-2 py-1 rounded-full shrink-0"
-                      style={{ background: rankColor.bg, color: rankColor.text, border: `1px solid ${rankColor.border}` }}
-                    >
-                      {rankLabel}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        <p className="text-[8px] text-white/20 tracking-widest mt-2">EGO-BLOOM</p>
       </div>
 
-      <ScrollDownHint show={showHint} />
+      {/* 티어 존 */}
+      <div
+        className="flex items-center justify-center"
+        style={{
+          marginBottom: 14,
+          padding: '12px 0 10px',
+          borderTop: `1px solid ${IVORY_LINE}`,
+          borderBottom: `1px solid ${IVORY_LINE}`,
+          gap: 12,
+        }}
+      >
+        <div style={{ filter: 'drop-shadow(0 0 8px rgba(245,158,11,0.3))', flexShrink: 0 }}>
+          <TierIcon tier={tier.key} size={40} />
+        </div>
+        <div className="flex flex-col" style={{ gap: 3 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.22em', color: 'rgba(245,236,217,0.45)' }}>
+            현재 티어
+          </div>
+          <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: '0.04em', color: IVORY }}>
+            {tierName}
+            {tierSub && (
+              <span style={{ fontWeight: 600, color: 'rgba(245,236,217,0.7)', marginLeft: 4 }}>{tierSub}</span>
+            )}
+          </div>
+        </div>
+        {globalRank != null && (
+          <>
+            <div style={{ width: 1, height: 34, background: 'rgba(245,236,217,0.2)', margin: '0 2px' }} />
+            <div className="flex flex-col" style={{ gap: 3 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(245,236,217,0.45)', letterSpacing: '0.04em' }}>
+                <span style={{ letterSpacing: '0.22em' }}>순위</span>
+                <span style={{ marginLeft: 5, fontSize: 9, color: 'rgba(245,236,217,0.35)', letterSpacing: '0.05em' }}>
+                  (에고블룸 기준)
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 800,
+                  letterSpacing: '-0.02em',
+                  color: IVORY,
+                  fontVariantNumeric: 'tabular-nums',
+                  lineHeight: 1,
+                }}
+              >
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(245,236,217,0.6)', marginRight: 2 }}>#</span>
+                {globalRank}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* 업적 — 마일스톤 + 태그 */}
+      {(milestones.length > 0 || tagBadges.length > 0) && (
+        <div className="flex flex-col" style={{ gap: 7, marginBottom: 10 }}>
+          <BadgeRow label="MILE" items={milestones} />
+          <BadgeRow label="TAG" items={tagBadges} />
+        </div>
+      )}
+
+      {/* 스탯 — 강조 */}
+      <div className="flex flex-col mt-auto" style={{ gap: 14 }}>
+        <StatRow label="대화량" value={formatCompactNumber(stats.plotInteractionCount)} />
+        <StatRow label="팔로워" value={formatCompactNumber(stats.followerCount)} />
+        <StatRow label="캐릭터" value={formatCompactNumber(charCount)} unit="개" />
+        <StatRow label="제작" value={formatCompactNumber(activityDays)} unit="일째" />
+      </div>
+
+      {/* 푸터 — 좌측 브랜드만, 우측은 flip 버튼 공간 */}
+      <div
+        className="flex items-center"
+        style={{
+          marginTop: 14,
+          paddingTop: 10,
+          paddingRight: 52,
+          borderTop: `1px dashed rgba(245,236,217,0.18)`,
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: '0.15em',
+          color: 'rgba(245,236,217,0.4)',
+        }}
+      >
+        <span>EGO · BLOOM</span>
+        <span style={{ marginLeft: 10, fontVariantNumeric: 'tabular-nums', letterSpacing: '0.08em', opacity: 0.7 }}>
+          {todayKST}
+        </span>
+      </div>
+
+      <FlipButton onClick={onFlip} ariaLabel="뒤집어서 상위 캐릭터 보기" />
+    </div>
+  );
+}
+
+function CardBack({ profile, characters, todayKST, onFlip }) {
+  const topChars = useMemo(() => {
+    if (!characters?.length) return [];
+    return [...characters]
+      .sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0))
+      .slice(0, 10);
+  }, [characters]);
+
+  const totalCount = characters?.length ?? 0;
+  const nowMs = useMemo(() => toKST().getTime(), []);
+
+  return (
+    <div
+      className="absolute inset-0 flex flex-col"
+      style={{
+        padding: '44px 18px 56px',
+        color: IVORY,
+        fontFamily: "'SUIT Variable', 'SUIT', 'Pretendard', system-ui, sans-serif",
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
+        transform: 'rotateY(180deg)',
+      }}
+    >
+      {/* 헤더 */}
+      <div className="flex items-baseline justify-between" style={{ marginBottom: 10, paddingInline: 4 }}>
+        <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.03em', color: IVORY }}>
+          상위 캐릭터
+        </div>
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 600,
+            color: 'rgba(245,236,217,0.5)',
+            letterSpacing: '0.1em',
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
+          TOP {topChars.length} · 총 {totalCount}개
+        </div>
+      </div>
+
+      {/* 리스트 */}
+      <div className="flex flex-col" style={{ flex: 1, minHeight: 0 }}>
+        {topChars.length > 0 ? (
+          topChars.map((c, idx) => {
+            const charTier = getCharacterTier(c.interactionCount || 0);
+            const isTop3 = idx < 3;
+            const tags = (c.hashtags || c.tags || []).filter((t) => t && typeof t === 'string');
+            const topTags = tags.slice(0, 2);
+            const raw = c.createdAt || c.createdDate;
+            let daysAgo = null;
+            if (raw) {
+              const created = toKST(raw).getTime();
+              if (!Number.isNaN(created)) {
+                daysAgo = Math.max(0, Math.floor((nowMs - created) / 86400000));
+              }
+            }
+
+            return (
+              <div
+                key={c.id || idx}
+                className="grid items-center"
+                style={{
+                  gridTemplateColumns: '20px 38px 1fr auto',
+                  gap: 10,
+                  padding: '9px 4px',
+                  borderBottom:
+                    idx < topChars.length - 1 ? '1px dotted rgba(245,236,217,0.12)' : 'none',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: isTop3 ? 13 : 12,
+                    fontWeight: 800,
+                    color: isTop3 ? IVORY : 'rgba(245,236,217,0.5)',
+                    textAlign: 'center',
+                    lineHeight: 1,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {idx + 1}
+                </span>
+                <div
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: 9,
+                    background: 'linear-gradient(135deg, #2b3250, #4a5280)',
+                    border: '1px solid rgba(245,236,217,0.15)',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: 'rgba(245,236,217,0.85)',
+                  }}
+                >
+                  {c.imageUrl ? (
+                    <img
+                      src={proxyImageUrl(c.imageUrl)}
+                      alt=""
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    (c.name || '?')[0]
+                  )}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      color: IVORY,
+                      letterSpacing: '-0.01em',
+                      lineHeight: 1.15,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {c.name || '—'}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 3,
+                      fontSize: 10.5,
+                      fontWeight: 500,
+                      lineHeight: 1.2,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: 'rgba(245,236,217,0.55)',
+                        fontVariantNumeric: 'tabular-nums',
+                      }}
+                    >
+                      대화 {formatCompactNumber(c.interactionCount || 0)}
+                    </span>
+                    {topTags.length > 0 ? (
+                      <>
+                        <span style={{ color: 'rgba(245,236,217,0.3)', margin: '0 6px' }}>·</span>
+                        {topTags.map((t, i) => (
+                          <span key={t + i}>
+                            {i > 0 && <span style={{ color: 'rgba(148,193,255,0.4)', margin: '0 4px' }}>·</span>}
+                            <span style={{ color: '#a9c7ff', fontWeight: 600 }}>#{t}</span>
+                          </span>
+                        ))}
+                      </>
+                    ) : daysAgo !== null ? (
+                      <>
+                        <span style={{ color: 'rgba(245,236,217,0.3)', margin: '0 6px' }}>·</span>
+                        <span style={{ color: 'rgba(245,236,217,0.55)', fontVariantNumeric: 'tabular-nums' }}>
+                          {daysAgo}일 전 제작
+                        </span>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 800,
+                    padding: '2px 7px',
+                    borderRadius: 5,
+                    border: '1px solid rgba(245,236,217,0.28)',
+                    background: 'rgba(245,236,217,0.06)',
+                    color: IVORY,
+                    letterSpacing: '0.04em',
+                  }}
+                >
+                  {charTier.name}
+                </span>
+              </div>
+            );
+          })
+        ) : (
+          <div
+            className="flex items-center justify-center"
+            style={{ padding: '40px 0', fontSize: 13, color: 'rgba(245,236,217,0.4)' }}
+          >
+            캐릭터 정보가 없습니다
+          </div>
+        )}
+      </div>
+
+      {/* 푸터 */}
+      <div
+        className="flex justify-between items-center mt-auto"
+        style={{
+          paddingTop: 10,
+          borderTop: `1px dashed rgba(245,236,217,0.18)`,
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: '0.15em',
+          color: 'rgba(245,236,217,0.4)',
+        }}
+      >
+        <span>@{profile.username || 'unknown'}</span>
+        <span style={{ fontVariantNumeric: 'tabular-nums', letterSpacing: '0.08em' }}>{todayKST}</span>
+      </div>
+
+      <FlipButton onClick={onFlip} ariaLabel="앞면으로 돌아가기" />
+    </div>
+  );
+}
+
+function FlipButton({ onClick, ariaLabel }) {
+  return (
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      style={{
+        position: 'absolute',
+        right: 14,
+        bottom: 14,
+        width: 34,
+        height: 34,
+        borderRadius: '50%',
+        background: 'rgba(245,236,217,0.06)',
+        border: '1px solid rgba(245,236,217,0.22)',
+        backdropFilter: 'blur(6px)',
+        WebkitBackdropFilter: 'blur(6px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 3,
+        cursor: 'pointer',
+        transition: 'background 0.2s',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = 'rgba(245,236,217,0.14)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'rgba(245,236,217,0.06)';
+      }}
+    >
+      <RefreshCw size={14} style={{ color: IVORY }} />
+    </button>
+  );
+}
+
+function Slide1({ profile, tier, stats, activityDays, characters, badges, globalRank, vh }) {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const todayKST = useMemo(() => {
+    const d = toKST();
+    return `${d.getFullYear()} · ${String(d.getMonth() + 1).padStart(2, '0')} · ${String(d.getDate()).padStart(2, '0')}`;
+  }, []);
+
+  const handleFlip = useCallback(() => setIsFlipped((v) => !v), []);
+
+  return (
+    <div
+      className="w-full relative overflow-hidden"
+      style={{ height: vh, background: '#040814', perspective: '1800px' }}
+    >
+      <StarField />
+
+      <div
+        className="absolute inset-0"
+        style={{
+          transformStyle: 'preserve-3d',
+          WebkitTransformStyle: 'preserve-3d',
+          transition: 'transform 0.7s cubic-bezier(0.4,0,0.2,1)',
+          transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0)',
+        }}
+      >
+        <CardFront
+          profile={profile}
+          tier={tier}
+          stats={stats}
+          activityDays={activityDays}
+          characters={characters}
+          badges={badges}
+          globalRank={globalRank}
+          todayKST={todayKST}
+          onFlip={handleFlip}
+        />
+        <CardBack
+          profile={profile}
+          characters={characters}
+          todayKST={todayKST}
+          onFlip={handleFlip}
+        />
+      </div>
     </div>
   );
 }
@@ -645,7 +1117,7 @@ const SLIDES = [
   { id: 'analytics', component: Slide4 },
 ];
 
-export default function LiveViewModal({ isOpen, onClose, characters, stats, profile, tier, score }) {
+export default function LiveViewModal({ isOpen, onClose, characters, stats, profile, tier, score, globalRank }) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const sliderRef = useRef(null);
   const touchStartX = useRef(null);
@@ -745,6 +1217,7 @@ export default function LiveViewModal({ isOpen, onClose, characters, stats, prof
     badges,
     activityDays,
     characters: characters || [],
+    globalRank: globalRank ?? null,
   };
 
   const VH = '100vh';
