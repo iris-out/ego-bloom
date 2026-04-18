@@ -81,6 +81,7 @@ export const BADGE_DEFINITIONS = [
   { id: 'lily',      emoji: '🌷', title: '난입은 범죄',     description: '#백합 태그',              desc: '캐릭터 중 #백합 태그 보유. GL 존중',        color: 'pink',    category: 'tag' },
   { id: 'original',  emoji: '✨', title: '오리지널',     description: '2차창작 태그 없음',        desc: '게임/애니/영화 2차창작 없이 오리지널만 제작', color: 'sky',     category: 'tag' },
 
+  { id: 'dual_addict', emoji: '💞', title: '심각한 듀얼 중독입니다', description: '#빼앗김/#배신 + #순애 공존', desc: '한 캐릭터 안에 #빼앗김, #뺏김, #배신 태그와 #순애 태그가 동시에 존재', color: 'gradient', category: 'tag' },
   { id: 'boss',      emoji: '😎', title: '굿데이 보스',     description: '#보스 태그',              desc: '캐릭터 중 #보스 태그 보유.',        color: 'amber',   category: 'tag' },
   { id: 'glasses',   emoji: '👓', title: '미소녀의 요소',   description: '#안경 태그',              desc: '캐릭터 중 #안경 태그 보유',                 color: 'indigo',  category: 'tag' },
   // ─── 개그 태그 (bonus) ───
@@ -256,6 +257,12 @@ export function computeEarnedTitles(input) {
   list.push({ id: 'cyber',     emoji: '⚡', title: '사펑',         desc: BADGE_DEFINITIONS.find(b => b.id === 'cyber')?.desc ?? '',     color: 'gradient',earned: cyberChars.length > 0, chars: cyberChars });
   const mesuChars = charsWithAnyTag(characters, ['메스가키', '소악마', '도발']);
   list.push({ id: 'guwon',     emoji: '🩹', title: '구원',         desc: BADGE_DEFINITIONS.find(b => b.id === 'guwon')?.desc ?? '',    color: 'emerald', earned: tagSet.has('구원'), chars: charsWithTag(characters, '구원') });
+
+  const dualAddictChars = characters.filter(c => {
+    const ctags = new Set((c.hashtags || c.tags || []).map(t => t.toLowerCase()));
+    return ['빼앗김', '뺏김', '배신'].some(t => ctags.has(t)) && ctags.has('순애');
+  });
+  list.push({ id: 'dual_addict', emoji: D('dual_addict').emoji, title: D('dual_addict').title, desc: D('dual_addict').desc ?? '', color: 'gradient', earned: dualAddictChars.length > 0, chars: dualAddictChars.map(c => c.name) });
 
   const bossChars = charsWithTag(characters, '보스');
   list.push({ id: 'boss',    emoji: '😎', title: '굿데이 보스',   desc: BADGE_DEFINITIONS.find(b => b.id === 'boss')?.desc ?? '',    color: 'amber',  earned: bossChars.length > 0,    chars: bossChars });
