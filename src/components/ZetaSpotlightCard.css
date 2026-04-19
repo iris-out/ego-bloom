@@ -203,10 +203,6 @@
 
 /* ---------- Mobile (<768px) ---------- */
 @media (max-width: 768px) {
-    .zeta-spotlight-card {
-        flex-direction: column;
-    }
-
     .zeta-spotlight-left {
         padding: 16px;
         gap: 12px;
@@ -230,28 +226,20 @@
     }
 
     .zeta-gold-block {
-        width: 100%;
-        height: 88px;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 20px;
+        width: 72px;
+        padding: 12px 8px;
     }
 
     .zeta-gold-top {
-        text-align: left;
-        flex-shrink: 0;
+        font-size: 9px;
+        letter-spacing: 0.12em;
     }
 
     .zeta-gold-number {
-        font-size: 52px;
-        flex: 1;
-        text-align: center;
+        font-size: 40px;
     }
 
     .zeta-gold-bottom {
-        flex-shrink: 0;
-        text-align: right;
-        min-height: 0;
+        font-size: 10px;
     }
 }

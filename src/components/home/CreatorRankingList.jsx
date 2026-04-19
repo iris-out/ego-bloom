@@ -129,11 +129,11 @@ export default function CreatorRankingList() {
           const tierKey = getTierKey(creator.tier_name);
           const tierData = getCreatorTier(creator.elo_score ?? 0);
           const tierKoName = TIER_KO[tierData.name] ?? tierData.name;
-          const tierLabel = globalRank < 3
+          const tierLabel = globalRank < 10
             ? `${globalRank + 1}위`
             : `${tierKoName}${tierData.subdivision !== null ? ' ' + tierData.subdivision : ''}`;
-          const tierLabelStyle = globalRank < 3
-            ? { color: STRIPE_COLORS[globalRank] }
+          const tierLabelStyle = globalRank < 10
+            ? { color: globalRank < 3 ? STRIPE_COLORS[globalRank] : 'rgba(255,255,255,0.7)' }
             : { color: tierData.color };
 
           const stripeColor = globalRank < 3 ? STRIPE_COLORS[globalRank] : null;
