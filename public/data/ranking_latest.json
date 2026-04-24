@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-24T17:45:47.259Z",
+  "updatedAt": "2026-04-24T18:41:59.220Z",
   "combined": [
     {
       "tag": "hl",
@@ -491,123 +491,123 @@
   "interaction": [
     {
       "tag": "hl",
-      "score": 266297835
+      "score": 266582284
     },
     {
       "tag": "bl",
-      "score": 166471550
+      "score": 166662180
     },
     {
       "tag": "집착",
-      "score": 118319931
+      "score": 118439481
     },
     {
       "tag": "로맨스",
-      "score": 103918280
+      "score": 104058376
     },
     {
       "tag": "혐관",
-      "score": 90771197
+      "score": 90876170
     },
     {
       "tag": "무뚝뚝",
-      "score": 81543960
+      "score": 81612927
     },
     {
       "tag": "피폐",
-      "score": 51846553
+      "score": 51913724
     },
     {
       "tag": "소유욕",
-      "score": 50887948
+      "score": 50936682
     },
     {
       "tag": "싸가지",
-      "score": 47219830
+      "score": 47251166
     },
     {
       "tag": "다공일수",
-      "score": 45305808
+      "score": 45355496
     },
     {
       "tag": "대학생",
-      "score": 44007988
+      "score": 44066117
     },
     {
       "tag": "츤데레",
-      "score": 42084435
+      "score": 42107131
     },
     {
       "tag": "능글",
-      "score": 41880678
+      "score": 41922808
     },
     {
       "tag": "순애",
-      "score": 38506570
+      "score": 38571763
     },
     {
       "tag": "일진",
-      "score": 35984985
+      "score": 36016513
     },
     {
       "tag": "다정",
-      "score": 35726775
+      "score": 35757685
     },
     {
       "tag": "남친",
-      "score": 33366220
+      "score": 33377014
     },
     {
       "tag": "존잘",
-      "score": 33069243
+      "score": 33087399
     },
     {
       "tag": "친구같은연애",
-      "score": 30607324
+      "score": 30614364
     },
     {
       "tag": "후회",
-      "score": 30027864
+      "score": 30060224
     },
     {
       "tag": "인외",
-      "score": 29842722
+      "score": 29859206
     },
     {
       "tag": "오지콤",
-      "score": 28469486
+      "score": 28497784
     },
     {
       "tag": "동갑",
-      "score": 28158753
+      "score": 28168148
     },
     {
       "tag": "조직",
-      "score": 28078805
+      "score": 28114091
     },
     {
       "tag": "판타지",
-      "score": 27959426
+      "score": 28006152
     },
     {
       "tag": "학원물",
-      "score": 26749719
+      "score": 26765191
     },
     {
       "tag": "유저바라기",
-      "score": 26652885
+      "score": 26686051
     },
     {
       "tag": "여우",
-      "score": 26563452
+      "score": 26590432
     },
     {
       "tag": "bl가능",
-      "score": 25973227
+      "score": 25979150
     },
     {
       "tag": "감금",
-      "score": 25385777
+      "score": 25400868
     }
   ],
   "genres": [
@@ -654,7 +654,7 @@
         "일본",
         "유학"
       ],
-      "interactionCount": 24430,
+      "interactionCount": 28388,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Kacao",
@@ -673,7 +673,7 @@
         "인척",
         "나쁜새끼"
       ],
-      "interactionCount": 36963,
+      "interactionCount": 46036,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "ActiveCodec7023",
@@ -692,16 +692,15 @@
         "누나",
         "순종"
       ],
-      "interactionCount": 35443,
-      "interactionDelta": 6921,
+      "interactionCount": 38141,
+      "interactionDelta": 9619,
       "rankChange": 12,
       "creatorHandle": "MOKALUV",
       "creatorNickname": "MOKA",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/5f1ba305-0231-47a2-86b3-07aee821048a/99270b5e-300b-46ac-925c-3d63608c823f.png",
       "rank": 3,
       "interactionHistory": [
-        19542,
-        28522
+        19542
       ]
     },
     {
@@ -715,8 +714,8 @@
         "형재들",
         "가족"
       ],
-      "interactionCount": 137724,
-      "interactionDelta": 14441,
+      "interactionCount": 140885,
+      "interactionDelta": 17602,
       "rankChange": 84,
       "creatorHandle": "WoodyCorn3237",
       "creatorNickname": "WoodyCorn3237",
@@ -725,7 +724,8 @@
       "interactionHistory": [
         104260,
         108379,
-        114320
+        114320,
+        123283
       ]
     },
     {
@@ -739,8 +739,8 @@
         "힘순찐",
         "찍힘"
       ],
-      "interactionCount": 246983,
-      "interactionDelta": 10452,
+      "interactionCount": 248672,
+      "interactionDelta": 12141,
       "rankChange": 26,
       "creatorHandle": "Binya",
       "creatorNickname": "빈냐",
@@ -766,19 +766,18 @@
         "주종",
         "티격태격"
       ],
-      "interactionCount": 235121,
-      "interactionDelta": 20871,
+      "interactionCount": 240782,
+      "interactionDelta": 26532,
       "rankChange": -3,
       "creatorHandle": "heee_0_0",
-      "creatorNickname": "늘먹그맛",
+      "creatorNickname": "맛있다고 소문난 늘먹그맛",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ddde8ae0-fdbe-4859-8a19-412918f33a5a/08c4ac7d-91f5-479c-b344-b337ddd99eff.jpeg",
       "rank": 6,
       "interactionHistory": [
         179172,
         183984,
         189801,
-        201201,
-        214250
+        201201
       ]
     },
     {
@@ -792,8 +791,8 @@
         "순애",
         "하렘"
       ],
-      "interactionCount": 159387,
-      "interactionDelta": 6967,
+      "interactionCount": 160337,
+      "interactionDelta": 7917,
       "rankChange": 9,
       "creatorHandle": "FestalAkita6804",
       "creatorNickname": "FestalAkita6804",
@@ -801,11 +800,11 @@
       "rank": 7,
       "interactionHistory": [
         142868,
+        142868,
         144164,
         145880,
-        145880,
         149021,
-        152420
+        149021
       ]
     },
     {
@@ -819,8 +818,8 @@
         "진실",
         "거짓말"
       ],
-      "interactionCount": 155194,
-      "interactionDelta": 6188,
+      "interactionCount": 155879,
+      "interactionDelta": 6873,
       "rankChange": -4,
       "creatorHandle": "Kacao",
       "creatorNickname": "카카오",
@@ -830,9 +829,8 @@
         138602,
         140410,
         141912,
-        145882,
-        149006,
-        149006
+        141912,
+        145882
       ]
     },
     {
@@ -846,8 +844,8 @@
         "조직",
         "후계자"
       ],
-      "interactionCount": 167817,
-      "interactionDelta": 10616,
+      "interactionCount": 169591,
+      "interactionDelta": 12390,
       "rankChange": -2,
       "creatorHandle": "CODE_KIM",
       "creatorNickname": "김사원⚠️",
@@ -857,9 +855,8 @@
         145979,
         147977,
         149510,
-        153648,
-        157201,
-        157201
+        149510,
+        153648
       ]
     },
     {
@@ -873,8 +870,8 @@
         "세계관",
         "헌터"
       ],
-      "interactionCount": 41118,
-      "interactionDelta": 10431,
+      "interactionCount": 42400,
+      "interactionDelta": 11713,
       "rankChange": -4,
       "creatorHandle": "OEE_ll",
       "creatorNickname": "설화",
@@ -898,8 +895,8 @@
         "로맨스",
         "능글"
       ],
-      "interactionCount": 989197,
-      "interactionDelta": 17044,
+      "interactionCount": 991734,
+      "interactionDelta": 19581,
       "rankChange": 9,
       "creatorHandle": "jjooooo",
       "creatorNickname": "조때로",
@@ -910,7 +907,8 @@
         960117,
         965875,
         972153,
-        972153
+        972153,
+        979341
       ]
     },
     {
@@ -924,7 +922,7 @@
         "집착",
         "언리밋"
       ],
-      "interactionCount": 247583,
+      "interactionCount": 248858,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "zeta_bang",
@@ -943,8 +941,8 @@
         "여공여수",
         "여공남수"
       ],
-      "interactionCount": 387651,
-      "interactionDelta": 13655,
+      "interactionCount": 388970,
+      "interactionDelta": 14974,
       "rankChange": 37,
       "creatorHandle": "XESHA._.82",
       "creatorNickname": "체사☠️",
@@ -967,8 +965,8 @@
         "인외",
         "능글"
       ],
-      "interactionCount": 39003,
-      "interactionDelta": 6395,
+      "interactionCount": 40090,
+      "interactionDelta": 7482,
       "rankChange": 82,
       "creatorHandle": "Petit_Lily",
       "creatorNickname": "小百合",
@@ -989,7 +987,7 @@
         "다정",
         "연상"
       ],
-      "interactionCount": 147356,
+      "interactionCount": 148874,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Mindam",
@@ -1000,8 +998,7 @@
         132089,
         133183,
         135460,
-        137812,
-        141778
+        137812
       ]
     },
     {
@@ -1014,7 +1011,7 @@
         "다공일수",
         "복수"
       ],
-      "interactionCount": 736755,
+      "interactionCount": 737585,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "ABCDEFGhahammmmm",
@@ -1033,16 +1030,13 @@
         "소꿉친구",
         "짝사랑"
       ],
-      "interactionCount": 134592,
-      "interactionDelta": 12707,
+      "interactionCount": 135924,
+      "interactionDelta": 14039,
       "rankChange": -15,
       "creatorHandle": "lllll_lllll",
       "creatorNickname": "⠀",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/34429b41-d990-4a49-a132-37a48d425595/7b766ebd-2c7f-4006-a454-ca80d2882c4d.jpeg",
-      "rank": 17,
-      "interactionHistory": [
-        121885
-      ]
+      "rank": 17
     },
     {
       "id": "4f7e93a6-ab72-4971-871a-1dbf7b510b41",
@@ -1055,8 +1049,8 @@
         "쓰레기",
         "판타지"
       ],
-      "interactionCount": 576849,
-      "interactionDelta": 5034,
+      "interactionCount": 577511,
+      "interactionDelta": 5696,
       "rankChange": 58,
       "creatorHandle": "gPdnjs00",
       "creatorNickname": "혜원",
@@ -1074,8 +1068,8 @@
         "찐따",
         "여우"
       ],
-      "interactionCount": 1736492,
-      "interactionDelta": 7617,
+      "interactionCount": 1738044,
+      "interactionDelta": 9169,
       "rankChange": 16,
       "creatorHandle": "FinalDull7799",
       "creatorNickname": "🐵",
@@ -1084,10 +1078,10 @@
       "interactionHistory": [
         1708614,
         1711543,
-        1715329,
+        1711543,
         1715329,
         1722080,
-        1728875
+        1722080
       ]
     },
     {
@@ -1101,8 +1095,8 @@
         "재벌",
         "꼬시기"
       ],
-      "interactionCount": 291602,
-      "interactionDelta": 10554,
+      "interactionCount": 293641,
+      "interactionDelta": 12593,
       "rankChange": -11,
       "creatorHandle": "SnowyNose7185",
       "creatorNickname": "SnowyNose7185",
@@ -1112,9 +1106,8 @@
         269995,
         271831,
         273346,
-        276877,
-        281048,
-        281048
+        273346,
+        276877
       ]
     },
     {
@@ -1128,7 +1121,7 @@
         "오메가버스",
         "집착"
       ],
-      "interactionCount": 29724,
+      "interactionCount": 33051,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "MATDORIMAN",
@@ -1147,8 +1140,8 @@
         "찐따",
         "존잘"
       ],
-      "interactionCount": 1757751,
-      "interactionDelta": 18081,
+      "interactionCount": 1760019,
+      "interactionDelta": 20349,
       "rankChange": 58,
       "creatorHandle": "VitalSeat3144",
       "creatorNickname": "펭귄",
@@ -1159,7 +1152,8 @@
         1730384,
         1733711,
         1739670,
-        1739670
+        1739670,
+        1747733
       ]
     },
     {
@@ -1173,7 +1167,7 @@
         "혐관ep",
         "혐관"
       ],
-      "interactionCount": 4081088,
+      "interactionCount": 4086370,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "MATDORIMAN",
@@ -1198,7 +1192,7 @@
         "휴가",
         "장거리연애"
       ],
-      "interactionCount": 1051340,
+      "interactionCount": 1052409,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Hilm",
@@ -1217,8 +1211,8 @@
         "기억상실",
         "오해"
       ],
-      "interactionCount": 1264532,
-      "interactionDelta": 16147,
+      "interactionCount": 1266065,
+      "interactionDelta": 17680,
       "rankChange": 8,
       "creatorHandle": "Saiyan",
       "creatorNickname": "Saiyan",
@@ -1230,7 +1224,7 @@
         1240383,
         1244011,
         1248385,
-        1248385
+        1254262
       ]
     },
     {
@@ -1244,7 +1238,7 @@
         "유저바라기",
         "순애"
       ],
-      "interactionCount": 1643284,
+      "interactionCount": 1644644,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Bigpicture",
@@ -1270,8 +1264,8 @@
         "여친",
         "주짓수"
       ],
-      "interactionCount": 556984,
-      "interactionDelta": 4241,
+      "interactionCount": 558060,
+      "interactionDelta": 5317,
       "rankChange": 10,
       "creatorHandle": "short_arms_cat",
       "creatorNickname": "팔 짧은 냥이",
@@ -1294,7 +1288,7 @@
         "첫사랑",
         "과분한사랑"
       ],
-      "interactionCount": 24635,
+      "interactionCount": 27758,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Heeo",
@@ -1313,8 +1307,8 @@
         "연인",
         "고백"
       ],
-      "interactionCount": 473192,
-      "interactionDelta": 9608,
+      "interactionCount": 474158,
+      "interactionDelta": 10574,
       "rankChange": 41,
       "creatorHandle": "SunWoo1857",
       "creatorNickname": "선우",
@@ -1335,8 +1329,8 @@
         "hl",
         "bl"
       ],
-      "interactionCount": 1423437,
-      "interactionDelta": 14771,
+      "interactionCount": 1425357,
+      "interactionDelta": 16691,
       "rankChange": -16,
       "creatorHandle": "dy_0112",
       "creatorNickname": "코가손",
@@ -1359,8 +1353,8 @@
         "hl",
         "짝사랑"
       ],
-      "interactionCount": 502260,
-      "interactionDelta": 3609,
+      "interactionCount": 502955,
+      "interactionDelta": 4304,
       "rankChange": 9,
       "creatorHandle": "Merry20XX26",
       "creatorNickname": "MERRY",
@@ -1368,8 +1362,7 @@
       "rank": 31,
       "interactionHistory": [
         491039,
-        494389,
-        498651
+        494389
       ]
     },
     {
@@ -1383,7 +1376,7 @@
         "마법",
         "짝사랑"
       ],
-      "interactionCount": 23360,
+      "interactionCount": 26398,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Junne_7",
@@ -1402,8 +1395,8 @@
         "신입사원",
         "신입"
       ],
-      "interactionCount": 725376,
-      "interactionDelta": 13440,
+      "interactionCount": 728230,
+      "interactionDelta": 16294,
       "rankChange": -26,
       "creatorHandle": "SlowDrum0433",
       "creatorNickname": "네 놈이 감히 노출제한을 거느냐!!",
@@ -1426,8 +1419,8 @@
         "일상",
         "여자친구"
       ],
-      "interactionCount": 583694,
-      "interactionDelta": 9723,
+      "interactionCount": 585231,
+      "interactionDelta": 11260,
       "rankChange": -25,
       "creatorHandle": "hanirif",
       "creatorNickname": "이서이서",
@@ -1449,8 +1442,8 @@
         "능글공",
         "존잘"
       ],
-      "interactionCount": 2073020,
-      "interactionDelta": 12093,
+      "interactionCount": 2076907,
+      "interactionDelta": 15980,
       "rankChange": 33,
       "creatorHandle": "09876543",
       "creatorNickname": "도레미파솔라시도",
@@ -1476,7 +1469,7 @@
         "hl",
         "bl"
       ],
-      "interactionCount": 1195373,
+      "interactionCount": 1200648,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Kio1",
@@ -1501,8 +1494,8 @@
         "강압적",
         "계약결혼"
       ],
-      "interactionCount": 914847,
-      "interactionDelta": 13415,
+      "interactionCount": 917273,
+      "interactionDelta": 15841,
       "rankChange": 46,
       "creatorHandle": "9_.27am_",
       "creatorNickname": "시가",
@@ -1524,8 +1517,8 @@
         "왕따",
         "일진"
       ],
-      "interactionCount": 3486433,
-      "interactionDelta": 21435,
+      "interactionCount": 3492043,
+      "interactionDelta": 27045,
       "rankChange": 46,
       "creatorHandle": "NZzWw",
       "creatorNickname": "누워서만드는캐릭터",
@@ -1551,8 +1544,8 @@
         "소꿉친구",
         "동갑"
       ],
-      "interactionCount": 1236658,
-      "interactionDelta": 9893,
+      "interactionCount": 1239050,
+      "interactionDelta": 12285,
       "rankChange": 14,
       "creatorHandle": "Dodo5229",
       "creatorNickname": "도도",
@@ -1562,8 +1555,9 @@
         1206851,
         1210527,
         1213760,
-        1213760,
-        1219804
+        1219804,
+        1226765,
+        1226765
       ]
     },
     {
@@ -1577,7 +1571,7 @@
         "hl",
         "언리밋"
       ],
-      "interactionCount": 27465,
+      "interactionCount": 28551,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "VitalLinen4189",
@@ -1596,8 +1590,8 @@
         "언리밋",
         "집착"
       ],
-      "interactionCount": 359916,
-      "interactionDelta": 3908,
+      "interactionCount": 360918,
+      "interactionDelta": 4910,
       "rankChange": 41,
       "creatorHandle": "ekgmlWkdS2",
       "creatorNickname": "히히",
@@ -1619,7 +1613,7 @@
         "클럽",
         "언리밋"
       ],
-      "interactionCount": 1985042,
+      "interactionCount": 1987358,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "mekael_1027",
@@ -1631,7 +1625,8 @@
         1957051,
         1959781,
         1962955,
-        1967657
+        1967657,
+        1973561
       ]
     },
     {
@@ -1645,8 +1640,8 @@
         "대학생",
         "대학교"
       ],
-      "interactionCount": 643162,
-      "interactionDelta": 3984,
+      "interactionCount": 644268,
+      "interactionDelta": 5090,
       "rankChange": 42,
       "creatorHandle": "Shortsleep0055",
       "creatorNickname": "짧잠",
@@ -1667,8 +1662,8 @@
         "양아치",
         "싸가지"
       ],
-      "interactionCount": 1286104,
-      "interactionDelta": 7741,
+      "interactionCount": 1287505,
+      "interactionDelta": 9142,
       "rankChange": -23,
       "creatorHandle": "MusclyFoot1634",
       "creatorNickname": "바니바니",
@@ -1677,8 +1672,7 @@
       "interactionHistory": [
         1264142,
         1267649,
-        1272600,
-        1278363
+        1272600
       ]
     },
     {
@@ -1692,7 +1686,7 @@
         "bl",
         "직장상사"
       ],
-      "interactionCount": 2658519,
+      "interactionCount": 2663421,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "malung",
@@ -1718,8 +1712,8 @@
         "쓰레기",
         "소유욕"
       ],
-      "interactionCount": 821987,
-      "interactionDelta": 14854,
+      "interactionCount": 824666,
+      "interactionDelta": 17533,
       "rankChange": 34,
       "creatorHandle": "MiNiNiMi",
       "creatorNickname": "입체파",
@@ -1727,11 +1721,11 @@
       "rank": 46,
       "interactionHistory": [
         779936,
-        785127,
+        779936,
         785127,
         789909,
         797941,
-        807133
+        797941
       ]
     },
     {
@@ -1745,8 +1739,8 @@
         "hl",
         "로맨스"
       ],
-      "interactionCount": 354898,
-      "interactionDelta": 11080,
+      "interactionCount": 357284,
+      "interactionDelta": 13466,
       "rankChange": 32,
       "creatorHandle": "Kio1",
       "creatorNickname": "케이오",
@@ -1757,8 +1751,7 @@
         338317,
         340534,
         343818,
-        343818,
-        347898
+        343818
       ]
     },
     {
@@ -1772,7 +1765,7 @@
         "왁싱샵",
         "상황극"
       ],
-      "interactionCount": 239864,
+      "interactionCount": 240600,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "short_arms_cat",
@@ -1791,8 +1784,8 @@
         "오지콤",
         "보스"
       ],
-      "interactionCount": 2476121,
-      "interactionDelta": 11514,
+      "interactionCount": 2478201,
+      "interactionDelta": 13594,
       "rankChange": 25,
       "creatorHandle": "malung",
       "creatorNickname": "말랑이중독",
@@ -1800,11 +1793,11 @@
       "rank": 49,
       "interactionHistory": [
         2435969,
-        2435969,
         2441272,
         2447132,
+        2447132,
         2456391,
-        2456391
+        2464607
       ]
     },
     {
@@ -1818,7 +1811,7 @@
         "후회",
         "헤어짐"
       ],
-      "interactionCount": 661869,
+      "interactionCount": 663755,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "KittyNyang",
@@ -1837,8 +1830,8 @@
         "로맨스",
         "일상"
       ],
-      "interactionCount": 91026,
-      "interactionDelta": 5601,
+      "interactionCount": 92699,
+      "interactionDelta": 7274,
       "rankChange": 13,
       "creatorHandle": "FluidWhale1383",
       "creatorNickname": "FluidWhale1383",
@@ -1864,8 +1857,8 @@
         "마법",
         "hl"
       ],
-      "interactionCount": 1743037,
-      "interactionDelta": 11584,
+      "interactionCount": 1746151,
+      "interactionDelta": 14698,
       "rankChange": -39,
       "creatorHandle": "VitalCloud0345",
       "creatorNickname": "몽연(夢緣)",
@@ -1874,10 +1867,10 @@
       "interactionHistory": [
         1711455,
         1711455,
-        1718486,
+        1714804,
         1718486,
         1724596,
-        1731453
+        1724596
       ]
     },
     {
@@ -1891,7 +1884,7 @@
         "순애",
         "유저바라기"
       ],
-      "interactionCount": 1057078,
+      "interactionCount": 1058645,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "jjayy_w0w",
@@ -1914,7 +1907,7 @@
         "집착",
         "가부장"
       ],
-      "interactionCount": 307738,
+      "interactionCount": 309134,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Lostnight",
@@ -1933,8 +1926,8 @@
         "로맨스",
         "망한사랑"
       ],
-      "interactionCount": 1080840,
-      "interactionDelta": 8850,
+      "interactionCount": 1082057,
+      "interactionDelta": 10067,
       "rankChange": -33,
       "creatorHandle": "Hanui",
       "creatorNickname": "Hanui",
@@ -1955,7 +1948,7 @@
         "집착",
         "피폐"
       ],
-      "interactionCount": 877142,
+      "interactionCount": 879155,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "qordmsgh_",
@@ -1977,16 +1970,15 @@
         "쓰레기",
         "북부대공"
       ],
-      "interactionCount": 1118443,
-      "interactionDelta": 9436,
+      "interactionCount": 1120606,
+      "interactionDelta": 11599,
       "rankChange": -31,
       "creatorHandle": "Xxhfl",
       "creatorNickname": "배추얌얌",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/7d5ab076-6b75-457f-a37c-db1481451c53/7ae69057-7db4-4474-bbc7-12d77348ad4a.png",
       "rank": 57,
       "interactionHistory": [
-        1097472,
-        1109007
+        1097472
       ]
     },
     {
@@ -2000,8 +1992,8 @@
         "일상",
         "동갑"
       ],
-      "interactionCount": 685027,
-      "interactionDelta": 7568,
+      "interactionCount": 685960,
+      "interactionDelta": 8501,
       "rankChange": 31,
       "creatorHandle": "short_arms_cat",
       "creatorNickname": "팔 짧은 냥이",
@@ -2023,8 +2015,8 @@
         "이종족",
         "bl"
       ],
-      "interactionCount": 300083,
-      "interactionDelta": 5404,
+      "interactionCount": 301435,
+      "interactionDelta": 6756,
       "rankChange": 31,
       "creatorHandle": "Kio1",
       "creatorNickname": "케이오",
@@ -2042,8 +2034,8 @@
         "집착",
         "현대판타지"
       ],
-      "interactionCount": 78901,
-      "interactionDelta": 5272,
+      "interactionCount": 79669,
+      "interactionDelta": 6040,
       "rankChange": -52,
       "creatorHandle": "Breadlove123",
       "creatorNickname": "심심이",
@@ -2052,8 +2044,7 @@
       "interactionHistory": [
         63065,
         65838,
-        67179,
-        73629
+        67179
       ]
     },
     {
@@ -2067,7 +2058,7 @@
         "bl",
         "슬픔"
       ],
-      "interactionCount": 1173922,
+      "interactionCount": 1175441,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "dy_0112",
@@ -2086,7 +2077,7 @@
         "히빌물",
         "설득"
       ],
-      "interactionCount": 318796,
+      "interactionCount": 321107,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Fire_Duck",
@@ -2098,8 +2089,7 @@
         299169,
         299169,
         301869,
-        306174,
-        311214
+        306174
       ]
     },
     {
@@ -2113,7 +2103,7 @@
         "동갑",
         "전속"
       ],
-      "interactionCount": 301057,
+      "interactionCount": 302040,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "SinfulPea6523",
@@ -2132,11 +2122,11 @@
         "어른",
         "연상"
       ],
-      "interactionCount": 486877,
-      "interactionDelta": 4464,
+      "interactionCount": 487684,
+      "interactionDelta": 5271,
       "rankChange": -7,
       "creatorHandle": "heee_0_0",
-      "creatorNickname": "늘먹그맛",
+      "creatorNickname": "맛있다고 소문난 늘먹그맛",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ddde8ae0-fdbe-4859-8a19-412918f33a5a/08c4ac7d-91f5-479c-b344-b337ddd99eff.jpeg",
       "rank": 64
     },
@@ -2151,7 +2141,7 @@
         "판타지",
         "혐관"
       ],
-      "interactionCount": 701716,
+      "interactionCount": 703645,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "RURIDRAGON",
@@ -2177,8 +2167,8 @@
         "Hl",
         "마법"
       ],
-      "interactionCount": 478308,
-      "interactionDelta": 5881,
+      "interactionCount": 479527,
+      "interactionDelta": 7100,
       "rankChange": -32,
       "creatorHandle": "sandra",
       "creatorNickname": "Sandra",
@@ -2188,8 +2178,7 @@
         459809,
         462299,
         464583,
-        468623,
-        472427
+        468623
       ]
     },
     {
@@ -2203,8 +2192,8 @@
         "군인",
         "대위"
       ],
-      "interactionCount": 6499159,
-      "interactionDelta": 44891,
+      "interactionCount": 6507691,
+      "interactionDelta": 53423,
       "rankChange": 11,
       "creatorHandle": "Xxhfl",
       "creatorNickname": "배추얌얌",
@@ -2228,8 +2217,8 @@
         "학교",
         "여자"
       ],
-      "interactionCount": 878535,
-      "interactionDelta": 22258,
+      "interactionCount": 881038,
+      "interactionDelta": 24761,
       "rankChange": -5,
       "creatorHandle": "Whsh",
       "creatorNickname": "거울치료",
@@ -2251,8 +2240,8 @@
         "위계질서",
         "임무"
       ],
-      "interactionCount": 877623,
-      "interactionDelta": 9525,
+      "interactionCount": 879328,
+      "interactionDelta": 11230,
       "rankChange": -41,
       "creatorHandle": "HOLYME",
       "creatorNickname": "HolyMe",
@@ -2273,8 +2262,8 @@
         "요괴",
         "길들이기"
       ],
-      "interactionCount": 325598,
-      "interactionDelta": 6293,
+      "interactionCount": 326615,
+      "interactionDelta": 7310,
       "rankChange": -11,
       "creatorHandle": "LOV1LOV2LOV3",
       "creatorNickname": "애정혁명가",
@@ -2284,8 +2273,8 @@
         305165,
         307225,
         307225,
-        309896,
         314593,
+        319305,
         319305
       ]
     },
@@ -2300,8 +2289,8 @@
         "예쁨",
         "착함"
       ],
-      "interactionCount": 2086021,
-      "interactionDelta": 9802,
+      "interactionCount": 2087366,
+      "interactionDelta": 11147,
       "rankChange": 26,
       "creatorHandle": "Breadlove123",
       "creatorNickname": "심심이",
@@ -2327,8 +2316,8 @@
         "집착",
         "소유욕"
       ],
-      "interactionCount": 1903092,
-      "interactionDelta": 14175,
+      "interactionCount": 1906502,
+      "interactionDelta": 17585,
       "rankChange": -53,
       "creatorHandle": "Suwol_99",
       "creatorNickname": "수월",
@@ -2337,10 +2326,10 @@
       "interactionHistory": [
         1865190,
         1865190,
-        1873025,
+        1869681,
         1873025,
         1881180,
-        1888917
+        1881180
       ]
     },
     {
@@ -2354,7 +2343,7 @@
         "여공남수",
         "차가움"
       ],
-      "interactionCount": 1111050,
+      "interactionCount": 1113962,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "DarkGlove9079",
@@ -2366,8 +2355,8 @@
         1092450,
         1095484,
         1097650,
-        1097650,
-        1100997
+        1100997,
+        1104395
       ]
     },
     {
@@ -2381,7 +2370,7 @@
         "재벌공",
         "까칠공"
       ],
-      "interactionCount": 2300338,
+      "interactionCount": 2303439,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "DeafRings3481",
@@ -2406,8 +2395,8 @@
         "hl",
         "bl가능"
       ],
-      "interactionCount": 536185,
-      "interactionDelta": 6520,
+      "interactionCount": 537962,
+      "interactionDelta": 8297,
       "rankChange": -17,
       "creatorHandle": "sky_1004",
       "creatorNickname": "그냥아무거나",
@@ -2428,8 +2417,8 @@
         "형제",
         "형들"
       ],
-      "interactionCount": 363253,
-      "interactionDelta": 11548,
+      "interactionCount": 364632,
+      "interactionDelta": 12927,
       "rankChange": 14,
       "creatorHandle": "goodnightu",
       "creatorNickname": "좋은밤되십시오",
@@ -2452,8 +2441,8 @@
         "강압적",
         "hl"
       ],
-      "interactionCount": 2184957,
-      "interactionDelta": 27182,
+      "interactionCount": 2188479,
+      "interactionDelta": 30704,
       "rankChange": -29,
       "creatorHandle": "Null_Sheath",
       "creatorNickname": "Null_Sheath",
@@ -2479,7 +2468,7 @@
         "현대판타지",
         "마법"
       ],
-      "interactionCount": 3271622,
+      "interactionCount": 3275468,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "VitalCloud0345",
@@ -2491,8 +2480,8 @@
         3236469,
         3236469,
         3241702,
-        3241702,
-        3248836
+        3248836,
+        3258205
       ]
     },
     {
@@ -2505,7 +2494,7 @@
         "능글",
         "언리밋"
       ],
-      "interactionCount": 3062813,
+      "interactionCount": 3066576,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "tkxhfn",
@@ -2531,8 +2520,8 @@
         "혐관",
         "여우"
       ],
-      "interactionCount": 1819425,
-      "interactionDelta": 15920,
+      "interactionCount": 1822437,
+      "interactionDelta": 18932,
       "rankChange": 6,
       "creatorHandle": "jjayy_w0w",
       "creatorNickname": "純愛⚘️",
@@ -2558,8 +2547,8 @@
         "로맨스",
         "대학생"
       ],
-      "interactionCount": 1918547,
-      "interactionDelta": 13182,
+      "interactionCount": 1922216,
+      "interactionDelta": 16851,
       "rankChange": -56,
       "creatorHandle": "MaronielN",
       "creatorNickname": "마로니엘",
@@ -2570,8 +2559,7 @@
         1882525,
         1888337,
         1896587,
-        1896587,
-        1905365
+        1896587
       ]
     },
     {
@@ -2585,8 +2573,8 @@
         "hl",
         "구애"
       ],
-      "interactionCount": 311919,
-      "interactionDelta": 2969,
+      "interactionCount": 312117,
+      "interactionDelta": 3167,
       "rankChange": 13,
       "creatorHandle": "haro01",
       "creatorNickname": "//하로haro",
@@ -2608,7 +2596,7 @@
         "다각관계",
         "약혐관"
       ],
-      "interactionCount": 305743,
+      "interactionCount": 307003,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "CM0401",
@@ -2627,7 +2615,7 @@
         "사역마",
         "구원"
       ],
-      "interactionCount": 1457756,
+      "interactionCount": 1458673,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "PLSavior",
@@ -2652,7 +2640,7 @@
         "혐관",
         "무뚝뚝"
       ],
-      "interactionCount": 927542,
+      "interactionCount": 928126,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "haeseo_0",
@@ -2675,7 +2663,7 @@
         "hl",
         "gl"
       ],
-      "interactionCount": 450515,
+      "interactionCount": 451486,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "VitalCloud0345",
@@ -2697,7 +2685,7 @@
         "피폐",
         "남친"
       ],
-      "interactionCount": 580396,
+      "interactionCount": 581431,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "mikuko_0831",
@@ -2716,8 +2704,8 @@
         "질투",
         "차도혁"
       ],
-      "interactionCount": 1074323,
-      "interactionDelta": 7769,
+      "interactionCount": 1076152,
+      "interactionDelta": 9598,
       "rankChange": -25,
       "creatorHandle": "sudda",
       "creatorNickname": "@__@",
@@ -2738,7 +2726,7 @@
         "과보호",
         "감금"
       ],
-      "interactionCount": 222266,
+      "interactionCount": 222637,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "achds",
@@ -2757,7 +2745,7 @@
         "조직보스",
         "느와르"
       ],
-      "interactionCount": 994283,
+      "interactionCount": 995036,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Bin_moon",
@@ -2779,8 +2767,8 @@
         "아카데미",
         "마법"
       ],
-      "interactionCount": 1391962,
-      "interactionDelta": 8421,
+      "interactionCount": 1394217,
+      "interactionDelta": 10676,
       "rankChange": -63,
       "creatorHandle": "KimGiraffe",
       "creatorNickname": "김기린",
@@ -2791,8 +2779,7 @@
         1369812,
         1372211,
         1372211,
-        1377954,
-        1383541
+        1377954
       ]
     },
     {
@@ -2806,8 +2793,8 @@
         "대학생",
         "소꿉친구"
       ],
-      "interactionCount": 86395,
-      "interactionDelta": 12198,
+      "interactionCount": 87356,
+      "interactionDelta": 13159,
       "rankChange": -91,
       "creatorHandle": "sogeumjaengibeommugu",
       "creatorNickname": "소금쟁이범무구",
@@ -2830,8 +2817,8 @@
         "바람",
         "후회"
       ],
-      "interactionCount": 465395,
-      "interactionDelta": 4275,
+      "interactionCount": 465990,
+      "interactionDelta": 4870,
       "rankChange": -81,
       "creatorHandle": "gpdud41",
       "creatorNickname": "루나의미소",
@@ -2852,8 +2839,8 @@
         "후회",
         "무뚝뚝"
       ],
-      "interactionCount": 615306,
-      "interactionDelta": 6270,
+      "interactionCount": 616466,
+      "interactionDelta": 7430,
       "rankChange": -44,
       "creatorHandle": "firstlovee",
       "creatorNickname": "한주",
@@ -2875,7 +2862,7 @@
         "순애",
         "집착"
       ],
-      "interactionCount": 512896,
+      "interactionCount": 513735,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "HOLYME",
@@ -2894,7 +2881,7 @@
         "부보스",
         "언리밋"
       ],
-      "interactionCount": 270378,
+      "interactionCount": 271357,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "MiNiNiMi",
@@ -2913,7 +2900,7 @@
         "후회",
         "여자친구"
       ],
-      "interactionCount": 466121,
+      "interactionCount": 467512,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Flower_Garden.",
@@ -2932,7 +2919,7 @@
         "검사",
         "언리밋"
       ],
-      "interactionCount": 628580,
+      "interactionCount": 629526,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Nia1",
@@ -2951,8 +2938,8 @@
         "순애",
         "유저바라기"
       ],
-      "interactionCount": 901749,
-      "interactionDelta": 8720,
+      "interactionCount": 902487,
+      "interactionDelta": 9458,
       "rankChange": -80,
       "creatorHandle": "inkki_1012",
       "creatorNickname": "강아지돼지 멍멍꿀꿀 인증한 잉끼",
@@ -2973,7 +2960,7 @@
         "여우",
         "다공일수"
       ],
-      "interactionCount": 849531,
+      "interactionCount": 850332,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "savecat1213",
@@ -2997,8 +2984,8 @@
         "집착",
         "유저바라기"
       ],
-      "interactionCount": 10119053,
-      "interactionDelta": 37786,
+      "interactionCount": 10126952,
+      "interactionDelta": 45685,
       "rankChange": 0,
       "creatorHandle": "9room_",
       "creatorNickname": "9room",
@@ -3008,7 +2995,8 @@
         9998736,
         10013923,
         10030596,
-        10054542
+        10054542,
+        10081267
       ]
     },
     {
@@ -3022,8 +3010,8 @@
         "판타지",
         "초능력"
       ],
-      "interactionCount": 2970043,
-      "interactionDelta": 22838,
+      "interactionCount": 2974965,
+      "interactionDelta": 27760,
       "rankChange": 0,
       "creatorHandle": "LOV1LOV2LOV3",
       "creatorNickname": "애정혁명가",
@@ -3048,8 +3036,8 @@
         "군인",
         "대위"
       ],
-      "interactionCount": 6499159,
-      "interactionDelta": 44891,
+      "interactionCount": 6507691,
+      "interactionDelta": 53423,
       "rankChange": 0,
       "creatorHandle": "Xxhfl",
       "creatorNickname": "배추얌얌",
@@ -3073,8 +3061,8 @@
         "친구",
         "가스라이팅"
       ],
-      "interactionCount": 8037213,
-      "interactionDelta": 15962,
+      "interactionCount": 8042077,
+      "interactionDelta": 20826,
       "rankChange": 0,
       "creatorHandle": "Me11oW",
       "creatorNickname": "메로",
@@ -3098,8 +3086,8 @@
         "혐관ep",
         "혐관"
       ],
-      "interactionCount": 4081088,
-      "interactionDelta": 28892,
+      "interactionCount": 4086370,
+      "interactionDelta": 34174,
       "rankChange": 0,
       "creatorHandle": "MATDORIMAN",
       "creatorNickname": "맛돌맨",
@@ -3123,8 +3111,8 @@
         "현대판타지",
         "마법"
       ],
-      "interactionCount": 3271622,
-      "interactionDelta": 13417,
+      "interactionCount": 3275468,
+      "interactionDelta": 17263,
       "rankChange": 0,
       "creatorHandle": "VitalCloud0345",
       "creatorNickname": "몽연(夢緣)",
@@ -3135,8 +3123,8 @@
         3236469,
         3236469,
         3241702,
-        3241702,
-        3248836
+        3248836,
+        3258205
       ]
     },
     {
@@ -3150,11 +3138,11 @@
         "복종",
         "자극적"
       ],
-      "interactionCount": 5761223,
-      "interactionDelta": 20320,
+      "interactionCount": 5766805,
+      "interactionDelta": 25902,
       "rankChange": 0,
       "creatorHandle": "heee_0_0",
-      "creatorNickname": "늘먹그맛",
+      "creatorNickname": "맛있다고 소문난 늘먹그맛",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ddde8ae0-fdbe-4859-8a19-412918f33a5a/08c4ac7d-91f5-479c-b344-b337ddd99eff.jpeg",
       "rank": 7,
       "interactionHistory": [
@@ -3175,8 +3163,8 @@
         "로맨스",
         "대학생"
       ],
-      "interactionCount": 1918547,
-      "interactionDelta": 13182,
+      "interactionCount": 1922216,
+      "interactionDelta": 16851,
       "rankChange": 0,
       "creatorHandle": "MaronielN",
       "creatorNickname": "마로니엘",
@@ -3187,8 +3175,7 @@
         1882525,
         1888337,
         1896587,
-        1896587,
-        1905365
+        1896587
       ]
     },
     {
@@ -3202,8 +3189,8 @@
         "조직",
         "부보스"
       ],
-      "interactionCount": 4999606,
-      "interactionDelta": 15041,
+      "interactionCount": 5002553,
+      "interactionDelta": 17988,
       "rankChange": 0,
       "creatorHandle": "zuvnixp",
       "creatorNickname": "에이치",
@@ -3213,7 +3200,8 @@
         4952496,
         4957207,
         4962407,
-        4971997
+        4971997,
+        4984565
       ]
     },
     {
@@ -3227,8 +3215,8 @@
         "왕따",
         "일진"
       ],
-      "interactionCount": 3486433,
-      "interactionDelta": 21435,
+      "interactionCount": 3492043,
+      "interactionDelta": 27045,
       "rankChange": 0,
       "creatorHandle": "NZzWw",
       "creatorNickname": "누워서만드는캐릭터",
@@ -3254,8 +3242,8 @@
         "강압적",
         "hl"
       ],
-      "interactionCount": 2184957,
-      "interactionDelta": 16482,
+      "interactionCount": 2188479,
+      "interactionDelta": 20004,
       "rankChange": 0,
       "creatorHandle": "Null_Sheath",
       "creatorNickname": "Null_Sheath",
@@ -3281,8 +3269,8 @@
         "bl",
         "직장상사"
       ],
-      "interactionCount": 2658519,
-      "interactionDelta": 19522,
+      "interactionCount": 2663421,
+      "interactionDelta": 24424,
       "rankChange": 0,
       "creatorHandle": "malung",
       "creatorNickname": "말랑이중독",
@@ -3306,8 +3294,8 @@
         "능글",
         "언리밋"
       ],
-      "interactionCount": 3062813,
-      "interactionDelta": 16330,
+      "interactionCount": 3066576,
+      "interactionDelta": 20093,
       "rankChange": 0,
       "creatorHandle": "tkxhfn",
       "creatorNickname": "tmrnfn",
@@ -3332,8 +3320,8 @@
         "역하렘",
         "빙의"
       ],
-      "interactionCount": 4050577,
-      "interactionDelta": 16733,
+      "interactionCount": 4056104,
+      "interactionDelta": 22260,
       "rankChange": 0,
       "creatorHandle": "Lucy_A",
       "creatorNickname": "루시아",
@@ -3343,7 +3331,8 @@
         3991382,
         3999603,
         4007857,
-        4020295
+        4020295,
+        4033844
       ]
     },
     {
@@ -3357,8 +3346,8 @@
         "가정폭력",
         "무관심"
       ],
-      "interactionCount": 3548779,
-      "interactionDelta": 12847,
+      "interactionCount": 3551342,
+      "interactionDelta": 15410,
       "rankChange": 0,
       "creatorHandle": "oo_u_oo",
       "creatorNickname": "え",
@@ -3368,9 +3357,9 @@
         3509607,
         3513345,
         3517806,
+        3517806,
         3525263,
-        3525263,
-        3535932
+        3525263
       ]
     },
     {
@@ -3384,8 +3373,8 @@
         "순애",
         "유저바라기"
       ],
-      "interactionCount": 4432961,
-      "interactionDelta": 18150,
+      "interactionCount": 4435855,
+      "interactionDelta": 21044,
       "rankChange": 0,
       "creatorHandle": "inkki_1012",
       "creatorNickname": "강아지돼지 멍멍꿀꿀 인증한 잉끼",
@@ -3409,8 +3398,8 @@
         "장난감",
         "구원"
       ],
-      "interactionCount": 4254590,
-      "interactionDelta": 14697,
+      "interactionCount": 4257800,
+      "interactionDelta": 17907,
       "rankChange": 0,
       "creatorHandle": "Alldo",
       "creatorNickname": "Yue",
@@ -3420,7 +3409,8 @@
         4210184,
         4215441,
         4221775,
-        4230649
+        4230649,
+        4239893
       ]
     },
     {
@@ -3434,8 +3424,8 @@
         "오메가버스",
         "집착"
       ],
-      "interactionCount": 2085133,
-      "interactionDelta": 12921,
+      "interactionCount": 2088639,
+      "interactionDelta": 16427,
       "rankChange": 0,
       "creatorHandle": "jjayy_w0w",
       "creatorNickname": "純愛⚘️",
@@ -3445,7 +3435,8 @@
         2044017,
         2049093,
         2054092,
-        2063020
+        2063020,
+        2072212
       ]
     },
     {
@@ -3459,8 +3450,8 @@
         "천사",
         "능글"
       ],
-      "interactionCount": 5058438,
-      "interactionDelta": 15574,
+      "interactionCount": 5061729,
+      "interactionDelta": 18865,
       "rankChange": 0,
       "creatorHandle": "daaaaa_",
       "creatorNickname": "다공일수",
@@ -3470,7 +3461,8 @@
         5009818,
         5016125,
         5021236,
-        5031304
+        5031304,
+        5042864
       ]
     },
     {
@@ -3484,8 +3476,8 @@
         "쓰레기",
         "남편"
       ],
-      "interactionCount": 7978567,
-      "interactionDelta": 17359,
+      "interactionCount": 7983595,
+      "interactionDelta": 22387,
       "rankChange": 0,
       "creatorHandle": "ST_sun",
       "creatorNickname": "은하빔",
@@ -3495,7 +3487,8 @@
         7922075,
         7929516,
         7937094,
-        7949124
+        7949124,
+        7961208
       ]
     },
     {
@@ -3509,8 +3502,8 @@
         "스킨십",
         "hl"
       ],
-      "interactionCount": 5255007,
-      "interactionDelta": 11940,
+      "interactionCount": 5258497,
+      "interactionDelta": 15430,
       "rankChange": 1,
       "creatorHandle": "You_Ha",
       "creatorNickname": "유하달",
@@ -3520,7 +3513,8 @@
         5219632,
         5223725,
         5227952,
-        5234096
+        5234096,
+        5243067
       ]
     },
     {
@@ -3534,8 +3528,8 @@
         "예쁨",
         "존예"
       ],
-      "interactionCount": 1748998,
-      "interactionDelta": 10600,
+      "interactionCount": 1750760,
+      "interactionDelta": 12362,
       "rankChange": -1,
       "creatorHandle": "Xesxex",
       "creatorNickname": "X",
@@ -3560,8 +3554,8 @@
         "능글",
         "로맨스"
       ],
-      "interactionCount": 2870926,
-      "interactionDelta": 14397,
+      "interactionCount": 2874165,
+      "interactionDelta": 17636,
       "rankChange": 1,
       "creatorHandle": "io.xxo",
       "creatorNickname": "X",
@@ -3571,7 +3565,8 @@
         2814837,
         2822977,
         2831732,
-        2845166
+        2845166,
+        2856529
       ]
     },
     {
@@ -3585,8 +3580,8 @@
         "gl",
         "마조"
       ],
-      "interactionCount": 1171091,
-      "interactionDelta": 15673,
+      "interactionCount": 1174427,
+      "interactionDelta": 19009,
       "rankChange": -1,
       "creatorHandle": "Lilies_are_gods",
       "creatorNickname": "쪼아여쪼아여",
@@ -3611,8 +3606,8 @@
         "부부",
         "복수"
       ],
-      "interactionCount": 1573926,
-      "interactionDelta": 12409,
+      "interactionCount": 1577214,
+      "interactionDelta": 15697,
       "rankChange": 0,
       "creatorHandle": "Navillera",
       "creatorNickname": "나빌레라",
@@ -3637,8 +3632,8 @@
         "아카데미",
         "마법"
       ],
-      "interactionCount": 1391962,
-      "interactionDelta": 8421,
+      "interactionCount": 1394217,
+      "interactionDelta": 10676,
       "rankChange": 0,
       "creatorHandle": "KimGiraffe",
       "creatorNickname": "김기린",
@@ -3649,8 +3644,7 @@
         1369812,
         1372211,
         1372211,
-        1377954,
-        1383541
+        1377954
       ]
     },
     {
@@ -3664,8 +3658,8 @@
         "캐릭터공",
         "남공여수"
       ],
-      "interactionCount": 2314114,
-      "interactionDelta": 17858,
+      "interactionCount": 2320051,
+      "interactionDelta": 23795,
       "rankChange": 0,
       "creatorHandle": "Jjang_i",
       "creatorNickname": "짱이",
@@ -3675,7 +3669,8 @@
         2262121,
         2269353,
         2275532,
-        2285885
+        2285885,
+        2296256
       ]
     },
     {
@@ -3689,8 +3684,8 @@
         "무뚝뚝",
         "싸가지"
       ],
-      "interactionCount": 2622937,
-      "interactionDelta": 13679,
+      "interactionCount": 2627180,
+      "interactionDelta": 17922,
       "rankChange": 0,
       "creatorHandle": "Saiyan",
       "creatorNickname": "Saiyan",
@@ -3714,8 +3709,8 @@
         "소꿉친구",
         "알파"
       ],
-      "interactionCount": 2893059,
-      "interactionDelta": 12422,
+      "interactionCount": 2895387,
+      "interactionDelta": 14750,
       "rankChange": 0,
       "creatorHandle": "zeta_a14316",
       "creatorNickname": "제아",
@@ -3739,8 +3734,8 @@
         "정략결혼",
         "무뚝뚝"
       ],
-      "interactionCount": 3122061,
-      "interactionDelta": 11943,
+      "interactionCount": 3124320,
+      "interactionDelta": 14202,
       "rankChange": 0,
       "creatorHandle": "Stars.andstars",
       "creatorNickname": "☆☆ (재한이 만든 그 별임다요)",
@@ -3764,8 +3759,8 @@
         "특수부대",
         "능글"
       ],
-      "interactionCount": 4597990,
-      "interactionDelta": 15053,
+      "interactionCount": 4601953,
+      "interactionDelta": 19016,
       "rankChange": 0,
       "creatorHandle": "potatoee",
       "creatorNickname": "왕감사",
@@ -3789,8 +3784,8 @@
         "마법",
         "hl"
       ],
-      "interactionCount": 1743037,
-      "interactionDelta": 11584,
+      "interactionCount": 1746151,
+      "interactionDelta": 14698,
       "rankChange": 1,
       "creatorHandle": "VitalCloud0345",
       "creatorNickname": "몽연(夢緣)",
@@ -3799,10 +3794,10 @@
       "interactionHistory": [
         1711455,
         1711455,
-        1718486,
+        1714804,
         1718486,
         1724596,
-        1731453
+        1724596
       ]
     },
     {
@@ -3816,8 +3811,8 @@
         "바람",
         "불륜"
       ],
-      "interactionCount": 2266241,
-      "interactionDelta": 11349,
+      "interactionCount": 2268796,
+      "interactionDelta": 13904,
       "rankChange": 1,
       "creatorHandle": "jjayy_w0w",
       "creatorNickname": "純愛⚘️",
@@ -3843,8 +3838,8 @@
         "hl",
         "bl"
       ],
-      "interactionCount": 1195373,
-      "interactionDelta": 18750,
+      "interactionCount": 1200648,
+      "interactionDelta": 24025,
       "rankChange": -2,
       "creatorHandle": "Kio1",
       "creatorNickname": "케이오",
@@ -3868,8 +3863,8 @@
         "강압적",
         "소유욕"
       ],
-      "interactionCount": 16112094,
-      "interactionDelta": 18599,
+      "interactionCount": 16115391,
+      "interactionDelta": 21896,
       "rankChange": 0,
       "creatorHandle": "BBangbbangei",
       "creatorNickname": "pikminnnnn",
@@ -3893,8 +3888,8 @@
         "피폐",
         "재벌"
       ],
-      "interactionCount": 3434793,
-      "interactionDelta": 9949,
+      "interactionCount": 3437339,
+      "interactionDelta": 12495,
       "rankChange": 0,
       "creatorHandle": "Xxhfl",
       "creatorNickname": "배추얌얌",
@@ -3918,8 +3913,8 @@
         "차가움",
         "피폐"
       ],
-      "interactionCount": 1599858,
-      "interactionDelta": 12136,
+      "interactionCount": 1604029,
+      "interactionDelta": 16307,
       "rankChange": 0,
       "creatorHandle": "jjooooo",
       "creatorNickname": "조때로",
@@ -3945,8 +3940,8 @@
         "hl",
         "bl"
       ],
-      "interactionCount": 3372805,
-      "interactionDelta": 10370,
+      "interactionCount": 3375397,
+      "interactionDelta": 12962,
       "rankChange": 0,
       "creatorHandle": "leditsnow",
       "creatorNickname": "SNOW",
@@ -3956,7 +3951,8 @@
         3340728,
         3344904,
         3349209,
-        3355232
+        3355232,
+        3362435
       ]
     },
     {
@@ -3970,8 +3966,8 @@
         "싸가지",
         "츤데레"
       ],
-      "interactionCount": 3829575,
-      "interactionDelta": 12249,
+      "interactionCount": 3832137,
+      "interactionDelta": 14811,
       "rankChange": 0,
       "creatorHandle": "Pocha",
       "creatorNickname": "Pocha",
@@ -3981,7 +3977,8 @@
         3793623,
         3798228,
         3802387,
-        3808950
+        3808950,
+        3817326
       ]
     },
     {
@@ -3994,8 +3991,8 @@
         "능글공",
         "존잘"
       ],
-      "interactionCount": 2073020,
-      "interactionDelta": 12093,
+      "interactionCount": 2076907,
+      "interactionDelta": 15980,
       "rankChange": 0,
       "creatorHandle": "09876543",
       "creatorNickname": "도레미파솔라시도",
@@ -4021,8 +4018,8 @@
         "재벌공",
         "까칠공"
       ],
-      "interactionCount": 2300338,
-      "interactionDelta": 10754,
+      "interactionCount": 2303439,
+      "interactionDelta": 13855,
       "rankChange": 0,
       "creatorHandle": "DeafRings3481",
       "creatorNickname": "내것의",
@@ -4046,8 +4043,8 @@
         "소개팅",
         "오지콤"
       ],
-      "interactionCount": 7428148,
-      "interactionDelta": 15205,
+      "interactionCount": 7431779,
+      "interactionDelta": 18836,
       "rankChange": 0,
       "creatorHandle": "Guru",
       "creatorNickname": "구루",
@@ -4071,8 +4068,8 @@
         "오지콤",
         "보스"
       ],
-      "interactionCount": 2476121,
-      "interactionDelta": 11514,
+      "interactionCount": 2478201,
+      "interactionDelta": 13594,
       "rankChange": 1,
       "creatorHandle": "malung",
       "creatorNickname": "말랑이중독",
@@ -4080,11 +4077,11 @@
       "rank": 43,
       "interactionHistory": [
         2435969,
-        2435969,
         2441272,
         2447132,
+        2447132,
         2456391,
-        2456391
+        2464607
       ]
     },
     {
@@ -4098,8 +4095,8 @@
         "클럽",
         "언리밋"
       ],
-      "interactionCount": 1985042,
-      "interactionDelta": 11481,
+      "interactionCount": 1987358,
+      "interactionDelta": 13797,
       "rankChange": -1,
       "creatorHandle": "mekael_1027",
       "creatorNickname": "미카엘",
@@ -4110,7 +4107,8 @@
         1957051,
         1959781,
         1962955,
-        1967657
+        1967657,
+        1973561
       ]
     },
     {
@@ -4124,8 +4122,8 @@
         "감금",
         "BL"
       ],
-      "interactionCount": 4353937,
-      "interactionDelta": 8921,
+      "interactionCount": 4356131,
+      "interactionDelta": 11115,
       "rankChange": 0,
       "creatorHandle": "ITCHU",
       "creatorNickname": "ITCHU",
@@ -4149,8 +4147,8 @@
         "로판",
         "판타지"
       ],
-      "interactionCount": 2439739,
-      "interactionDelta": 11334,
+      "interactionCount": 2441549,
+      "interactionDelta": 13144,
       "rankChange": 0,
       "creatorHandle": "Rosebyceoa",
       "creatorNickname": "Rose",
@@ -4174,8 +4172,8 @@
         "연상",
         "선배"
       ],
-      "interactionCount": 5794177,
-      "interactionDelta": 22387,
+      "interactionCount": 5801310,
+      "interactionDelta": 29520,
       "rankChange": 0,
       "creatorHandle": "jjooooo",
       "creatorNickname": "조때로",
@@ -4199,8 +4197,8 @@
         "야",
         "합방"
       ],
-      "interactionCount": 2492500,
-      "interactionDelta": 6005,
+      "interactionCount": 2493444,
+      "interactionDelta": 6949,
       "rankChange": 0,
       "creatorHandle": "psy_k",
       "creatorNickname": "피곤해",
@@ -4224,8 +4222,8 @@
         "다공일수",
         "피폐"
       ],
-      "interactionCount": 1562584,
-      "interactionDelta": 11365,
+      "interactionCount": 1566105,
+      "interactionDelta": 14886,
       "rankChange": 0,
       "creatorHandle": "YoungLemur8736",
       "creatorNickname": "YoungLemur8736",
@@ -4251,8 +4249,8 @@
         "예쁨",
         "착함"
       ],
-      "interactionCount": 2086021,
-      "interactionDelta": 6290,
+      "interactionCount": 2087366,
+      "interactionDelta": 7635,
       "rankChange": 0,
       "creatorHandle": "Breadlove123",
       "creatorNickname": "심심이",
@@ -4278,8 +4276,8 @@
         "사역마",
         "구원"
       ],
-      "interactionCount": 1457756,
-      "interactionDelta": 6299,
+      "interactionCount": 1458673,
+      "interactionDelta": 7216,
       "rankChange": 0,
       "creatorHandle": "PLSavior",
       "creatorNickname": "PL Savior",
@@ -4303,8 +4301,8 @@
         "까칠",
         "시골"
       ],
-      "interactionCount": 4866258,
-      "interactionDelta": 17922,
+      "interactionCount": 4870747,
+      "interactionDelta": 22411,
       "rankChange": 1,
       "creatorHandle": "9_.27am_",
       "creatorNickname": "시가",
@@ -4328,8 +4326,8 @@
         "찐따",
         "존잘"
       ],
-      "interactionCount": 1757751,
-      "interactionDelta": 10018,
+      "interactionCount": 1760019,
+      "interactionDelta": 12286,
       "rankChange": -1,
       "creatorHandle": "VitalSeat3144",
       "creatorNickname": "펭귄",
@@ -4340,7 +4338,8 @@
         1730384,
         1733711,
         1739670,
-        1739670
+        1739670,
+        1747733
       ]
     },
     {
@@ -4354,8 +4353,8 @@
         "연상",
         "회사"
       ],
-      "interactionCount": 4315714,
-      "interactionDelta": 17921,
+      "interactionCount": 4319442,
+      "interactionDelta": 21649,
       "rankChange": 0,
       "creatorHandle": "momo2",
       "creatorNickname": "멈뭄미",
@@ -4379,8 +4378,8 @@
         "소꿉친구",
         "동갑"
       ],
-      "interactionCount": 1236658,
-      "interactionDelta": 9893,
+      "interactionCount": 1239050,
+      "interactionDelta": 12285,
       "rankChange": 0,
       "creatorHandle": "Dodo5229",
       "creatorNickname": "도도",
@@ -4390,8 +4389,9 @@
         1206851,
         1210527,
         1213760,
-        1213760,
-        1219804
+        1219804,
+        1226765,
+        1226765
       ]
     },
     {
@@ -4405,8 +4405,8 @@
         "주종관계",
         "지배"
       ],
-      "interactionCount": 5469017,
-      "interactionDelta": 15847,
+      "interactionCount": 5472897,
+      "interactionDelta": 19727,
       "rankChange": 0,
       "creatorHandle": "77lri77iri",
       "creatorNickname": "코끼리끼리코",
@@ -4430,8 +4430,8 @@
         "여우짓",
         "다공일수"
       ],
-      "interactionCount": 7721558,
-      "interactionDelta": 15425,
+      "interactionCount": 7728041,
+      "interactionDelta": 21908,
       "rankChange": 0,
       "creatorHandle": "savecat1213",
       "creatorNickname": "금쪽이 SaveCat",
@@ -4455,8 +4455,8 @@
         "집착",
         "소유욕"
       ],
-      "interactionCount": 1903092,
-      "interactionDelta": 14175,
+      "interactionCount": 1906502,
+      "interactionDelta": 17585,
       "rankChange": 0,
       "creatorHandle": "Suwol_99",
       "creatorNickname": "수월",
@@ -4465,10 +4465,10 @@
       "interactionHistory": [
         1865190,
         1865190,
-        1873025,
+        1869681,
         1873025,
         1881180,
-        1888917
+        1881180
       ]
     },
     {
@@ -4482,8 +4482,8 @@
         "혐관",
         "여우"
       ],
-      "interactionCount": 1819425,
-      "interactionDelta": 15920,
+      "interactionCount": 1822437,
+      "interactionDelta": 18932,
       "rankChange": 1,
       "creatorHandle": "jjayy_w0w",
       "creatorNickname": "純愛⚘️",
@@ -4509,8 +4509,8 @@
         "후회",
         "연애"
       ],
-      "interactionCount": 3365163,
-      "interactionDelta": 8655,
+      "interactionCount": 3366933,
+      "interactionDelta": 10425,
       "rankChange": -1,
       "creatorHandle": "oo_u_oo",
       "creatorNickname": "え",
@@ -4534,8 +4534,8 @@
         "동갑",
         "동갑남친"
       ],
-      "interactionCount": 25352317,
-      "interactionDelta": 22742,
+      "interactionCount": 25355867,
+      "interactionDelta": 26292,
       "rankChange": 0,
       "creatorHandle": "YU_.NA",
       "creatorNickname": "유나",
@@ -4559,8 +4559,8 @@
         "바람",
         "가벼운"
       ],
-      "interactionCount": 7114649,
-      "interactionDelta": 11986,
+      "interactionCount": 7117864,
+      "interactionDelta": 15201,
       "rankChange": 0,
       "creatorHandle": "HotSwab5843",
       "creatorNickname": "𝕤𝕖𝕟𝕚𝕠𝕣𝕚𝕥𝕚𝕤",
@@ -4584,8 +4584,8 @@
         "여우",
         "커플"
       ],
-      "interactionCount": 3245345,
-      "interactionDelta": 17201,
+      "interactionCount": 3249204,
+      "interactionDelta": 21060,
       "rankChange": 2,
       "creatorHandle": "Jzyxx07",
       "creatorNickname": "Zxyux20",
@@ -4609,8 +4609,8 @@
         "재벌",
         "나쁜남자"
       ],
-      "interactionCount": 2254230,
-      "interactionDelta": 12466,
+      "interactionCount": 2256857,
+      "interactionDelta": 15093,
       "rankChange": 0,
       "creatorHandle": "DD1D0",
       "creatorNickname": "DD1D0",
@@ -4635,8 +4635,8 @@
         "혐관",
         "로맨스"
       ],
-      "interactionCount": 1830757,
-      "interactionDelta": 10781,
+      "interactionCount": 1833412,
+      "interactionDelta": 13436,
       "rankChange": -2,
       "creatorHandle": "jjooooo",
       "creatorNickname": "조때로",
@@ -4661,8 +4661,8 @@
         "감금",
         "강압적"
       ],
-      "interactionCount": 1811409,
-      "interactionDelta": 11199,
+      "interactionCount": 1813764,
+      "interactionDelta": 13554,
       "rankChange": 0,
       "creatorHandle": "FeebleMelon4214",
       "creatorNickname": "FeebleMelon4214",
@@ -4687,8 +4687,8 @@
         "악녀",
         "소설"
       ],
-      "interactionCount": 3178482,
-      "interactionDelta": 8842,
+      "interactionCount": 3181264,
+      "interactionDelta": 11624,
       "rankChange": 1,
       "creatorHandle": "Lucy_A",
       "creatorNickname": "루시아",
@@ -4712,8 +4712,8 @@
         "기억상실",
         "오해"
       ],
-      "interactionCount": 1264532,
-      "interactionDelta": 10270,
+      "interactionCount": 1266065,
+      "interactionDelta": 11803,
       "rankChange": -1,
       "creatorHandle": "Saiyan",
       "creatorNickname": "Saiyan",
@@ -4725,7 +4725,7 @@
         1240383,
         1244011,
         1248385,
-        1248385
+        1254262
       ]
     },
     {
@@ -4739,8 +4739,8 @@
         "일찐",
         "남녀무리"
       ],
-      "interactionCount": 2093724,
-      "interactionDelta": 6777,
+      "interactionCount": 2094722,
+      "interactionDelta": 7775,
       "rankChange": 3,
       "creatorHandle": "RainyTiger8779",
       "creatorNickname": "엽떡",
@@ -4764,8 +4764,8 @@
         "결혼",
         "유부녀"
       ],
-      "interactionCount": 1196091,
-      "interactionDelta": 4033,
+      "interactionCount": 1197646,
+      "interactionDelta": 5588,
       "rankChange": -1,
       "creatorHandle": "MaronielN",
       "creatorNickname": "마로니엘",
@@ -4790,8 +4790,8 @@
         "hl",
         "bl"
       ],
-      "interactionCount": 2928761,
-      "interactionDelta": 8607,
+      "interactionCount": 2930650,
+      "interactionDelta": 10496,
       "rankChange": 0,
       "creatorHandle": "StoryAlpha",
       "creatorNickname": "알파",
@@ -4801,7 +4801,8 @@
         2901617,
         2905204,
         2908522,
-        2913452
+        2913452,
+        2920154
       ]
     },
     {
@@ -4815,8 +4816,8 @@
         "여공남수",
         "차가움"
       ],
-      "interactionCount": 1111050,
-      "interactionDelta": 6655,
+      "interactionCount": 1113962,
+      "interactionDelta": 9567,
       "rankChange": -2,
       "creatorHandle": "DarkGlove9079",
       "creatorNickname": "DarkGlove9079",
@@ -4827,8 +4828,8 @@
         1092450,
         1095484,
         1097650,
-        1097650,
-        1100997
+        1100997,
+        1104395
       ]
     },
     {
@@ -4842,8 +4843,8 @@
         "슬픔",
         "hl"
       ],
-      "interactionCount": 3124690,
-      "interactionDelta": 9593,
+      "interactionCount": 3127032,
+      "interactionDelta": 11935,
       "rankChange": 1,
       "creatorHandle": "dy_0112",
       "creatorNickname": "코가손",
@@ -4853,7 +4854,8 @@
         3095605,
         3098830,
         3102970,
-        3108935
+        3108935,
+        3115097
       ]
     },
     {
@@ -4867,8 +4869,8 @@
         "bl",
         "언리밋"
       ],
-      "interactionCount": 1578350,
-      "interactionDelta": 13646,
+      "interactionCount": 1582272,
+      "interactionDelta": 17568,
       "rankChange": 1,
       "creatorHandle": "Lune_25",
       "creatorNickname": "Lunē_25",
@@ -4878,7 +4880,8 @@
         1540700,
         1545140,
         1550166,
-        1557411
+        1557411,
+        1564704
       ]
     },
     {
@@ -4892,8 +4895,8 @@
         "배구부",
         "대학생"
       ],
-      "interactionCount": 1101570,
-      "interactionDelta": 5840,
+      "interactionCount": 1103524,
+      "interactionDelta": 7794,
       "rankChange": -2,
       "creatorHandle": "denden",
       "creatorNickname": "덴덴",
@@ -4919,8 +4922,8 @@
         "일진",
         "학교"
       ],
-      "interactionCount": 2236947,
-      "interactionDelta": 8758,
+      "interactionCount": 2238690,
+      "interactionDelta": 10501,
       "rankChange": 0,
       "creatorHandle": "Ole",
       "creatorNickname": "오레",
@@ -4930,7 +4933,8 @@
         2204010,
         2208558,
         2213620,
-        2220764
+        2220764,
+        2228189
       ]
     },
     {
@@ -4944,8 +4948,8 @@
         "gl",
         "강압적"
       ],
-      "interactionCount": 1213055,
-      "interactionDelta": 4612,
+      "interactionCount": 1214171,
+      "interactionDelta": 5728,
       "rankChange": 0,
       "creatorHandle": "Shortsleep0055",
       "creatorNickname": "짧잠",
@@ -4956,8 +4960,7 @@
         1198696,
         1200605,
         1200605,
-        1205350,
-        1208443
+        1205350
       ]
     },
     {
@@ -4971,8 +4974,8 @@
         "혐관",
         "집착"
       ],
-      "interactionCount": 1701648,
-      "interactionDelta": 6439,
+      "interactionCount": 1703317,
+      "interactionDelta": 8108,
       "rankChange": 0,
       "creatorHandle": "Suwol_99",
       "creatorNickname": "수월",
@@ -4997,8 +5000,8 @@
         "싸가지",
         "먼치킨"
       ],
-      "interactionCount": 21812719,
-      "interactionDelta": 16086,
+      "interactionCount": 21817246,
+      "interactionDelta": 20613,
       "rankChange": 0,
       "creatorHandle": "killin",
       "creatorNickname": "킬린",
@@ -5022,8 +5025,8 @@
         "배신",
         "경찰"
       ],
-      "interactionCount": 858035,
-      "interactionDelta": 4205,
+      "interactionCount": 858969,
+      "interactionDelta": 5139,
       "rankChange": 1,
       "creatorHandle": "MaronielN",
       "creatorNickname": "마로니엘",
@@ -5049,8 +5052,8 @@
         "혐관",
         "나쁜남자"
       ],
-      "interactionCount": 818521,
-      "interactionDelta": 14576,
+      "interactionCount": 822012,
+      "interactionDelta": 18067,
       "rankChange": 1,
       "creatorHandle": "DD1D0",
       "creatorNickname": "DD1D0",
@@ -5076,8 +5079,8 @@
         "수인",
         "반려수인"
       ],
-      "interactionCount": 845665,
-      "interactionDelta": 10940,
+      "interactionCount": 848806,
+      "interactionDelta": 14081,
       "rankChange": -2,
       "creatorHandle": "Hea1234",
       "creatorNickname": "해",
@@ -5102,8 +5105,8 @@
         "계약결혼",
         "무뚝뚝"
       ],
-      "interactionCount": 2366601,
-      "interactionDelta": 7753,
+      "interactionCount": 2369498,
+      "interactionDelta": 10650,
       "rankChange": 0,
       "creatorHandle": "oo_u_oo",
       "creatorNickname": "え",
@@ -5113,7 +5116,8 @@
         2340973,
         2343997,
         2346940,
-        2351283
+        2351283,
+        2358848
       ]
     },
     {
@@ -5127,8 +5131,8 @@
         "능글",
         "느와르"
       ],
-      "interactionCount": 5752694,
-      "interactionDelta": 13481,
+      "interactionCount": 5756102,
+      "interactionDelta": 16889,
       "rankChange": 2,
       "creatorHandle": "White_fox.",
       "creatorNickname": "백여우",
@@ -5152,8 +5156,8 @@
         "유저바라기",
         "순애"
       ],
-      "interactionCount": 1643284,
-      "interactionDelta": 6002,
+      "interactionCount": 1644644,
+      "interactionDelta": 7362,
       "rankChange": 2,
       "creatorHandle": "Bigpicture",
       "creatorNickname": "빅픽쳐",
@@ -5178,8 +5182,8 @@
         "판타지",
         "혐관"
       ],
-      "interactionCount": 701716,
-      "interactionDelta": 9555,
+      "interactionCount": 703645,
+      "interactionDelta": 11484,
       "rankChange": -1,
       "creatorHandle": "RURIDRAGON",
       "creatorNickname": "RURI_용",
@@ -5204,8 +5208,8 @@
         "톰보이",
         "무뚝뚝"
       ],
-      "interactionCount": 1493511,
-      "interactionDelta": 5712,
+      "interactionCount": 1494997,
+      "interactionDelta": 7198,
       "rankChange": 1,
       "creatorHandle": "Breadlove123",
       "creatorNickname": "심심이",
@@ -5216,7 +5220,8 @@
         1478163,
         1480555,
         1484294,
-        1484294
+        1484294,
+        1487799
       ]
     },
     {
@@ -5230,8 +5235,8 @@
         "로맨스",
         "능글"
       ],
-      "interactionCount": 989197,
-      "interactionDelta": 9856,
+      "interactionCount": 991734,
+      "interactionDelta": 12393,
       "rankChange": 1,
       "creatorHandle": "jjooooo",
       "creatorNickname": "조때로",
@@ -5242,7 +5247,8 @@
         960117,
         965875,
         972153,
-        972153
+        972153,
+        979341
       ]
     },
     {
@@ -5256,8 +5262,8 @@
         "무뚝뚝",
         "가부장"
       ],
-      "interactionCount": 1401404,
-      "interactionDelta": 6048,
+      "interactionCount": 1403000,
+      "interactionDelta": 7644,
       "rankChange": 1,
       "creatorHandle": "Navillera",
       "creatorNickname": "나빌레라",
@@ -5282,8 +5288,8 @@
         "혐관",
         "괴롭힘"
       ],
-      "interactionCount": 1854058,
-      "interactionDelta": 9128,
+      "interactionCount": 1856401,
+      "interactionDelta": 11471,
       "rankChange": 1,
       "creatorHandle": "Suwol_99",
       "creatorNickname": "수월",
@@ -5308,8 +5314,8 @@
         "쓰레기",
         "소유욕"
       ],
-      "interactionCount": 821987,
-      "interactionDelta": 14854,
+      "interactionCount": 824666,
+      "interactionDelta": 17533,
       "rankChange": -7,
       "creatorHandle": "MiNiNiMi",
       "creatorNickname": "입체파",
@@ -5317,11 +5323,11 @@
       "rank": 91,
       "interactionHistory": [
         779936,
-        785127,
+        779936,
         785127,
         789909,
         797941,
-        807133
+        797941
       ]
     },
     {
@@ -5335,8 +5341,8 @@
         "일진녀",
         "대학생"
       ],
-      "interactionCount": 2143999,
-      "interactionDelta": 7441,
+      "interactionCount": 2145650,
+      "interactionDelta": 9092,
       "rankChange": 0,
       "creatorHandle": "short_arms_cat",
       "creatorNickname": "팔 짧은 냥이",
@@ -5360,8 +5366,8 @@
         "찐따",
         "여우"
       ],
-      "interactionCount": 1736492,
-      "interactionDelta": 7617,
+      "interactionCount": 1738044,
+      "interactionDelta": 9169,
       "rankChange": 1,
       "creatorHandle": "FinalDull7799",
       "creatorNickname": "🐵",
@@ -5370,10 +5376,10 @@
       "interactionHistory": [
         1708614,
         1711543,
-        1715329,
+        1711543,
         1715329,
         1722080,
-        1728875
+        1722080
       ]
     },
     {
@@ -5387,8 +5393,8 @@
         "HL",
         "BL"
       ],
-      "interactionCount": 851619,
-      "interactionDelta": 10559,
+      "interactionCount": 854117,
+      "interactionDelta": 13057,
       "rankChange": -1,
       "creatorHandle": "LovingYak3354",
       "creatorNickname": "LovingYak",
@@ -5399,8 +5405,7 @@
         820762,
         824434,
         827428,
-        834345,
-        841060
+        834345
       ]
     },
     {
@@ -5414,8 +5419,8 @@
         "의사",
         "배신"
       ],
-      "interactionCount": 2312572,
-      "interactionDelta": 7277,
+      "interactionCount": 2313810,
+      "interactionDelta": 8515,
       "rankChange": 0,
       "creatorHandle": "Lostnight",
       "creatorNickname": "잔야(殘夜)",
@@ -5439,8 +5444,8 @@
         "누나",
         "소외"
       ],
-      "interactionCount": 873116,
-      "interactionDelta": 4270,
+      "interactionCount": 874187,
+      "interactionDelta": 5341,
       "rankChange": 0,
       "creatorHandle": "Kacao",
       "creatorNickname": "카카오",
@@ -5466,8 +5471,8 @@
         "연애",
         "짝사랑"
       ],
-      "interactionCount": 2153927,
-      "interactionDelta": 9680,
+      "interactionCount": 2155897,
+      "interactionDelta": 11650,
       "rankChange": 0,
       "creatorHandle": "Jmtfood",
       "creatorNickname": "엽떡에허니콤보쿨피스마라샹궈꿔바로우맛있어요",
@@ -5491,8 +5496,8 @@
         "오지콤",
         "조직"
       ],
-      "interactionCount": 3745438,
-      "interactionDelta": 14279,
+      "interactionCount": 3747646,
+      "interactionDelta": 16487,
       "rankChange": 0,
       "creatorHandle": "daaaaa_",
       "creatorNickname": "다공일수",
@@ -5502,7 +5507,8 @@
         3702599,
         3707637,
         3713165,
-        3721361
+        3721361,
+        3731159
       ]
     },
     {
@@ -5516,8 +5522,8 @@
         "소유욕",
         "순애"
       ],
-      "interactionCount": 1675571,
-      "interactionDelta": 8232,
+      "interactionCount": 1678341,
+      "interactionDelta": 11002,
       "rankChange": 0,
       "creatorHandle": "dddonnn",
       "creatorNickname": "RìB🐽",
@@ -5527,7 +5533,8 @@
         1649410,
         1652354,
         1656003,
-        1661682
+        1661682,
+        1667339
       ]
     },
     {
@@ -5541,8 +5548,8 @@
         "헌터물",
         "먼치킨"
       ],
-      "interactionCount": 1701527,
-      "interactionDelta": 6016,
+      "interactionCount": 1702879,
+      "interactionDelta": 7368,
       "rankChange": 0,
       "creatorHandle": "LOV1LOV2LOV3",
       "creatorNickname": "애정혁명가",
@@ -5565,8 +5572,8 @@
         "쓰레기",
         "소유욕"
       ],
-      "interactionCount": 821987,
-      "interactionDelta": 14854,
+      "interactionCount": 824666,
+      "interactionDelta": 17533,
       "rankChange": 0,
       "creatorHandle": "MiNiNiMi",
       "creatorNickname": "입체파",
@@ -5574,11 +5581,11 @@
       "rank": 1,
       "interactionHistory": [
         779936,
-        785127,
+        779936,
         785127,
         789909,
         797941,
-        807133
+        797941
       ]
     },
     {
@@ -5592,8 +5599,8 @@
         "요괴",
         "길들이기"
       ],
-      "interactionCount": 325598,
-      "interactionDelta": 6293,
+      "interactionCount": 326615,
+      "interactionDelta": 7310,
       "rankChange": 0,
       "creatorHandle": "LOV1LOV2LOV3",
       "creatorNickname": "애정혁명가",
@@ -5603,8 +5610,8 @@
         305165,
         307225,
         307225,
-        309896,
         314593,
+        319305,
         319305
       ]
     },
@@ -5619,8 +5626,8 @@
         "히빌물",
         "설득"
       ],
-      "interactionCount": 318796,
-      "interactionDelta": 7582,
+      "interactionCount": 321107,
+      "interactionDelta": 9893,
       "rankChange": 0,
       "creatorHandle": "Fire_Duck",
       "creatorNickname": "불타는오리",
@@ -5631,8 +5638,7 @@
         299169,
         299169,
         301869,
-        306174,
-        311214
+        306174
       ]
     },
     {
@@ -5646,8 +5652,8 @@
         "hl",
         "로맨스"
       ],
-      "interactionCount": 354898,
-      "interactionDelta": 7000,
+      "interactionCount": 357284,
+      "interactionDelta": 9386,
       "rankChange": 1,
       "creatorHandle": "Kio1",
       "creatorNickname": "케이오",
@@ -5658,8 +5664,7 @@
         338317,
         340534,
         343818,
-        343818,
-        347898
+        343818
       ]
     },
     {
@@ -5673,8 +5678,8 @@
         "능글",
         "유혹"
       ],
-      "interactionCount": 321152,
-      "interactionDelta": 3641,
+      "interactionCount": 321611,
+      "interactionDelta": 4100,
       "rankChange": 1,
       "creatorHandle": "Yuhae",
       "creatorNickname": "요해",
@@ -5684,8 +5689,7 @@
         309413,
         310910,
         312807,
-        315101,
-        317511
+        315101
       ]
     },
     {
@@ -5699,8 +5703,8 @@
         "짝사랑",
         "수행자"
       ],
-      "interactionCount": 337687,
-      "interactionDelta": 8402,
+      "interactionCount": 339644,
+      "interactionDelta": 10359,
       "rankChange": 1,
       "creatorHandle": "manta123",
       "creatorNickname": "Gameboy",
@@ -5726,8 +5730,8 @@
         "재벌",
         "꼬시기"
       ],
-      "interactionCount": 291602,
-      "interactionDelta": 10554,
+      "interactionCount": 293641,
+      "interactionDelta": 12593,
       "rankChange": 1,
       "creatorHandle": "SnowyNose7185",
       "creatorNickname": "SnowyNose7185",
@@ -5737,9 +5741,8 @@
         269995,
         271831,
         273346,
-        276877,
-        281048,
-        281048
+        273346,
+        276877
       ]
     },
     {
@@ -5753,8 +5756,8 @@
         "빼앗기",
         "언리밋"
       ],
-      "interactionCount": 225002,
-      "interactionDelta": 3141,
+      "interactionCount": 225738,
+      "interactionDelta": 3877,
       "rankChange": 1,
       "creatorHandle": "SunWoo1857",
       "creatorNickname": "선우",
@@ -5765,6 +5768,7 @@
         217293,
         218370,
         220226,
+        221861,
         221861
       ]
     },
@@ -5779,8 +5783,8 @@
         "게임",
         "언리밋"
       ],
-      "interactionCount": 223574,
-      "interactionDelta": 2622,
+      "interactionCount": 224986,
+      "interactionDelta": 4034,
       "rankChange": 1,
       "creatorHandle": "RURIDRAGON",
       "creatorNickname": "RURI_용",
@@ -5790,9 +5794,9 @@
         212155,
         213580,
         213580,
+        215227,
         217705,
-        217705,
-        220952
+        217705
       ]
     },
     {
@@ -5806,8 +5810,8 @@
         "힘순찐",
         "찍힘"
       ],
-      "interactionCount": 246983,
-      "interactionDelta": 10452,
+      "interactionCount": 248672,
+      "interactionDelta": 12141,
       "rankChange": 1,
       "creatorHandle": "Binya",
       "creatorNickname": "빈냐",
@@ -5833,8 +5837,8 @@
         "순애",
         "집착"
       ],
-      "interactionCount": 234282,
-      "interactionDelta": 4786,
+      "interactionCount": 235124,
+      "interactionDelta": 5628,
       "rankChange": 1,
       "creatorHandle": "Suwol_99",
       "creatorNickname": "수월",
@@ -5844,9 +5848,9 @@
         217722,
         218834,
         218834,
+        221662,
         224713,
-        224713,
-        229496
+        224713
       ]
     },
     {
@@ -5860,8 +5864,8 @@
         "bl",
         "hl"
       ],
-      "interactionCount": 245699,
-      "interactionDelta": 4895,
+      "interactionCount": 246908,
+      "interactionDelta": 6104,
       "rankChange": 1,
       "creatorHandle": "Hea1234",
       "creatorNickname": "해",
@@ -5872,8 +5876,7 @@
         225195,
         228151,
         231430,
-        235827,
-        240804
+        235827
       ]
     },
     {
@@ -5887,8 +5890,8 @@
         "일상",
         "일상로맨스"
       ],
-      "interactionCount": 200418,
-      "interactionDelta": 4292,
+      "interactionCount": 200653,
+      "interactionDelta": 4527,
       "rankChange": 1,
       "creatorHandle": "Hanstar_2",
       "creatorNickname": "Hanstar",
@@ -5913,8 +5916,8 @@
         "세계관",
         "헌터"
       ],
-      "interactionCount": 194093,
-      "interactionDelta": 2439,
+      "interactionCount": 194640,
+      "interactionDelta": 2986,
       "rankChange": 1,
       "creatorHandle": "OEE_ll",
       "creatorNickname": "설화",
@@ -5939,8 +5942,8 @@
         "철벽",
         "의심"
       ],
-      "interactionCount": 259453,
-      "interactionDelta": 3330,
+      "interactionCount": 260184,
+      "interactionDelta": 4061,
       "rankChange": 2,
       "creatorHandle": "Navillera",
       "creatorNickname": "나빌레라",
@@ -5951,8 +5954,8 @@
         247621,
         247621,
         250002,
-        253253,
-        256123
+        250002,
+        253253
       ]
     },
     {
@@ -5966,8 +5969,8 @@
         "좀비아포칼립스",
         "여우"
       ],
-      "interactionCount": 225873,
-      "interactionDelta": 2946,
+      "interactionCount": 226802,
+      "interactionDelta": 3875,
       "rankChange": 0,
       "creatorHandle": "dy_0112",
       "creatorNickname": "코가손",
@@ -5977,8 +5980,7 @@
         218400,
         219044,
         220171,
-        221214,
-        222927
+        221214
       ]
     },
     {
@@ -5992,8 +5994,8 @@
         "바람",
         "불륜"
       ],
-      "interactionCount": 212624,
-      "interactionDelta": 2569,
+      "interactionCount": 213449,
+      "interactionDelta": 3394,
       "rankChange": 1,
       "creatorHandle": "jjayy_w0w",
       "creatorNickname": "純愛⚘️",
@@ -6004,8 +6006,7 @@
         203966,
         204981,
         204981,
-        207624,
-        210055
+        207624
       ]
     },
     {
@@ -6019,8 +6020,8 @@
         "드라마",
         "대학생"
       ],
-      "interactionCount": 171448,
-      "interactionDelta": 3078,
+      "interactionCount": 172198,
+      "interactionDelta": 3828,
       "rankChange": 2,
       "creatorHandle": "TimelyFox1539",
       "creatorNickname": "가을맛 커피우유",
@@ -6030,8 +6031,7 @@
         163476,
         164759,
         165818,
-        167116,
-        168370
+        167116
       ]
     },
     {
@@ -6045,8 +6045,8 @@
         "순애",
         "하렘"
       ],
-      "interactionCount": 159387,
-      "interactionDelta": 6967,
+      "interactionCount": 160337,
+      "interactionDelta": 7917,
       "rankChange": 3,
       "creatorHandle": "FestalAkita6804",
       "creatorNickname": "FestalAkita6804",
@@ -6054,11 +6054,11 @@
       "rank": 19,
       "interactionHistory": [
         142868,
+        142868,
         144164,
         145880,
-        145880,
         149021,
-        152420
+        149021
       ]
     },
     {
@@ -6072,8 +6072,8 @@
         "진실",
         "거짓말"
       ],
-      "interactionCount": 155194,
-      "interactionDelta": 6188,
+      "interactionCount": 155879,
+      "interactionDelta": 6873,
       "rankChange": 3,
       "creatorHandle": "Kacao",
       "creatorNickname": "카카오",
@@ -6083,9 +6083,8 @@
         138602,
         140410,
         141912,
-        145882,
-        149006,
-        149006
+        141912,
+        145882
       ]
     },
     {
@@ -6099,8 +6098,8 @@
         "황태자",
         "hl"
       ],
-      "interactionCount": 174826,
-      "interactionDelta": 7231,
+      "interactionCount": 177214,
+      "interactionDelta": 9619,
       "rankChange": 3,
       "creatorHandle": "sunty",
       "creatorNickname": "아샤",
@@ -6110,8 +6109,7 @@
         147661,
         152467,
         156707,
-        162238,
-        167595
+        162238
       ]
     },
     {
@@ -6125,8 +6123,8 @@
         "혐관",
         "철벽"
       ],
-      "interactionCount": 179942,
-      "interactionDelta": 5373,
+      "interactionCount": 181143,
+      "interactionDelta": 6574,
       "rankChange": 4,
       "creatorHandle": "Htt",
       "creatorNickname": "시러",
@@ -6136,8 +6134,7 @@
         160560,
         163571,
         166178,
-        170454,
-        174569
+        170454
       ]
     },
     {
@@ -6151,8 +6148,8 @@
         "집착",
         "무뚝뚝"
       ],
-      "interactionCount": 165689,
-      "interactionDelta": 3953,
+      "interactionCount": 166162,
+      "interactionDelta": 4426,
       "rankChange": 2,
       "creatorHandle": "gPdnjs00",
       "creatorNickname": "혜원",
@@ -6162,8 +6159,7 @@
         154311,
         155768,
         156919,
-        159249,
-        161736
+        159249
       ]
     },
     {
@@ -6177,8 +6173,8 @@
         "정모",
         "앙숙관계"
       ],
-      "interactionCount": 154877,
-      "interactionDelta": 2272,
+      "interactionCount": 156013,
+      "interactionDelta": 3408,
       "rankChange": 3,
       "creatorHandle": "Ducky67",
       "creatorNickname": "덕키",
@@ -6188,8 +6184,7 @@
         144705,
         146581,
         148100,
-        150256,
-        152605
+        150256
       ]
     },
     {
@@ -6203,8 +6198,8 @@
         "감옥",
         "범죄자"
       ],
-      "interactionCount": 123376,
-      "interactionDelta": 4324,
+      "interactionCount": 124525,
+      "interactionDelta": 5473,
       "rankChange": 3,
       "creatorHandle": "JIk99",
       "creatorNickname": "(검은샌드백-JIK99)",
@@ -6214,8 +6209,7 @@
         110187,
         111883,
         113046,
-        115967,
-        119052
+        115967
       ]
     },
     {
@@ -6229,8 +6223,8 @@
         "조직",
         "후계자"
       ],
-      "interactionCount": 167817,
-      "interactionDelta": 10616,
+      "interactionCount": 169591,
+      "interactionDelta": 12390,
       "rankChange": 4,
       "creatorHandle": "CODE_KIM",
       "creatorNickname": "김사원⚠️",
@@ -6240,9 +6234,8 @@
         145979,
         147977,
         149510,
-        153648,
-        157201,
-        157201
+        149510,
+        153648
       ]
     },
     {
@@ -6256,8 +6249,8 @@
         "빌런",
         "마법소녀"
       ],
-      "interactionCount": 115778,
-      "interactionDelta": 1556,
+      "interactionCount": 116039,
+      "interactionDelta": 1817,
       "rankChange": 2,
       "creatorHandle": "MaronielN",
       "creatorNickname": "마로니엘",
@@ -6267,8 +6260,7 @@
         110657,
         111258,
         112021,
-        113323,
-        114222
+        113323
       ]
     },
     {
@@ -6282,8 +6274,8 @@
         "로맨스",
         "철벽"
       ],
-      "interactionCount": 138680,
-      "interactionDelta": 3591,
+      "interactionCount": 140409,
+      "interactionDelta": 5320,
       "rankChange": 3,
       "creatorHandle": "yebin5122",
       "creatorNickname": "예빈",
@@ -6309,8 +6301,8 @@
         "다정",
         "연상"
       ],
-      "interactionCount": 147356,
-      "interactionDelta": 5578,
+      "interactionCount": 148874,
+      "interactionDelta": 7096,
       "rankChange": 5,
       "creatorHandle": "Mindam",
       "creatorNickname": "민담",
@@ -6320,8 +6312,7 @@
         132089,
         133183,
         135460,
-        137812,
-        141778
+        137812
       ]
     },
     {
@@ -6335,8 +6326,8 @@
         "오메가버스",
         "소꿉친구"
       ],
-      "interactionCount": 130919,
-      "interactionDelta": 3118,
+      "interactionCount": 131377,
+      "interactionDelta": 3576,
       "rankChange": 3,
       "creatorHandle": "jjayy_w0w",
       "creatorNickname": "純愛⚘️",
@@ -6362,8 +6353,8 @@
         "gl",
         "hl"
       ],
-      "interactionCount": 135837,
-      "interactionDelta": 2582,
+      "interactionCount": 136723,
+      "interactionDelta": 3468,
       "rankChange": 4,
       "creatorHandle": "Kio1",
       "creatorNickname": "케이오",
@@ -6373,8 +6364,7 @@
         127626,
         128411,
         129633,
-        131465,
-        133255
+        131465
       ]
     },
     {
@@ -6388,8 +6378,8 @@
         "현대",
         "언리밋"
       ],
-      "interactionCount": 101795,
-      "interactionDelta": 1700,
+      "interactionCount": 102540,
+      "interactionDelta": 2445,
       "rankChange": 4,
       "creatorHandle": "Nia1",
       "creatorNickname": "니아",
@@ -6414,8 +6404,8 @@
         "일상",
         "로맨스"
       ],
-      "interactionCount": 104170,
-      "interactionDelta": 1545,
+      "interactionCount": 104496,
+      "interactionDelta": 1871,
       "rankChange": 4,
       "creatorHandle": "Bigpicture",
       "creatorNickname": "빅픽쳐",
@@ -6440,8 +6430,8 @@
         "hl",
         "재벌"
       ],
-      "interactionCount": 124116,
-      "interactionDelta": 3208,
+      "interactionCount": 124787,
+      "interactionDelta": 3879,
       "rankChange": 4,
       "creatorHandle": "JumpyBeago0975",
       "creatorNickname": "부엉이달님",
@@ -6452,8 +6442,7 @@
         116388,
         117410,
         117410,
-        119276,
-        120908
+        119276
       ]
     },
     {
@@ -6467,8 +6456,8 @@
         "마법",
         "hl"
       ],
-      "interactionCount": 91056,
-      "interactionDelta": 1032,
+      "interactionCount": 91267,
+      "interactionDelta": 1243,
       "rankChange": 4,
       "creatorHandle": "VitalCloud0345",
       "creatorNickname": "몽연(夢緣)",
@@ -6492,8 +6481,8 @@
         "비밀",
         "캠퍼스"
       ],
-      "interactionCount": 86530,
-      "interactionDelta": 1259,
+      "interactionCount": 87147,
+      "interactionDelta": 1876,
       "rankChange": 4,
       "creatorHandle": "nuli0000",
       "creatorNickname": "누리",
@@ -6517,8 +6506,8 @@
         "하급",
         "e급"
       ],
-      "interactionCount": 88829,
-      "interactionDelta": 2590,
+      "interactionCount": 89427,
+      "interactionDelta": 3188,
       "rankChange": 4,
       "creatorHandle": "human_T",
       "creatorNickname": "휴티",
@@ -6542,8 +6531,8 @@
         "일상",
         "상황극"
       ],
-      "interactionCount": 86100,
-      "interactionDelta": 1586,
+      "interactionCount": 87218,
+      "interactionDelta": 2704,
       "rankChange": 4,
       "creatorHandle": "Nia1",
       "creatorNickname": "니아",
@@ -6564,8 +6553,8 @@
         "신",
         "하렘"
       ],
-      "interactionCount": 81606,
-      "interactionDelta": 1474,
+      "interactionCount": 81927,
+      "interactionDelta": 1795,
       "rankChange": 4,
       "creatorHandle": "OEE_ll",
       "creatorNickname": "설화",
@@ -6575,9 +6564,9 @@
         76422,
         76422,
         77282,
-        77282,
         78042,
-        78839
+        78839,
+        80132
       ]
     },
     {
@@ -6588,8 +6577,8 @@
         "혐관",
         "언리밋"
       ],
-      "interactionCount": 77273,
-      "interactionDelta": 426,
+      "interactionCount": 77531,
+      "interactionDelta": 684,
       "rankChange": 4,
       "creatorHandle": "MildMine69",
       "creatorNickname": "JK",
@@ -6613,8 +6602,8 @@
         "다각관계",
         "로맨스"
       ],
-      "interactionCount": 77605,
-      "interactionDelta": 2438,
+      "interactionCount": 78061,
+      "interactionDelta": 2894,
       "rankChange": 4,
       "creatorHandle": "Winter10",
       "creatorNickname": "김겨울",
@@ -6638,8 +6627,8 @@
         "로맨스",
         "일상"
       ],
-      "interactionCount": 91026,
-      "interactionDelta": 5601,
+      "interactionCount": 92699,
+      "interactionDelta": 7274,
       "rankChange": 6,
       "creatorHandle": "FluidWhale1383",
       "creatorNickname": "FluidWhale1383",
@@ -6665,8 +6654,8 @@
         "보스",
         "느와르"
       ],
-      "interactionCount": 73264,
-      "interactionDelta": 763,
+      "interactionCount": 73345,
+      "interactionDelta": 844,
       "rankChange": 4,
       "creatorHandle": "OEE_ll",
       "creatorNickname": "설화",
@@ -6676,7 +6665,8 @@
         70087,
         70508,
         70948,
-        71798
+        71798,
+        72501
       ]
     },
     {
@@ -6690,8 +6680,8 @@
         "집착",
         "연애"
       ],
-      "interactionCount": 77060,
-      "interactionDelta": 911,
+      "interactionCount": 77423,
+      "interactionDelta": 1274,
       "rankChange": 2,
       "creatorHandle": "m_m_0o0_",
       "creatorNickname": "애매",
@@ -6715,8 +6705,8 @@
         "피폐",
         "집착"
       ],
-      "interactionCount": 79798,
-      "interactionDelta": 2868,
+      "interactionCount": 80188,
+      "interactionDelta": 3258,
       "rankChange": 4,
       "creatorHandle": "Cnlgidwhswnd",
       "creatorNickname": "취향존중",
@@ -6740,8 +6730,8 @@
         "유부녀",
         "이웃"
       ],
-      "interactionCount": 76004,
-      "interactionDelta": 849,
+      "interactionCount": 76113,
+      "interactionDelta": 958,
       "rankChange": 4,
       "creatorHandle": "beefprotin",
       "creatorNickname": "고기는단백질",
@@ -6762,8 +6752,8 @@
         "경멸",
         "부자"
       ],
-      "interactionCount": 67682,
-      "interactionDelta": 1619,
+      "interactionCount": 68799,
+      "interactionDelta": 2736,
       "rankChange": 4,
       "creatorHandle": "sandra",
       "creatorNickname": "Sandra",
@@ -6787,8 +6777,8 @@
         "트라우마",
         "복수"
       ],
-      "interactionCount": 84725,
-      "interactionDelta": 1575,
+      "interactionCount": 85321,
+      "interactionDelta": 2171,
       "rankChange": 4,
       "creatorHandle": "hlblgl7942",
       "creatorNickname": "7942",
@@ -6812,8 +6802,8 @@
         "까칠",
         "제주도"
       ],
-      "interactionCount": 61662,
-      "interactionDelta": 2360,
+      "interactionCount": 62202,
+      "interactionDelta": 2900,
       "rankChange": 6,
       "creatorHandle": "VitalLinen4189",
       "creatorNickname": "뻐끔금붕어",
@@ -6837,8 +6827,8 @@
         "로맨스",
         "hl"
       ],
-      "interactionCount": 72947,
-      "interactionDelta": 831,
+      "interactionCount": 73121,
+      "interactionDelta": 1005,
       "rankChange": 4,
       "creatorHandle": "ModestEagle2393",
       "creatorNickname": "햄",
@@ -6848,7 +6838,8 @@
         69780,
         69953,
         70598,
-        71236
+        71236,
+        72116
       ]
     },
     {
@@ -6862,8 +6853,8 @@
         "하램",
         "길드"
       ],
-      "interactionCount": 68700,
-      "interactionDelta": 1467,
+      "interactionCount": 69085,
+      "interactionDelta": 1852,
       "rankChange": 5,
       "creatorHandle": "VioletStud7646",
       "creatorNickname": ".",
@@ -6873,7 +6864,8 @@
         63106,
         64188,
         64961,
-        66160
+        66160,
+        67233
       ]
     },
     {
@@ -6887,8 +6879,8 @@
         "연상",
         "빼앗기"
       ],
-      "interactionCount": 66832,
-      "interactionDelta": 1799,
+      "interactionCount": 67255,
+      "interactionDelta": 2222,
       "rankChange": 5,
       "creatorHandle": "STORYFACTORY",
       "creatorNickname": "이야기 공장",
@@ -6912,8 +6904,8 @@
         "공부",
         "학원물"
       ],
-      "interactionCount": 67187,
-      "interactionDelta": 2730,
+      "interactionCount": 67920,
+      "interactionDelta": 3463,
       "rankChange": 6,
       "creatorHandle": "WindyLatch6947",
       "creatorNickname": "WindyLatch6947",
@@ -6937,8 +6929,8 @@
         "소개팅",
         "알파"
       ],
-      "interactionCount": 81343,
-      "interactionDelta": 7841,
+      "interactionCount": 83035,
+      "interactionDelta": 9533,
       "rankChange": 10,
       "creatorHandle": "Hea1234",
       "creatorNickname": "해",
@@ -6946,11 +6938,11 @@
       "rank": 54,
       "interactionHistory": [
         41077,
-        47032,
+        41077,
         47032,
         54789,
         63924,
-        73502
+        63924
       ]
     },
     {
@@ -6964,8 +6956,8 @@
         "헌팅",
         "지키기"
       ],
-      "interactionCount": 53483,
-      "interactionDelta": 1099,
+      "interactionCount": 53786,
+      "interactionDelta": 1402,
       "rankChange": 7,
       "creatorHandle": "deli1945",
       "creatorNickname": "댈람",
@@ -6989,8 +6981,8 @@
         "오해",
         "괴롭힘"
       ],
-      "interactionCount": 60011,
-      "interactionDelta": 1401,
+      "interactionCount": 60423,
+      "interactionDelta": 1813,
       "rankChange": 5,
       "creatorHandle": "MusclyFoot1634",
       "creatorNickname": "바니바니",
@@ -7000,7 +6992,8 @@
         56450,
         56875,
         57305,
-        58149
+        58149,
+        58610
       ]
     },
     {
@@ -7014,8 +7007,8 @@
         "혐관",
         "가부장"
       ],
-      "interactionCount": 64897,
-      "interactionDelta": 2606,
+      "interactionCount": 65287,
+      "interactionDelta": 2996,
       "rankChange": 5,
       "creatorHandle": "Navillera",
       "creatorNickname": "나빌레라",
@@ -7025,7 +7018,8 @@
         57469,
         58789,
         59508,
-        60723
+        60723,
+        62291
       ]
     },
     {
@@ -7039,8 +7033,8 @@
         "참교육",
         "재회"
       ],
-      "interactionCount": 53968,
-      "interactionDelta": 6030,
+      "interactionCount": 54582,
+      "interactionDelta": 6644,
       "rankChange": 8,
       "creatorHandle": "MaronielN",
       "creatorNickname": "마로니엘",
@@ -7051,8 +7045,7 @@
         39229,
         40673,
         40673,
-        46302,
-        47938
+        46302
       ]
     },
     {
@@ -7066,8 +7059,8 @@
         "집착",
         "삼각관계"
       ],
-      "interactionCount": 60105,
-      "interactionDelta": 1313,
+      "interactionCount": 60168,
+      "interactionDelta": 1376,
       "rankChange": 5,
       "creatorHandle": "JumpyBeago0975",
       "creatorNickname": "부엉이달님",
@@ -7091,8 +7084,8 @@
         "고등학교",
         "망상"
       ],
-      "interactionCount": 52757,
-      "interactionDelta": 2204,
+      "interactionCount": 52993,
+      "interactionDelta": 2440,
       "rankChange": 9,
       "creatorHandle": "I_eat_",
       "creatorNickname": "똥을 너한테 던지면",
@@ -7116,8 +7109,8 @@
         "일진녀",
         "일진무리"
       ],
-      "interactionCount": 43138,
-      "interactionDelta": 1164,
+      "interactionCount": 43866,
+      "interactionDelta": 1892,
       "rankChange": 4,
       "creatorHandle": "SsaLiger9921",
       "creatorNickname": "SsaLiger9921",
@@ -7141,8 +7134,8 @@
         "유저바라기",
         "소꿉친구"
       ],
-      "interactionCount": 46860,
-      "interactionDelta": 1814,
+      "interactionCount": 47148,
+      "interactionDelta": 2102,
       "rankChange": 9,
       "creatorHandle": "buckyou127",
       "creatorNickname": "디발",
@@ -7166,8 +7159,8 @@
         "언리밋",
         "언리밋모드"
       ],
-      "interactionCount": 40679,
-      "interactionDelta": 701,
+      "interactionCount": 40760,
+      "interactionDelta": 782,
       "rankChange": 4,
       "creatorHandle": "Nia1",
       "creatorNickname": "니아",
@@ -7177,7 +7170,8 @@
         39063,
         39325,
         39448,
-        39703
+        39703,
+        39978
       ]
     },
     {
@@ -7191,11 +7185,11 @@
         "덩치차이",
         "순애남"
       ],
-      "interactionCount": 47474,
-      "interactionDelta": 1439,
+      "interactionCount": 48015,
+      "interactionDelta": 1980,
       "rankChange": 6,
       "creatorHandle": "heee_0_0",
-      "creatorNickname": "늘먹그맛",
+      "creatorNickname": "맛있다고 소문난 늘먹그맛",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ddde8ae0-fdbe-4859-8a19-412918f33a5a/08c4ac7d-91f5-479c-b344-b337ddd99eff.jpeg",
       "rank": 65,
       "interactionHistory": [
@@ -7216,8 +7210,8 @@
         "간첩",
         "hl"
       ],
-      "interactionCount": 41782,
-      "interactionDelta": 242,
+      "interactionCount": 41814,
+      "interactionDelta": 274,
       "rankChange": 3,
       "creatorHandle": "StarlightNight",
       "creatorNickname": "별빛밤",
@@ -7227,7 +7221,8 @@
         41062,
         41077,
         41336,
-        41471
+        41471,
+        41540
       ]
     },
     {
@@ -7241,8 +7236,8 @@
         "비서",
         "집착"
       ],
-      "interactionCount": 62098,
-      "interactionDelta": 9594,
+      "interactionCount": 63623,
+      "interactionDelta": 11119,
       "rankChange": 12,
       "creatorHandle": "goooni",
       "creatorNickname": "고니",
@@ -7268,8 +7263,8 @@
         "범죄",
         "범죄자"
       ],
-      "interactionCount": 43448,
-      "interactionDelta": 751,
+      "interactionCount": 43703,
+      "interactionDelta": 1006,
       "rankChange": 5,
       "creatorHandle": "ahhh_haaa",
       "creatorNickname": "아아하",
@@ -7279,7 +7274,8 @@
         40158,
         40708,
         41074,
-        41809
+        41809,
+        42697
       ]
     },
     {
@@ -7293,8 +7289,8 @@
         "다공일수",
         "여우"
       ],
-      "interactionCount": 57729,
-      "interactionDelta": 1535,
+      "interactionCount": 58108,
+      "interactionDelta": 1914,
       "rankChange": 5,
       "creatorHandle": "jjayy_w0w",
       "creatorNickname": "純愛⚘️",
@@ -7318,8 +7314,8 @@
         "생존",
         "살아남기"
       ],
-      "interactionCount": 40691,
-      "interactionDelta": 693,
+      "interactionCount": 40748,
+      "interactionDelta": 750,
       "rankChange": 5,
       "creatorHandle": "SunWoo2857",
       "creatorNickname": "서누",
@@ -7343,8 +7339,8 @@
         "판타지",
         "순애"
       ],
-      "interactionCount": 42100,
-      "interactionDelta": 899,
+      "interactionCount": 42256,
+      "interactionDelta": 1055,
       "rankChange": 6,
       "creatorHandle": "mikuko_0831",
       "creatorNickname": "미쿠코",
@@ -7368,8 +7364,8 @@
         "차가움",
         "반전"
       ],
-      "interactionCount": 38320,
-      "interactionDelta": 212,
+      "interactionCount": 38376,
+      "interactionDelta": 268,
       "rankChange": 4,
       "creatorHandle": "GDDR7",
       "creatorNickname": "96GB",
@@ -7393,8 +7389,8 @@
         "고등학생",
         "찐따"
       ],
-      "interactionCount": 38018,
-      "interactionDelta": 829,
+      "interactionCount": 38185,
+      "interactionDelta": 996,
       "rankChange": 5,
       "creatorHandle": "Sapphire0209",
       "creatorNickname": "사파이어",
@@ -7418,8 +7414,8 @@
         "세계관",
         "헌터"
       ],
-      "interactionCount": 41118,
-      "interactionDelta": 4160,
+      "interactionCount": 42400,
+      "interactionDelta": 5442,
       "rankChange": 18,
       "creatorHandle": "OEE_ll",
       "creatorNickname": "설화",
@@ -7443,8 +7439,8 @@
         "소시오패스",
         "재회"
       ],
-      "interactionCount": 40093,
-      "interactionDelta": 680,
+      "interactionCount": 40146,
+      "interactionDelta": 733,
       "rankChange": 5,
       "creatorHandle": "selly8174",
       "creatorNickname": "Selly",
@@ -7468,8 +7464,8 @@
         "배덕",
         "소유욕"
       ],
-      "interactionCount": 45010,
-      "interactionDelta": 1114,
+      "interactionCount": 45148,
+      "interactionDelta": 1252,
       "rankChange": 7,
       "creatorHandle": "9_.27am_",
       "creatorNickname": "시가",
@@ -7479,7 +7475,8 @@
         40720,
         41444,
         41967,
-        42770
+        42770,
+        43896
       ]
     },
     {
@@ -7493,8 +7490,8 @@
         "룸메이트",
         "존예"
       ],
-      "interactionCount": 37267,
-      "interactionDelta": 1029,
+      "interactionCount": 37698,
+      "interactionDelta": 1460,
       "rankChange": 5,
       "creatorHandle": "MaronielN",
       "creatorNickname": "마로니엘",
@@ -7504,7 +7501,8 @@
         33250,
         34146,
         34498,
-        35060
+        35060,
+        36238
       ]
     },
     {
@@ -7516,8 +7514,8 @@
         "순애",
         "후회"
       ],
-      "interactionCount": 32886,
-      "interactionDelta": 39,
+      "interactionCount": 32904,
+      "interactionDelta": 57,
       "rankChange": 3,
       "creatorHandle": "HarshDiver1550",
       "creatorNickname": "마이쬬",
@@ -7541,8 +7539,8 @@
         "일진녀",
         "일진남"
       ],
-      "interactionCount": 33086,
-      "interactionDelta": 1327,
+      "interactionCount": 33422,
+      "interactionDelta": 1663,
       "rankChange": 6,
       "creatorHandle": "anythinging",
       "creatorNickname": "아무거나",
@@ -7566,8 +7564,8 @@
         "로맨스",
         "경쟁"
       ],
-      "interactionCount": 31477,
-      "interactionDelta": 450,
+      "interactionCount": 31509,
+      "interactionDelta": 482,
       "rankChange": 4,
       "creatorHandle": "Bigpicture",
       "creatorNickname": "빅픽쳐",
@@ -7591,8 +7589,8 @@
         "지배",
         "복종"
       ],
-      "interactionCount": 31277,
-      "interactionDelta": 528,
+      "interactionCount": 31364,
+      "interactionDelta": 615,
       "rankChange": 5,
       "creatorHandle": "VastBongo9421",
       "creatorNickname": "헤헤 꼴",
@@ -7613,11 +7611,11 @@
         "순애보",
         "강제동거"
       ],
-      "interactionCount": 35862,
-      "interactionDelta": 1176,
+      "interactionCount": 35876,
+      "interactionDelta": 1190,
       "rankChange": 6,
       "creatorHandle": "heee_0_0",
-      "creatorNickname": "늘먹그맛",
+      "creatorNickname": "맛있다고 소문난 늘먹그맛",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ddde8ae0-fdbe-4859-8a19-412918f33a5a/08c4ac7d-91f5-479c-b344-b337ddd99eff.jpeg",
       "rank": 82,
       "interactionHistory": [
@@ -7637,8 +7635,8 @@
         "체육쌤",
         "언리밋"
       ],
-      "interactionCount": 41427,
-      "interactionDelta": 1658,
+      "interactionCount": 41538,
+      "interactionDelta": 1769,
       "rankChange": 8,
       "creatorHandle": "chix2",
       "creatorNickname": "치치",
@@ -7662,8 +7660,8 @@
         "복수",
         "로맨스"
       ],
-      "interactionCount": 41003,
-      "interactionDelta": 2372,
+      "interactionCount": 41501,
+      "interactionDelta": 2870,
       "rankChange": 6,
       "creatorHandle": "selly8174",
       "creatorNickname": "Selly",
@@ -7687,8 +7685,8 @@
         "강압적",
         "계략"
       ],
-      "interactionCount": 36920,
-      "interactionDelta": 479,
+      "interactionCount": 37221,
+      "interactionDelta": 780,
       "rankChange": 4,
       "creatorHandle": "u_uoO",
       "creatorNickname": "눈눈",
@@ -7698,7 +7696,8 @@
         35238,
         35369,
         35699,
-        36094
+        36094,
+        36441
       ]
     },
     {
@@ -7712,8 +7711,8 @@
         "로맨스",
         "유저바라기"
       ],
-      "interactionCount": 31567,
-      "interactionDelta": 215,
+      "interactionCount": 31568,
+      "interactionDelta": 216,
       "rankChange": 7,
       "creatorHandle": "SourMedal0793",
       "creatorNickname": "SourMedal0793",
@@ -7737,8 +7736,8 @@
         "순애",
         "집착"
       ],
-      "interactionCount": 34108,
-      "interactionDelta": 2031,
+      "interactionCount": 34342,
+      "interactionDelta": 2265,
       "rankChange": 8,
       "creatorHandle": "Kio1",
       "creatorNickname": "케이오",
@@ -7748,7 +7747,8 @@
         29444,
         30102,
         30532,
-        31324
+        31324,
+        32077
       ]
     },
     {
@@ -7762,8 +7762,8 @@
         "인외",
         "능글"
       ],
-      "interactionCount": 39003,
-      "interactionDelta": 3835,
+      "interactionCount": 40090,
+      "interactionDelta": 4922,
       "rankChange": 11,
       "creatorHandle": "Petit_Lily",
       "creatorNickname": "小百合",
@@ -7784,8 +7784,8 @@
         "초능력",
         "hl"
       ],
-      "interactionCount": 29094,
-      "interactionDelta": 542,
+      "interactionCount": 29304,
+      "interactionDelta": 752,
       "rankChange": 7,
       "creatorHandle": "Shortsleep0055",
       "creatorNickname": "짧잠",
@@ -7834,8 +7834,8 @@
         "여남박",
         "bl"
       ],
-      "interactionCount": 30109,
-      "interactionDelta": 652,
+      "interactionCount": 30272,
+      "interactionDelta": 815,
       "rankChange": 6,
       "creatorHandle": "RunnyCage3661",
       "creatorNickname": "RunnyCage3661",
@@ -7859,8 +7859,8 @@
         "바람",
         "집착"
       ],
-      "interactionCount": 33885,
-      "interactionDelta": 451,
+      "interactionCount": 34272,
+      "interactionDelta": 838,
       "rankChange": 8,
       "creatorHandle": "Hea1234",
       "creatorNickname": "해",
@@ -7884,8 +7884,8 @@
         "혐관",
         "고등학생"
       ],
-      "interactionCount": 26029,
-      "interactionDelta": 662,
+      "interactionCount": 26103,
+      "interactionDelta": 736,
       "rankChange": 6,
       "creatorHandle": "MaronielN",
       "creatorNickname": "마로니엘",
@@ -7909,8 +7909,8 @@
         "일진녀",
         "찐따남"
       ],
-      "interactionCount": 23699,
-      "interactionDelta": 768,
+      "interactionCount": 23790,
+      "interactionDelta": 859,
       "rankChange": 6,
       "creatorHandle": "WetKnee3498",
       "creatorNickname": "테무산 단종",
@@ -7934,7 +7934,7 @@
         "누나",
         "순종"
       ],
-      "interactionCount": 35443,
+      "interactionCount": 38141,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "MOKALUV",
@@ -7942,8 +7942,7 @@
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/5f1ba305-0231-47a2-86b3-07aee821048a/99270b5e-300b-46ac-925c-3d63608c823f.png",
       "rank": 95,
       "interactionHistory": [
-        19542,
-        28522
+        19542
       ]
     },
     {
@@ -7957,7 +7956,7 @@
         "혐관",
         "까칠"
       ],
-      "interactionCount": 33138,
+      "interactionCount": 33353,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Suwol_99",
@@ -7979,7 +7978,7 @@
         "무뚝뚝",
         "배우"
       ],
-      "interactionCount": 32385,
+      "interactionCount": 32504,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "MiNiNiMi",
@@ -7998,7 +7997,7 @@
         "로맨스",
         "꼬시기"
       ],
-      "interactionCount": 21664,
+      "interactionCount": 21738,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Sky1231",
@@ -8017,7 +8016,7 @@
         "HL",
         "로어북"
       ],
-      "interactionCount": 27421,
+      "interactionCount": 27455,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "ITCHU",
@@ -8048,28 +8047,24 @@
   "tagTrend": {
     "순애": [
       {
-        "score": 5447,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 5039,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 5040,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 5859,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 4430,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 5243,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 5906,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 5582,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 5782,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 5433,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 4925,
@@ -8080,34 +8075,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 4442,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 5366,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "bl": [
       {
-        "score": 10963,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 10568,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 9821,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 10839,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 11353,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 10981,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 12499,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 11275,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 10073,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 12935,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 10830,
@@ -8118,34 +8113,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 10217,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 10555,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "gl": [
       {
-        "score": 2308,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 1431,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 2651,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 2163,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 2312,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 2149,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 2230,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 1991,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 2621,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 1446,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 1909,
@@ -8156,34 +8151,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 1542,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 1639,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "ntr_agg": [
       {
-        "score": 2482,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 3108,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 3121,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 1799,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 2852,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 2779,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 1652,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 2166,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 2558,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 2135,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 2168,
@@ -8194,34 +8189,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 1864,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 2069,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "hpj_agg": [
       {
-        "score": 14429,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 16514,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 15661,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 13381,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 14485,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 15735,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 13240,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 13140,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 12479,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 14010,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 11814,
@@ -8232,34 +8227,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 13956,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 12671,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "harem_agg": [
       {
-        "score": 1418,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 1518,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 1513,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 1318,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 1425,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 1196,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 1633,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 1894,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 2064,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 1522,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 1282,
@@ -8270,34 +8265,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 1219,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 1499,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "혐관": [
       {
-        "score": 5653,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 7484,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 5659,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 6109,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 5761,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 7317,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 5137,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 5584,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 4825,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 5633,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 5339,
@@ -8308,34 +8303,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 6684,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 5789,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "능글": [
       {
-        "score": 2155,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 2163,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 3159,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 1688,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 2781,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 2098,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 2684,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 2358,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 1941,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 2119,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 2468,
@@ -8346,34 +8341,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 1848,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 2335,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "소꿉친구": [
       {
-        "score": 2341,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 2040,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 2297,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 2322,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 2640,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 2223,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 2862,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 1914,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 2197,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 2449,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 2069,
@@ -8384,34 +8379,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 1957,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 2083,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "배신": [
       {
-        "score": 480,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 646,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 705,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 637,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 615,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 539,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 568,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 532,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 390,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 583,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 768,
@@ -8422,34 +8417,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 745,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 542,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "오지콤": [
       {
-        "score": 1125,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 1387,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 1361,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 904,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 1953,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 1727,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 1196,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 1459,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 1078,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 1634,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 1449,
@@ -8460,34 +8455,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 1194,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 1288,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "짝사랑": [
       {
-        "score": 1112,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 757,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 967,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 865,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 1167,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 861,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 1412,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 1787,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 1769,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 1433,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 1564,
@@ -8498,34 +8493,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 1655,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 1607,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "fantasy_agg": [
       {
-        "score": 5919,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 5954,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 5651,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 6772,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 6312,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 5694,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 7241,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 8004,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 7775,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 7615,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 5856,
@@ -8536,34 +8531,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 6083,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 6310,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "isekai_agg": [
       {
-        "score": 514,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 920,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 903,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 792,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 1219,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 1052,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 708,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 1140,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 1004,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 831,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 522,
@@ -8574,34 +8569,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 1153,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 914,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "무협": [
       {
-        "score": 356,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 273,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 49,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 275,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 147,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 57,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 148,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 57,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 57,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 198,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 56,
@@ -8613,21 +8608,25 @@
       },
       {
         "score": 60,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
+        "score": 60,
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "sf": [
       {
         "score": 0,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 0,
@@ -8635,11 +8634,7 @@
       },
       {
         "score": 0,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 0,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 0,
@@ -8651,33 +8646,33 @@
       },
       {
         "score": 0,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "thriller_agg": [
       {
-        "score": 70,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 69,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
         "score": 68,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 72,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 159,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 246,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 279,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 186,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 177,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 207,
@@ -8689,21 +8684,25 @@
       },
       {
         "score": 0,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "학원": [
       {
         "score": 0,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 0,
@@ -8711,11 +8710,7 @@
       },
       {
         "score": 0,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 0,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 0,
@@ -8727,21 +8722,25 @@
       },
       {
         "score": 0,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "현대": [
       {
-        "score": 312,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 241,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 62,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 63,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 68,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 67,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 143,
@@ -8749,11 +8748,7 @@
       },
       {
         "score": 65,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 65,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 65,
@@ -8765,33 +8760,33 @@
       },
       {
         "score": 69,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
+        "score": 69,
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "수인": [
       {
-        "score": 1210,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 838,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 1563,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 567,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 392,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 590,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 629,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 1064,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 730,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 945,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 589,
@@ -8802,34 +8797,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 633,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 332,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "재벌": [
       {
-        "score": 1173,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 1460,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 1556,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 1828,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 1293,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 1795,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 1554,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 1788,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 1759,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 1736,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 1388,
@@ -8840,22 +8835,26 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 1746,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 1316,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "연예계": [
       {
         "score": 0,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 0,
@@ -8863,11 +8862,7 @@
       },
       {
         "score": 0,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 0,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 0,
@@ -8879,33 +8874,33 @@
       },
       {
         "score": 0,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "게임": [
       {
-        "score": 552,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 339,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 666,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 285,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 327,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 373,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 261,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 392,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 260,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 515,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 395,
@@ -8916,34 +8911,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 460,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 265,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "일상": [
       {
-        "score": 3109,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 2662,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 2423,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 3021,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 1277,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 1611,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 2448,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 2110,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 2105,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 2350,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 2169,
@@ -8954,34 +8949,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 1891,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 1714,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "대학생": [
       {
-        "score": 3342,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 2599,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 3879,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 4008,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 3558,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 3393,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 3848,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 4146,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 4127,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 3987,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 4178,
@@ -8992,34 +8987,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 3226,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 2909,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "일진": [
       {
-        "score": 1340,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 788,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 838,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 1259,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 1323,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 1293,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 2176,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 780,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 1900,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 1218,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 1154,
@@ -9030,34 +9025,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 1241,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 1544,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "조직": [
       {
-        "score": 1793,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 1553,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 1901,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 1657,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 1682,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 1546,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 1462,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 2066,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 1944,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 2571,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 1834,
@@ -9068,34 +9063,34 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 2325,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 2184,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ],
     "정략결혼": [
       {
-        "score": 358,
-        "ts": "2026-04-22T19:13:32.056+00:00"
+        "score": 360,
+        "ts": "2026-04-22T20:48:59.635+00:00"
       },
       {
-        "score": 474,
-        "ts": "2026-04-23T05:25:29.9+00:00"
+        "score": 469,
+        "ts": "2026-04-23T07:29:21.965+00:00"
       },
       {
-        "score": 701,
-        "ts": "2026-04-23T17:15:05.599+00:00"
+        "score": 702,
+        "ts": "2026-04-23T19:01:46.593+00:00"
       },
       {
         "score": 725,
         "ts": "2026-04-24T02:07:54.489+00:00"
       },
       {
-        "score": 504,
-        "ts": "2026-04-24T07:54:35.461+00:00"
-      },
-      {
-        "score": 660,
-        "ts": "2026-04-24T11:02:31.908+00:00"
+        "score": 434,
+        "ts": "2026-04-24T09:26:56.571+00:00"
       },
       {
         "score": 436,
@@ -9106,8 +9101,12 @@
         "ts": "2026-04-24T15:04:14.713+00:00"
       },
       {
+        "score": 539,
+        "ts": "2026-04-24T16:50:25.312+00:00"
+      },
+      {
         "score": 719,
-        "ts": "2026-04-24T17:45:46.410Z"
+        "ts": "2026-04-24T18:41:58.288Z"
       }
     ]
   },
@@ -9142,62 +9141,63 @@
     "정략결혼": 719
   },
   "tagScoresDelta": {
-    "순애": 861,
-    "bl": -969,
-    "gl": -851,
-    "ntr_agg": -824,
-    "hpj_agg": -994,
-    "harem_agg": -98,
-    "혐관": 206,
-    "능글": -60,
-    "소꿉친구": -682,
-    "배신": -98,
-    "오지콤": -57,
-    "짝사랑": -578,
-    "fantasy_agg": 465,
-    "isekai_agg": -228,
-    "무협": 4,
+    "순애": 924,
+    "bl": 338,
+    "gl": 97,
+    "ntr_agg": 205,
+    "hpj_agg": -1285,
+    "harem_agg": 280,
+    "혐관": -895,
+    "능글": 487,
+    "소꿉친구": 126,
+    "배신": -203,
+    "오지콤": 94,
+    "짝사랑": -48,
+    "fantasy_agg": 227,
+    "isekai_agg": -239,
+    "무협": 0,
     "sf": 0,
-    "thriller_agg": null,
+    "thriller_agg": 0,
     "학원": 0,
-    "현대": 4,
-    "수인": -348,
-    "재벌": -461,
+    "현대": 0,
+    "수인": -301,
+    "재벌": -430,
     "연예계": 0,
-    "게임": -136,
-    "일상": -70,
-    "대학생": -806,
-    "일진": 159,
-    "조직": 302,
-    "정략결혼": 1
+    "게임": -195,
+    "일상": -177,
+    "대학생": -317,
+    "일진": 303,
+    "조직": -141,
+    "정략결혼": 180
   },
   "tagScoresDeltaRef": {
-    "순애": 3,
-    "bl": 3,
-    "gl": 3,
-    "ntr_agg": 3,
-    "hpj_agg": 3,
-    "harem_agg": 3,
-    "혐관": 3,
-    "능글": 3,
-    "소꿉친구": 3,
-    "배신": 3,
-    "오지콤": 3,
-    "짝사랑": 3,
-    "fantasy_agg": 3,
-    "isekai_agg": 3,
-    "무협": 3,
-    "sf": 3,
-    "학원": 3,
-    "현대": 3,
-    "수인": 3,
-    "재벌": 3,
-    "연예계": 3,
-    "게임": 3,
-    "일상": 3,
-    "대학생": 3,
-    "일진": 3,
-    "조직": 3,
-    "정략결혼": 3
+    "순애": 2,
+    "bl": 2,
+    "gl": 2,
+    "ntr_agg": 2,
+    "hpj_agg": 2,
+    "harem_agg": 2,
+    "혐관": 2,
+    "능글": 2,
+    "소꿉친구": 2,
+    "배신": 2,
+    "오지콤": 2,
+    "짝사랑": 2,
+    "fantasy_agg": 2,
+    "isekai_agg": 2,
+    "무협": 2,
+    "sf": 2,
+    "thriller_agg": 2,
+    "학원": 2,
+    "현대": 2,
+    "수인": 2,
+    "재벌": 2,
+    "연예계": 2,
+    "게임": 2,
+    "일상": 2,
+    "대학생": 2,
+    "일진": 2,
+    "조직": 2,
+    "정략결혼": 2
   }
 }
