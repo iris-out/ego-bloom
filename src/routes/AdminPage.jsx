@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../utils/supabase';
 
+const PULSE_STYLE = '@keyframes admin-pulse{0%,100%{opacity:.5}50%{opacity:1}}';
+if (typeof document !== 'undefined' && !document.getElementById('admin-pulse-kf')) {
+  const s = document.createElement('style');
+  s.id = 'admin-pulse-kf';
+  s.textContent = PULSE_STYLE;
+  document.head.appendChild(s);
+}
+
 function formatDate(iso) {
   if (!iso) return '-';
   const d = new Date(iso);
@@ -29,6 +37,7 @@ export default function AdminPage() {
   const [query, setQuery] = useState('');
   const [reason, setReason] = useState('');
   const [blocked, setBlocked] = useState([]);
+  const [listLoading, setListLoading] = useState(false);
   const [msg, setMsg] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -43,9 +52,11 @@ export default function AdminPage() {
 
   const fetchBlocked = useCallback(async () => {
     if (!token) return;
+    setListLoading(true);
     const data = await adminFetch('GET', token);
     if (data.blocked) setBlocked(data.blocked);
     else setMsg({ type: 'error', text: data.error || '목록을 불러올 수 없습니다.' });
+    setListLoading(false);
   }, [token]);
 
   useEffect(() => {
@@ -147,8 +158,14 @@ export default function AdminPage() {
       </section>
 
       <section style={S.section}>
-        <h2 style={S.h2}>차단된 사용자 ({blocked.length}명)</h2>
-        {blocked.length === 0 ? (
+        <h2 style={S.h2}>차단된 사용자 ({listLoading ? '…' : `${blocked.length}명`})</h2>
+        {listLoading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} style={{ height: 40, borderRadius: 8, background: 'rgba(255,255,255,0.05)', animation: 'admin-pulse 1.5s ease-in-out infinite', opacity: 1 - i * 0.15 }} />
+            ))}
+          </div>
+        ) : blocked.length === 0 ? (
           <p style={{ color: '#6b7280', fontSize: 14 }}>차단된 사용자가 없습니다.</p>
         ) : (
           <table style={S.table}>
