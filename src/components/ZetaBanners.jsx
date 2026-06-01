@@ -118,7 +118,11 @@ export default function ZetaBanners() {
             const isUrl = banner.clickAction?.type === 'externalLink';
             const rawHref = banner.clickAction?.href || '';
             const localHref = rawHref.startsWith('/ko') ? rawHref : `/ko${rawHref}`;
-            const href = isUrl ? banner.clickAction.url : `https://zeta-ai.io${localHref}`;
+            const externalUrl = (() => {
+              try { return new URL(banner.clickAction?.url || '').protocol === 'https:' ? banner.clickAction.url : null; }
+              catch { return null; }
+            })();
+            const href = isUrl ? externalUrl : `https://zeta-ai.io${localHref}`;
 
             return (
               <div key={banner.id} className="relative flex-none w-[280px] sm:w-[320px] snap-center group">

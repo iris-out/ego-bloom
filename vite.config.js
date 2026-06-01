@@ -137,11 +137,13 @@ function supabaseApiPlugin(env) {
         try {
           if (!supabase) throw new Error('Supabase not configured');
           const url = new URL(req.url, `http://${req.headers.host}`);
-          const q = url.searchParams.get('q');
-          
-          if (!q) {
+          const raw = (url.searchParams.get('q') || '').replace(/@/g, '').trim();
+          const sanitized = raw.replace(/[^a-zA-Z0-9가-힣\s._-]/g, '').trim();
+          const q = sanitized.replace(/%/g, '\\%').replace(/_/g, '\\_');
+
+          if (!q || q.length < 2) {
             res.setHeader('Content-Type', 'application/json');
-            return res.end(JSON.stringify({ error: '검색어를 입력해주세요.' }));
+            return res.end(JSON.stringify({ error: '검색어는 2자 이상 입력해주세요.' }));
           }
 
           const { data: users, error: searchError } = await supabase
