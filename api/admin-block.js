@@ -16,6 +16,27 @@ function readBody(req) {
   });
 }
 
+const HANDLE_RE = /^[a-zA-Z0-9가-힣._-]{1,50}$/;
+
+async function resolveHandleFromZeta(cleanHandle) {
+  if (!HANDLE_RE.test(cleanHandle)) return null;
+  try {
+    const res = await fetch(`https://zeta-ai.io/@${encodeURIComponent(cleanHandle)}`, {
+      redirect: 'follow',
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; EgoBloom-Admin/1.0)' },
+    });
+    let finalHost = '';
+    try { finalHost = new URL(res.url).hostname; } catch {}
+    if (!finalHost.endsWith('zeta-ai.io')) return null;
+    let match = res.url.match(/creators\/([a-f0-9-]{36})/i);
+    if (!match) {
+      const html = await res.text();
+      match = html.match(/creators\/([a-f0-9-]{36})/i);
+    }
+    return match?.[1] ?? null;
+  } catch { return null; }
+}
+
 async function verifyAdmin(req) {
   const auth = req.headers.authorization;
   if (!auth?.startsWith('Bearer ')) return null;
@@ -61,29 +82,68 @@ export default async function handler(req, res) {
     const { id, handle, reason } = payload;
     if (!id && !handle) return res.status(400).json({ error: 'id 또는 handle이 필요합니다.' });
 
-    let targetId = id;
-    if (!targetId) {
+    const now = new Date().toISOString();
+    const blockFields = {
+      is_blocked: true,
+      blocked_reason: reason?.trim() || null,
+      blocked_at: now,
+    };
+
+    // ── 핸들로 차단 ──
+    if (!id) {
       const clean = (handle || '').replace(/^@/, '').trim();
+
+      // 1. DB에서 먼저 조회
       const { data: found } = await supabase
         .from('account_current')
         .select('id')
         .eq('handle', clean)
         .single();
-      if (!found) return res.status(404).json({ error: '해당 크리에이터를 찾을 수 없습니다.' });
-      targetId = found.id;
+
+      if (found) {
+        // 이미 등록된 사용자 → 바로 업데이트
+        const { error } = await supabase
+          .from('account_current')
+          .update(blockFields)
+          .eq('id', found.id);
+        if (error) return res.status(500).json({ error: error.message });
+        return res.status(200).json({ success: true, id: found.id });
+      }
+
+      // 2. DB에 없으면 Zeta API로 UUID 조회
+      const resolvedId = await resolveHandleFromZeta(clean);
+      if (!resolvedId) return res.status(404).json({ error: '해당 크리에이터를 찾을 수 없습니다.' });
+
+      // 3. 최소 행 upsert (update-creator가 나중에 채워줌, is_blocked는 유지됨)
+      const { error } = await supabase
+        .from('account_current')
+        .upsert({
+          id: resolvedId,
+          handle: clean,
+          nickname: clean,
+          follower_count: 0,
+          plot_interaction_count: 0,
+          voice_play_count: 0,
+          elo_score: 0,
+          tier_name: 'BRONZE',
+          updated_at: now,
+          ...blockFields,
+        }, { onConflict: 'id' });
+      if (error) return res.status(500).json({ error: error.message });
+      return res.status(200).json({ success: true, id: resolvedId, preRegistered: true });
     }
 
-    const { error } = await supabase
+    // ── UUID로 차단 ──
+    const { data: updated, error } = await supabase
       .from('account_current')
-      .update({
-        is_blocked: true,
-        blocked_reason: reason?.trim() || null,
-        blocked_at: new Date().toISOString(),
-      })
-      .eq('id', targetId);
-
+      .update(blockFields)
+      .eq('id', id)
+      .select('id');
     if (error) return res.status(500).json({ error: error.message });
-    return res.status(200).json({ success: true, id: targetId });
+    if (!updated || updated.length === 0) {
+      return res.status(404).json({ error: 'DB에 등록되지 않은 사용자입니다. @핸들로 다시 시도해주세요.' });
+    }
+    return res.status(200).json({ success: true, id });
   }
 
   // DELETE: 차단 해제

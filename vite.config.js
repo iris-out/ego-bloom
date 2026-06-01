@@ -417,19 +417,41 @@ function supabaseApiPlugin(env) {
           if (req.method === 'POST') {
             const { id, handle, reason } = payload;
             if (!id && !handle) return json(400, { error: 'id 또는 handle이 필요합니다.' });
-            let targetId = id;
-            if (!targetId) {
+
+            const now = new Date().toISOString();
+            const blockFields = { is_blocked: true, blocked_reason: reason?.trim() || null, blocked_at: now };
+
+            if (!id) {
               const clean = (handle || '').replace(/^@/, '').trim();
               const { data: found } = await supabase.from('account_current').select('id').eq('handle', clean).single();
-              if (!found) return json(404, { error: '해당 크리에이터를 찾을 수 없습니다.' });
-              targetId = found.id;
+              if (found) {
+                const { error } = await supabase.from('account_current').update(blockFields).eq('id', found.id);
+                return error ? json(500, { error: error.message }) : json(200, { success: true, id: found.id });
+              }
+              const resolved = await (async () => {
+                if (!/^[a-zA-Z0-9가-힣._-]{1,50}$/.test(clean)) return null;
+                try {
+                  const r = await fetch(`https://zeta-ai.io/@${encodeURIComponent(clean)}`, { redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0 (compatible; EgoBloom-Admin/1.0)' } });
+                  let host = ''; try { host = new URL(r.url).hostname; } catch {}
+                  if (!host.endsWith('zeta-ai.io')) return null;
+                  let m = r.url.match(/creators\/([a-f0-9-]{36})/i);
+                  if (!m) { const html = await r.text(); m = html.match(/creators\/([a-f0-9-]{36})/i); }
+                  return m?.[1] ?? null;
+                } catch { return null; }
+              })();
+              if (!resolved) return json(404, { error: '해당 크리에이터를 찾을 수 없습니다.' });
+              const { error } = await supabase.from('account_current').upsert({
+                id: resolved, handle: clean, nickname: clean,
+                follower_count: 0, plot_interaction_count: 0, voice_play_count: 0,
+                elo_score: 0, tier_name: 'BRONZE', updated_at: now, ...blockFields,
+              }, { onConflict: 'id' });
+              return error ? json(500, { error: error.message }) : json(200, { success: true, id: resolved, preRegistered: true });
             }
-            const { error } = await supabase.from('account_current').update({
-              is_blocked: true,
-              blocked_reason: reason?.trim() || null,
-              blocked_at: new Date().toISOString(),
-            }).eq('id', targetId);
-            return error ? json(500, { error: error.message }) : json(200, { success: true, id: targetId });
+
+            const { data: updated, error } = await supabase.from('account_current').update(blockFields).eq('id', id).select('id');
+            if (error) return json(500, { error: error.message });
+            if (!updated?.length) return json(404, { error: 'DB에 등록되지 않은 사용자입니다. @핸들로 다시 시도해주세요.' });
+            return json(200, { success: true, id });
           }
 
           if (req.method === 'DELETE') {
