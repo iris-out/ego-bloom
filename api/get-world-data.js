@@ -26,6 +26,7 @@ export default async function handler(req, res) {
     const { data, error } = await supabase
       .from('account_current')
       .select('id, nickname, handle, elo_score, tier_name')
+      .eq('is_blocked', false)
       .order('elo_score', { ascending: false })
       .limit(1000);
 

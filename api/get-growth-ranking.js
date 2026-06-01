@@ -39,6 +39,12 @@ export default async function handler(req, res) {
     const blacklist = (process.env.RANK_BLACKLIST || '')
       .split(',').map(s => s.trim()).filter(s => UUID_RE.test(s));
 
+    const { data: blockedRows } = await supabase
+      .from('account_current')
+      .select('id')
+      .eq('is_blocked', true);
+    const blockedSet = new Set((blockedRows || []).map(r => r.id));
+
     const todayKST     = getKSTDateString(0);
     const threeDaysAgo = getKSTDateString(3);
 
@@ -57,7 +63,7 @@ export default async function handler(req, res) {
     }
 
     // 이 윈도우에 포함된 크리에이터 ID 목록
-    const windowIds = [...new Set(historyRows.map(r => r.id))].filter(id => !blacklist.includes(id));
+    const windowIds = [...new Set(historyRows.map(r => r.id))].filter(id => !blacklist.includes(id) && !blockedSet.has(id));
 
     // 크리에이터별 전체 레코드 수 조회 (등록 기간 판단)
     let totalRecordMap = {};
@@ -78,7 +84,7 @@ export default async function handler(req, res) {
     // 크리에이터별 그룹화
     const byCreator = {};
     for (const row of historyRows) {
-      if (blacklist.includes(row.id)) continue;
+      if (blacklist.includes(row.id) || blockedSet.has(row.id)) continue;
       if (!byCreator[row.id]) byCreator[row.id] = [];
       byCreator[row.id].push(row);
     }

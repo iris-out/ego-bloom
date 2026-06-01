@@ -8,6 +8,14 @@
             "destination": "/api/resolve-handle"
         },
         {
+            "source": "/api/admin-block",
+            "destination": "/api/admin-block"
+        },
+        {
+            "source": "/api/check-blocked",
+            "destination": "/api/check-blocked"
+        },
+        {
             "source": "/api/get-season-rankings",
             "destination": "/api/get-season-rankings"
         },

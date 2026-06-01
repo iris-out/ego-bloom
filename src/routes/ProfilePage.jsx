@@ -344,6 +344,17 @@ export default function ProfilePage() {
       
       if (!id.match(/^[0-9a-fA-F-]{36}$/)) throw new Error('올바른 Creator ID 또는 @핸들이 아닙니다.');
 
+      // 차단된 사용자 확인
+      try {
+        const blockedRes = await fetch(`/api/check-blocked?id=${id}`);
+        if (blockedRes.ok) {
+          const { blocked } = await blockedRes.json();
+          if (blocked) throw new Error('존재하지 않는 사용자입니다.');
+        }
+      } catch (e) {
+        if (e.message === '존재하지 않는 사용자입니다.') throw e;
+      }
+
       const cacheKey = CACHE_KEY_PREFIX + id;
       if (!forceRefresh) {
         const cached = localStorage.getItem(cacheKey);

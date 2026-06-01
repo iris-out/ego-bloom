@@ -365,6 +365,87 @@ function supabaseApiPlugin(env) {
         }
       });
 
+      server.middlewares.use('/api/check-blocked', async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        try {
+          if (!supabase) return res.end(JSON.stringify({ blocked: false }));
+          const url = new URL(req.url, `http://${req.headers.host}`);
+          const id = url.searchParams.get('id') || '';
+          if (!/^[0-9a-fA-F-]{36}$/.test(id)) return res.end(JSON.stringify({ blocked: false }));
+          const { data } = await supabase.from('account_current').select('is_blocked').eq('id', id).single();
+          res.end(JSON.stringify({ blocked: data?.is_blocked === true }));
+        } catch { res.end(JSON.stringify({ blocked: false })); }
+      });
+
+      server.middlewares.use('/api/admin-block', async (req, res) => {
+        const json = (status, data) => {
+          res.statusCode = status;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify(data));
+        };
+        try {
+          if (!supabase) return json(500, { error: 'Database not configured' });
+
+          // JWT 인증 + admin_users 확인
+          const auth = req.headers.authorization;
+          if (!auth?.startsWith('Bearer ')) return json(401, { error: '관리자 권한이 없습니다.' });
+          const token = auth.slice(7);
+          const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
+          if (authErr || !user) return json(401, { error: '관리자 권한이 없습니다.' });
+          const { data: adminRow } = await supabase.from('admin_users').select('user_id').eq('user_id', user.id).single();
+          if (!adminRow) return json(401, { error: '관리자 권한이 없습니다.' });
+
+          if (req.method === 'GET') {
+            const { data, error } = await supabase
+              .from('account_current')
+              .select('id, handle, nickname, elo_score, is_blocked, blocked_reason, blocked_at')
+              .eq('is_blocked', true)
+              .order('blocked_at', { ascending: false });
+            return error ? json(500, { error: error.message }) : json(200, { blocked: data ?? [] });
+          }
+
+          const raw = await new Promise(resolve => {
+            let body = '';
+            req.on('data', c => { body += c.toString(); });
+            req.on('end', () => resolve(body));
+          });
+          let payload;
+          try { payload = JSON.parse(raw); } catch { return json(400, { error: 'Invalid JSON' }); }
+
+          if (req.method === 'POST') {
+            const { id, handle, reason } = payload;
+            if (!id && !handle) return json(400, { error: 'id 또는 handle이 필요합니다.' });
+            let targetId = id;
+            if (!targetId) {
+              const clean = (handle || '').replace(/^@/, '').trim();
+              const { data: found } = await supabase.from('account_current').select('id').eq('handle', clean).single();
+              if (!found) return json(404, { error: '해당 크리에이터를 찾을 수 없습니다.' });
+              targetId = found.id;
+            }
+            const { error } = await supabase.from('account_current').update({
+              is_blocked: true,
+              blocked_reason: reason?.trim() || null,
+              blocked_at: new Date().toISOString(),
+            }).eq('id', targetId);
+            return error ? json(500, { error: error.message }) : json(200, { success: true, id: targetId });
+          }
+
+          if (req.method === 'DELETE') {
+            const { id } = payload;
+            if (!id) return json(400, { error: 'id가 필요합니다.' });
+            const { error } = await supabase.from('account_current')
+              .update({ is_blocked: false, blocked_reason: null, blocked_at: null })
+              .eq('id', id);
+            return error ? json(500, { error: error.message }) : json(200, { success: true });
+          }
+
+          json(405, { error: 'Method Not Allowed' });
+        } catch (err) {
+          console.error('[admin-block] Error:', err);
+          json(500, { error: 'Internal Server Error' });
+        }
+      });
+
       server.middlewares.use('/api/get-world-data', async (req, res, next) => {
         try {
           if (!supabase) throw new Error('Supabase not configured');

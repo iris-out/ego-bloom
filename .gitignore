@@ -45,6 +45,7 @@ SKILL.md
 
 # environment
 .env
+.env.example
 plan.md
 todo.md
 .agent/

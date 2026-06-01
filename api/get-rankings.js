@@ -38,6 +38,7 @@ export default async function handler(req, res) {
     let query = supabase
       .from('account_current')
       .select('id, nickname, handle, elo_score, tier_name, profile_image_url, follower_count, plot_interaction_count, voice_play_count, updated_at')
+      .eq('is_blocked', false)
       .order('elo_score', { ascending: false });
 
     if (blacklist.length > 0) {

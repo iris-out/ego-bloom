@@ -27,6 +27,7 @@ export default async function handler(req, res) {
     let query = supabase
       .from('account_current')
       .select('id, nickname, handle, elo_score, tier_name, follower_count, plot_interaction_count')
+      .eq('is_blocked', false)
       .gt('elo_score', 0);
 
     if (blacklist.length > 0) {

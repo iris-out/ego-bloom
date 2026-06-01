@@ -36,6 +36,7 @@ export default async function handler(req, res) {
     const { data: users, error: searchErr } = await supabase
       .from('account_current')
       .select('*')
+      .eq('is_blocked', false)
       .or(`nickname.ilike.%${escaped}%,handle.ilike.%${escaped}%`)
       .order('elo_score', { ascending: false })
       .limit(1);
