@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { toBlob } from 'html-to-image';
 import { Camera } from 'lucide-react';
-import PlotRankingItem from './PlotRankingItem';
+import PlotRankingItem, { PlotPosterCard } from './PlotRankingItem';
 import FilterDropdown from './FilterDropdown';
 import { proxyThumbnailUrl } from '../../utils/imageUtils';
 import { formatNumber } from '../../utils/tierCalculator';
@@ -531,9 +531,12 @@ export default function PlotRankingList({ rankingData }) {
                 onClick={() => handleSubTab(t)}
                 className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-[13px] sm:text-[15px] font-semibold transition-all ${
                   subTab === t
-                    ? 'bg-indigo-500/50 text-white border border-indigo-400/70 shadow-sm shadow-indigo-500/20'
-                    : 'bg-white/[0.07] text-white/50 border border-white/[0.13] hover:bg-white/[0.12] hover:text-white/75 hover:border-white/25'
+                    ? 'text-white shadow-sm'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
                 }`}
+                style={subTab === t
+                  ? { background: '#e11d48', boxShadow: '0 4px 14px -4px rgba(225,29,72,0.6)' }
+                  : undefined}
               >
                 {t}
               </button>
@@ -574,56 +577,31 @@ export default function PlotRankingList({ rankingData }) {
         </div>
       </div>
 
-      {/* 데스크탑 헤더 (sm+): 5열 그리드 */}
-      <div className="hidden sm:grid plot-ranking-grid items-center gap-x-2 mb-1">
-        <span style={{ fontSize: '11px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)', textAlign: 'center' }}>순위</span>
-        <span style={{ fontSize: '11px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)' }}>플롯</span>
-        <span style={{ fontSize: '11px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)', textAlign: 'right', width: '188px' }}>태그</span>
-        <span style={{ fontSize: '11px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)', textAlign: 'right' }}>대화</span>
-        <span style={{ fontSize: '11px', color: 'var(--c-label)', letterSpacing: 'var(--label-tracking)', textAlign: 'right', paddingRight: '8px' }}>2시간</span>
-      </div>
-      {/* 모바일 헤더 (< sm): 간단 2열 */}
-      <div className="sm:hidden flex items-center px-2 mb-1 gap-x-2">
-        <span className="text-[11px] text-white/45 w-16 text-center shrink-0">순위</span>
-        <span className="text-[11px] text-white/45 flex-1">플롯</span>
-        <span className="text-[11px] text-white/45">대화 / 2시간</span>
-      </div>
-
       {!rankingData ? (
         /* 스켈레톤 */
-        <div className="flex flex-col">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="border-b border-white/5">
-              <div className="hidden sm:grid plot-ranking-grid items-center gap-x-2 py-3">
-                <div className="h-6 w-10 rounded bg-white/10 animate-pulse mx-auto" />
-                <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-full bg-white/10 animate-pulse shrink-0" />
-                  <div className="flex-1 space-y-1.5">
-                    <div className="h-4 rounded bg-white/10 animate-pulse w-3/4" />
-                    <div className="h-3 rounded bg-white/5 animate-pulse w-1/2" />
-                  </div>
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-3 gap-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-xl border border-white/10 bg-white/[0.04] animate-pulse"
+                style={{ aspectRatio: '2 / 3' }}
+              />
+            ))}
+          </div>
+          <div className="flex flex-col gap-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5">
+                <div className="h-5 w-8 rounded bg-white/10 animate-pulse" />
+                <div className="h-11 w-11 rounded-lg bg-white/10 animate-pulse shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-4 w-3/4 rounded bg-white/10 animate-pulse" />
+                  <div className="h-3 w-1/2 rounded bg-white/5 animate-pulse" />
                 </div>
-                <div className="h-5 rounded-full bg-white/5 animate-pulse" style={{ width: '188px' }} />
-                <div className="h-4 rounded bg-white/10 animate-pulse" />
-                <div className="h-4 rounded bg-white/5 animate-pulse mr-2" />
+                <div className="h-4 w-10 rounded bg-white/10 animate-pulse" />
               </div>
-              <div className="sm:hidden py-3 px-2">
-                <div className="flex items-center gap-2.5 mb-1.5">
-                  <div className="w-16 h-6 rounded bg-white/10 animate-pulse shrink-0" />
-                  <div className="w-10 h-10 rounded-full bg-white/10 animate-pulse shrink-0" />
-                  <div className="flex-1 space-y-1.5">
-                    <div className="h-4 rounded bg-white/10 animate-pulse w-3/4" />
-                    <div className="h-3 rounded bg-white/5 animate-pulse w-1/2" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 pl-[108px]">
-                  <div className="h-3 w-12 rounded-full bg-white/5 animate-pulse" />
-                  <div className="h-3 w-10 rounded bg-white/10 animate-pulse ml-auto" />
-                  <div className="w-10 h-2 rounded-full bg-white/5 animate-pulse" />
-                </div>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       ) : plots.length === 0 ? (
         <div className="flex-1 flex items-center justify-center text-white/45 text-[14px]">
@@ -631,16 +609,30 @@ export default function PlotRankingList({ rankingData }) {
         </div>
       ) : (
         <>
-          <div className="flex flex-col divide-y divide-white/5">
-            {visiblePlots.map((plot, i) => (
-              <PlotRankingItem
-                key={plot.id}
-                plot={plot}
-                rank={i + 1}
-                maxDelta={maxDelta}
-              />
-            ))}
-          </div>
+          {/* Top 10 — 가로 스크롤 포스터 레일 (넷플릭스) */}
+          {visiblePlots.length > 0 && (
+            <div className="flex gap-3.5 sm:gap-4 overflow-x-auto pb-3 pt-1 pl-2 mb-4 snap-x snap-mandatory scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 [scrollbar-width:thin]">
+              {visiblePlots.slice(0, 10).map((plot, i) => (
+                <div key={plot.id} className="shrink-0 snap-start w-[120px] sm:w-[140px]">
+                  <PlotPosterCard plot={plot} rank={i + 1} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Rank 11+ — compact dense list */}
+          {visiblePlots.length > 10 && (
+            <div className="flex flex-col gap-2">
+              {visiblePlots.slice(10).map((plot, i) => (
+                <PlotRankingItem
+                  key={plot.id}
+                  plot={plot}
+                  rank={i + 11}
+                  maxDelta={maxDelta}
+                />
+              ))}
+            </div>
+          )}
 
           {/* 무한 스크롤 센티넬 */}
           {hasMore && (

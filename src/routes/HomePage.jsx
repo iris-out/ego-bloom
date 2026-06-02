@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Database, Lock, BarChart2, Hash, Trophy, Star, Zap, PanelRight, PanelRightClose } from 'lucide-react';
+import { Database, Lock, BarChart2, Hash, Trophy, Star, Zap, PanelRight, PanelRightClose, History, Clapperboard } from 'lucide-react';
 import { useServerStatus } from '../hooks/useServerStatus';
 import ChangelogModal from '../components/ChangelogModal';
 import DataCollectionModal from '../components/DataCollectionModal';
@@ -10,8 +10,8 @@ import EmergencyToast from '../components/EmergencyToast';
 import ServerAlertCard from '../components/ServerAlertCard';
 import SearchPill from '../components/SearchPill';
 import AnnouncementTicker from '../components/home/AnnouncementTicker';
-import TagTrendStrip from '../components/home/TagTrendStrip';
-import TagBubbleSection from '../components/home/TagBubbleSection';
+import TagTrendCards from '../components/home/TagTrendCards';
+import MainHall from '../components/home/MainHall';
 import PlotRankingList from '../components/home/PlotRankingList';
 import TagTrendingList from '../components/home/TagTrendingList';
 import CreatorRankingList from '../components/home/CreatorRankingList';
@@ -76,9 +76,10 @@ const TIME_BG = {
 };
 
 const TABS = [
+  { label: '메인',          short: '메인',   Icon: Clapperboard },
   { label: '2시간 차트',    short: '차트',   Icon: BarChart2 },
-  { label: '지금 뜨는 태그', short: '태그',   Icon: Hash      },
   { label: '크리에이터 순위', short: '순위',   Icon: Trophy    },
+  { label: '인기 태그',     short: '태그',   Icon: Hash      },
   { label: '즐겨찾기',      short: '즐찾기', Icon: Star      },
   { label: '인사이트',      short: '인사이트', Icon: Zap, mobileOnly: true },
 ];
@@ -117,15 +118,16 @@ export default function HomePage() {
     () => localStorage.getItem('ego-bloom-warning-agreed') === 'true'
   );
   const [activeTab, setActiveTab] = useState(0);
-  const [bubbleTabOverride, setBubbleTabOverride] = useState(null);
+  const [focusTag, setFocusTag] = useState(null);
   const [rankingData, setRankingData] = useState(null);
   const [showTimeline, setShowTimeline] = useState(() =>
     localStorage.getItem('ego-bloom-timeline-visible') !== 'false'
   );
 
-  const handleTagStripClick = (bubbleTab) => {
-    setActiveTab(1);
-    setBubbleTabOverride(bubbleTab);
+  // 인기 태그 카드 클릭 → 메인 탭의 해당 태그 레일로 점프
+  const handleTagJump = (familyKey) => {
+    setFocusTag(familyKey);
+    setActiveTab(0);
   };
 
   const handleTimelineToggle = () => {
@@ -184,7 +186,7 @@ export default function HomePage() {
         <header className="flex items-center justify-between px-4 py-3 border-b border-white/5">
           {/* Left: logo + (PC) data btn + server status */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 cursor-pointer select-none" onClick={() => setShowChangelogModal(true)}>
+            <div className="flex items-center gap-2 cursor-pointer select-none" onClick={() => navigate('/')}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
                 <path d="M8 12 L12 8 L16 12 L12 16 Z" fill="rgba(129,140,248,0.8)" />
@@ -200,6 +202,17 @@ export default function HomePage() {
 
           {/* Right: mobile = status+openworld+data btn; PC = openworld btn + search bar */}
           <div className="flex items-center gap-2">
+            {/* Update log button (all viewports) */}
+            <button
+              onClick={() => setShowChangelogModal(true)}
+              title="업데이트 로그"
+              aria-label="업데이트 로그"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition-colors text-[11px] font-semibold hover:brightness-110"
+              style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)' }}
+            >
+              <History size={13} />
+              <span className="hidden sm:inline">업데이트</span>
+            </button>
             {/* Mobile: status + openworld + data btn */}
             <div className="flex lg:hidden items-center gap-2">
               <ServerStatusBadge status={serverStatus} />
@@ -240,9 +253,6 @@ export default function HomePage() {
               <SearchWithLock />
             </div>
 
-            {/* Tag Trend Strip */}
-            <TagTrendStrip tagTrend={rankingData?.tagTrend || {}} combined={rankingData?.combined || []} tagScores={rankingData?.tagScores ?? null} tagScoresDelta={rankingData?.tagScoresDelta ?? null} tagScoresDeltaRef={rankingData?.tagScoresDeltaRef ?? null} onTagClick={handleTagStripClick} />
-
             {/* Main Tabs */}
             <div className="flex flex-col flex-1">
               <div className="flex border-b border-white/10 mb-4">
@@ -268,7 +278,8 @@ export default function HomePage() {
                     <span className="hidden lg:inline text-[13px]">{label}</span>
                   </button>
                 ))}
-                {/* PC 전용: 인사이트 패널 토글 버튼 */}
+                {/* PC 전용: 인사이트 패널 토글 버튼 (메인 탭에서는 숨김) */}
+                {activeTab !== 0 && (
                 <div className="hidden lg:flex items-center ml-auto self-center pl-2">
                   <button
                     onClick={handleTimelineToggle}
@@ -283,14 +294,16 @@ export default function HomePage() {
                     <span>{showTimeline ? '타임라인 접기' : '타임라인 펴기'}</span>
                   </button>
                 </div>
+                )}
               </div>
 
-              {activeTab === 0 && <PlotRankingList rankingData={rankingData} />}
-              {activeTab === 1 && <TagBubbleSection tagTrend={rankingData?.tagTrend || {}} tagScores={rankingData?.tagScores ?? null} tagScoresDelta={rankingData?.tagScoresDelta ?? null} activeTabOverride={bubbleTabOverride} />}
+              {activeTab === 0 && <MainHall rankingData={rankingData} focusTag={focusTag} />}
+              {activeTab === 1 && <PlotRankingList rankingData={rankingData} />}
               {activeTab === 2 && <CreatorRankingList />}
-              {activeTab === 3 && <FavoritesPanel />}
+              {activeTab === 3 && <TagTrendCards tagScores={rankingData?.tagScores ?? null} tagScoresDelta={rankingData?.tagScoresDelta ?? null} tagTrend={rankingData?.tagTrend ?? null} onTagClick={handleTagJump} />}
+              {activeTab === 4 && <FavoritesPanel />}
               {/* 인사이트 탭: 모바일 전용 (PC는 사이드바로 표시) */}
-              {activeTab === 4 && (
+              {activeTab === 5 && (
                 <div className="lg:hidden">
                   <RankingTimeline rankingData={rankingData} />
                 </div>
@@ -303,8 +316,8 @@ export default function HomePage() {
             <motion.div
               className="flex flex-col overflow-hidden"
               animate={{
-                width: showTimeline ? 368 : 0,
-                opacity: showTimeline ? 1 : 0,
+                width: (showTimeline && activeTab !== 0) ? 368 : 0,
+                opacity: (showTimeline && activeTab !== 0) ? 1 : 0,
               }}
               transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
             >
