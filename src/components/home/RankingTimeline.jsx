@@ -38,9 +38,9 @@ function PlotRow({ plot, rank, extra, hideRank = false }) {
       <div className="flex-1 min-w-0">
         <p className="text-[13px] font-medium text-white/90 truncate leading-tight">{plot.name}</p>
         {extra ? (
-          <p className="text-[12px] text-indigo-300/70 truncate">{extra}</p>
+          <p className="text-[12px] text-indigo-300/80 truncate">{extra}</p>
         ) : plot.creatorHandle ? (
-          <p className="text-[12px] text-white/30 truncate">@{plot.creatorHandle}</p>
+          <p className="text-[12px] text-white/45 truncate">@{plot.creatorHandle}</p>
         ) : null}
       </div>
 
@@ -59,7 +59,7 @@ function Section({ title, badge, children }) {
   return (
     <div className="mb-3">
       <div className="flex items-center gap-2 mb-2 px-1">
-        <span className="text-[11px] font-bold tracking-widest text-white/30 uppercase">{title}</span>
+        <span className="text-[11px] font-bold tracking-widest text-white/45 uppercase">{title}</span>
         {badge && (
           <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300">{badge}</span>
         )}
@@ -114,15 +114,15 @@ export default function RankingTimeline({ rankingData }) {
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/5">
-        <span className="text-[13px] font-semibold text-white/50">랭킹 타임라인</span>
-        <span className="text-[11px] text-white/20">2시간마다 갱신</span>
+        <span className="text-[13px] font-semibold text-white/65">랭킹 타임라인</span>
+        <span className="text-[11px] text-white/40">2시간마다 갱신</span>
       </div>
 
       <div>
         <Section title="가장 많이 오른 캐릭터" badge="↑">
           {risingPlots.length > 0
             ? risingPlots.map((p, i) => <PlotRow key={p.id} plot={p} rank={i + 1} />)
-            : <p className="text-[11px] text-white/20 px-2 py-1">데이터 없음</p>
+            : <p className="text-[11px] text-white/40 px-2 py-1">데이터 없음</p>
           }
         </Section>
 
@@ -131,21 +131,21 @@ export default function RankingTimeline({ rankingData }) {
             ? categoryTop.map((item) => (
                 <PlotRow key={item.plot.id} plot={item.plot} rank={item.label[0]} extra={item.label} />
               ))
-            : <p className="text-[11px] text-white/20 px-2 py-1">데이터 없음</p>
+            : <p className="text-[11px] text-white/40 px-2 py-1">데이터 없음</p>
           }
         </Section>
 
         <Section title="불륜/바람 캐릭터 TOP 3" badge="불륜">
           {ntrTop.length > 0
             ? ntrTop.map((p, i) => <PlotRow key={p.id} plot={p} rank={i + 1} extra={`# ${ntrTag(p)}`} />)
-            : <p className="text-[11px] text-white/20 px-2 py-1">데이터 없음</p>
+            : <p className="text-[11px] text-white/40 px-2 py-1">데이터 없음</p>
           }
         </Section>
 
         <Section title="순애 캐릭터 TOP 3" badge="순애">
           {sunaeTop.length > 0
             ? sunaeTop.map((p, i) => <PlotRow key={p.id} plot={p} rank={i + 1} />)
-            : <p className="text-[11px] text-white/20 px-2 py-1">데이터 없음</p>
+            : <p className="text-[11px] text-white/40 px-2 py-1">데이터 없음</p>
           }
         </Section>
       </div>

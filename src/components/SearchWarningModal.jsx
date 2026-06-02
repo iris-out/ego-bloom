@@ -56,15 +56,15 @@ export default function SearchWarningModal({ isOpen, onClose }) {
           width: '100%',
           maxWidth: '500px',
           maxHeight: '90vh',
-          background: '#0F0A1A',
-          border: '1px solid rgba(251, 146, 60, 0.2)',
-          borderRadius: '24px',
+          background: '#0A0612',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: '18px',
           overflowY: 'auto',
-          boxShadow: '0 32px 80px rgba(0,0,0,0.8), 0 0 40px rgba(251, 146, 60, 0.1)',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.7), 0 0 40px rgba(99,102,241,0.08)',
         }}
       >
-        {/* 상단 컬러 바 (주황색) */}
-        <div style={{ height: '4px', background: 'linear-gradient(to right, #fb923c, #f97316)' }} />
+        {/* 상단 컬러 바 (브랜드 그라데이션) */}
+        <div style={{ height: '3px', background: 'linear-gradient(to right, #a855f7, #6366f1)' }} />
 
         {/* 헤더 */}
         <div style={{
@@ -109,21 +109,21 @@ export default function SearchWarningModal({ isOpen, onClose }) {
         <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
           <div style={{ display: 'flex', gap: '16px' }}>
-            <div style={{ color: '#fb923c', flexShrink: 0, marginTop: '2px' }}><Info size={18} /></div>
+            <div style={{ color: '#818cf8', flexShrink: 0, marginTop: '2px' }}><Info size={18} /></div>
             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', lineHeight: '1.6', margin: 0 }}>
               검색 시 자동으로 랭킹에 등재되며, 대화량과 팔로워가 내부 계산을 통하여 점수화되어 티어와 함께 올라가게 됩니다.
             </p>
           </div>
 
           <div style={{ display: 'flex', gap: '16px' }}>
-            <div style={{ color: '#fb923c', flexShrink: 0, marginTop: '2px' }}><ShieldCheck size={18} /></div>
+            <div style={{ color: '#818cf8', flexShrink: 0, marginTop: '2px' }}><ShieldCheck size={18} /></div>
             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', lineHeight: '1.6', margin: 0 }}>
               제작자의 개인정보나 기타 민감한 정보를 수집하지 않습니다. 또한, 이를 이용하여 사적인 이득이나 영리적인 이득을 취하지 않습니다.
             </p>
           </div>
 
           <div style={{ display: 'flex', gap: '16px' }}>
-            <div style={{ color: '#fb923c', flexShrink: 0, marginTop: '2px' }}><UserMinus size={18} /></div>
+            <div style={{ color: '#818cf8', flexShrink: 0, marginTop: '2px' }}><UserMinus size={18} /></div>
             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', lineHeight: '1.6', margin: 0 }}>
               다른 사람이 자신을 검색하는 경우에도 랭킹에 등재되게 설정되어 있습니다. (제작자가 제작자 자신임을 인증할 수단이 없기 때문에 개방해 둔 기능입니다.)
             </p>
@@ -158,24 +158,24 @@ export default function SearchWarningModal({ isOpen, onClose }) {
           </div>
 
           {/* 체크박스 영역 */}
-          <div 
+          <div
             onClick={() => setAgreed(!agreed)}
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: '12px', 
-              padding: '16px', borderRadius: '16px', 
-              background: agreed ? 'rgba(251, 146, 60, 0.1)' : 'rgba(255,255,255,0.03)',
-              border: agreed ? '1px solid rgba(251, 146, 60, 0.3)' : '1px solid rgba(255,255,255,0.08)',
+            style={{
+              display: 'flex', alignItems: 'center', gap: '12px',
+              padding: '16px', borderRadius: '14px',
+              background: agreed ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.03)',
+              border: agreed ? '1px solid rgba(99,102,241,0.4)' : '1px solid rgba(255,255,255,0.08)',
               cursor: 'pointer', transition: 'all 0.2s'
             }}
           >
             <div style={{
               width: '24px', height: '24px', borderRadius: '6px',
               border: agreed ? 'none' : '2px solid rgba(255,255,255,0.2)',
-              background: agreed ? '#fb923c' : 'transparent',
-              display: 'flex', alignItems: 'center', justifyCenter: 'center',
-              transition: 'all 0.2s'
+              background: agreed ? '#6366f1' : 'transparent',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.2s', flexShrink: 0
             }}>
-              {agreed && <Check size={18} color="#000" strokeWidth={3} />}
+              {agreed && <Check size={18} color="#fff" strokeWidth={3} />}
             </div>
             <span style={{ fontSize: '14px', fontWeight: 700, color: agreed ? '#fff' : 'rgba(255,255,255,0.6)' }}>
               위 주의사항을 모두 읽었으며, 이에 동의합니다.
@@ -190,28 +190,30 @@ export default function SearchWarningModal({ isOpen, onClose }) {
             disabled={!agreed}
             style={{
               width: '100%',
-              padding: '16px',
-              borderRadius: '16px',
+              padding: '15px',
+              borderRadius: '12px',
               border: 'none',
               cursor: agreed ? 'pointer' : 'not-allowed',
-              background: agreed ? '#fb923c' : 'rgba(255,255,255,0.05)',
-              color: agreed ? '#000' : 'rgba(255,255,255,0.2)',
+              background: agreed
+                ? 'linear-gradient(to right, rgba(168,85,247,0.9), rgba(99,102,241,1))'
+                : 'rgba(255,255,255,0.05)',
+              color: agreed ? '#fff' : 'rgba(255,255,255,0.25)',
               fontSize: '15px',
               fontWeight: 800,
               letterSpacing: '-0.01em',
               transition: 'all 0.2s',
               outline: 'none',
-              boxShadow: agreed ? '0 4px 12px rgba(251, 146, 60, 0.3)' : 'none'
+              boxShadow: agreed ? '0 4px 16px rgba(99,102,241,0.35)' : 'none'
             }}
             onMouseEnter={e => {
               if (agreed) {
-                e.currentTarget.style.background = '#f97316';
+                e.currentTarget.style.filter = 'brightness(1.1)';
                 e.currentTarget.style.transform = 'translateY(-1px)';
               }
             }}
             onMouseLeave={e => {
               if (agreed) {
-                e.currentTarget.style.background = '#fb923c';
+                e.currentTarget.style.filter = 'brightness(1)';
                 e.currentTarget.style.transform = 'translateY(0)';
               }
             }}

@@ -276,16 +276,16 @@ export default function ProfileHeader({ profile, stats, characters, growthHistor
                   D+{breakdown.activityDays}
                 </span>
               )}
-              {globalRank != null && globalRank <= 50 && (
+              {globalRank != null && globalRank <= 100 && (
                 <span
-                  className="shrink-0 text-[10px] font-bold px-1.5 py-[2px] rounded-md"
+                  className="shrink-0 text-[10px] font-bold px-1.5 py-[2px] rounded-md whitespace-nowrap"
                   style={{
                     color: '#fbbf24',
                     background: 'rgba(251,191,36,0.12)',
                     border: '1px solid rgba(251,191,36,0.25)',
                   }}
                 >
-                  #{globalRank}
+                  상위 {globalRank}위
                 </span>
               )}
             </div>

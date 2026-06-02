@@ -540,7 +540,7 @@ export default function PlotRankingList({ rankingData }) {
             ))}
           </div>
           {rankingData?.updatedAt && (
-            <span className="text-[11px] text-white/25 shrink-0">
+            <span className="text-[11px] text-white/45 shrink-0">
               {formatKST(rankingData.updatedAt)}
             </span>
           )}
@@ -584,9 +584,9 @@ export default function PlotRankingList({ rankingData }) {
       </div>
       {/* 모바일 헤더 (< sm): 간단 2열 */}
       <div className="sm:hidden flex items-center px-2 mb-1 gap-x-2">
-        <span className="text-[11px] text-white/20 w-16 text-center shrink-0">순위</span>
-        <span className="text-[11px] text-white/20 flex-1">플롯</span>
-        <span className="text-[11px] text-white/20">대화 / 2시간</span>
+        <span className="text-[11px] text-white/45 w-16 text-center shrink-0">순위</span>
+        <span className="text-[11px] text-white/45 flex-1">플롯</span>
+        <span className="text-[11px] text-white/45">대화 / 2시간</span>
       </div>
 
       {!rankingData ? (
@@ -626,7 +626,7 @@ export default function PlotRankingList({ rankingData }) {
           ))}
         </div>
       ) : plots.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center text-white/20 text-[14px]">
+        <div className="flex-1 flex items-center justify-center text-white/45 text-[14px]">
           데이터 없음
         </div>
       ) : (
@@ -658,7 +658,7 @@ export default function PlotRankingList({ rankingData }) {
           )}
 
           {!hasMore && plots.length > 30 && (
-            <div className="py-4 text-center text-[12px] text-white/20">
+            <div className="py-4 text-center text-[12px] text-white/40">
               총 {plots.length}개 표시됨
             </div>
           )}

@@ -112,7 +112,7 @@ export default function PlotRankingItem({ plot, rank }) {
             <p className="text-[16px] sm:text-[15px] font-semibold sm:font-medium text-white truncate min-w-0 leading-tight">{name}</p>
           </div>
           {creatorHandle && (
-            <p className="text-[13px] text-white/35 truncate">@{creatorHandle}</p>
+            <p className="text-[13px] text-white/50 truncate">@{creatorHandle}</p>
           )}
         </div>
 

@@ -157,9 +157,9 @@ export default function HomePage() {
       {!hasAgreedToWarning && (
         <div
           onClick={() => setShowWarningModal(true)}
-          className={`absolute inset-0 bg-[#0F0A1A]/60 backdrop-blur-[4px] rounded-full flex items-center justify-center cursor-pointer border border-orange-500/30 hover:bg-[#0F0A1A]/40 transition-all`}
+          className={`absolute inset-0 bg-[#0F0A1A]/60 backdrop-blur-[4px] rounded-full flex items-center justify-center cursor-pointer border border-indigo-400/30 hover:bg-[#0F0A1A]/40 transition-all`}
         >
-          <div className={`flex items-center gap-2 text-orange-400 font-bold ${compact ? 'text-xs' : 'text-sm'}`}>
+          <div className={`flex items-center gap-2 text-indigo-300 font-bold ${compact ? 'text-xs' : 'text-sm'}`}>
             <Lock size={compact ? 13 : 16} />
             {!compact && <span>검색 가이드라인에 동의가 필요합니다</span>}
           </div>
@@ -232,9 +232,9 @@ export default function HomePage() {
         <AnnouncementTicker />
 
         {/* Content */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-0 px-4 pt-4 pb-8 max-w-7xl w-full mx-auto">
+        <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-0 px-4 pt-5 pb-8 max-w-7xl w-full mx-auto">
           {/* Left column: main content */}
-          <div className="flex flex-col gap-4 flex-1 min-w-0">
+          <div className="flex flex-col gap-5 flex-1 min-w-0">
             {/* Mobile-only search */}
             <div className="lg:hidden">
               <SearchWithLock />

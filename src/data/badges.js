@@ -88,10 +88,23 @@ export const BADGE_DEFINITIONS = [
   { id: 'truck',     emoji: '🚛', title: '트럭 주의',   description: '이세계/환생/회귀 태그',   desc: '#이세계, #환생, #회귀 등 태그 보유. "터엉-" ', color: 'orange',  category: 'tag' },
   { id: 'yethwi',    emoji: '🔄', title: '또 회귀함',   description: '#회귀 태그',               desc: '#회귀 태그 보유. 오늘도 회귀하는 당신', color: 'violet',  category: 'tag' },
   { id: 'healer',    emoji: '💊', title: '전문 힐러',   description: '#치유/힐링 태그',    desc: '#치유, #힐링 태그 보유.', color: 'emerald', category: 'tag' },
-  { id: 'ts',        emoji: '🎭', title: '수컷암컷실격', description: '#TS 태그',     desc: '있어야 할 게 없고 없어야 할 게 있다.',     color: 'gradient', category: 'tag' },
-  { id: 'madness',   emoji: '👁️', title: '맑눈광',       description: '#광기/#싸이코패스 태그', desc: '도망쳐', color: 'violet',   category: 'tag' },
-  { id: 'childhood', emoji: '🚲', title: '맛잘알',       description: '#소꿉친구 태그',   desc: '약속된 맛도리 조합', color: 'sky',      category: 'tag' },
-  { id: 'apocalypse',emoji: '🧟', title: '시켜볼게 있어', description: '#아포칼립스/#좀비 태그',desc: '터널 끝나면 들어간다.', color: 'lime',     category: 'tag' },
+  { id: 'ts',        emoji: '🎭', title: '수컷암컷실격', description: '#TS 태그',     desc: '#TS 태그 보유. 있어야 할 게 없고 없어야 할 게 있다.',     color: 'gradient', category: 'tag' },
+  { id: 'madness',   emoji: '👁️', title: '맑눈광',       description: '#광기/#싸이코패스 태그', desc: '#광기, #싸이코패스 태그 보유. 도망쳐', color: 'violet',   category: 'tag' },
+  { id: 'childhood', emoji: '🚲', title: '맛잘알',       description: '#소꿉친구 태그',   desc: '#소꿉친구 태그 보유. 약속된 맛도리 조합', color: 'sky',      category: 'tag' },
+  { id: 'apocalypse',emoji: '🧟', title: '시켜볼게 있어', description: '#아포칼립스/#좀비 태그',desc: '#아포칼립스, #좀비 태그 보유. 터널 끝나면 들어간다.', color: 'lime',     category: 'tag' },
+
+  // ─── 추가 개그/밈 태그 ───
+  { id: 'yandere',  emoji: '🔪', title: '안아줘안아줘안아줘안아줘',                 description: '#얀데레 태그',      desc: '#얀데레 태그 보유. 너… 어디 가?',                       color: 'red',    category: 'tag' },
+  { id: 'tsundere', emoji: '🙄', title: '딱..딱히! 널 위해서..준비한 건 아니라구!', description: '#츤데레 태그',      desc: '#츤데레 태그 보유. 벼,별로 안 좋아해',                  color: 'rose',   category: 'tag' },
+  { id: 'maid',     emoji: '🎀', title: '야레야레 못말리는 주인님',                description: '#메이드/#집사 태그', desc: '#메이드, #집사 태그 보유. 돌아오셨군요',                color: 'pink',   category: 'tag' },
+  { id: 'vampire',  emoji: '🧛', title: '한 입만',                                description: '#흡혈귀 태그',      desc: '#흡혈귀 태그 보유. 목 좀 빌릴게',                       color: 'violet', category: 'tag' },
+  { id: 'chaebol',  emoji: '💳', title: '내 카드 긁어',                           description: '#재벌 태그',        desc: '#재벌, #재벌집 태그 보유. 돈으로 안 되는 게 어딨어',     color: 'amber',  category: 'tag' },
+  { id: 'royalty',  emoji: '👑', title: '이 구역의 황녀',                         description: '#황제/#황녀 태그',  desc: '#황제, #황녀, #귀족 태그 보유. 고개를 들라',            color: 'yellow', category: 'tag' },
+  { id: 'villain',  emoji: '😈', title: '악역이라 죄송합니다',                    description: '#악역/#악녀 태그',  desc: '#악역, #악녀 태그 보유. 정해진 파멸 엔딩',              color: 'violet', category: 'tag' },
+  { id: 'hunter',   emoji: '⚔️', title: 'E급에서 시작',                           description: '#헌터/#던전 태그',  desc: '#헌터, #던전, #게이트 태그 보유. 오늘도 각성하는 당신',   color: 'blue',   category: 'tag' },
+  { id: 'contract', emoji: '💍', title: '서류상 부부',                            description: '#계약결혼 태그',    desc: '#계약결혼, #정략결혼 태그 보유. 사랑은 계약서에 없었는데', color: 'rose',   category: 'tag' },
+  { id: 'inhuman',  emoji: '👻', title: '사람은 아닙니다만',                      description: '#인외 태그',        desc: '#인외 태그 보유. 종족이 좀 다를 뿐',                    color: 'slate',  category: 'tag' },
+  { id: 'noona',    emoji: '🍷', title: '누나 믿지?',                             description: '#연상/#누나 태그',  desc: '#연상, #누나 태그 보유. 오빠가 사줄게…가 아니라',        color: 'pink',   category: 'tag' },
 
   // ─── 활동 기간 ───
   { id: 'newbie',    emoji: '🌱', title: '뉴비',         description: '활동 3개월 이하', desc: '활동 기간 3개월 이하',          color: 'emerald', category: 'activity' },
@@ -304,6 +317,58 @@ export function computeEarnedTitles(input) {
 
   const hasNo2nd = !characters.some(c => (c.hashtags || c.tags || []).some(t => MEDIA_SET.has(t.toLowerCase())));
   list.push({ id: 'original', emoji: '✨', title: '오리지널', desc: BADGE_DEFINITIONS.find(b => b.id === 'original')?.desc ?? '', color: 'sky', earned: hasNo2nd && characters.length > 0 });
+
+  // ─── 추가 개그/밈 태그 ───
+  const yandereChars = charsWithTag(characters, '얀데레');
+  list.push({ id: 'yandere',  emoji: D('yandere').emoji,  title: D('yandere').title,  desc: D('yandere').desc ?? '',  color: 'red',    earned: yandereChars.length > 0,  chars: yandereChars });
+  const tsundereChars = charsWithTag(characters, '츤데레');
+  list.push({ id: 'tsundere', emoji: D('tsundere').emoji, title: D('tsundere').title, desc: D('tsundere').desc ?? '', color: 'rose',   earned: tsundereChars.length > 0, chars: tsundereChars });
+  const maidChars = charsWithAnyTag(characters, ['메이드', '집사']);
+  list.push({ id: 'maid',     emoji: D('maid').emoji,     title: D('maid').title,     desc: D('maid').desc ?? '',     color: 'pink',   earned: maidChars.length > 0,     chars: maidChars });
+  const vampireChars = charsWithTag(characters, '흡혈귀');
+  list.push({ id: 'vampire',  emoji: D('vampire').emoji,  title: D('vampire').title,  desc: D('vampire').desc ?? '',  color: 'violet', earned: vampireChars.length > 0,  chars: vampireChars });
+  const chaebolChars = charsWithAnyTag(characters, ['재벌', '재벌집']);
+  list.push({ id: 'chaebol',  emoji: D('chaebol').emoji,  title: D('chaebol').title,  desc: D('chaebol').desc ?? '',  color: 'amber',  earned: chaebolChars.length > 0,  chars: chaebolChars });
+  const royaltyChars = charsWithAnyTag(characters, ['황제', '황녀', '귀족']);
+  list.push({ id: 'royalty',  emoji: D('royalty').emoji,  title: D('royalty').title,  desc: D('royalty').desc ?? '',  color: 'yellow', earned: royaltyChars.length > 0,  chars: royaltyChars });
+  const villainChars = charsWithAnyTag(characters, ['악역', '악녀']);
+  list.push({ id: 'villain',  emoji: D('villain').emoji,  title: D('villain').title,  desc: D('villain').desc ?? '',  color: 'violet', earned: villainChars.length > 0,  chars: villainChars });
+  const hunterChars = charsWithAnyTag(characters, ['헌터', '던전', '게이트']);
+  list.push({ id: 'hunter',   emoji: D('hunter').emoji,   title: D('hunter').title,   desc: D('hunter').desc ?? '',   color: 'blue',   earned: hunterChars.length > 0,   chars: hunterChars });
+  const contractChars = charsWithAnyTag(characters, ['계약결혼', '정략결혼']);
+  list.push({ id: 'contract', emoji: D('contract').emoji, title: D('contract').title, desc: D('contract').desc ?? '', color: 'rose',   earned: contractChars.length > 0, chars: contractChars });
+  const inhumanChars = charsWithTag(characters, '인외');
+  list.push({ id: 'inhuman',  emoji: D('inhuman').emoji,  title: D('inhuman').title,  desc: D('inhuman').desc ?? '',  color: 'slate',  earned: inhumanChars.length > 0,  chars: inhumanChars });
+  const noonaChars = charsWithAnyTag(characters, ['연상', '누나']);
+  list.push({ id: 'noona',    emoji: D('noona').emoji,    title: D('noona').title,    desc: D('noona').desc ?? '',    color: 'pink',   earned: noonaChars.length > 0,    chars: noonaChars });
+
+  // ─── 복구: 정의됐으나 list.push 누락으로 표시되지 않던 배지 ───
+  list.push({ id: 'mesu',    emoji: D('mesu').emoji,    title: D('mesu').title,    desc: D('mesu').desc ?? '',    color: 'pink',   earned: mesuChars.length > 0,    chars: mesuChars });
+  list.push({ id: 'unlimit', emoji: D('unlimit').emoji, title: D('unlimit').title, desc: D('unlimit').desc ?? '', color: 'violet', earned: unlimitedChars.length > 0, chars: unlimitedChars.map(c => c.name) });
+  const furryChars = charsWithAnyTag(characters, ['퍼리', '수인']);
+  list.push({ id: 'furry',   emoji: D('furry').emoji,   title: D('furry').title,   desc: D('furry').desc ?? '',   color: 'amber',  earned: furryChars.length > 0,   chars: furryChars });
+  const obsessiveChars = charsWithTag(characters, '집착');
+  list.push({ id: 'obsessive', emoji: D('obsessive').emoji, title: D('obsessive').title, desc: D('obsessive').desc ?? '', color: 'violet', earned: obsessiveChars.length >= 5, chars: obsessiveChars, progress: obsessiveChars.length < 5 ? { current: obsessiveChars.length, max: 5, label: '#집착 캐릭터' } : undefined });
+  list.push({ id: 'purelove', emoji: D('purelove').emoji, title: D('purelove').title, desc: D('purelove').desc ?? '', color: 'pink', earned: !hasNtr && sunaeChars.length >= 5, chars: sunaeChars, progress: (!hasNtr && sunaeChars.length < 5) ? { current: sunaeChars.length, max: 5, label: '#순애 캐릭터' } : undefined });
+  const iljinChars = charsWithTag(characters, '일진');
+  list.push({ id: 'iljin',   emoji: D('iljin').emoji,   title: D('iljin').title,   desc: D('iljin').desc ?? '',   color: 'orange', earned: iljinChars.length > 0,   chars: iljinChars });
+  const jjinddaChars = charsWithTag(characters, '찐따');
+  list.push({ id: 'jjindda', emoji: D('jjindda').emoji, title: D('jjindda').title, desc: D('jjindda').desc ?? '', color: 'slate',  earned: jjinddaChars.length > 0, chars: jjinddaChars });
+  const heroChars = charsWithTag(characters, '히어로');
+  list.push({ id: 'hero',    emoji: D('hero').emoji,    title: D('hero').title,    desc: D('hero').desc ?? '',    color: 'amber',  earned: heroChars.length > 0,    chars: heroChars });
+  const academyChars = charsWithTag(characters, '아카데미');
+  list.push({ id: 'academy', emoji: D('academy').emoji, title: D('academy').title, desc: D('academy').desc ?? '', color: 'indigo', earned: academyChars.length > 0, chars: academyChars });
+  const hyeongwanChars = charsWithTag(characters, '혐관');
+  list.push({ id: 'hyeongwan', emoji: D('hyeongwan').emoji, title: D('hyeongwan').title, desc: D('hyeongwan').desc ?? '', color: 'slate', earned: hyeongwanChars.length > 0, chars: hyeongwanChars });
+  const pipyeChars = charsWithTag(characters, '피폐');
+  list.push({ id: 'pipye',   emoji: D('pipye').emoji,   title: D('pipye').title,   desc: D('pipye').desc ?? '',   color: 'violet', earned: pipyeChars.length > 0,   chars: pipyeChars });
+  const sihanbuChars = charsWithTag(characters, '시한부');
+  list.push({ id: 'sihanbu', emoji: D('sihanbu').emoji, title: D('sihanbu').title, desc: D('sihanbu').desc ?? '', color: 'red',    earned: sihanbuChars.length > 0, chars: sihanbuChars });
+
+  // ─── 활동 기간 (복구) ───
+  list.push({ id: 'newbie',   emoji: D('newbie').emoji,   title: D('newbie').title,   desc: D('newbie').desc ?? '',   color: 'emerald', earned: activityDays > 0 && activityMonths <= 3 });
+  list.push({ id: 'oneyear',  emoji: D('oneyear').emoji,  title: D('oneyear').title,  desc: D('oneyear').desc ?? '',  color: 'emerald', earned: activityDays >= 365 });
+  list.push({ id: 'military', emoji: D('military').emoji, title: D('military').title, desc: D('military').desc ?? '', color: 'blue',    earned: activityDays >= 548 });
 
 
   // BADGE_DEFINITIONS에서 category 필드 매핑 (list.push마다 category를 넣지 않았으므로 여기서 보완)
