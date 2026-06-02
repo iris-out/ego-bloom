@@ -51,6 +51,17 @@ async function verifyAdmin(req) {
   return adminRow ? user : null;
 }
 
+async function logBlockAction(targetId, targetHandle, targetNickname, action, reason, adminEmail) {
+  await supabase.from('block_history').insert({
+    target_id: targetId,
+    target_handle: targetHandle || null,
+    target_nickname: targetNickname || null,
+    action,
+    reason: reason || null,
+    admin_email: adminEmail,
+  });
+}
+
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
   if (!supabase) return res.status(500).json({ error: 'Database not configured' });
@@ -58,8 +69,21 @@ export default async function handler(req, res) {
   const admin = await verifyAdmin(req);
   if (!admin) return res.status(401).json({ error: '관리자 권한이 없습니다.' });
 
-  // GET: 차단된 사용자 목록
+  // GET: 차단 목록 또는 이력
   if (req.method === 'GET') {
+    const queryString = req.url?.split('?')[1] || '';
+    const type = new URLSearchParams(queryString).get('type');
+
+    if (type === 'history') {
+      const { data, error } = await supabase
+        .from('block_history')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (error) return res.status(500).json({ error: error.message });
+      return res.status(200).json({ history: data ?? [] });
+    }
+
     const { data, error } = await supabase
       .from('account_current')
       .select('id, handle, nickname, elo_score, is_blocked, blocked_reason, blocked_at')
@@ -77,7 +101,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid JSON' });
   }
 
-  // POST: 사용자 차단 (id 또는 handle로)
+  // POST: 사용자 차단
   if (req.method === 'POST') {
     const { id, handle, reason } = payload;
     if (!id && !handle) return res.status(400).json({ error: 'id 또는 handle이 필요합니다.' });
@@ -89,32 +113,29 @@ export default async function handler(req, res) {
       blocked_at: now,
     };
 
-    // ── 핸들로 차단 ──
+    // 핸들로 차단
     if (!id) {
       const clean = (handle || '').replace(/^@/, '').trim();
 
-      // 1. DB에서 먼저 조회
       const { data: found } = await supabase
         .from('account_current')
-        .select('id')
+        .select('id, handle, nickname')
         .eq('handle', clean)
         .single();
 
       if (found) {
-        // 이미 등록된 사용자 → 바로 업데이트
         const { error } = await supabase
           .from('account_current')
           .update(blockFields)
           .eq('id', found.id);
         if (error) return res.status(500).json({ error: error.message });
+        await logBlockAction(found.id, found.handle, found.nickname, 'block', reason?.trim(), admin.email);
         return res.status(200).json({ success: true, id: found.id });
       }
 
-      // 2. DB에 없으면 Zeta API로 UUID 조회
       const resolvedId = await resolveHandleFromZeta(clean);
       if (!resolvedId) return res.status(404).json({ error: '해당 크리에이터를 찾을 수 없습니다.' });
 
-      // 3. 최소 행 upsert (update-creator가 나중에 채워줌, is_blocked는 유지됨)
       const { error } = await supabase
         .from('account_current')
         .upsert({
@@ -130,19 +151,21 @@ export default async function handler(req, res) {
           ...blockFields,
         }, { onConflict: 'id' });
       if (error) return res.status(500).json({ error: error.message });
+      await logBlockAction(resolvedId, clean, clean, 'block', reason?.trim(), admin.email);
       return res.status(200).json({ success: true, id: resolvedId, preRegistered: true });
     }
 
-    // ── UUID로 차단 ──
+    // UUID로 차단
     const { data: updated, error } = await supabase
       .from('account_current')
       .update(blockFields)
       .eq('id', id)
-      .select('id');
+      .select('id, handle, nickname');
     if (error) return res.status(500).json({ error: error.message });
     if (!updated || updated.length === 0) {
       return res.status(404).json({ error: 'DB에 등록되지 않은 사용자입니다. @핸들로 다시 시도해주세요.' });
     }
+    await logBlockAction(id, updated[0].handle, updated[0].nickname, 'block', reason?.trim(), admin.email);
     return res.status(200).json({ success: true, id });
   }
 
@@ -151,12 +174,19 @@ export default async function handler(req, res) {
     const { id } = payload;
     if (!id) return res.status(400).json({ error: 'id가 필요합니다.' });
 
+    const { data: target } = await supabase
+      .from('account_current')
+      .select('handle, nickname')
+      .eq('id', id)
+      .single();
+
     const { error } = await supabase
       .from('account_current')
       .update({ is_blocked: false, blocked_reason: null, blocked_at: null })
       .eq('id', id);
-
     if (error) return res.status(500).json({ error: error.message });
+
+    await logBlockAction(id, target?.handle, target?.nickname, 'unblock', null, admin.email);
     return res.status(200).json({ success: true });
   }
 
