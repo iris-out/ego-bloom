@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { getCharacterTier, formatCompactNumber } from '../utils/tierCalculator';
 import ImageWithFallback from './ImageWithFallback';
 import CharacterDetailModal from './CharacterDetailModal';
+import { proxyThumbnailUrl } from '../utils/imageUtils';
 import { Search } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 30;
@@ -187,7 +188,7 @@ export default function SummaryTab({ characters, stats }) {
               >
                 {char.imageUrl ? (
                   <ImageWithFallback
-                    src={char.imageUrl}
+                    src={proxyThumbnailUrl(char.imageUrl, 128)}
                     alt={char.name}
                     className="w-full h-full object-cover"
                   />

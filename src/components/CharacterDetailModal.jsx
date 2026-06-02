@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { getCharacterTier, formatCompactNumber, toKST } from '../utils/tierCalculator';
 import ImageWithFallback from './ImageWithFallback';
-import { proxyImageUrl } from '../utils/imageUtils';
+import { proxyThumbnailUrl } from '../utils/imageUtils';
 
 const CACHE_PREFIX = 'char_detail_v1_';
 const CACHE_TTL = 4 * 60 * 60 * 1000; // 4시간
@@ -172,7 +172,7 @@ export default function CharacterDetailModal({ char, isOpen, onClose }) {
     if (!isOpen) { setBgPalette(null); return; }
     if (!char?.imageUrl) { setBgPalette(null); return; }
     setBgPalette(null);
-    extractImagePalette(proxyImageUrl(char.imageUrl, { forExport: true })).then(setBgPalette);
+    extractImagePalette(proxyThumbnailUrl(char.imageUrl, 96, { forExport: true })).then(setBgPalette);
   }, [isOpen, char?.imageUrl]);
 
   useEffect(() => {
@@ -278,8 +278,8 @@ export default function CharacterDetailModal({ char, isOpen, onClose }) {
                 >
                   {char.imageUrl ? (
                     <ImageWithFallback
-                      src={char.imageUrl}
-                      fallbackSrcs={(char.imageUrls || []).slice(1)}
+                      src={proxyThumbnailUrl(char.imageUrl, 192)}
+                      fallbackSrcs={(char.imageUrls || []).slice(1).map(u => proxyThumbnailUrl(u, 192))}
                       alt={char.name}
                       className="w-full h-full object-cover"
                     />

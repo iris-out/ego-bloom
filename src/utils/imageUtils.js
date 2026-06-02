@@ -21,8 +21,12 @@ export function proxyImageUrl(url, { forExport = false } = {}) {
 }
 
 /**
- * Proxies image URL and appends a width hint for CDN-side resize.
- * S3 assets don't support query-string resize — returned as-is.
+ * Proxies image URL and appends CDN resize + WebP transcode params.
+ * The Zeta image CDN resizes via `?w=<px>` (NOT `width=`, which it ignores)
+ * and transcodes via `?f=webp`. Combined, a ~1.6MB source PNG drops to a
+ * few KB at thumbnail sizes. Pick `width` ≈ 2× the rendered CSS px so it
+ * stays crisp on high-DPR displays.
+ * The raw S3 bucket has no resize support — those URLs are returned as-is.
  * @param {string} url - original image URL
  * @param {number} width - desired pixel width (default 128)
  * @param {{forExport?: boolean}} [opts]
@@ -32,7 +36,7 @@ export function proxyThumbnailUrl(url, width = 128, opts) {
   if (!proxied) return null;
   if (proxied.startsWith('/zeta-s3') || proxied.startsWith(S3_ORIGIN)) return proxied;
   const sep = proxied.includes('?') ? '&' : '?';
-  return `${proxied}${sep}width=${width}`;
+  return `${proxied}${sep}w=${width}&f=webp`;
 }
 
 function collectPlotImageUrls(plot, opts) {

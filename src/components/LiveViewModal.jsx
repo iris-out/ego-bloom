@@ -1,7 +1,7 @@
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import { X, ChevronDown, RefreshCw } from 'lucide-react';
 import { formatCompactNumber, toKST, getCharacterTier } from '../utils/tierCalculator';
-import { proxyImageUrl } from '../utils/imageUtils';
+import { proxyThumbnailUrl } from '../utils/imageUtils';
 import { computeEarnedTitles } from '../data/badges';
 import TierIcon from './ui/TierIcon';
 
@@ -314,7 +314,7 @@ function CardFront({ profile, tier, stats, activityDays, characters, badges, glo
             >
               {profile.profileImageUrl ? (
                 <img
-                  src={proxyImageUrl(profile.profileImageUrl)}
+                  src={proxyThumbnailUrl(profile.profileImageUrl, 128)}
                   alt=""
                   style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
                 />
@@ -539,7 +539,7 @@ function CardBack({ profile, characters, todayKST, onFlip }) {
                 >
                   {c.imageUrl ? (
                     <img
-                      src={proxyImageUrl(c.imageUrl)}
+                      src={proxyThumbnailUrl(c.imageUrl, 96)}
                       alt=""
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
@@ -752,7 +752,7 @@ function Slide2({ profile, tier, score, stats, badges, activityDays, characters,
         <div className="flex items-center gap-4 mb-8">
           <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center overflow-hidden shrink-0">
             {profile.profileImageUrl ? (
-              <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover" />
+              <img src={proxyThumbnailUrl(profile.profileImageUrl, 128)} alt="" className="w-full h-full object-cover" />
             ) : (
               <span className="text-xl font-black text-black">{(profile.nickname || '?')[0]}</span>
             )}
@@ -863,7 +863,7 @@ function Slide3({ profile, tier, score, stats, badges, activityDays, characters,
           {/* 배경에 깔리는 거대한 프로필 이미지 워터마크 */}
           <div className="absolute top-1/4 -left-16 w-80 h-80 rounded-full overflow-hidden opacity-10 pointer-events-none transform -rotate-12 border-[16px] border-blue-950/20 mix-blend-multiply">
             {profile.profileImageUrl ? (
-              <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover" />
+              <img src={proxyThumbnailUrl(profile.profileImageUrl, 256)} alt="" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full bg-blue-200 flex items-center justify-center text-9xl font-black text-blue-950">
                 {(profile.nickname || '?')[0]}
@@ -874,7 +874,7 @@ function Slide3({ profile, tier, score, stats, badges, activityDays, characters,
           <div className="relative z-10 mt-auto pb-4 flex flex-col gap-4">
             <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-blue-950 shadow-sm shrink-0 bg-white">
               {profile.profileImageUrl ? (
-                <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover" />
+                <img src={proxyThumbnailUrl(profile.profileImageUrl, 160)} alt="" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-blue-200 flex items-center justify-center text-3xl font-black text-blue-950">
                   {(profile.nickname || '?')[0]}
@@ -1000,7 +1000,7 @@ function Slide4({ profile, tier, score, stats, badges, activityDays, characters,
             <div className="w-12 h-12 rounded-full overflow-hidden p-[2px]" style={{ background: 'linear-gradient(135deg, #4A7FFF, #6366f1)' }}>
               <div className="w-full h-full rounded-full bg-[#13161f] flex items-center justify-center overflow-hidden">
                 {profile.profileImageUrl ? (
-                  <img src={proxyImageUrl(profile.profileImageUrl)} alt="" className="w-full h-full object-cover rounded-full" />
+                  <img src={proxyThumbnailUrl(profile.profileImageUrl, 128)} alt="" className="w-full h-full object-cover rounded-full" />
                 ) : (
                   <span className="font-bold text-lg text-white">{(profile.nickname || '?')[0]}</span>
                 )}

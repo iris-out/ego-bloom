@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { formatCompactNumber, formatNumber, toKST } from '../utils/tierCalculator';
-import { proxyImageUrl } from '../utils/imageUtils';
+import { proxyThumbnailUrl } from '../utils/imageUtils';
 import ContributionGraph from './ContributionGraph';
 import CreatorRadarChart from './CreatorRadarChart';
 import { WordCloud } from './ExtraCharts';
@@ -315,7 +315,7 @@ export default function StatsTab({ stats, characters }) {
                 </div>
                 {char.imageUrl && (
                   <img
-                    src={proxyImageUrl(char.imageUrl)}
+                    src={proxyThumbnailUrl(char.imageUrl, 96)}
                     alt={char.name}
                     className="w-8 h-8 rounded-full object-cover shrink-0"
                     style={{ border: '1px solid rgba(255,255,255,0.1)' }}

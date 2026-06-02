@@ -10,6 +10,7 @@ import HoverNumber from './HoverNumber';
 import { Pin, Link2, Check, Heart } from 'lucide-react';
 import { computeEarnedTitles, BADGE_COLOR_MAP, FIXED_BADGE_IDS } from '../data/badges';
 import ImageWithFallback from './ImageWithFallback';
+import { proxyThumbnailUrl } from '../utils/imageUtils';
 import { getCreatorBadge, saveCreatorBadge } from '../utils/storage';
 const LiveViewModal = lazy(() => import('./LiveViewModal'));
 
@@ -237,7 +238,7 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
             >
               {profile.profileImageUrl ? (
                 <img
-                  src={profile.profileImageUrl}
+                  src={proxyThumbnailUrl(profile.profileImageUrl, 128)}
                   alt={profile.nickname}
                   loading="eager"
                   className="w-full h-full object-cover"

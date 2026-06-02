@@ -10,7 +10,7 @@ import {
   isMyProfileStale
 } from '../utils/storage';
 import { formatCompactNumber } from '../utils/tierCalculator';
-import { proxyImageUrl } from '../utils/imageUtils';
+import { proxyThumbnailUrl } from '../utils/imageUtils';
 
 export default function MyProfileCard() {
   const navigate = useNavigate();
@@ -177,7 +177,7 @@ export default function MyProfileCard() {
 
   // ─── Profile card ───
   const avatarUrl = profileData?.profileImageUrl
-    ? proxyImageUrl(profileData.profileImageUrl)
+    ? proxyThumbnailUrl(profileData.profileImageUrl, 96)
     : null;
 
   return (

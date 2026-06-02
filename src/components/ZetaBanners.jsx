@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { proxyImageUrl } from '../utils/imageUtils';
+import { proxyThumbnailUrl } from '../utils/imageUtils';
 import { Megaphone, MessageCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const BANNERS_CACHE_KEY = 'zeta_banners_v1';
@@ -135,7 +135,7 @@ export default function ZetaBanners() {
                   {banner.imageUrl ? (
                     <>
                       <img
-                        src={proxyImageUrl(banner.imageUrl)}
+                        src={proxyThumbnailUrl(banner.imageUrl, 640)}
                         alt={banner.titlePrimary}
                         className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
