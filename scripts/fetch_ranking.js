@@ -71,6 +71,35 @@ function shouldSkipForRanking(tag) {
   return RANKING_SKIP_TAGS.includes(tag.toLowerCase());
 }
 
+// 차단된 크리에이터(account_current.is_blocked=true)의 id/handle 집합을 조회.
+// 캐릭터(플롯) 랭킹에서 차단 크리에이터의 작품을 제거하기 위해 사용한다.
+async function fetchBlockedCreators() {
+  const ids = new Set();
+  const handles = new Set();
+  if (!supabase) return { ids, handles };
+  try {
+    const { data, error } = await supabase
+      .from('account_current')
+      .select('id, handle')
+      .eq('is_blocked', true);
+    if (error) throw error;
+    for (const row of (data || [])) {
+      if (row.id) ids.add(row.id);
+      if (row.handle) handles.add(row.handle.toLowerCase());
+    }
+  } catch (err) {
+    console.error('⚠️  차단 크리에이터 목록 조회 실패 (필터 미적용):', err.message);
+  }
+  return { ids, handles };
+}
+
+// 원본 플롯이 차단 크리에이터의 작품인지 판정 (id 우선, handle 폴백)
+function isBlockedPlot(p, blocked) {
+  const cid = p.creator?.id;
+  const handle = (p.creator?.username || '').toLowerCase();
+  return (cid && blocked.ids.has(cid)) || (handle && blocked.handles.has(handle));
+}
+
 function mapPlot(p, prevMap) {
   const cur = p.interactionCountWithRegen ?? p.interactionCount ?? 0;
   const prev = prevMap ? prevMap.get(p.id) : null;
@@ -240,11 +269,23 @@ async function cleanOldHistory() {
 
 async function generateRankingData() {
   try {
-    const [trending, best, newItems] = await Promise.all([
+    const [rawTrending, rawBest, rawNew, blocked] = await Promise.all([
       fetchApi('/plots/ranking?type=TRENDING&limit=100&filterType=GENRE&filterValues=all'),
       fetchApi('/plots/ranking?type=BEST&limit=100&filterType=GENRE&filterValues=all'),
       fetchApi('/plots/ranking?type=NEW&limit=100&filterType=GENRE&filterValues=all'),
+      fetchBlockedCreators(),
     ]);
+
+    // 차단된 크리에이터의 플롯 제거 — 플롯 리스트·태그 집계 전반에서 일관되게 배제
+    const dropBlocked = (list) => list.filter(p => !isBlockedPlot(p, blocked));
+    const trending = dropBlocked(rawTrending);
+    const best = dropBlocked(rawBest);
+    const newItems = dropBlocked(rawNew);
+    const removed = (rawTrending.length + rawBest.length + rawNew.length)
+      - (trending.length + best.length + newItems.length);
+    if (blocked.ids.size > 0) {
+      console.log(`🚫 차단 크리에이터 ${blocked.ids.size}명 → 플롯 ${removed}건 제외`);
+    }
 
     const calcTags = (list) => {
       const w = {};
