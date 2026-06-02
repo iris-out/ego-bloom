@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
-import { CREATOR_TIERS, getCreatorTier, formatNumber } from '../utils/tierCalculator';
+import { CREATOR_TIERS, getCreatorTier, formatEloScore } from '../utils/tierCalculator';
 import TierIcon from '../components/ui/TierIcon';
 import { proxyThumbnailUrl } from '../utils/imageUtils';
 
@@ -181,7 +181,7 @@ export default function TierPage() {
                     fontFamily: "'Toss Product Sans', 'Pretendard Variable', sans-serif",
                   }}
                 >
-                  ELO {formatNumber(currentUser.elo)}
+                  ELO {formatEloScore(currentUser.elo)}
                 </span>
               </div>
               {nextTier && (
@@ -201,7 +201,7 @@ export default function TierPage() {
                       fontFamily: "'Toss Product Sans', 'Pretendard Variable', sans-serif",
                     }}
                   >
-                    {formatNumber(nextTier.min - currentUser.elo)}
+                    {formatEloScore(nextTier.min - currentUser.elo)}
                   </b>{' '}
                   남음
                 </span>
@@ -236,8 +236,8 @@ export default function TierPage() {
               const higherTier = displayTiers[idx - 1];
 
               // ELO 범위 표기
-              const minLabel = formatNumber(tier.min);
-              const maxLabel = higherTier ? formatNumber(higherTier.min - 1) : null;
+              const minLabel = formatEloScore(tier.min);
+              const maxLabel = higherTier ? formatEloScore(higherTier.min - 1) : null;
               const rangeLabel = maxLabel ? `${minLabel}–${maxLabel}` : `${minLabel}+`;
 
               const isCurrent = currentTier && currentTier.key === tier.key;

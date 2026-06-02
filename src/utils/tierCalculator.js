@@ -232,6 +232,21 @@ export function formatNumber(num) {
   return new Intl.NumberFormat('ko-KR').format(num);
 }
 
+/**
+ * ELO 점수 표시 전용 포맷터.
+ * 내부 계산값(티어 판정에 사용)은 그대로 두고, 화면에는 1/1000 스케일로 표시한다.
+ * 100 미만으로 떨어지는 소규모 점수는 소수 1자리까지 보여 정밀도를 유지한다.
+ * @param {number|null|undefined} rawScore calculateCreatorScore()가 반환한 원본 점수
+ * @returns {string}
+ */
+export function formatEloScore(rawScore) {
+  if (rawScore == null || !Number.isFinite(rawScore)) return '0';
+  const scaled = rawScore / 1000;
+  const abs = Math.abs(scaled);
+  const decimals = abs > 0 && abs < 100 ? 1 : 0;
+  return new Intl.NumberFormat('ko-KR', { maximumFractionDigits: decimals }).format(scaled);
+}
+
 export function toKST(dateInput) {
   const d = dateInput ? new Date(dateInput) : new Date();
   const utc = d.getTime() + (d.getTimezoneOffset() * 60000);

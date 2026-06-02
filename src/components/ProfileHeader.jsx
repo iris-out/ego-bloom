@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import {
   formatCompactNumber, getCreatorTier, CREATOR_TIERS,
-  calculateCreatorScore, toKST, getCharacterTier, formatNumber
+  calculateCreatorScore, toKST, getCharacterTier, formatNumber, formatEloScore
 } from '../utils/tierCalculator';
 import TierIcon from './ui/TierIcon';
 import DeltaBadge from './ui/DeltaBadge';
@@ -354,11 +354,11 @@ export default function ProfileHeader({ profile, stats, characters, growthHistor
                 lineHeight: 1,
               }}
             >
-              {formatNumber(animScore)}
+              {formatEloScore(animScore)}
             </div>
             <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }} className="flex items-center gap-1 flex-wrap">
               <span>{tierLabel}{globalRank ? ` · 전체 #${globalRank}위` : ''}</span>
-              <DeltaBadge value={eloDelta} />
+              <DeltaBadge value={eloDelta} format={formatEloScore} />
               {eloDelta != null && sinceLabel && (
                 <span style={{ color: 'rgba(255,255,255,0.3)' }}>{sinceLabel}</span>
               )}
@@ -409,10 +409,10 @@ export default function ProfileHeader({ profile, stats, characters, growthHistor
                 lineHeight: 1,
               }}
             >
-              {formatNumber(animFollowers)}
+              {(animFollowers || 0).toLocaleString('ko-KR')}
             </div>
             <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }} className="flex items-center gap-1 flex-wrap">
-              <span>팔로잉 {formatNumber(stats?.followingCount || 0)}</span>
+              <span>팔로잉 {(stats?.followingCount || 0).toLocaleString('ko-KR')}</span>
               <DeltaBadge value={followerDelta} />
             </div>
           </div>
