@@ -258,6 +258,7 @@ export default function ProfilePage() {
   const [showChangelog, setShowChangelog] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [tierRevealed, setTierRevealed] = useState(false);
+  const [history, setHistory] = useState(null); // 1일 전 대비 성장 baseline
 
   const rankedCharacters = useMemo(() => {
     if (!data?.characters) return [];
@@ -299,7 +300,7 @@ export default function ProfilePage() {
 
   const fetchData = async (inputStr, forceRefresh = false) => {
     let id = inputStr.trim();
-    setLoading(true); setError(null); setData(null); setCacheInfo(null); setTab('characters');
+    setLoading(true); setError(null); setData(null); setCacheInfo(null); setTab('characters'); setHistory(null);
 
     try {
       // UUID 형식이 아니면서, URL 형태도 아니라면 핸들(@) 검색으로 간주함
@@ -423,6 +424,12 @@ export default function ProfilePage() {
       }).catch(err => console.error('[Ranking Update Error]:', err));
       // --- 백그라운드 랭킹 데이터 수집 끝 ---
 
+      // --- 1일 전 대비 성장 baseline 조회 (백그라운드) ---
+      fetch(`/api/get-creator-history?id=${id}`)
+        .then(res => res.ok ? res.json() : null)
+        .then(h => { if (h && h.found) setHistory(h); })
+        .catch(err => console.error('[Creator History Error]:', err));
+
       const characters = allPlots.map(p => ({
         ...p,
         imageUrl: getPlotImageUrl(p),
@@ -531,6 +538,7 @@ export default function ProfilePage() {
               profile={data.profile}
               stats={data.stats}
               characters={data.characters}
+              growthHistory={history}
               editing={editingTitle}
               setEditing={setEditingTitle}
               onTierReveal={() => setTierRevealed(true)}

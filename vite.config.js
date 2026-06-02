@@ -379,6 +379,41 @@ function supabaseApiPlugin(env) {
         } catch { res.end(JSON.stringify({ blocked: false })); }
       });
 
+      // 단일 크리에이터의 "오늘 이전" 최신 스냅샷 (성장 비교 baseline) — api/get-creator-history.js 미러
+      server.middlewares.use('/api/get-creator-history', async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        try {
+          if (!supabase) return res.end(JSON.stringify({ found: false }));
+          const url = new URL(req.url, `http://${req.headers.host}`);
+          const id = url.searchParams.get('id') || '';
+          if (!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id)) {
+            res.statusCode = 400;
+            return res.end(JSON.stringify({ error: 'Invalid creator ID' }));
+          }
+          const now = new Date();
+          const kst = new Date(now.getTime() + (now.getTimezoneOffset() + 540) * 60000);
+          const today = kst.toISOString().split('T')[0];
+          const { data, error } = await supabase
+            .from('account_history')
+            .select('record_date, elo_score, follower_count, plot_interaction_count, voice_play_count, plot_count, tier_name')
+            .eq('id', id)
+            .lt('record_date', today)
+            .order('record_date', { ascending: false })
+            .limit(1);
+          if (error) throw error;
+          if (!data || data.length === 0) return res.end(JSON.stringify({ found: false }));
+          const baseline = data[0];
+          const daysAgo = Math.round(
+            (new Date(`${today}T00:00:00Z`).getTime() - new Date(`${baseline.record_date}T00:00:00Z`).getTime()) / 86400000
+          );
+          res.end(JSON.stringify({ found: true, baseline, recordDate: baseline.record_date, daysAgo }));
+        } catch (err) {
+          console.error('[get-creator-history] Error:', err);
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: 'Internal Server Error' }));
+        }
+      });
+
       server.middlewares.use('/api/admin-block', async (req, res) => {
         const json = (status, data) => {
           res.statusCode = status;

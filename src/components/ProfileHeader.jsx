@@ -6,6 +6,7 @@ import {
   calculateCreatorScore, toKST, getCharacterTier, formatNumber
 } from '../utils/tierCalculator';
 import TierIcon from './ui/TierIcon';
+import DeltaBadge from './ui/DeltaBadge';
 import HoverNumber from './HoverNumber';
 import { Pin, Link2, Check, Heart } from 'lucide-react';
 import { computeEarnedTitles, BADGE_COLOR_MAP, FIXED_BADGE_IDS } from '../data/badges';
@@ -104,7 +105,7 @@ const TIER_COLORS = {
   champion: '#F97316',
 };
 
-export default function ProfileHeader({ profile, stats, characters, onLiveClick, editing: editingProp, setEditing: setEditingProp, onTierReveal }) {
+export default function ProfileHeader({ profile, stats, characters, growthHistory, onLiveClick, editing: editingProp, setEditing: setEditingProp, onTierReveal }) {
   const navigate = useNavigate();
   const [showRecap, setShowRecap] = useState(false);
   const [editingInternal, setEditingInternal] = useState(false);
@@ -182,6 +183,13 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
 
   const score = calculateCreatorScore(stats, characters);
   const tier = getCreatorTier(score);
+
+  // baseline(오늘 이전 최신 스냅샷) 대비 증감 — growthHistory 없으면 null → 배지 미표시
+  const base = growthHistory?.baseline || null;
+  const eloDelta         = base && base.elo_score != null ? score - base.elo_score : null;
+  const interactionDelta = base ? (stats.plotInteractionCount || 0) - (base.plot_interaction_count || 0) : null;
+  const followerDelta    = base ? (stats.followerCount || 0) - (base.follower_count || 0) : null;
+  const sinceLabel = growthHistory?.daysAgo ? `${growthHistory.daysAgo}일 전 대비` : null;
 
   // A2: 카운트업 값
   const animInteractions = useCountUp(stats.plotInteractionCount || 0);
@@ -348,8 +356,12 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
             >
               {formatNumber(animScore)}
             </div>
-            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>
-              {tierLabel}{globalRank ? ` · 전체 #${globalRank}위` : ''}
+            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }} className="flex items-center gap-1 flex-wrap">
+              <span>{tierLabel}{globalRank ? ` · 전체 #${globalRank}위` : ''}</span>
+              <DeltaBadge value={eloDelta} />
+              {eloDelta != null && sinceLabel && (
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>{sinceLabel}</span>
+              )}
             </div>
           </div>
 
@@ -373,8 +385,9 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
             >
               {formatNumber(animInteractions)}
             </div>
-            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>
-              평균 {formatNumber(Math.floor(breakdown.avgInteractions || 0))}/캐릭터
+            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }} className="flex items-center gap-1 flex-wrap">
+              <span>평균 {formatNumber(Math.floor(breakdown.avgInteractions || 0))}/캐릭터</span>
+              <DeltaBadge value={interactionDelta} />
             </div>
           </div>
 
@@ -398,8 +411,9 @@ export default function ProfileHeader({ profile, stats, characters, onLiveClick,
             >
               {formatNumber(animFollowers)}
             </div>
-            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>
-              팔로잉 {formatNumber(stats?.followingCount || 0)}
+            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }} className="flex items-center gap-1 flex-wrap">
+              <span>팔로잉 {formatNumber(stats?.followingCount || 0)}</span>
+              <DeltaBadge value={followerDelta} />
             </div>
           </div>
 
