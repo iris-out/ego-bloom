@@ -25,7 +25,7 @@ export default function RailCharacterCard({ rank, accent = '#a78bfa', character 
       {/* 순위 숫자 (포스터 좌측 겹침) */}
       <span
         aria-hidden="true"
-        className="font-black leading-[0.8] -mr-1.5 sm:-mr-2 z-10 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+        className="font-black leading-[0.8] -mr-5 sm:-mr-7 z-10 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
         style={{
           fontSize: 'clamp(58px, 7vw, 92px)',
           letterSpacing: rank >= 10 ? '-0.12em' : '-0.03em',

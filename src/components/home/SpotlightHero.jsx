@@ -73,6 +73,9 @@ export default function SpotlightHero({ spotlights }) {
     }
   };
 
+  // 이전/다음 슬라이드 이동 (좌우 화살표 버튼·스와이프 공용)
+  const go = (dir) => setIndex((i) => (i + dir + count) % count);
+
   if (!count) return null;
 
   const active = spotlights[safeIndex];
@@ -82,7 +85,7 @@ export default function SpotlightHero({ spotlights }) {
 
   return (
     <div
-      className="relative -mx-4 sm:mx-0 lg:mx-[calc(50%-50vw)] lg:w-screen touch-pan-y select-none"
+      className="group relative -mx-4 sm:mx-0 lg:mx-[calc(50%-50vw)] lg:w-screen touch-pan-y select-none"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={handleTouchStart}
@@ -148,6 +151,30 @@ export default function SpotlightHero({ spotlights }) {
          </div>
         </div>
       </a>
+
+      {/* 좌우 이동 — 가장자리 비네팅 + 은은한 원형 화살표(데스크탑, hover 시 짙어짐) */}
+      {count > 1 && (
+        <>
+          <div className="hidden sm:flex absolute inset-y-0 left-0 z-20 w-20 lg:w-28 items-center justify-start pl-2 lg:pl-4 pointer-events-none">
+            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/20 to-transparent opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
+            <button
+              type="button" aria-label="이전 배너" onClick={() => go(-1)}
+              className="relative pointer-events-auto w-10 h-10 rounded-full bg-black/35 group-hover:bg-black/65 backdrop-blur-sm ring-1 ring-white/15 text-white/70 hover:text-white opacity-60 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 shadow-[0_4px_16px_rgba(0,0,0,0.5)]"
+            >
+              <ChevronLeft size={20} />
+            </button>
+          </div>
+          <div className="hidden sm:flex absolute inset-y-0 right-0 z-20 w-20 lg:w-28 items-center justify-end pr-2 lg:pr-4 pointer-events-none">
+            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-l from-black/55 via-black/20 to-transparent opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
+            <button
+              type="button" aria-label="다음 배너" onClick={() => go(1)}
+              className="relative pointer-events-auto w-10 h-10 rounded-full bg-black/35 group-hover:bg-black/65 backdrop-blur-sm ring-1 ring-white/15 text-white/70 hover:text-white opacity-60 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 shadow-[0_4px_16px_rgba(0,0,0,0.5)]"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        </>
+      )}
 
       {/* 인디케이터 점 — PC 풀블리드에서는 페이지 그리드 우측에 맞춤 */}
       {count > 1 && (
