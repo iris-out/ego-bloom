@@ -116,6 +116,8 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0;
+  /* PWA 설치 배너가 떠 있을 때 그 높이만큼 콘텐츠를 아래로 민다 (배너 미노출 시 0). */
+  padding-top: var(--pwa-banner-h, 0px);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
   padding-bottom: env(safe-area-inset-bottom);
@@ -345,7 +347,7 @@ img { display: block; }
 
 .nav {
   position: sticky;
-  top: 0;
+  top: var(--pwa-banner-h, 0px);
   z-index: 100;
   height: var(--nav-height);
   background: var(--bg-primary);

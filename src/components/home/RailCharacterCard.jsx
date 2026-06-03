@@ -25,13 +25,18 @@ export default function RailCharacterCard({ rank, accent = '#a78bfa', character 
       {/* 순위 숫자 (포스터 좌측 겹침) */}
       <span
         aria-hidden="true"
-        className="font-black leading-[0.8] -mr-3 sm:-mr-4 z-10 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+        className="font-black leading-[0.8] -mr-1.5 sm:-mr-2 z-10 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
         style={{
           fontSize: 'clamp(58px, 7vw, 92px)',
           letterSpacing: rank >= 10 ? '-0.12em' : '-0.03em',
           color: 'transparent',
           WebkitTextStroke: `2.5px ${numeralColor}`,
           fontFamily: NUM_FONT,
+          // 카드가 숫자의 오른쪽 획을 가리지 않도록 살짝만 겹치고 오른쪽 정렬로 통일.
+          display: 'inline-block',
+          textAlign: 'right',
+          minWidth: rank >= 10 ? '1.1em' : '0.62em',
+          paddingRight: '0.04em',
         }}
       >
         {rank}

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Database, Lock, BarChart2, Hash, Trophy, Star, History, Clapperboard, Bell, Globe, Menu, Megaphone } from 'lucide-react';
+import { Database, Lock, BarChart2, Hash, Trophy, Star, History, Clapperboard, Bell, Globe, Menu, Megaphone, Download } from 'lucide-react';
 import { useServerStatus } from '../hooks/useServerStatus';
+import { usePwaInstall } from '../hooks/usePwaInstall';
+import { triggerInstall } from '../lib/pwaInstall';
 import ChangelogModal from '../components/ChangelogModal';
 import DataCollectionModal from '../components/DataCollectionModal';
 import SearchWarningModal from '../components/SearchWarningModal';
@@ -195,7 +197,13 @@ export default function HomePage() {
   const [scrolled, setScrolled] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { canInstall: canInstallApp } = usePwaInstall();
   const banners = useBanners();
+
+  const handleInstallApp = () => {
+    setMenuOpen(false);
+    triggerInstall();
+  };
 
   const isMain = activeTab === 0;
 
@@ -275,6 +283,9 @@ export default function HomePage() {
   const MobileMenuPanel = (
     <Popover open={menuOpen} onClose={() => setMenuOpen(false)} align="right">
       <div className="py-1">
+        {canInstallApp && (
+          <MenuRow Icon={Download} label="앱으로 설치" tag="앱" onClick={handleInstallApp} />
+        )}
         <MenuRow Icon={Globe} label="오픈월드 입장" tag="베타" onClick={() => { setMenuOpen(false); navigate('/world'); }} />
         <MenuRow Icon={History} label="업데이트 로그" onClick={() => { setMenuOpen(false); setShowChangelogModal(true); }} />
         <MenuRow Icon={Database} label="데이터 수집 안내" onClick={() => { setMenuOpen(false); setShowDataModal(true); }} />
@@ -302,10 +313,10 @@ export default function HomePage() {
         <div className="relative flex-1 flex flex-col">
           {/* ===== Cinematic Overlay 헤더 (히어로 위에 얹힘, 고정) ===== */}
           <header
-            className="fixed top-0 inset-x-0 z-30 transition-colors duration-300"
+            className="fixed inset-x-0 z-30 transition-colors duration-300"
             style={scrolled
-              ? { background: 'rgba(6,9,16,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }
-              : { background: 'linear-gradient(to bottom, rgba(3,5,12,0.82) 0%, rgba(3,5,12,0.40) 55%, transparent 100%)' }
+              ? { top: 'var(--pwa-banner-h, 0px)', background: 'rgba(6,9,16,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }
+              : { top: 'var(--pwa-banner-h, 0px)', background: 'linear-gradient(to bottom, rgba(3,5,12,0.82) 0%, rgba(3,5,12,0.40) 55%, transparent 100%)' }
             }
           >
             <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-5">

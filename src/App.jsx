@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
 import HomePage from './routes/HomePage';
 import ProfilePage from './routes/ProfilePage';
+import PwaInstallBanner from './components/PwaInstallBanner';
 const TierPage = lazy(() => import('./routes/TierPage'));
 const WorldPage = lazy(() => import('./routes/WorldPage'));
 const AdminPage = lazy(() => import('./routes/AdminPage'));
@@ -19,8 +20,10 @@ function LegacyRedirect() {
 
 export default function App() {
   return (
-    <Suspense fallback={null}>
-      <Routes>
+    <>
+      <PwaInstallBanner />
+      <Suspense fallback={null}>
+        <Routes>
         <Route path="/" element={<LegacyRedirect />} />
         <Route path="/profile" element={<ProfilePage />} />
 <Route path="/tier" element={<TierPage />} />
@@ -29,6 +32,7 @@ export default function App() {
         <Route path="/tier-preview" element={<TierPreviewPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Suspense>
+      </Suspense>
+    </>
   );
 }
