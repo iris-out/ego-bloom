@@ -179,7 +179,7 @@ function PlotCompactRow({ plot, rank }) {
       href={zetaUrl || undefined}
       target={zetaUrl ? '_blank' : undefined}
       rel={zetaUrl ? 'noopener noreferrer' : undefined}
-      className="row-card group flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 no-underline transition-transform duration-200 ease-out will-change-transform hover:-translate-y-0.5 hover:border-white/20 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      className="row-card group flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3 sm:py-2.5 no-underline transition-transform duration-200 ease-out will-change-transform hover:-translate-y-0.5 hover:border-white/20 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       {/* Rank number */}
       <span
@@ -209,13 +209,15 @@ function PlotCompactRow({ plot, rank }) {
       </div>
 
       {/* Name + creator */}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          <p className="truncate text-[15px] font-semibold leading-tight text-white" title={name}>{name}</p>
-          <RankChange rankChange={rankChange} size="sm" />
+      <div className="min-w-0 flex-1 py-0.5">
+        <div className="flex items-start gap-1.5">
+          <p className="text-[14px] sm:text-[15px] font-semibold leading-[1.2] text-white line-clamp-2" title={name}>{name}</p>
+          <div className="mt-0.5 shrink-0">
+            <RankChange rankChange={rankChange} size="sm" />
+          </div>
         </div>
         {creatorHandle && (
-          <p className="truncate text-[12px] text-white/45">@{creatorHandle}</p>
+          <p className="text-[11px] sm:text-[12px] text-white/45 mt-0.5 leading-tight">@{creatorHandle}</p>
         )}
       </div>
 

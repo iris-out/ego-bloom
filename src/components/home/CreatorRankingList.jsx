@@ -167,16 +167,16 @@ function PodiumCard({ creator, rank, onClick, className = '' }) {
           </span>
         </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <span className="shrink-0 text-[13px] leading-none drop-shadow" aria-hidden="true">
+        <div className="min-w-0 flex-1 py-0.5">
+          <div className="flex items-start gap-1.5">
+            <span className="shrink-0 mt-0.5 text-[13px] leading-none drop-shadow" aria-hidden="true">
               {PODIUM_CROWNS[rank]}
             </span>
-            <p className="truncate text-[15px] font-bold text-white" style={{ letterSpacing: '-0.02em' }}>
+            <p className="text-[15px] font-bold text-white leading-tight line-clamp-2" style={{ letterSpacing: '-0.02em' }}>
               {creator.nickname}
             </p>
           </div>
-          <p className="truncate text-[11px] text-white/40">@{creator.handle}</p>
+          <p className="text-[11px] text-white/40 mt-0.5 leading-tight">@{creator.handle}</p>
           <div className="mt-1 flex items-center gap-1.5">
             <TierIcon tier={meta.tierKey} rank={rank + 1} size={22} />
             <span className="truncate text-[10px] font-semibold tracking-wider" style={{ color: meta.tierColor }}>
@@ -267,7 +267,7 @@ function CreatorRow({ creator, globalRank, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`group relative my-1 flex w-full flex-col gap-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] px-2 py-2.5 text-left shadow-sm transition-transform will-change-transform hover:-translate-y-px hover:bg-white/[0.06] sm:flex-row sm:items-stretch sm:gap-3 sm:pr-2 ${
+      className={`group relative my-1 flex w-full flex-col gap-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] px-2 py-3 sm:py-2.5 text-left shadow-sm transition-transform will-change-transform hover:-translate-y-px hover:bg-white/[0.06] sm:flex-row sm:items-stretch sm:gap-3 sm:pr-2 ${
         creator.handle ? 'cursor-pointer' : 'cursor-default'
       }`}
     >
@@ -304,9 +304,9 @@ function CreatorRow({ creator, globalRank, onClick }) {
           style={isTop3 ? { border: `2px solid ${stripeColor}` } : { border: '2px solid rgba(255,255,255,0.08)' }}
         />
 
-        <div className="min-w-0 flex-1 self-center">
-          <p className="truncate text-[14px] font-medium text-white">{creator.nickname}</p>
-          <p className="truncate text-[12px] text-white/35">@{creator.handle}</p>
+        <div className="min-w-0 flex-1 py-0.5 self-center">
+          <p className="text-[14px] font-medium leading-tight text-white line-clamp-2">{creator.nickname}</p>
+          <p className="text-[11px] text-white/35 mt-0.5 leading-tight">@{creator.handle}</p>
         </div>
 
         {/* 티어 아이콘 + 라벨: 모바일에서는 Row 1 끝 */}

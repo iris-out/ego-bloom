@@ -97,7 +97,7 @@ export default function SpotlightHero({ spotlights }) {
         rel="noopener noreferrer"
         onClick={handleClick}
         draggable={false}
-        className="group relative block w-full overflow-hidden aspect-[16/5] lg:aspect-[64/15] rounded-none sm:rounded-b-2xl lg:rounded-none border-x-0 border-t-0 border-b border-white/10 text-left shadow-none lg:shadow-[0_10px_40px_rgba(0,0,0,0.5)] focus:outline-none focus:ring-2 focus:ring-white/40 min-h-[248px] sm:min-h-[170px] lg:max-h-[450px] pt-14 lg:pt-0"
+        className="group relative block w-full overflow-hidden aspect-[16/5] lg:aspect-[64/15] rounded-none sm:rounded-b-2xl lg:rounded-none border-x-0 border-t-0 border-b border-white/10 text-left shadow-none lg:shadow-[0_10px_40px_rgba(0,0,0,0.5)] focus:outline-none focus:ring-2 focus:ring-white/40 min-h-[248px] sm:min-h-[170px] lg:max-h-[450px] pt-20 lg:pt-0"
       >
         {/* 배경 이미지 — key로 크로스페이드 */}
         {bg ? (
@@ -157,22 +157,22 @@ export default function SpotlightHero({ spotlights }) {
       {/* 좌우 이동 — 가장자리 비네팅 + 은은한 원형 화살표(데스크탑, hover 시 짙어짐) */}
       {count > 1 && (
         <>
-          <div className="hidden sm:flex absolute inset-y-0 left-0 z-20 w-20 lg:w-28 items-center justify-start pl-2 lg:pl-4 pointer-events-none">
-            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/20 to-transparent opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute top-[35%] sm:inset-y-0 left-0 z-20 w-20 lg:w-28 flex items-center justify-start pl-2 lg:pl-4 pointer-events-none">
+            <div aria-hidden="true" className="hidden sm:block absolute inset-0 bg-gradient-to-r from-black/55 via-black/20 to-transparent opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
             <button
               type="button" aria-label="이전 배너" onClick={() => go(-1)}
-              className="relative pointer-events-auto w-10 h-10 rounded-full bg-black/35 group-hover:bg-black/65 backdrop-blur-sm ring-1 ring-white/15 text-white/70 hover:text-white opacity-60 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 shadow-[0_4px_16px_rgba(0,0,0,0.5)]"
+              className="relative pointer-events-auto w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/25 sm:bg-black/35 group-hover:bg-black/65 backdrop-blur-sm ring-1 ring-white/10 sm:ring-white/15 text-white/70 hover:text-white opacity-40 sm:opacity-60 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 shadow-[0_4px_16px_rgba(0,0,0,0.5)]"
             >
-              <ChevronLeft size={20} />
+              <ChevronLeft size={18} />
             </button>
           </div>
-          <div className="hidden sm:flex absolute inset-y-0 right-0 z-20 w-20 lg:w-28 items-center justify-end pr-2 lg:pr-4 pointer-events-none">
-            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-l from-black/55 via-black/20 to-transparent opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute top-[35%] sm:inset-y-0 right-0 z-20 w-20 lg:w-28 flex items-center justify-end pr-2 lg:pr-4 pointer-events-none">
+            <div aria-hidden="true" className="hidden sm:block absolute inset-0 bg-gradient-to-l from-black/55 via-black/20 to-transparent opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
             <button
               type="button" aria-label="다음 배너" onClick={() => go(1)}
-              className="relative pointer-events-auto w-10 h-10 rounded-full bg-black/35 group-hover:bg-black/65 backdrop-blur-sm ring-1 ring-white/15 text-white/70 hover:text-white opacity-60 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 shadow-[0_4px_16px_rgba(0,0,0,0.5)]"
+              className="relative pointer-events-auto w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/25 sm:bg-black/35 group-hover:bg-black/65 backdrop-blur-sm ring-1 ring-white/10 sm:ring-white/15 text-white/70 hover:text-white opacity-40 sm:opacity-60 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 shadow-[0_4px_16px_rgba(0,0,0,0.5)]"
             >
-              <ChevronRight size={20} />
+              <ChevronRight size={18} />
             </button>
           </div>
         </>
