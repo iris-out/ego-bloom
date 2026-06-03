@@ -63,7 +63,7 @@ export default function CreatorRail({ tag, tierMap, onCreatorClick }) {
 
       <div
         ref={scrollerRef}
-        className="flex gap-4 sm:gap-5 overflow-x-auto pb-3 pt-1 pl-2 snap-x snap-mandatory scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 [scrollbar-width:thin]"
+        className="flex gap-4 sm:gap-5 overflow-x-auto overflow-y-hidden pb-3 pt-3 pl-2 snap-x snap-mandatory scrollbar-hide"
       >
         {creators.map((creator, i) => (
           <RailCreatorCard
