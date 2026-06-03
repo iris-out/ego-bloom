@@ -85,7 +85,7 @@ export default function SpotlightHero({ spotlights }) {
 
   return (
     <div
-      className="group relative -mx-4 sm:mx-0 lg:mx-[calc(50%-50vw)] lg:w-screen touch-pan-y select-none"
+      className="group relative -mx-4 lg:mx-[calc(50%-50vw)] lg:w-screen touch-pan-y select-none"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={handleTouchStart}
@@ -97,7 +97,7 @@ export default function SpotlightHero({ spotlights }) {
         rel="noopener noreferrer"
         onClick={handleClick}
         draggable={false}
-        className="group relative block w-full overflow-hidden aspect-[16/5] lg:aspect-[64/15] rounded-b-2xl sm:rounded-2xl lg:rounded-none border-x-0 border-t-0 border-b sm:border lg:border-x-0 lg:border-t-0 lg:border-b border-white/10 text-left shadow-[0_10px_40px_rgba(0,0,0,0.5)] focus:outline-none focus:ring-2 focus:ring-white/40 min-h-[248px] sm:min-h-[170px] lg:max-h-[450px] pt-14 lg:pt-0"
+        className="group relative block w-full overflow-hidden aspect-[16/5] lg:aspect-[64/15] rounded-none sm:rounded-b-2xl lg:rounded-none border-x-0 border-t-0 border-b border-white/10 text-left shadow-none lg:shadow-[0_10px_40px_rgba(0,0,0,0.5)] focus:outline-none focus:ring-2 focus:ring-white/40 min-h-[248px] sm:min-h-[170px] lg:max-h-[450px] pt-14 lg:pt-0"
       >
         {/* 배경 이미지 — key로 크로스페이드 */}
         {bg ? (
