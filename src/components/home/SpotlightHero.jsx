@@ -97,7 +97,7 @@ export default function SpotlightHero({ spotlights }) {
         rel="noopener noreferrer"
         onClick={handleClick}
         draggable={false}
-        className="group relative block w-full overflow-hidden aspect-[16/5] lg:aspect-[64/15] rounded-b-2xl sm:rounded-2xl lg:rounded-none border-x-0 border-t-0 border-b sm:border lg:border-x-0 lg:border-t-0 lg:border-b border-white/10 text-left shadow-[0_10px_40px_rgba(0,0,0,0.5)] focus:outline-none focus:ring-2 focus:ring-white/40 min-h-[248px] sm:min-h-[170px] lg:max-h-[450px]"
+        className="group relative block w-full overflow-hidden aspect-[16/5] lg:aspect-[64/15] rounded-b-2xl sm:rounded-2xl lg:rounded-none border-x-0 border-t-0 border-b sm:border lg:border-x-0 lg:border-t-0 lg:border-b border-white/10 text-left shadow-[0_10px_40px_rgba(0,0,0,0.5)] focus:outline-none focus:ring-2 focus:ring-white/40 min-h-[248px] sm:min-h-[170px] lg:max-h-[450px] pt-14 lg:pt-0"
       >
         {/* 배경 이미지 — key로 크로스페이드 */}
         {bg ? (
@@ -117,6 +117,8 @@ export default function SpotlightHero({ spotlights }) {
         {/* 스크림 */}
         <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, #07060e 8%, rgba(7,6,14,0.7) 38%, transparent 75%)' }} />
         <div className="absolute inset-x-0 bottom-0 h-1/2" style={{ background: 'linear-gradient(to top, #07060e, transparent)' }} />
+        {/* 상단 스크림 — 모바일 헤더 가독성 확보 */}
+        <div className="absolute inset-x-0 top-0 h-24 lg:hidden" style={{ background: 'linear-gradient(to bottom, rgba(7,6,14,0.7), transparent)' }} />
 
         {/* 내용 — PC 풀블리드에서는 페이지 그리드(max-w-7xl)에 맞춰 안쪽 정렬 */}
         <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-7 lg:px-4 lg:py-9 lg:mx-auto lg:w-full max-w-[680px] lg:max-w-7xl">

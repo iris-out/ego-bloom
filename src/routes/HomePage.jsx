@@ -197,12 +197,15 @@ export default function HomePage() {
   const [scrolled, setScrolled] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { canInstall: canInstallApp } = usePwaInstall();
+  const { canInstall: canInstallApp, installed: isInstalled } = usePwaInstall();
   const banners = useBanners();
 
-  const handleInstallApp = () => {
+  const handleInstallApp = async () => {
     setMenuOpen(false);
-    triggerInstall();
+    const success = await triggerInstall();
+    if (!success && !canInstallApp) {
+      alert('이 브라우저에서는 바로 설치가 지원되지 않습니다.\n\nSafari의 경우: 하단 [공유] 버튼 -> [홈 화면에 추가]\nChrome(모바일)의 경우: 우상단 메뉴 -> [앱 설치] 또는 [홈 화면에 추가]를 눌러주세요.');
+    }
   };
 
   const isMain = activeTab === 0;
@@ -283,7 +286,7 @@ export default function HomePage() {
   const MobileMenuPanel = (
     <Popover open={menuOpen} onClose={() => setMenuOpen(false)} align="right">
       <div className="py-1">
-        {canInstallApp && (
+        {!isInstalled && (
           <MenuRow Icon={Download} label="앱으로 설치" tag="앱" onClick={handleInstallApp} />
         )}
         <MenuRow Icon={Globe} label="오픈월드 입장" tag="베타" onClick={() => { setMenuOpen(false); navigate('/world'); }} />
@@ -310,7 +313,7 @@ export default function HomePage() {
         )}
 
         {/* 본문 영역 — 오버레이 헤더의 포지셔닝 컨텍스트 */}
-        <div className="relative flex-1 flex flex-col">
+        <div className="relative flex-1">
           {/* ===== Cinematic Overlay 헤더 (히어로 위에 얹힘, 고정) ===== */}
           <header
             className="fixed inset-x-0 z-30 transition-colors duration-300"
@@ -385,8 +388,8 @@ export default function HomePage() {
               'flex-1 flex flex-col lg:flex-row gap-4 lg:gap-0 px-4 max-w-7xl w-full mx-auto',
               // 모바일: 하단 플로팅 바(검색+탭) 공간 확보. 데스크탑: 일반 여백
               'pb-[150px] lg:pb-8',
-              // 메인 탭: 히어로가 헤더 아래로 풀블리드(모바일·데스크탑 공통). 그 외: 헤더 높이만큼 패딩
-              isMain ? 'pt-0' : 'pt-14 lg:pt-[72px]',
+              // 메인 탭: 히어로가 헤더 아래로 풀블리드(데스크탑만). 모바일은 겹침 방지를 위해 헤더 높이만큼 패딩
+              isMain ? 'pt-14 lg:pt-0' : 'pt-14 lg:pt-[72px]',
             ].join(' ')}
           >
             {/* Left column: main content */}
