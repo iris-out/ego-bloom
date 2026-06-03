@@ -94,8 +94,7 @@ export default function SpotlightHero({ spotlights }) {
         rel="noopener noreferrer"
         onClick={handleClick}
         draggable={false}
-        className="group relative block w-full overflow-hidden rounded-b-2xl sm:rounded-2xl lg:rounded-none border-x-0 border-t-0 border-b sm:border lg:border-x-0 lg:border-t-0 lg:border-b border-white/10 text-left shadow-[0_10px_40px_rgba(0,0,0,0.5)] focus:outline-none focus:ring-2 focus:ring-white/40 min-h-[248px] sm:min-h-[170px] lg:max-h-[600px]"
-        style={{ aspectRatio: '16 / 5' }}
+        className="group relative block w-full overflow-hidden aspect-[16/5] lg:aspect-[64/15] rounded-b-2xl sm:rounded-2xl lg:rounded-none border-x-0 border-t-0 border-b sm:border lg:border-x-0 lg:border-t-0 lg:border-b border-white/10 text-left shadow-[0_10px_40px_rgba(0,0,0,0.5)] focus:outline-none focus:ring-2 focus:ring-white/40 min-h-[248px] sm:min-h-[170px] lg:max-h-[450px]"
       >
         {/* 배경 이미지 — key로 크로스페이드 */}
         {bg ? (
