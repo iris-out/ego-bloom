@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import HeroBillboard from './HeroBillboard';
-import CreatorRail from './CreatorRail';
-import { buildTagLeaderboards, pickBillboard, buildTierMap } from '../../utils/hallOfFame';
+import React, { useEffect, useMemo } from 'react';
+import SpotlightHero from './SpotlightHero';
+import CharacterRail from './CharacterRail';
+import { buildTagCharacterRails, pickSpotlights } from '../../utils/tagCharacters';
 
 function RailSkeleton() {
   return (
@@ -18,48 +17,32 @@ function RailSkeleton() {
 }
 
 /**
- * 메인 뷰 — 시네마틱 빌보드 + 태그별 TOP 제작자 레일.
+ * 메인 뷰 — 캐릭터(스토리) 중심. 시네마틱 스포트라이트 + 비슷한 태그를 모은 타이틀별 캐릭터 레일.
+ * 카드 클릭 시 해당 캐릭터의 제타 페이지(새 탭)로 이동.
  * props: { rankingData, focusTag }
  */
 export default function MainHall({ rankingData, focusTag }) {
-  const navigate = useNavigate();
-  const [tierMap, setTierMap] = useState(() => new Map());
-
-  const leaderboards = useMemo(() => buildTagLeaderboards(rankingData), [rankingData]);
-  const billboard = useMemo(() => pickBillboard(leaderboards), [leaderboards]);
-
-  // ELO 티어 뱃지용 — get-rankings(top100) handle→tier 매핑. 실패해도 메인은 정상 렌더.
-  useEffect(() => {
-    let alive = true;
-    fetch('/api/get-rankings')
-      .then((r) => r.json())
-      .then((data) => { if (alive) setTierMap(buildTierMap(data?.rankings)); })
-      .catch(() => {});
-    return () => { alive = false; };
-  }, []);
+  const rails = useMemo(() => buildTagCharacterRails(rankingData), [rankingData]);
+  const spotlights = useMemo(() => pickSpotlights(rankingData, rails), [rankingData, rails]);
 
   // 인기 태그 탭 등에서 점프해온 경우 해당 레일로 스크롤
   useEffect(() => {
     if (!focusTag) return;
     const el = document.getElementById(`rail-${focusTag}`);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, [focusTag, leaderboards]);
-
-  const goCreator = (creator) => {
-    if (creator?.handle) navigate(`/profile?creator=${encodeURIComponent(creator.handle)}`);
-  };
+  }, [focusTag, rails]);
 
   if (!rankingData) {
     return (
       <div className="flex flex-col gap-7">
-        <div className="w-full rounded-2xl bg-white/[0.06] animate-pulse" style={{ aspectRatio: '16 / 7' }} />
+        <div className="w-full rounded-2xl bg-white/[0.06] animate-pulse" style={{ aspectRatio: '16 / 5' }} />
         <RailSkeleton />
         <RailSkeleton />
       </div>
     );
   }
 
-  if (!leaderboards.length) {
+  if (!rails.length) {
     return (
       <div className="py-20 text-center text-white/40 text-[14px]">
         랭킹 데이터를 준비 중입니다.
@@ -67,13 +50,11 @@ export default function MainHall({ rankingData, focusTag }) {
     );
   }
 
-  const billboardTier = billboard ? tierMap.get((billboard.handle || '').toLowerCase()) : null;
-
   return (
     <div className="flex flex-col gap-7 sm:gap-9">
-      <HeroBillboard billboard={billboard} tier={billboardTier} onClick={() => goCreator(billboard)} />
-      {leaderboards.map((tag) => (
-        <CreatorRail key={tag.key} tag={tag} tierMap={tierMap} onCreatorClick={goCreator} />
+      <SpotlightHero spotlights={spotlights} />
+      {rails.map((tag) => (
+        <CharacterRail key={tag.key} tag={tag} />
       ))}
     </div>
   );

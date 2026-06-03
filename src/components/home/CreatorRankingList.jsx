@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { proxyThumbnailUrl } from '../../utils/imageUtils';
-import { formatNumber, getCreatorTier } from '../../utils/tierCalculator';
+import { formatNumber, getCreatorTier, formatEloScore } from '../../utils/tierCalculator';
 import TierIcon from '../ui/TierIcon';
 
 const PAGE_SIZE = 20;
@@ -30,14 +30,35 @@ function splitFormatted(str) {
   return { num: str, unit: '' };
 }
 
-function StatVal({ count, label, numSize = '17px', labelSize = '11px' }) {
-  const { num, unit } = splitFormatted(formatNumber(count ?? 0));
+// Pass `count` for unit-formatted stats (대화/팔로워 → 만/억) or `value` for a
+// raw integer (ELO). `whitespace-nowrap` keeps the number+unit+label together so
+// labels like "팔로워" never split across lines in tight columns.
+function StatVal({ count, text, label, numSize = '17px', labelSize = '11px', numColor = 'rgba(255,255,255,0.92)' }) {
+  const { num, unit } = text != null
+    ? { num: text, unit: '' }
+    : splitFormatted(formatNumber(count ?? 0));
   return (
-    <span className="tabular-nums" style={{ letterSpacing: '-0.02em' }}>
-      <span style={{ fontSize: numSize, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>{num}</span>
-      {unit && <span style={{ fontSize: labelSize, fontWeight: 600, color: 'rgba(255,255,255,0.45)', marginLeft: '1px' }}>{unit}</span>}
-      <span style={{ fontSize: labelSize, fontWeight: 500, color: 'rgba(255,255,255,0.35)', marginLeft: '3px' }}>{label}</span>
+    <span className="tabular-nums whitespace-nowrap" style={{ letterSpacing: '-0.02em' }}>
+      <span style={{ fontSize: numSize, fontWeight: 800, color: numColor }}>{num}</span>
+      {unit && <span style={{ fontSize: labelSize, fontWeight: 600, color: 'rgba(255,255,255,0.5)', marginLeft: '1px' }}>{unit}</span>}
+      <span style={{ fontSize: labelSize, fontWeight: 500, color: 'rgba(255,255,255,0.4)', marginLeft: '3px' }}>{label}</span>
     </span>
+  );
+}
+
+// 시상대 전용: 라벨(좌) · 값(우) 한 줄. whitespace-nowrap 으로 절대 줄바꿈 안 됨.
+function PodiumStatRow({ label, count, text, valueColor }) {
+  const { num, unit } = text != null
+    ? { num: text, unit: '' }
+    : splitFormatted(formatNumber(count ?? 0));
+  return (
+    <div className="flex items-baseline justify-between gap-2 whitespace-nowrap">
+      <span className="text-[10px] font-medium text-white/40">{label}</span>
+      <span className="tabular-nums" style={{ letterSpacing: '-0.02em' }}>
+        <span style={{ fontSize: '15px', fontWeight: 800, color: valueColor || 'rgba(255,255,255,0.95)' }}>{num}</span>
+        {unit && <span style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.5)', marginLeft: '1px' }}>{unit}</span>}
+      </span>
+    </div>
   );
 }
 
@@ -176,13 +197,14 @@ function PodiumCard({ creator, rank, onClick }) {
         </span>
       </div>
 
-      {/* 헤드라인 스탯 */}
-      <div
-        className="mt-4 flex w-full items-center justify-center gap-3 rounded-lg border border-white/5 bg-black/20 px-3 py-2"
-      >
-        <StatVal count={creator.plot_interaction_count} label="대화" numSize="15px" />
-        <span className="text-white/15 text-[12px]">·</span>
-        <StatVal count={creator.follower_count} label="팔로워" numSize="15px" />
+      {/* 헤드라인 스탯 — 세로 정렬(라벨 좌 / 값 우). 좁은 모바일 시상대 칸에서
+          가로 배치가 줄바꿈·짜부라지던 문제를 막는다. */}
+      <div className="mt-4 flex w-full flex-col gap-1 rounded-lg border border-white/5 bg-black/20 px-3 py-2.5">
+        <PodiumStatRow label="대화" count={creator.plot_interaction_count} />
+        <PodiumStatRow label="팔로워" count={creator.follower_count} />
+        {creator.elo_score != null && (
+          <PodiumStatRow label="ELO" text={formatEloScore(creator.elo_score)} valueColor={color} />
+        )}
       </div>
     </button>
   );
@@ -251,20 +273,25 @@ function CreatorRow({ creator, globalRank, onClick }) {
         </div>
       </div>
 
-      {/* 모바일 전용: 스탯 */}
+      {/* 모바일 전용: 스탯 (대화 · 팔로워 · ELO) */}
       <div className="mt-1.5 pl-[120px] sm:hidden">
-        <div className="flex items-center gap-3">
-          <StatVal count={creator.plot_interaction_count} label="대화" numSize="16px" />
-          <StatVal count={creator.follower_count} label="팔로워" numSize="16px" />
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <StatVal count={creator.plot_interaction_count} label="대화" numSize="18px" />
+          <StatVal count={creator.follower_count} label="팔로워" numSize="18px" />
+          {creator.elo_score != null && (
+            <StatVal text={formatEloScore(creator.elo_score)} label="ELO" numSize="18px" numColor={meta.tierColor} />
+          )}
         </div>
       </div>
 
       {/* 데스크탑(sm+) 전용: 우측 스탯 블록 */}
       <div className="ml-auto hidden shrink-0 items-center gap-4 sm:flex">
-        <div className="flex items-center gap-2">
-          <StatVal count={creator.plot_interaction_count} label="대화" />
+        <div className="flex items-center gap-2.5">
+          <StatVal count={creator.plot_interaction_count} label="대화" numSize="20px" />
           <span className="text-[12px] text-white/20">·</span>
-          <StatVal count={creator.follower_count} label="팔로워" />
+          <StatVal count={creator.follower_count} label="팔로워" numSize="20px" />
+          <span className="text-[12px] text-white/20">·</span>
+          <StatVal text={formatEloScore(creator.elo_score)} label="ELO" numSize="20px" numColor={meta.tierColor} />
         </div>
         <div className="flex w-[64px] flex-col items-center justify-center gap-0.5" style={{ marginRight: '6px' }}>
           <TierIcon tier={meta.tierKey} rank={globalRank + 1} size={40} />

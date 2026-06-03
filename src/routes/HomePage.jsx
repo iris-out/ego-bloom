@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Database, Lock, BarChart2, Hash, Trophy, Star, Zap, PanelRight, PanelRightClose, History, Clapperboard } from 'lucide-react';
+import { Database, Lock, BarChart2, Hash, Trophy, Star, History, Clapperboard, Bell, Globe, Menu, Megaphone } from 'lucide-react';
 import { useServerStatus } from '../hooks/useServerStatus';
 import ChangelogModal from '../components/ChangelogModal';
 import DataCollectionModal from '../components/DataCollectionModal';
@@ -9,14 +8,11 @@ import SearchWarningModal from '../components/SearchWarningModal';
 import EmergencyToast from '../components/EmergencyToast';
 import ServerAlertCard from '../components/ServerAlertCard';
 import SearchPill from '../components/SearchPill';
-import AnnouncementTicker from '../components/home/AnnouncementTicker';
 import TagTrendCards from '../components/home/TagTrendCards';
 import MainHall from '../components/home/MainHall';
 import PlotRankingList from '../components/home/PlotRankingList';
-import TagTrendingList from '../components/home/TagTrendingList';
 import CreatorRankingList from '../components/home/CreatorRankingList';
 import FavoritesPanel from '../components/home/FavoritesPanel';
-import RankingTimeline from '../components/home/RankingTimeline';
 
 function _lcg(seed) {
   let s = seed >>> 0;
@@ -76,33 +72,109 @@ const TIME_BG = {
 };
 
 const TABS = [
-  { label: '메인',          short: '메인',   Icon: Clapperboard },
-  { label: '2시간 차트',    short: '차트',   Icon: BarChart2 },
-  { label: '크리에이터 순위', short: '순위',   Icon: Trophy    },
-  { label: '인기 태그',     short: '태그',   Icon: Hash      },
-  { label: '즐겨찾기',      short: '즐찾기', Icon: Star      },
-  { label: '인사이트',      short: '인사이트', Icon: Zap, mobileOnly: true },
+  { label: '메인',        short: '메인',   Icon: Clapperboard },
+  { label: 'TOP 100',     short: 'TOP',    Icon: BarChart2 },
+  { label: '제작자 순위',  short: '순위',   Icon: Trophy    },
+  { label: '인기 태그',   short: '태그',   Icon: Hash      },
+  { label: '즐겨찾기',    short: '즐겨찾기', Icon: Star, pcIconOnly: true },
 ];
 
-function ServerStatusBadge({ status }) {
-  const color = status === 'ok' ? '#6CD97E' : status === 'warning' ? '#FBBF24' : status === 'checking' ? 'rgba(255,255,255,0.3)' : '#F87171';
-  const label = status === 'ok' ? 'ZETA 서버 정상' : status === 'warning' ? 'ZETA 서버 불안정' : status === 'checking' ? 'ZETA 서버 확인 중' : 'ZETA 서버 이상';
+const FAVORITES_TAB = TABS.findIndex(t => t.label === '즐겨찾기');
+
+const SERVER_DOT = {
+  ok: '#6CD97E', warning: '#FBBF24', checking: 'rgba(255,255,255,0.3)', error: '#F87171',
+};
+const SERVER_LABEL = {
+  ok: '제타 서버 정상', warning: '제타 서버 불안정', checking: '제타 서버 확인 중', error: '제타 서버 이상',
+};
+
+// 공지 배너 — AnnouncementTicker와 동일 소스(세션 캐시 공유)
+function useBanners() {
+  const [banners, setBanners] = useState([]);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const cached = sessionStorage.getItem('zeta_banners_v1');
+        if (cached) {
+          const { data, ts } = JSON.parse(cached);
+          if (Date.now() - ts < 3600000 && Array.isArray(data)) {
+            if (alive) setBanners(data.filter(b => b.titlePrimary));
+            return;
+          }
+        }
+        const res = await fetch('/api/zeta/banners');
+        if (!res.ok) return;
+        const json = await res.json();
+        const list = json.banners || [];
+        try { sessionStorage.setItem('zeta_banners_v1', JSON.stringify({ data: list, ts: Date.now() })); } catch {}
+        if (alive) setBanners(list.filter(b => b.titlePrimary));
+      } catch {}
+    })();
+    return () => { alive = false; };
+  }, []);
+  return banners;
+}
+
+function bannerUrl(banner) {
+  if (!banner.clickAction) return null;
+  if (banner.clickAction.type === 'externalLink') return banner.clickAction.url;
+  if (banner.clickAction.href) {
+    const raw = banner.clickAction.href;
+    const local = raw.startsWith('/ko') ? raw : `/ko${raw}`;
+    return `https://zeta-ai.io${local}`;
+  }
+  return null;
+}
+
+// 헤더용 아이콘 버튼 — 동그란 글래스 버튼
+function IconButton({ Icon, label, onClick, badge, active = false }) {
   return (
-    <div className="flex items-center gap-1.5 text-[11px] font-medium text-white/50">
-      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
-      <span className="hidden sm:inline whitespace-nowrap">{label}</span>
+    <button
+      type="button" onClick={onClick} title={label} aria-label={label}
+      aria-pressed={active}
+      className={[
+        'relative w-9 h-9 rounded-full flex items-center justify-center transition-colors',
+        active ? 'text-amber-300 bg-white/10' : 'text-white/75 hover:text-white hover:bg-white/10',
+      ].join(' ')}
+    >
+      <Icon size={17} fill={active ? 'currentColor' : 'none'} />
+      {badge && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full" style={{ background: '#7AA3FF' }} />}
+    </button>
+  );
+}
+
+// 클릭-바깥-닫힘 팝오버
+function Popover({ open, onClose, align = 'right', children }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose(); };
+    const onEsc = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onEsc);
+    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onEsc); };
+  }, [open, onClose]);
+  if (!open) return null;
+  return (
+    <div
+      ref={ref}
+      className={`absolute top-full mt-2 z-50 ${align === 'right' ? 'right-0' : 'left-0'} w-72 rounded-xl border border-white/12 bg-[#0b1018]/95 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.55)] overflow-hidden`}
+    >
+      {children}
     </div>
   );
 }
 
-function DataCollectionButton({ onClick }) {
+function MenuRow({ Icon, label, tag, onClick }) {
   return (
     <button
-      onClick={onClick}
-      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors text-[11px] font-medium text-white/70"
+      type="button" onClick={onClick}
+      className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left hover:bg-white/[0.06] transition-colors text-white/85"
     >
-      <Database size={11} className="text-blue-400" />
-      <span className="hidden sm:inline">데이터 수집</span>
+      <Icon size={15} className="text-white/60 shrink-0" />
+      <span className="text-[13px] font-medium">{label}</span>
+      {tag && <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: 'rgba(99,102,241,0.2)', color: 'rgba(165,180,252,0.95)' }}>{tag}</span>}
     </button>
   );
 }
@@ -120,22 +192,17 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState(0);
   const [focusTag, setFocusTag] = useState(null);
   const [rankingData, setRankingData] = useState(null);
-  const [showTimeline, setShowTimeline] = useState(() =>
-    localStorage.getItem('ego-bloom-timeline-visible') !== 'false'
-  );
+  const [scrolled, setScrolled] = useState(false);
+  const [bellOpen, setBellOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const banners = useBanners();
+
+  const isMain = activeTab === 0;
 
   // 인기 태그 카드 클릭 → 메인 탭의 해당 태그 레일로 점프
   const handleTagJump = (familyKey) => {
     setFocusTag(familyKey);
     setActiveTab(0);
-  };
-
-  const handleTimelineToggle = () => {
-    setShowTimeline(prev => {
-      const next = !prev;
-      localStorage.setItem('ego-bloom-timeline-visible', String(next));
-      return next;
-    });
   };
 
   const bg = TIME_BG[timeSegment];
@@ -153,9 +220,17 @@ export default function HomePage() {
       .catch(() => {});
   }, []);
 
-  const SearchWithLock = ({ compact = false }) => (
+  // 스크롤 시 오버레이 내비가 솔리드로 — Netflix식
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const SearchWithLock = ({ compact = false, suggestionsAbove = false }) => (
     <div className="relative">
-      <SearchPill suggestionsAbove={false} />
+      <SearchPill suggestionsAbove={suggestionsAbove} />
       {!hasAgreedToWarning && (
         <div
           onClick={() => setShowWarningModal(true)}
@@ -170,6 +245,47 @@ export default function HomePage() {
     </div>
   );
 
+  // 공지 드롭다운 내용
+  const BellPanel = (
+    <Popover open={bellOpen} onClose={() => setBellOpen(false)} align="right">
+      <div className="flex items-center gap-2 px-3.5 py-2.5 border-b border-white/8 text-white/80">
+        <Megaphone size={14} className="text-indigo-400" />
+        <span className="text-[13px] font-bold">공지</span>
+      </div>
+      <div className="max-h-80 overflow-y-auto py-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+        {banners.length === 0 ? (
+          <div className="px-3.5 py-6 text-center text-[12px] text-white/40">새 공지가 없습니다.</div>
+        ) : banners.map((b, i) => {
+          const url = bannerUrl(b);
+          const inner = (
+            <div className="px-3.5 py-2.5 hover:bg-white/[0.06] transition-colors">
+              <div className="text-[13px] font-medium text-white/90 leading-snug">{b.titlePrimary}</div>
+              {b.titleSecondary && <div className="text-[11px] text-white/45 mt-0.5 leading-snug">{b.titleSecondary}</div>}
+            </div>
+          );
+          return url ? (
+            <a key={i} href={url} target="_blank" rel="noopener noreferrer" onClick={() => setBellOpen(false)}>{inner}</a>
+          ) : <div key={i}>{inner}</div>;
+        })}
+      </div>
+    </Popover>
+  );
+
+  // 모바일 더보기 메뉴(부가기능)
+  const MobileMenuPanel = (
+    <Popover open={menuOpen} onClose={() => setMenuOpen(false)} align="right">
+      <div className="py-1">
+        <MenuRow Icon={Globe} label="오픈월드 입장" tag="베타" onClick={() => { setMenuOpen(false); navigate('/world'); }} />
+        <MenuRow Icon={History} label="업데이트 로그" onClick={() => { setMenuOpen(false); setShowChangelogModal(true); }} />
+        <MenuRow Icon={Database} label="데이터 수집 안내" onClick={() => { setMenuOpen(false); setShowDataModal(true); }} />
+        <div className="flex items-center gap-2 px-3.5 py-2.5 border-t border-white/8 text-[12px] text-white/55">
+          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: SERVER_DOT[serverStatus] }} />
+          {SERVER_LABEL[serverStatus]}
+        </div>
+      </div>
+    </Popover>
+  );
+
   return (
     <div className="min-h-dvh relative flex flex-col" style={{ background: bg.base }}>
       <div className="absolute inset-0 pointer-events-none" style={{ background: bg.horizon }} />
@@ -177,157 +293,135 @@ export default function HomePage() {
       <StarField globalOpacity={bg.stars} />
 
       <div className="relative z-10 flex flex-col min-h-dvh">
-        {/* 서버 불안정/이상 알림 */}
+        {/* 서버 불안정/이상 알림 — 헤더 위 정상 흐름 */}
         {(serverStatus === 'warning' || serverStatus === 'error') && (
           <ServerAlertCard status={serverStatus} message={serverMessage} />
         )}
 
-        {/* Header */}
-        <header className="flex items-center justify-between px-4 py-3 border-b border-white/5">
-          {/* Left: logo + (PC) data btn + server status */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 cursor-pointer select-none" onClick={() => navigate('/')}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
-                <path d="M8 12 L12 8 L16 12 L12 16 Z" fill="rgba(129,140,248,0.8)" />
-              </svg>
-              <h1 className="font-medium text-[18px] tracking-[-0.02em] text-white whitespace-nowrap">EGO-BLOOM</h1>
-            </div>
-            {/* PC-only: data btn + server status */}
-            <div className="hidden lg:flex items-center gap-2">
-              <DataCollectionButton onClick={() => setShowDataModal(true)} />
-              <ServerStatusBadge status={serverStatus} />
-            </div>
-          </div>
-
-          {/* Right: mobile = status+openworld+data btn; PC = openworld btn + search bar */}
-          <div className="flex items-center gap-2">
-            {/* Update log button (all viewports) */}
-            <button
-              onClick={() => setShowChangelogModal(true)}
-              title="업데이트 로그"
-              aria-label="업데이트 로그"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition-colors text-[11px] font-semibold hover:brightness-110"
-              style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)' }}
-            >
-              <History size={13} />
-              <span className="hidden sm:inline">업데이트</span>
-            </button>
-            {/* Mobile: status + openworld + data btn */}
-            <div className="flex lg:hidden items-center gap-2">
-              <ServerStatusBadge status={serverStatus} />
-              <button
-                onClick={() => navigate('/world')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition-colors text-[11px] font-semibold"
-                style={{ background: 'rgba(99,102,241,0.15)', borderColor: 'rgba(99,102,241,0.4)', color: 'rgba(165,180,252,0.9)' }}
-              >
-                오픈월드<span className="text-[9px] opacity-70">베타</span>
-              </button>
-              <DataCollectionButton onClick={() => setShowDataModal(true)} />
-            </div>
-            {/* PC: openworld btn + search bar in header */}
-            <div className="hidden lg:flex items-center gap-2">
-              <button
-                onClick={() => navigate('/world')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all duration-200 text-[12px] font-semibold hover:brightness-110"
-                style={{ background: 'rgba(99,102,241,0.15)', borderColor: 'rgba(99,102,241,0.4)', color: 'rgba(165,180,252,0.9)' }}
-              >
-                오픈월드 <span className="text-[10px] opacity-60">(베타)</span> 입장
-              </button>
-              <div className="w-72">
-                <SearchWithLock compact />
+        {/* 본문 영역 — 오버레이 헤더의 포지셔닝 컨텍스트 */}
+        <div className="relative flex-1 flex flex-col">
+          {/* ===== Cinematic Overlay 헤더 (히어로 위에 얹힘, 고정) ===== */}
+          <header
+            className="fixed top-0 inset-x-0 z-30 transition-colors duration-300"
+            style={scrolled
+              ? { background: 'rgba(6,9,16,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }
+              : { background: 'linear-gradient(to bottom, rgba(3,5,12,0.82) 0%, rgba(3,5,12,0.40) 55%, transparent 100%)' }
+            }
+          >
+            <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-5">
+              {/* 로고 */}
+              <div className="flex items-center gap-2 cursor-pointer select-none shrink-0" onClick={() => navigate('/')}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" />
+                  <path d="M8 12 L12 8 L16 12 L12 16 Z" fill="rgba(122,163,255,0.9)" />
+                </svg>
+                <h1 className="font-bold text-[18px] tracking-[-0.02em] text-white whitespace-nowrap">EGO-BLOOM</h1>
               </div>
-            </div>
-          </div>
-        </header>
 
-        {/* Announcement Ticker */}
-        <AnnouncementTicker />
-
-        {/* Content */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-0 px-4 pt-5 pb-8 max-w-7xl w-full mx-auto">
-          {/* Left column: main content */}
-          <div className="flex flex-col gap-5 flex-1 min-w-0">
-            {/* Mobile-only search */}
-            <div className="lg:hidden">
-              <SearchWithLock />
-            </div>
-
-            {/* Main Tabs */}
-            <div className="flex flex-col flex-1">
-              <div className="flex border-b border-white/10 mb-4">
-                {TABS.map(({ label, short, Icon, mobileOnly }, i) => (
-                  <button
-                    key={label}
-                    onClick={() => setActiveTab(i)}
-                    className={[
-                      mobileOnly ? 'flex lg:hidden' : 'flex',
-                      'flex-1 lg:flex-none flex-col lg:flex-row',
-                      'items-center gap-1 lg:gap-1.5',
-                      'px-1 lg:px-3 py-2 lg:py-2.5',
-                      'font-medium transition-colors border-b-2 -mb-px',
-                      activeTab === i
-                        ? 'text-indigo-300 border-indigo-500'
-                        : 'text-white/40 border-transparent hover:text-white/70',
-                    ].join(' ')}
-                  >
-                    <Icon size={15} className="shrink-0 lg:w-[14px] lg:h-[14px]" />
-                    {/* 모바일: short 레이블 */}
-                    <span className="text-[11px] lg:hidden leading-none">{short}</span>
-                    {/* PC: 전체 레이블 */}
-                    <span className="hidden lg:inline text-[13px]">{label}</span>
-                  </button>
+              {/* PC 인라인 탭 내비 */}
+              <nav className="hidden lg:flex items-center gap-5 ml-1">
+                {TABS.map(({ label, pcIconOnly }, i) => (
+                  pcIconOnly ? null : (
+                    <button
+                      key={label}
+                      onClick={() => setActiveTab(i)}
+                      className="text-[13.5px] font-medium transition-colors"
+                      style={{ color: activeTab === i ? '#fff' : 'rgba(255,255,255,0.58)' }}
+                    >
+                      {label}
+                    </button>
+                  )
                 ))}
-                {/* PC 전용: 인사이트 패널 토글 버튼 (메인 탭에서는 숨김) */}
-                {activeTab !== 0 && (
-                <div className="hidden lg:flex items-center ml-auto self-center pl-2">
-                  <button
-                    onClick={handleTimelineToggle}
-                    title={showTimeline ? '인사이트 패널 숨기기' : '인사이트 패널 보기'}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all duration-200 text-[12px] font-semibold hover:brightness-110"
-                    style={showTimeline
-                      ? { background: 'rgba(99,102,241,0.15)', borderStyle: 'solid', borderColor: 'rgba(99,102,241,0.4)', color: 'rgba(165,180,252,0.9)' }
-                      : { background: 'rgba(255,255,255,0.06)', borderStyle: 'solid', borderColor: 'rgba(255,255,255,0.18)', color: 'rgba(255,255,255,0.65)' }
-                    }
-                  >
-                    {showTimeline ? <PanelRightClose size={13} /> : <PanelRight size={13} />}
-                    <span>{showTimeline ? '타임라인 접기' : '타임라인 펴기'}</span>
-                  </button>
-                </div>
-                )}
-              </div>
+              </nav>
 
-              {activeTab === 0 && <MainHall rankingData={rankingData} focusTag={focusTag} />}
-              {activeTab === 1 && <PlotRankingList rankingData={rankingData} />}
-              {activeTab === 2 && <CreatorRankingList />}
-              {activeTab === 3 && <TagTrendCards tagScores={rankingData?.tagScores ?? null} tagScoresDelta={rankingData?.tagScoresDelta ?? null} tagTrend={rankingData?.tagTrend ?? null} onTagClick={handleTagJump} />}
-              {activeTab === 4 && <FavoritesPanel />}
-              {/* 인사이트 탭: 모바일 전용 (PC는 사이드바로 표시) */}
-              {activeTab === 5 && (
-                <div className="lg:hidden">
-                  <RankingTimeline rankingData={rankingData} />
+              {/* 우측 클러스터 */}
+              <div className="ml-auto flex items-center gap-1.5">
+                {/* PC: 검색 + 부가 아이콘 */}
+                <div className="hidden lg:block w-56">
+                  <SearchWithLock compact />
                 </div>
-              )}
+                <div className="hidden lg:flex items-center gap-0.5">
+                  <IconButton Icon={Star} label="즐겨찾기" active={activeTab === FAVORITES_TAB} onClick={() => setActiveTab(FAVORITES_TAB)} />
+                  <IconButton Icon={Globe} label="오픈월드(베타) 입장" onClick={() => navigate('/world')} />
+                  <IconButton Icon={History} label="업데이트 로그" onClick={() => setShowChangelogModal(true)} />
+                  <IconButton Icon={Database} label="데이터 수집 안내" onClick={() => setShowDataModal(true)} />
+                </div>
+                {/* 공지 벨 (전 뷰) */}
+                <div className="relative">
+                  <IconButton Icon={Bell} label="공지" onClick={() => setBellOpen(v => !v)} badge={banners.length > 0} />
+                  {BellPanel}
+                </div>
+                {/* 서버 상태 — 점 + 텍스트 항상 표시 (PC) */}
+                <span
+                  className="hidden lg:flex items-center gap-1.5 ml-1.5 mr-0.5 text-[12px] font-medium text-white/70 whitespace-nowrap"
+                  aria-label={SERVER_LABEL[serverStatus]}
+                >
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: SERVER_DOT[serverStatus] }} />
+                  {SERVER_LABEL[serverStatus]}
+                </span>
+                {/* 모바일 더보기 메뉴 */}
+                <div className="relative lg:hidden">
+                  <IconButton Icon={Menu} label="메뉴" onClick={() => setMenuOpen(v => !v)} />
+                  {MobileMenuPanel}
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* ===== 콘텐츠 ===== */}
+          <div
+            className={[
+              'flex-1 flex flex-col lg:flex-row gap-4 lg:gap-0 px-4 max-w-7xl w-full mx-auto',
+              // 모바일: 하단 플로팅 바(검색+탭) 공간 확보. 데스크탑: 일반 여백
+              'pb-[150px] lg:pb-8',
+              // 메인 탭: 히어로가 헤더 아래로 풀블리드(모바일·데스크탑 공통). 그 외: 헤더 높이만큼 패딩
+              isMain ? 'pt-0' : 'pt-14 lg:pt-[72px]',
+            ].join(' ')}
+          >
+            {/* Left column: main content */}
+            <div className="flex flex-col gap-5 flex-1 min-w-0">
+              <div className="flex flex-col flex-1">
+                {activeTab === 0 && <MainHall rankingData={rankingData} focusTag={focusTag} />}
+                {activeTab === 1 && <PlotRankingList rankingData={rankingData} />}
+                {activeTab === 2 && <CreatorRankingList />}
+                {activeTab === 3 && <TagTrendCards tagScores={rankingData?.tagScores ?? null} tagScoresDelta={rankingData?.tagScoresDelta ?? null} tagTrend={rankingData?.tagTrend ?? null} onTagClick={handleTagJump} />}
+                {activeTab === 4 && <FavoritesPanel />}
+              </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Right column: PC-only timeline (토글 가능) */}
-          <div className="hidden lg:flex shrink-0">
-            <motion.div
-              className="flex flex-col overflow-hidden"
-              animate={{
-                width: (showTimeline && activeTab !== 0) ? 368 : 0,
-                opacity: (showTimeline && activeTab !== 0) ? 1 : 0,
-              }}
-              transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-            >
-              <div style={{ width: '368px' }} className="pl-4">
-                <div className="sticky top-4 bg-white/[0.03] border border-white/[0.07] rounded-xl p-4 max-h-[calc(100vh-80px)] overflow-y-auto flex flex-col scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
-                  <RankingTimeline rankingData={rankingData} />
-                </div>
-              </div>
-            </motion.div>
-          </div>
+      {/* ===== 모바일 하단 플로팅 바 — 검색(iOS 26 Safari 스타일) + 탭 ===== */}
+      <div
+        className="lg:hidden fixed inset-x-0 bottom-0 z-40 px-3 pt-10 pb-[calc(env(safe-area-inset-bottom,0px)+10px)] pointer-events-none"
+        style={{ background: 'linear-gradient(to top, rgba(4,7,14,0.95) 38%, rgba(4,7,14,0.6) 70%, transparent 100%)' }}
+      >
+        <div className="pointer-events-auto mx-auto max-w-md flex flex-col gap-2">
+          {/* 플로팅 검색 — 제안은 위로 펼침 */}
+          <SearchWithLock suggestionsAbove />
+
+          {/* 탭 바 */}
+          <nav className="flex items-stretch rounded-2xl border border-white/12 bg-[#0b1018]/85 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] px-1 py-1">
+            {TABS.map(({ short, Icon }, i) => {
+              const active = activeTab === i;
+              return (
+                <button
+                  key={short}
+                  type="button"
+                  onClick={() => setActiveTab(i)}
+                  aria-current={active}
+                  className={[
+                    'flex flex-1 flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl transition-colors',
+                    active ? 'text-indigo-300 bg-white/[0.07]' : 'text-white/45 hover:text-white/75',
+                  ].join(' ')}
+                >
+                  <Icon size={18} className="shrink-0" fill={active && i === FAVORITES_TAB ? 'currentColor' : 'none'} />
+                  <span className="text-[10px] font-semibold leading-none">{short}</span>
+                </button>
+              );
+            })}
+          </nav>
         </div>
       </div>
 

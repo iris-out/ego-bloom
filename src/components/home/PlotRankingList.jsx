@@ -609,13 +609,11 @@ export default function PlotRankingList({ rankingData }) {
         </div>
       ) : (
         <>
-          {/* Top 10 — 가로 스크롤 포스터 레일 (넷플릭스) */}
+          {/* Top 10 — 가로 스크롤 포스터 레일 (넷플릭스). 순위 숫자는 카드 외부 좌측. */}
           {visiblePlots.length > 0 && (
-            <div className="flex gap-3.5 sm:gap-4 overflow-x-auto overflow-y-hidden pb-3 pt-2 pl-2 mb-4 snap-x snap-mandatory scrollbar-hide">
+            <div className="flex gap-4 sm:gap-5 overflow-x-auto overflow-y-hidden pb-3 pt-2 pl-3 mb-4 snap-x snap-mandatory scrollbar-hide">
               {visiblePlots.slice(0, 10).map((plot, i) => (
-                <div key={plot.id} className="shrink-0 snap-start w-[120px] sm:w-[140px]">
-                  <PlotPosterCard plot={plot} rank={i + 1} />
-                </div>
+                <PlotPosterCard key={plot.id} plot={plot} rank={i + 1} />
               ))}
             </div>
           )}

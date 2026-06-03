@@ -116,9 +116,11 @@ function supabaseApiPlugin(env) {
       server.middlewares.use('/api/get-rankings', async (req, res, next) => {
         try {
           if (!supabase) throw new Error('Supabase not configured');
+          // 프로덕션 api/get-rankings.js 와 동일하게 차단 제작자 제외.
           const { data, error } = await supabase
             .from('account_current')
             .select('*')
+            .eq('is_blocked', false)
             .order('elo_score', { ascending: false })
             .limit(100);
 
@@ -377,6 +379,22 @@ function supabaseApiPlugin(env) {
           const { data } = await supabase.from('account_current').select('is_blocked').eq('id', id).single();
           res.end(JSON.stringify({ blocked: data?.is_blocked === true }));
         } catch { res.end(JSON.stringify({ blocked: false })); }
+      });
+
+      // 차단된 크리에이터 id/handle 일괄 조회 — api/get-blocked.js 미러 (메인 클라이언트 필터)
+      server.middlewares.use('/api/get-blocked', async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        try {
+          if (!supabase) return res.end(JSON.stringify({ ids: [], handles: [] }));
+          const { data } = await supabase.from('account_current').select('id, handle').eq('is_blocked', true);
+          const ids = [];
+          const handles = [];
+          for (const row of (data || [])) {
+            if (row.id) ids.push(row.id);
+            if (row.handle) handles.push(row.handle.toLowerCase());
+          }
+          res.end(JSON.stringify({ ids, handles }));
+        } catch { res.end(JSON.stringify({ ids: [], handles: [] })); }
       });
 
       // 단일 크리에이터의 "오늘 이전" 최신 스냅샷 (성장 비교 baseline) — api/get-creator-history.js 미러

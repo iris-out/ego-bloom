@@ -49,10 +49,10 @@ export default function SearchPill({ className = '', style, suggestionsAbove = f
   return (
     <form ref={pillRef} onSubmit={handleSubmit} className={className} style={style}>
       <label
-        className="glass-pill flex items-center w-full h-14 px-5 gap-3 shadow-[0_10px_30px_rgba(0,0,0,0.3)] relative cursor-text"
+        className="glass-pill rounded-full flex items-center w-full h-11 px-4 gap-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.3)] relative cursor-text"
         style={{ background: focused ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.12)', transition: 'background 0.2s ease' }}
       >
-        <Search size={20} className="text-white/70 shrink-0" />
+        <Search size={18} className="text-white/70 shrink-0" />
         <div className="flex-1 relative">
           <input
             type="text"
@@ -61,11 +61,11 @@ export default function SearchPill({ className = '', style, suggestionsAbove = f
             onFocus={() => { setShowSuggestions(true); setFocused(true); }}
             onBlur={() => { setTimeout(() => setShowSuggestions(false), 200); setFocused(false); }}
             placeholder="@핸들, ID, URL 검색"
-            className="w-full bg-transparent border-none text-[15px] text-white placeholder-white/40 font-light py-3 focus:outline-none"
+            className="w-full bg-transparent border-none text-[14px] text-white placeholder-white/40 font-light py-2 focus:outline-none"
           />
         </div>
         <button type="submit" disabled={!input.trim()}
-          className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white shrink-0 hover:bg-white/20 transition-colors disabled:opacity-30">
+          className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white shrink-0 hover:bg-white/20 transition-colors disabled:opacity-30">
           <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 stroke-current stroke-2 fill-none"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
         </button>
       </label>

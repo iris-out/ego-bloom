@@ -29,7 +29,7 @@ export default function FilterDropdown({ sortBy, direction, onChange }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-8 z-50 w-44 rounded-xl bg-[#12102a] border border-white/10 shadow-2xl py-1 overflow-hidden">
+        <div className="absolute left-0 sm:left-auto sm:right-0 top-8 z-50 w-44 rounded-xl bg-[#12102a] border border-white/10 shadow-2xl py-1 overflow-hidden">
           <div className="px-3 py-1.5 text-[10px] text-white/30 uppercase tracking-widest">정렬 기준</div>
           {SORT_BY.map(s => (
             <button

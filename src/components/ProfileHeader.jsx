@@ -419,30 +419,50 @@ export default function ProfileHeader({ profile, stats, characters, growthHistor
 
           {/* 대표 캐릭터 */}
           <div
-            className="flex flex-col gap-1.5 px-[18px] py-4 sm:px-6 sm:py-5"
+            className="relative flex flex-col gap-1.5 px-[18px] py-4 sm:px-6 sm:py-5 overflow-hidden"
             style={{ background: 'rgba(255,255,255,0.02)' }}
           >
-            <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            {/* 캐릭터 이미지 배경 + 어둡게 반투명 비네팅 */}
+            {topCharacter?.imageUrl && (
+              <>
+                <img
+                  src={proxyThumbnailUrl(topCharacter.imageUrl, 256)}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+                  style={{ opacity: 0.28, objectPosition: 'center 22%' }}
+                />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background:
+                      'linear-gradient(90deg, rgba(10,10,14,0.92) 0%, rgba(10,10,14,0.7) 45%, rgba(10,10,14,0.5) 100%), radial-gradient(120% 90% at 70% 30%, rgba(10,10,14,0) 0%, rgba(10,10,14,0.6) 100%)',
+                  }}
+                />
+              </>
+            )}
+            <div className="relative" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               대표 캐릭터
             </div>
             <div
-              className="text-[17px] sm:text-[18px]"
+              className="relative text-[22px] sm:text-[26px]"
               style={{
                 fontFamily: "'Pretendard Variable', system-ui, sans-serif",
                 fontWeight: 700,
                 color: 'var(--accent-bright)',
-                lineHeight: 1.25,
-                letterSpacing: '-0.02em',
+                lineHeight: 1.15,
+                letterSpacing: '-0.03em',
                 overflow: 'hidden',
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical',
+                textShadow: '0 1px 12px rgba(0,0,0,0.6)',
               }}
             >
               {topCharacter?.name || '—'}
             </div>
             {topCharacter && (
-              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>
+              <div className="relative" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)', textShadow: '0 1px 8px rgba(0,0,0,0.6)' }}>
                 {formatNumber(topCharacter.interactionCount)} 대화
               </div>
             )}

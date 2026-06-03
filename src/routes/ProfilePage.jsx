@@ -125,9 +125,9 @@ async function fetchRankingMap() {
 }
 
 const TABS = [
-  { key: 'characters',   label: '캐릭터' },
-  { key: 'achievements', label: '업적'   },
   { key: 'stats',        label: '통계'   },
+  { key: 'achievements', label: '업적'   },
+  { key: 'characters',   label: '캐릭터' },
 ];
 
 const TIER_BADGE_STYLES = {
@@ -252,7 +252,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
-  const [tab, setTab] = useState('characters');
+  const [tab, setTab] = useState('stats');
   const [cacheInfo, setCacheInfo] = useState(null);
   const [cacheRemaining, setCacheRemaining] = useState(null);
   const [showChangelog, setShowChangelog] = useState(false);
@@ -300,7 +300,7 @@ export default function ProfilePage() {
 
   const fetchData = async (inputStr, forceRefresh = false) => {
     let id = inputStr.trim();
-    setLoading(true); setError(null); setData(null); setCacheInfo(null); setTab('characters'); setHistory(null);
+    setLoading(true); setError(null); setData(null); setCacheInfo(null); setTab('stats'); setHistory(null);
 
     try {
       // UUID 형식이 아니면서, URL 형태도 아니라면 핸들(@) 검색으로 간주함
