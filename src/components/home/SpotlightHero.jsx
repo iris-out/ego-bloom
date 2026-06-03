@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { proxyImageUrl } from '../../utils/imageUtils';
 import { formatNumber } from '../../utils/tierCalculator';
 import { characterZetaUrl } from '../../utils/tagCharacters';
