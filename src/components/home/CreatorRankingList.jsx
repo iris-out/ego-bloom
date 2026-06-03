@@ -121,7 +121,7 @@ function Avatar({ creator, size, className = '', style }) {
 }
 
 // ── 시상대 히어로 카드 (top 1~3) ─────────────────────────────
-function PodiumCard({ creator, rank, onClick }) {
+function PodiumCard({ creator, rank, onClick, className = '' }) {
   const color = STRIPE_COLORS[rank];
   const meta = deriveTierMeta(creator, rank);
   const isFirst = rank === 0;
@@ -131,9 +131,9 @@ function PodiumCard({ creator, rank, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`podium-card group relative flex flex-col items-center overflow-hidden rounded-2xl border bg-gradient-to-b from-white/[0.07] to-white/[0.02] text-center transition-transform will-change-transform ${
+      className={`podium-card group relative flex flex-col overflow-hidden rounded-2xl border bg-gradient-to-b from-white/[0.07] to-white/[0.02] transition-transform will-change-transform ${
         creator.handle ? 'cursor-pointer' : 'cursor-default'
-      } ${isFirst ? 'px-5 pt-8 pb-6 sm:-mt-3' : 'px-4 pt-7 pb-5'}`}
+      } p-3 sm:items-center sm:text-center ${isFirst ? 'sm:px-5 sm:pt-8 sm:pb-6 sm:-mt-3' : 'sm:px-4 sm:pt-7 sm:pb-5'} ${className}`}
       style={{
         borderColor: `${color}66`,
         boxShadow: `0 18px 50px -22px ${color}99, inset 0 1px 0 rgba(255,255,255,0.06)`,
@@ -151,60 +151,105 @@ function PodiumCard({ creator, rank, onClick }) {
         style={{ background: color }}
       />
 
-      {/* 왕관 / 순위 배지 */}
-      <span
-        className="absolute left-1/2 top-2 -translate-x-1/2 text-[15px] leading-none drop-shadow"
-        aria-hidden="true"
-      >
-        {PODIUM_CROWNS[rank]}
-      </span>
+      {/* ── 모바일: 가로 컴팩트 행 (아바타 · 이름/티어 · 스탯) ── */}
+      <div className="flex w-full items-center gap-3 text-left sm:hidden">
+        <div className="relative shrink-0">
+          <Avatar
+            creator={creator}
+            size={58}
+            style={{ border: `2.5px solid ${color}`, boxShadow: `0 0 0 3px ${color}22` }}
+          />
+          <span
+            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 rounded-full px-1.5 py-px text-[9px] font-bold leading-none text-black"
+            style={{ background: color }}
+          >
+            {PODIUM_LABELS[rank]}
+          </span>
+        </div>
 
-      {/* 아바타 (티어/순위 컬러 링) */}
-      <div className="relative">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="shrink-0 text-[13px] leading-none drop-shadow" aria-hidden="true">
+              {PODIUM_CROWNS[rank]}
+            </span>
+            <p className="truncate text-[15px] font-bold text-white" style={{ letterSpacing: '-0.02em' }}>
+              {creator.nickname}
+            </p>
+          </div>
+          <p className="truncate text-[11px] text-white/40">@{creator.handle}</p>
+          <div className="mt-1 flex items-center gap-1.5">
+            <TierIcon tier={meta.tierKey} rank={rank + 1} size={22} />
+            <span className="truncate text-[10px] font-semibold tracking-wider" style={{ color: meta.tierColor }}>
+              {meta.fullTierLabel}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex shrink-0 flex-col gap-0.5 rounded-lg border border-white/5 bg-black/20 px-2.5 py-1.5">
+          <PodiumStatRow label="대화" count={creator.plot_interaction_count} />
+          <PodiumStatRow label="팔로워" count={creator.follower_count} />
+          {creator.elo_score != null && (
+            <PodiumStatRow label="ELO" text={formatEloScore(creator.elo_score)} valueColor={color} />
+          )}
+        </div>
+      </div>
+
+      {/* ── sm+: 기존 세로 시상대 카드 ── */}
+      <div className="hidden w-full flex-col items-center sm:flex">
+        {/* 왕관 / 순위 배지 */}
         <span
+          className="absolute left-1/2 top-2 -translate-x-1/2 text-[15px] leading-none drop-shadow"
           aria-hidden="true"
-          className="absolute inset-0 -m-1 rounded-full blur-md opacity-50"
-          style={{ background: color }}
-        />
-        <Avatar
-          creator={creator}
-          size={avatarSize}
-          className="relative self-center"
-          style={{ border: `3px solid ${color}`, boxShadow: `0 0 0 4px ${color}22` }}
-        />
-        <span
-          className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[10px] font-bold leading-none text-black"
-          style={{ background: color }}
         >
-          {PODIUM_LABELS[rank]}
+          {PODIUM_CROWNS[rank]}
         </span>
-      </div>
 
-      {/* 닉네임 / 핸들 */}
-      <p
-        className={`mt-4 w-full truncate font-bold text-white ${isFirst ? 'text-[17px]' : 'text-[15px]'}`}
-        style={{ letterSpacing: '-0.02em' }}
-      >
-        {creator.nickname}
-      </p>
-      <p className="w-full truncate text-[11px] text-white/40">@{creator.handle}</p>
+        {/* 아바타 (티어/순위 컬러 링) */}
+        <div className="relative">
+          <span
+            aria-hidden="true"
+            className="absolute inset-0 -m-1 rounded-full blur-md opacity-50"
+            style={{ background: color }}
+          />
+          <Avatar
+            creator={creator}
+            size={avatarSize}
+            className="relative self-center"
+            style={{ border: `3px solid ${color}`, boxShadow: `0 0 0 4px ${color}22` }}
+          />
+          <span
+            className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[10px] font-bold leading-none text-black"
+            style={{ background: color }}
+          >
+            {PODIUM_LABELS[rank]}
+          </span>
+        </div>
 
-      {/* 티어 */}
-      <div className="mt-3 flex flex-col items-center gap-1">
-        <TierIcon tier={meta.tierKey} rank={rank + 1} size={isFirst ? 52 : 44} />
-        <span className="text-[10px] font-semibold tracking-wider" style={{ color: meta.tierColor }}>
-          {meta.fullTierLabel}
-        </span>
-      </div>
+        {/* 닉네임 / 핸들 */}
+        <p
+          className={`mt-4 w-full truncate font-bold text-white ${isFirst ? 'text-[17px]' : 'text-[15px]'}`}
+          style={{ letterSpacing: '-0.02em' }}
+        >
+          {creator.nickname}
+        </p>
+        <p className="w-full truncate text-[11px] text-white/40">@{creator.handle}</p>
 
-      {/* 헤드라인 스탯 — 세로 정렬(라벨 좌 / 값 우). 좁은 모바일 시상대 칸에서
-          가로 배치가 줄바꿈·짜부라지던 문제를 막는다. */}
-      <div className="mt-4 flex w-full flex-col gap-1 rounded-lg border border-white/5 bg-black/20 px-3 py-2.5">
-        <PodiumStatRow label="대화" count={creator.plot_interaction_count} />
-        <PodiumStatRow label="팔로워" count={creator.follower_count} />
-        {creator.elo_score != null && (
-          <PodiumStatRow label="ELO" text={formatEloScore(creator.elo_score)} valueColor={color} />
-        )}
+        {/* 티어 */}
+        <div className="mt-3 flex flex-col items-center gap-1">
+          <TierIcon tier={meta.tierKey} rank={rank + 1} size={isFirst ? 52 : 44} />
+          <span className="text-[10px] font-semibold tracking-wider" style={{ color: meta.tierColor }}>
+            {meta.fullTierLabel}
+          </span>
+        </div>
+
+        {/* 헤드라인 스탯 — 세로 정렬(라벨 좌 / 값 우) */}
+        <div className="mt-4 flex w-full flex-col gap-1 rounded-lg border border-white/5 bg-black/20 px-3 py-2.5">
+          <PodiumStatRow label="대화" count={creator.plot_interaction_count} />
+          <PodiumStatRow label="팔로워" count={creator.follower_count} />
+          {creator.elo_score != null && (
+            <PodiumStatRow label="ELO" text={formatEloScore(creator.elo_score)} valueColor={color} />
+          )}
+        </div>
       </div>
     </button>
   );
@@ -393,15 +438,15 @@ export default function CreatorRankingList() {
         </span>
       </div>
 
-      {/* 시상대 (페이지 0에서만) — 1위 중앙·가장 큼 */}
+      {/* 시상대 (페이지 0에서만) — 모바일: 세로 1·2·3위 / sm+: 시상대 3열(2·1·3) */}
       {showPodium && (
-        <div className="grid grid-cols-3 items-end gap-2.5 px-1 sm:gap-4">
-          {/* 2위 (좌) */}
-          <PodiumCard creator={podiumCreators[1]} rank={1} onClick={() => goToProfile(podiumCreators[1].handle)} />
-          {/* 1위 (중앙, 가장 큼) */}
-          <PodiumCard creator={podiumCreators[0]} rank={0} onClick={() => goToProfile(podiumCreators[0].handle)} />
-          {/* 3위 (우) */}
-          <PodiumCard creator={podiumCreators[2]} rank={2} onClick={() => goToProfile(podiumCreators[2].handle)} />
+        <div className="flex flex-col gap-2.5 px-1 sm:grid sm:grid-cols-3 sm:items-end sm:gap-4">
+          {/* 2위 (sm+ 좌 / 모바일 2번째) */}
+          <PodiumCard creator={podiumCreators[1]} rank={1} className="order-2 sm:order-none" onClick={() => goToProfile(podiumCreators[1].handle)} />
+          {/* 1위 (sm+ 중앙·가장 큼 / 모바일 1번째) */}
+          <PodiumCard creator={podiumCreators[0]} rank={0} className="order-1 sm:order-none" onClick={() => goToProfile(podiumCreators[0].handle)} />
+          {/* 3위 (sm+ 우 / 모바일 3번째) */}
+          <PodiumCard creator={podiumCreators[2]} rank={2} className="order-3 sm:order-none" onClick={() => goToProfile(podiumCreators[2].handle)} />
         </div>
       )}
 

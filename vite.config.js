@@ -636,8 +636,29 @@ export default defineConfig(({ mode }) => {
           ],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+          // 해시 처리된 에셋만 프리캐시. index.html 은 프리캐시에서 제외해
+          // 'CacheFirst' 로 옛 디자인이 박제되는 문제를 막는다(아래 navigate 규칙이 처리).
+          globPatterns: ['**/*.{js,css,ico,png,svg}'],
+          globIgnores: ['**/index.html'],
+          // 새 SW 가 즉시 활성화되고, 오래된 캐시는 정리되도록.
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
+          // SPA 진입 문서는 프리캐시 폴백을 쓰지 않는다(navigate 규칙으로 일원화).
+          navigateFallback: null,
           runtimeCaching: [
+            {
+              // HTML 문서: 항상 네트워크 우선 → 배포 즉시 새 디자인 반영,
+              // 오프라인일 때만 마지막으로 받은 문서로 폴백.
+              urlPattern: ({ request }) => request.mode === 'navigate',
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'html-documents',
+                networkTimeoutSeconds: 3,
+                expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
             {
               // /api/zeta/* 프록시 경로 매칭 (직접 CDN URL이 아닌 실제 요청 경로)
               urlPattern: ({ url }) => url.pathname.startsWith('/api/zeta/'),

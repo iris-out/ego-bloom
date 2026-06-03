@@ -106,7 +106,7 @@ export default function SpotlightHero({ spotlights }) {
             src={bg}
             alt=""
             loading="eager"
-            fetchpriority="high"
+            fetchPriority="high"
             className="absolute inset-0 w-full h-full object-cover scale-105 transition-transform duration-700 group-hover:scale-110 motion-reduce:transform-none hero-fade"
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
