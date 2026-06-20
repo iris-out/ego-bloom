@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EgoBloom — 생일 배너 디자인 시안</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Nanum+Myeongjo:wght@400;700;800&family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* ===== EgoBloom 실제 토큰 ===== */
+  :root {
+    --bg-profile:    #060C1C;
+    --bg-base:       #080C14;
+    --c-surface-1:   #0C1018;
+    --c-glass-border: rgba(255,255,255,0.12);
+    --c-rule:        rgba(255,255,255,0.06);
+    --text-primary:  #FFFFFF;
+    --text-secondary: rgba(255,255,255,0.72);
+    --text-tertiary: rgba(255,255,255,0.52);
+    --accent:        #4A7FFF;
+    --accent-bright: #7AA3FF;
+
+    /* 생일 전용 축제 그라데이션 (네이비 위 따뜻한 대비) */
+    --cake-gold:    #FFD166;
+    --cake-coral:   #FF6B9D;
+    --cake-violet:  #B57BFF;
+    --cake-amber:   #FFB05C;
+
+    --font-display: "Nanum Myeongjo", serif;
+    --font-deco:    "Cinzel", serif;
+    --font-body:    "Plus Jakarta Sans", "Pretendard Variable", -apple-system, sans-serif;
+    --font-mono:    "JetBrains Mono", monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(74,127,255,0.10), transparent 60%),
+      var(--bg-profile);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    padding: 48px 20px 120px;
+    min-height: 100vh;
+  }
+
+  .page { max-width: 980px; margin: 0 auto; }
+
+  /* ===== 시안 페이지 헤더 ===== */
+  .doc-head { margin-bottom: 8px; }
+  .doc-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--accent-bright);
+  }
+  .doc-title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 5vw, 40px); font-weight: 800;
+    margin-top: 10px; line-height: 1.1;
+  }
+  .doc-sub { color: var(--text-tertiary); margin-top: 12px; max-width: 60ch; line-height: 1.6; font-size: 14px; }
+
+  .controls { display: flex; gap: 10px; margin: 28px 0 8px; flex-wrap: wrap; }
+  .btn {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em;
+    color: var(--text-secondary); background: rgba(255,255,255,0.04);
+    border: 1px solid var(--c-glass-border); border-radius: 999px;
+    padding: 9px 16px; cursor: pointer; transition: all .2s;
+  }
+  .btn:hover { color: #fff; border-color: var(--accent); background: rgba(74,127,255,0.10); }
+
+  .variant-label {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--text-tertiary);
+    margin: 64px 0 16px; display: flex; align-items: center; gap: 14px;
+  }
+  .variant-label::after { content: ""; flex: 1; height: 1px; background: var(--c-rule); }
+  .variant-note { color: var(--text-tertiary); font-size: 13px; line-height: 1.6; margin: -4px 0 18px; max-width: 64ch; }
+
+  /* ============================================================
+     공통: 폭죽/컨페티 캔버스
+  ============================================================ */
+  .fx-canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 2;
+  }
+
+  /* ============================================================
+     VARIANT A — "스포트라이트 배너" (가로 풀폭)
+     프로필 헤더 바로 위. 아바타 뒤에서 폭죽이 터지고,
+     따뜻한 오로라 그라데이션이 가로로 흐른다.
+  ============================================================ */
+  .bd-a {
+    position: relative; overflow: hidden;
+    border-radius: 20px;
+    border: 1px solid rgba(255,209,102,0.22);
+    background:
+      radial-gradient(420px 200px at 14% 120%, rgba(255,107,157,0.20), transparent 70%),
+      radial-gradient(520px 240px at 78% -40%, rgba(181,123,255,0.20), transparent 70%),
+      linear-gradient(100deg, #140A1E 0%, #0A0E22 52%, #0B1330 100%);
+    padding: 26px 28px;
+    display: grid; grid-template-columns: auto 1fr auto; gap: 22px; align-items: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  /* 위쪽 그라데이션 헤어라인 */
+  .bd-a::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cake-gold), var(--cake-coral), var(--cake-violet), transparent);
+    background-size: 200% 100%; animation: slide-sheen 6s linear infinite; z-index: 3;
+  }
+  @keyframes slide-sheen { to { background-position: 200% 0; } }
+
+  .bd-a .avatar-wrap { position: relative; z-index: 3; width: 84px; height: 84px; }
+  .bd-a .avatar-ring {
+    position: absolute; inset: -6px; border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--cake-gold), var(--cake-coral), var(--cake-violet), var(--cake-amber), var(--cake-gold));
+    animation: spin 7s linear infinite; filter: blur(0.5px);
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .bd-a .avatar {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: #1a1430 center/cover;
+    border: 3px solid #0A0E22;
+    display: grid; place-items: center; font-size: 38px;
+  }
+  .bd-a .cake-pin {
+    position: absolute; right: -4px; bottom: -4px; z-index: 4;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--cake-gold), var(--cake-coral));
+    display: grid; place-items: center; font-size: 15px;
+    box-shadow: 0 4px 12px rgba(255,107,157,0.5);
+  }
+
+  .bd-a .copy { position: relative; z-index: 3; min-width: 0; }
+  .bd-a .eyebrow {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase;
+    background: linear-gradient(90deg, var(--cake-gold), var(--cake-coral));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .bd-a .headline {
+    font-family: var(--font-display); font-weight: 800;
+    font-size: clamp(22px, 3.4vw, 30px); line-height: 1.18; margin-top: 9px;
+    letter-spacing: -0.01em;
+  }
+  .bd-a .headline .name {
+    background: linear-gradient(92deg, var(--cake-gold) 0%, var(--cake-coral) 45%, var(--cake-violet) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .bd-a .subline { color: var(--text-secondary); font-size: 13.5px; margin-top: 8px; line-height: 1.5; }
+  .bd-a .subline b { color: var(--text-primary); font-weight: 600; }
+
+  .bd-a .cta {
+    position: relative; z-index: 3; white-space: nowrap;
+    font-family: var(--font-body); font-weight: 600; font-size: 13px;
+    color: #1a0e16; padding: 11px 18px; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(135deg, var(--cake-gold), var(--cake-amber));
+    box-shadow: 0 8px 24px rgba(255,176,92,0.35);
+    transition: transform .15s;
+  }
+  .bd-a .cta:hover { transform: translateY(-2px); }
+
+  /* 다중 생일: 아바타 스택 */
+  .avatar-stack { display: flex; align-items: center; }
+  .avatar-stack .mini {
+    width: 52px; height: 52px; border-radius: 50%; border: 2px solid #0A0E22;
+    background: #1a1430; display: grid; place-items: center; font-size: 24px; margin-left: -14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .avatar-stack .mini:first-child { margin-left: 0; }
+  .avatar-stack .more {
+    margin-left: -14px; width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid #0A0E22; display: grid; place-items: center;
+    background: linear-gradient(135deg, var(--cake-coral), var(--cake-violet));
+    font-family: var(--font-mono); font-weight: 700; font-size: 13px; color: #fff;
+  }
+
+  /* ============================================================
+     VARIANT B — "컨페티 글래스 카드" (콤팩트, 회전 그라데이션 보더)
+  ============================================================ */
+  .bd-b {
+    position: relative; border-radius: 18px; padding: 1.5px; overflow: hidden;
+    background: conic-gradient(from 0deg, var(--cake-gold), var(--cake-coral), var(--cake-violet), var(--cake-amber), var(--cake-gold));
+    animation: spin 9s linear infinite;
+  }
+  .bd-b-inner {
+    position: relative; overflow: hidden; border-radius: 17px;
+    background: linear-gradient(160deg, rgba(20,12,28,0.92), rgba(10,14,32,0.96));
+    backdrop-filter: blur(12px);
+    padding: 22px 24px;
+    display: flex; align-items: center; gap: 18px;
+    animation: spin 9s linear infinite reverse; /* 내용은 정지 보이게 역회전 보정 */
+  }
+  /* 역회전 보정이 내용까지 돌리므로, 실제로는 wrapper만 돌리고 inner는 고정.
+     아래 JS 없이 정지시키기 위해 애니메이션 취소 */
+  .bd-b-inner { animation: none; }
+  .bd-b .glow {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(300px 140px at 20% 130%, rgba(255,107,157,0.18), transparent 70%);
+  }
+  .bd-b .emoji-badge {
+    position: relative; z-index: 2; width: 56px; height: 56px; border-radius: 14px; flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(255,209,102,0.18), rgba(181,123,255,0.18));
+    border: 1px solid rgba(255,209,102,0.30);
+    display: grid; place-items: center; font-size: 28px;
+  }
+  .bd-b .copy { position: relative; z-index: 2; min-width: 0; }
+  .bd-b .eyebrow {
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--cake-gold);
+  }
+  .bd-b .headline {
+    font-family: var(--font-display); font-weight: 700; font-size: 19px; margin-top: 6px; line-height: 1.3;
+  }
+  .bd-b .headline .name { color: var(--cake-coral); }
+  .bd-b .subline { color: var(--text-tertiary); font-size: 12.5px; margin-top: 5px; }
+
+  /* ============================================================
+     VARIANT C — "리본" (초미니멀, 헤더 위 얇은 스트립)
+  ============================================================ */
+  .bd-c {
+    position: relative; overflow: hidden; border-radius: 12px;
+    padding: 13px 18px; display: flex; align-items: center; gap: 13px;
+    background: linear-gradient(90deg, rgba(255,209,102,0.10), rgba(255,107,157,0.10), rgba(181,123,255,0.10));
+    border: 1px solid rgba(255,209,102,0.20);
+  }
+  .bd-c .dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    background: var(--cake-coral); box-shadow: 0 0 10px var(--cake-coral);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse { 50% { opacity: 0.4; transform: scale(0.7); } }
+  .bd-c .txt { font-size: 13.5px; color: var(--text-secondary); }
+  .bd-c .txt b {
+    font-family: var(--font-display); font-weight: 700;
+    background: linear-gradient(90deg, var(--cake-gold), var(--cake-coral));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .bd-c .link {
+    margin-left: auto; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em;
+    color: var(--cake-gold); white-space: nowrap;
+  }
+
+  /* ===== 시안: 컨텍스트 (프로필 헤더 더미) ===== */
+  .context-frame {
+    margin-top: 18px; border: 1px dashed var(--c-rule); border-radius: 16px; padding: 16px;
+    opacity: 0.5;
+  }
+  .ctx-row { display: flex; gap: 14px; align-items: center; }
+  .ctx-av { width: 60px; height: 60px; border-radius: 16px; background: rgba(255,255,255,0.06); }
+  .ctx-lines { flex: 1; }
+  .ctx-l1 { width: 180px; height: 14px; border-radius: 4px; background: rgba(255,255,255,0.10); }
+  .ctx-l2 { width: 120px; height: 11px; border-radius: 4px; background: rgba(255,255,255,0.06); margin-top: 9px; }
+  .ctx-tag { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.1em; margin-bottom: 10px; }
+
+  @media (max-width: 640px) {
+    .bd-a { grid-template-columns: auto 1fr; gap: 16px; padding: 20px; }
+    .bd-a .cta { grid-column: 1 / -1; width: 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bd-a::before, .bd-a .avatar-ring, .bd-b, .bd-c .dot { animation: none !important; }
+    .fx-canvas { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="doc-head">
+    <div class="doc-eyebrow">EgoBloom · Design Comp</div>
+    <h1 class="doc-title">🎂 캐릭터 생일 축하 배너</h1>
+    <p class="doc-sub">
+      제작자 프로필을 열었을 때, 보유 캐릭터 중 <b style="color:var(--text-secondary)">오늘이 제작 기념일(생일)</b>인
+      캐릭터가 있으면 프로필 헤더 위에 나타나는 배너입니다. 차분한 네이비 UI를 깨는
+      따뜻한 골드–코럴–바이올렛 그라데이션과 폭죽이 시그니처. 아래 3개 변형 중 방향을 골라주세요.
+    </p>
+  </div>
+
+  <div class="controls">
+    <button class="btn" onclick="burstAll()">🎆 폭죽 다시 터뜨리기</button>
+    <button class="btn" onclick="toggleMulti()">👥 단일 ↔ 다중 생일 전환</button>
+  </div>
+
+  <!-- ===================== VARIANT A ===================== -->
+  <div class="variant-label">Variant A — 스포트라이트 배너 (추천)</div>
+  <p class="variant-note">
+    가로 풀폭. 아바타 뒤에서 폭죽이 터지고 회전하는 파티 링 + 케이크 핀.
+    존재감이 가장 크고 "오늘의 주인공"을 분명히 보여줍니다. 프로필 메인 컬럼 최상단에 배치.
+  </p>
+  <div class="bd-a" id="variantA">
+    <canvas class="fx-canvas" data-fx="A"></canvas>
+    <div class="avatar-wrap" id="aSingle">
+      <div class="avatar-ring"></div>
+      <div class="avatar">🦊</div>
+      <div class="cake-pin">🎂</div>
+    </div>
+    <div class="copy">
+      <span class="eyebrow">🎉 오늘의 생일</span>
+      <div class="headline">오늘은 <span class="name">『여우와 밤』</span>이 태어난 날이에요</div>
+      <div class="subline"><b>제작자</b>님이 2024년 6월 20일에 빚어낸 캐릭터 · <b>2번째 생일</b></div>
+    </div>
+    <button class="cta">축하 보내기 🎈</button>
+  </div>
+  <div class="context-frame">
+    <div class="ctx-tag">↓ 실제 화면에서는 이 아래로 기존 프로필 헤더가 이어집니다</div>
+    <div class="ctx-row">
+      <div class="ctx-av"></div>
+      <div class="ctx-lines"><div class="ctx-l1"></div><div class="ctx-l2"></div></div>
+    </div>
+  </div>
+
+  <!-- ===================== VARIANT B ===================== -->
+  <div class="variant-label">Variant B — 컨페티 글래스 카드</div>
+  <p class="variant-note">
+    콤팩트한 글래스 카드. 테두리가 그라데이션으로 천천히 회전하고 내부에 컨페티가 떨어집니다.
+    기존 글래스 카드 시스템과 가장 잘 어울리는 절제된 방향.
+  </p>
+  <div class="bd-b" id="variantB">
+    <div class="bd-b-inner">
+      <canvas class="fx-canvas" data-fx="B"></canvas>
+      <div class="glow"></div>
+      <div class="emoji-badge">🎈</div>
+      <div class="copy">
+        <div class="eyebrow">Happy Birthday</div>
+        <div class="headline"><span class="name">『여우와 밤』</span>의 생일이에요</div>
+        <div class="subline">2024.06.20 제작 · 함께 축하해 주세요</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== VARIANT C ===================== -->
+  <div class="variant-label">Variant C — 리본 (미니멀)</div>
+  <p class="variant-note">
+    초미니멀 스트립. 폭죽 없이 펄스 도트와 그라데이션 텍스트만. 화면을 거의 차지하지 않아
+    "조용한 알림"을 원할 때. 다중 생일에도 한 줄로 처리됩니다.
+  </p>
+  <div class="bd-c">
+    <span class="dot"></span>
+    <span class="txt">오늘은 <b>『여우와 밤』</b>의 2번째 생일이에요 🎂</span>
+    <span class="link">캐릭터 보기 →</span>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   폭죽 + 컨페티 파티클 (의존성 없는 경량 캔버스)
+   - reduced-motion 시 전체 비활성
+============================================================ */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const PALETTE = ['#FFD166','#FF6B9D','#B57BFF','#FFB05C','#7AA3FF','#FFFFFF'];
+
+class FX {
+  constructor(canvas, mode) {
+    this.c = canvas; this.ctx = canvas.getContext('2d'); this.mode = mode;
+    this.particles = []; this.raf = null;
+    this.resize(); window.addEventListener('resize', () => this.resize());
+    if (!reduceMotion) { this.loop(); if (mode === 'A') this.burst(); if (mode === 'B') this.confettiTimer(); }
+  }
+  resize() {
+    const r = this.c.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    this.c.width = r.width * dpr; this.c.height = r.height * dpr;
+    this.ctx.setTransform(dpr,0,0,dpr,0,0);
+    this.w = r.width; this.h = r.height;
+  }
+  /* 폭죽: 한 점에서 방사형으로 터짐 */
+  burst(x, y) {
+    x = x ?? this.w * (this.mode === 'A' ? 0.10 : 0.5);
+    y = y ?? this.h * 0.5;
+    const n = 46;
+    for (let i = 0; i < n; i++) {
+      const ang = (Math.PI * 2 * i) / n + Math.random() * 0.2;
+      const sp = 1.6 + Math.random() * 3.4;
+      this.particles.push({
+        x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+        life: 1, decay: 0.012 + Math.random() * 0.012,
+        size: 1.5 + Math.random() * 2.5, color: PALETTE[(Math.random()*PALETTE.length)|0],
+        kind: 'spark', g: 0.03,
+      });
+    }
+  }
+  /* 컨페티: 위에서 떨어지는 종이조각 */
+  confettiTimer() {
+    this.ci = setInterval(() => {
+      if (document.hidden) return;
+      for (let i = 0; i < 2; i++) {
+        this.particles.push({
+          x: Math.random() * this.w, y: -8,
+          vx: (Math.random()-0.5) * 0.8, vy: 0.7 + Math.random() * 0.9,
+          life: 1, decay: 0.004, size: 3 + Math.random()*3,
+          color: PALETTE[(Math.random()*PALETTE.length)|0],
+          kind: 'confetti', g: 0.005, rot: Math.random()*6, vr: (Math.random()-0.5)*0.25,
+        });
+      }
+    }, 180);
+  }
+  loop() {
+    this.ctx.clearRect(0,0,this.w,this.h);
+    for (let i = this.particles.length-1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.vy += p.g; p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+      if (p.kind === 'confetti') { p.rot += p.vr; if (p.y > this.h + 10) p.life = 0; }
+      if (p.life <= 0) { this.particles.splice(i,1); continue; }
+      this.ctx.globalAlpha = Math.max(0, Math.min(1, p.life));
+      this.ctx.fillStyle = p.color;
+      if (p.kind === 'confetti') {
+        this.ctx.save(); this.ctx.translate(p.x,p.y); this.ctx.rotate(p.rot);
+        this.ctx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2); this.ctx.restore();
+      } else {
+        this.ctx.shadowBlur = 8; this.ctx.shadowColor = p.color;
+        this.ctx.beginPath(); this.ctx.arc(p.x,p.y,p.size,0,Math.PI*2); this.ctx.fill();
+        this.ctx.shadowBlur = 0;
+      }
+    }
+    this.ctx.globalAlpha = 1;
+    this.raf = requestAnimationFrame(() => this.loop());
+  }
+}
+
+const fxList = [...document.querySelectorAll('.fx-canvas')].map(c => new FX(c, c.dataset.fx));
+
+function burstAll() {
+  fxList.forEach(fx => {
+    if (fx.mode === 'A') { fx.burst(fx.w*0.10, fx.h*0.5); setTimeout(()=>fx.burst(fx.w*0.30, fx.h*0.35), 220); }
+    else fx.burst();
+  });
+}
+
+/* 단일 ↔ 다중 생일 토글 (Variant A) */
+let multi = false;
+function toggleMulti() {
+  multi = !multi;
+  const wrap = document.getElementById('aSingle');
+  const copy = document.querySelector('#variantA .copy');
+  if (multi) {
+    wrap.outerHTML = `
+      <div class="avatar-stack" id="aSingle">
+        <div class="mini">🦊</div><div class="mini">🐰</div><div class="mini">🐉</div>
+        <div class="more">+2</div>
+      </div>`;
+    copy.innerHTML = `
+      <span class="eyebrow">🎉 오늘의 생일</span>
+      <div class="headline">오늘 생일을 맞은 캐릭터가 <span class="name">5명</span> 있어요</div>
+      <div class="subline"><b>제작자</b>님의 『여우와 밤』 외 4명이 오늘 태어났어요</div>`;
+  } else {
+    document.getElementById('aSingle').outerHTML = `
+      <div class="avatar-wrap" id="aSingle">
+        <div class="avatar-ring"></div><div class="avatar">🦊</div><div class="cake-pin">🎂</div>
+      </div>`;
+    copy.innerHTML = `
+      <span class="eyebrow">🎉 오늘의 생일</span>
+      <div class="headline">오늘은 <span class="name">『여우와 밤』</span>이 태어난 날이에요</div>
+      <div class="subline"><b>제작자</b>님이 2024년 6월 20일에 빚어낸 캐릭터 · <b>2번째 생일</b></div>`;
+  }
+  setTimeout(burstAll, 60);
+}
+</script>
+</body>
+</html>

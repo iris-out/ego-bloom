@@ -11,6 +11,7 @@ import ChangelogModal from '../components/ChangelogModal';
 import { proxyImageUrl, getPlotImageUrl, getPlotImageUrls } from '../utils/imageUtils';
 import { getCharacterTier, formatCompactNumber } from '../utils/tierCalculator';
 import ImageWithFallback from '../components/ImageWithFallback';
+import BirthdayBanner from '../components/BirthdayBanner';
 import { useServerStatus } from '../hooks/useServerStatus';
 import { lazyWithRetry } from '../utils/lazyWithRetry';
 
@@ -509,6 +510,8 @@ export default function ProfilePage() {
             </button>
           </div>
         )}
+
+        <BirthdayBanner characters={data.characters} creatorName={data.profile?.nickname} />
 
         <div className="profile-layout">
           {/* 탭 바 — 전체 너비 상단 */}
