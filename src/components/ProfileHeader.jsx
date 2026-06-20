@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import {
@@ -13,7 +13,8 @@ import { computeEarnedTitles, BADGE_COLOR_MAP, FIXED_BADGE_IDS } from '../data/b
 import ImageWithFallback from './ImageWithFallback';
 import { proxyThumbnailUrl } from '../utils/imageUtils';
 import { getCreatorBadge, saveCreatorBadge } from '../utils/storage';
-const LiveViewModal = lazy(() => import('./LiveViewModal'));
+import { lazyWithRetry } from '../utils/lazyWithRetry';
+const LiveViewModal = lazyWithRetry(() => import('./LiveViewModal'), 'LiveViewModal');
 
 // A2: 카운트업 훅 — 0 → target easeOut 애니메이션
 function useCountUp(target, duration) {

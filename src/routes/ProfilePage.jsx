@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AlertCircle, Loader2, RefreshCw, Archive, ChevronLeft } from 'lucide-react';
 import { computeEarnedTitles } from '../data/badges';
@@ -12,9 +12,10 @@ import { proxyImageUrl, getPlotImageUrl, getPlotImageUrls } from '../utils/image
 import { getCharacterTier, formatCompactNumber } from '../utils/tierCalculator';
 import ImageWithFallback from '../components/ImageWithFallback';
 import { useServerStatus } from '../hooks/useServerStatus';
+import { lazyWithRetry } from '../utils/lazyWithRetry';
 
-const AchievementsTab = lazy(() => import('../components/AchievementsTab'));
-const StatsTab = lazy(() => import('../components/StatsTab'));
+const AchievementsTab = lazyWithRetry(() => import('../components/AchievementsTab'), 'AchievementsTab');
+const StatsTab = lazyWithRetry(() => import('../components/StatsTab'), 'StatsTab');
 
 const CACHE_KEY_PREFIX = 'zeta_cache_v2_';
 const CACHE_DURATION = 30 * 60 * 1000;

@@ -1,12 +1,13 @@
-import React, { lazy, Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
 import HomePage from './routes/HomePage';
 import ProfilePage from './routes/ProfilePage';
 import PwaInstallBanner from './components/PwaInstallBanner';
-const TierPage = lazy(() => import('./routes/TierPage'));
-const WorldPage = lazy(() => import('./routes/WorldPage'));
-const AdminPage = lazy(() => import('./routes/AdminPage'));
-const TierPreviewPage = lazy(() => import('./routes/TierPreviewPage'));
+import { lazyWithRetry } from './utils/lazyWithRetry';
+const TierPage = lazyWithRetry(() => import('./routes/TierPage'), 'TierPage');
+const WorldPage = lazyWithRetry(() => import('./routes/WorldPage'), 'WorldPage');
+const AdminPage = lazyWithRetry(() => import('./routes/AdminPage'), 'AdminPage');
+const TierPreviewPage = lazyWithRetry(() => import('./routes/TierPreviewPage'), 'TierPreviewPage');
 
 // Redirect old /?creator=X to /profile?creator=X
 function LegacyRedirect() {

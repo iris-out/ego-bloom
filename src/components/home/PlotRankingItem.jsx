@@ -71,7 +71,7 @@ function RankChange({ rankChange, size = 'md', onImage = false }) {
 // Main-page style: the giant rank numeral lives OUTSIDE the card, overlapping
 // its bottom-left edge, so the whole card surface is free for name + creator +
 // an emphasized 대화량(interaction) stat block.
-export function PlotPosterCard({ plot, rank }) {
+export function PlotPosterCard({ plot, rank, fill = false }) {
   const { id, name, imageUrl, interactionCount = 0, interactionDelta, rankChange, creatorHandle } = plot;
   const zetaUrl = plotZetaUrl(id);
   const cover = getPlotImageUrl(plot) || imageUrl;
@@ -81,8 +81,9 @@ export function PlotPosterCard({ plot, rank }) {
   const pct = pctStr(interactionDelta, interactionCount);
   const hasDelta = interactionDelta != null && interactionDelta > 0;
 
+  // fill 모드: 그리드 셀 폭을 꽉 채움(고정폭 대신). PC 카탈로그(1~6위)에서 사용.
   return (
-    <div className="flex items-end shrink-0 snap-start select-none">
+    <div className={`flex items-end select-none ${fill ? 'w-full' : 'shrink-0 snap-start'}`}>
       {/* Rank numeral — outside the card, overlapping its left edge (메인 style) */}
       <span
         aria-hidden="true"
@@ -102,7 +103,7 @@ export function PlotPosterCard({ plot, rank }) {
         href={zetaUrl || undefined}
         target={zetaUrl ? '_blank' : undefined}
         rel={zetaUrl ? 'noopener noreferrer' : undefined}
-        className="poster-card group relative z-20 block w-[120px] sm:w-[140px] overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] no-underline shadow-lg shadow-black/30 transition-transform duration-300 ease-out will-change-transform hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+        className={`poster-card group relative z-20 block ${fill ? 'flex-1 min-w-0' : 'w-[120px] sm:w-[140px]'} overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] no-underline shadow-lg shadow-black/30 transition-transform duration-300 ease-out will-change-transform hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0`}
         style={{ aspectRatio: '2 / 3' }}
       >
         {/* Cover image */}

@@ -6,6 +6,7 @@ import FilterDropdown from './FilterDropdown';
 import ScrollArrows from '../ui/ScrollArrows';
 import { proxyThumbnailUrl } from '../../utils/imageUtils';
 import { formatNumber } from '../../utils/tierCalculator';
+import { useIsPC } from '../../hooks/useMediaQuery';
 
 const SUB_TABS = ['트렌딩', '베스트', '신작'];
 const DATA_KEYS = { '트렌딩': 'trendingPlots', '베스트': 'bestPlots', '신작': 'newPlots' };
@@ -418,6 +419,9 @@ export default function PlotRankingList({ rankingData }) {
   const [filter, setFilter] = useState({ sortBy: '순위', direction: '내림차순' });
   const [stepIndex, setStepIndex] = useState(0);
   const [capturing, setCapturing] = useState(false);
+  const isPC = useIsPC();
+  // PC 전용: 7위~ 리스트의 1열/2열 보기 (모바일은 항상 단일 열)
+  const [listCols, setListCols] = useState(2);
   const sentinelRef = useRef(null);
   const snapshotRef = useRef(null);
   const loadingRef = useRef(false);
@@ -551,8 +555,31 @@ export default function PlotRankingList({ rankingData }) {
           )}
         </div>
 
-        {/* 우측: 스냅샷 버튼 + 필터 */}
+        {/* 우측: (PC) 1열/2열 토글 + 스냅샷 버튼 + 필터 */}
         <div className="flex items-center gap-2">
+          {isPC && (
+            <div
+              className="flex items-center rounded-full border border-white/12 bg-white/5 p-0.5"
+              role="group"
+              aria-label="리스트 열 수"
+            >
+              {[1, 2].map(n => (
+                <button
+                  key={n}
+                  onClick={() => setListCols(n)}
+                  aria-pressed={listCols === n}
+                  title={`${n}열 보기`}
+                  className={`px-2.5 py-1 rounded-full text-[12px] font-semibold transition-colors ${
+                    listCols === n
+                      ? 'bg-white/15 text-white'
+                      : 'text-white/50 hover:text-white/80'
+                  }`}
+                >
+                  {n}열
+                </button>
+              ))}
+            </div>
+          )}
           <button
             onClick={captureSnapshot}
             disabled={capturing || !rankingData}
@@ -611,33 +638,62 @@ export default function PlotRankingList({ rankingData }) {
         </div>
       ) : (
         <>
-          {/* Top 10 — 가로 스크롤 포스터 레일 (넷플릭스). 순위 숫자는 카드 외부 좌측. */}
-          {visiblePlots.length > 0 && (
-            <div className="relative mb-4">
-              <ScrollArrows targetRef={posterRailRef} />
-              <div
-                ref={posterRailRef}
-                className="flex gap-4 sm:gap-5 overflow-x-auto overflow-y-hidden pb-3 pt-2 pl-3 snap-x snap-mandatory scrollbar-hide"
-              >
-                {visiblePlots.slice(0, 10).map((plot, i) => (
-                  <PlotPosterCard key={plot.id} plot={plot} rank={i + 1} />
-                ))}
-              </div>
-            </div>
-          )}
+          {isPC ? (
+            <>
+              {/* PC: 1~6위 카탈로그 — 한 줄 6개 포스터 카드 */}
+              {visiblePlots.length > 0 && (
+                <div className="mb-5 grid grid-cols-6 gap-3 xl:gap-4">
+                  {visiblePlots.slice(0, 6).map((plot, i) => (
+                    <PlotPosterCard key={plot.id} plot={plot} rank={i + 1} fill />
+                  ))}
+                </div>
+              )}
 
-          {/* Rank 11+ — compact dense list */}
-          {visiblePlots.length > 10 && (
-            <div className="flex flex-col gap-2">
-              {visiblePlots.slice(10).map((plot, i) => (
-                <PlotRankingItem
-                  key={plot.id}
-                  plot={plot}
-                  rank={i + 11}
-                  maxDelta={maxDelta}
-                />
-              ))}
-            </div>
+              {/* PC: 7위~ 리스트 — 1열/2열 토글 */}
+              {visiblePlots.length > 6 && (
+                <div className={listCols === 2 ? 'grid grid-cols-2 gap-2' : 'flex flex-col gap-2'}>
+                  {visiblePlots.slice(6).map((plot, i) => (
+                    <PlotRankingItem
+                      key={plot.id}
+                      plot={plot}
+                      rank={i + 7}
+                      maxDelta={maxDelta}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {/* 모바일: Top 10 — 가로 스크롤 포스터 레일 (넷플릭스). 순위 숫자는 카드 외부 좌측. */}
+              {visiblePlots.length > 0 && (
+                <div className="relative mb-4">
+                  <ScrollArrows targetRef={posterRailRef} />
+                  <div
+                    ref={posterRailRef}
+                    className="flex gap-4 sm:gap-5 overflow-x-auto overflow-y-hidden pb-3 pt-2 pl-3 snap-x snap-mandatory scrollbar-hide"
+                  >
+                    {visiblePlots.slice(0, 10).map((plot, i) => (
+                      <PlotPosterCard key={plot.id} plot={plot} rank={i + 1} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 모바일: Rank 11+ — compact dense list */}
+              {visiblePlots.length > 10 && (
+                <div className="flex flex-col gap-2">
+                  {visiblePlots.slice(10).map((plot, i) => (
+                    <PlotRankingItem
+                      key={plot.id}
+                      plot={plot}
+                      rank={i + 11}
+                      maxDelta={maxDelta}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
 
           {/* 무한 스크롤 센티넬 */}
