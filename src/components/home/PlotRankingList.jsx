@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { toBlob } from 'html-to-image';
+import { toBlob, toCanvas } from 'html-to-image';
 import { Camera } from 'lucide-react';
 import PlotRankingItem, { PlotPosterCard } from './PlotRankingItem';
 import FilterDropdown from './FilterDropdown';
@@ -168,6 +168,55 @@ function restoreImages(origSrcs) {
     img.src = src;
     img.style.visibility = '';
   }
+}
+
+// ─── Tall-node capture (split + vertical stitch) ───────────────────────────
+// Browsers/GPUs cap a single canvas dimension (commonly 8192px on mobile Safari/
+// Android; older iOS as low as 4096). A ranking snapshot is ~8–9k px tall, so a
+// one-shot toBlob() silently clips everything past the limit (the "only top ~80"
+// bug). We render the node in vertical slices that each stay well under the cap,
+// read their raw pixels, and assemble the final PNG from a pixel buffer — never
+// allocating a canvas taller than one slice — so the output can exceed the cap.
+const SNAPSHOT_SLICE_HEIGHT = 3500; // safe per-slice canvas height (< 4096 floor)
+const SNAPSHOT_BG = '#0F0B1F';
+
+async function captureTallNode(node, width, totalHeight) {
+  // Single slice fits comfortably → keep the simple, fast one-shot path.
+  if (totalHeight <= SNAPSHOT_SLICE_HEIGHT) {
+    return toBlob(node, {
+      pixelRatio: 1,
+      backgroundColor: SNAPSHOT_BG,
+      cacheBust: false,
+      skipFonts: true,
+      width,
+      height: totalHeight,
+    });
+  }
+
+  const full = new Uint8ClampedArray(width * totalHeight * 4);
+  for (let y = 0; y < totalHeight; y += SNAPSHOT_SLICE_HEIGHT) {
+    const sliceHeight = Math.min(SNAPSHOT_SLICE_HEIGHT, totalHeight - y);
+    // Shift the cloned node up by `y` and clip to `sliceHeight` → renders the
+    // [y, y+sliceHeight) band into a small canvas.
+    const canvas = await toCanvas(node, {
+      pixelRatio: 1,
+      backgroundColor: SNAPSHOT_BG,
+      cacheBust: false,
+      skipFonts: true,
+      width,
+      height: sliceHeight,
+      style: {
+        transform: `translateY(${-y}px)`,
+        transformOrigin: 'top left',
+      },
+    });
+    const { data } = canvas.getContext('2d').getImageData(0, 0, width, sliceHeight);
+    full.set(data, y * width * 4);
+  }
+
+  const { encode } = await import('fast-png');
+  const png = encode({ width, height: totalHeight, data: full, depth: 8, channels: 4 });
+  return new Blob([png], { type: 'image/png' });
 }
 
 // ─── Snapshot ranking row — mobile-style vertical, fully inline-styled ─────
@@ -494,15 +543,11 @@ export default function PlotRankingList({ rankingData }) {
       // eslint-disable-next-line no-unused-expressions
       node.offsetHeight;
 
-      const blob = await toBlob(node, {
-        pixelRatio: 1,
-        backgroundColor: '#0F0B1F',
-        cacheBust: false,
-        skipFonts: true,
-        width: 560,
-        height: node.scrollHeight,
-      });
-      if (!blob) throw new Error('toBlob returned null');
+      // Capture in vertical slices and stitch — a one-shot canvas would be
+      // clipped at the device's max canvas height (~8192px), dropping the
+      // lower-ranked rows. See captureTallNode.
+      const blob = await captureTallNode(node, 560, node.scrollHeight);
+      if (!blob) throw new Error('snapshot capture returned null');
 
       const dateStr = rankingData.updatedAt
         ? new Date(rankingData.updatedAt).toISOString().slice(0, 10)
