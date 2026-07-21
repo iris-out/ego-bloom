@@ -1,809 +1,622 @@
 {
-  "updatedAt": "2026-07-21T11:02:11.448Z",
+  "updatedAt": "2026-07-21T13:25:35.660Z",
   "combined": [
     {
-      "tag": "로맨스",
-      "score": 535
-    },
-    {
       "tag": "hl",
-      "score": 489
+      "score": 437
     },
     {
       "tag": "bl",
-      "score": 410
+      "score": 396
     },
     {
-      "tag": "유저바라기",
-      "score": 384
+      "tag": "혐관",
+      "score": 362
     },
     {
-      "tag": "다정",
-      "score": 319
+      "tag": "삼각관계",
+      "score": 315
     },
     {
-      "tag": "능글",
-      "score": 293
+      "tag": "판타지",
+      "score": 275
     },
     {
-      "tag": "역키잡",
-      "score": 264
+      "tag": "능력",
+      "score": 246
     },
     {
-      "tag": "사극",
-      "score": 264
-    },
-    {
-      "tag": "순애",
-      "score": 264
-    },
-    {
-      "tag": "연하",
-      "score": 264
-    },
-    {
-      "tag": "일진",
-      "score": 256
-    },
-    {
-      "tag": "청춘",
-      "score": 216
-    },
-    {
-      "tag": "현대판타지",
-      "score": 200
-    },
-    {
-      "tag": "히빌물",
-      "score": 200
-    },
-    {
-      "tag": "히어로",
-      "score": 200
-    },
-    {
-      "tag": "빌런",
-      "score": 200
-    },
-    {
-      "tag": "다인캐",
-      "score": 200
-    },
-    {
-      "tag": "비서",
-      "score": 187
-    },
-    {
-      "tag": "냉미남",
-      "score": 187
-    },
-    {
-      "tag": "문란남",
-      "score": 187
-    },
-    {
-      "tag": "사디스트",
-      "score": 187
-    },
-    {
-      "tag": "오피스로맨스",
-      "score": 187
-    },
-    {
-      "tag": "여우",
-      "score": 187
-    },
-    {
-      "tag": "hlbl",
-      "score": 187
-    },
-    {
-      "tag": "낮이밤이",
-      "score": 187
-    },
-    {
-      "tag": "능글남",
-      "score": 187
-    },
-    {
-      "tag": "학교",
-      "score": 171
+      "tag": "게이트",
+      "score": 246
     },
     {
       "tag": "일상",
-      "score": 164
+      "score": 245
     },
     {
-      "tag": "학원물",
-      "score": 142
+      "tag": "결혼",
+      "score": 222
     },
     {
-      "tag": "짝사랑",
-      "score": 142
+      "tag": "대학생",
+      "score": 222
+    },
+    {
+      "tag": "직장인",
+      "score": 222
+    },
+    {
+      "tag": "경멸",
+      "score": 222
+    },
+    {
+      "tag": "헌터",
+      "score": 186
+    },
+    {
+      "tag": "현대판타지",
+      "score": 186
+    },
+    {
+      "tag": "길드",
+      "score": 186
+    },
+    {
+      "tag": "다공일수",
+      "score": 186
+    },
+    {
+      "tag": "소유욕",
+      "score": 150
+    },
+    {
+      "tag": "집착",
+      "score": 128
+    },
+    {
+      "tag": "로맨스",
+      "score": 104
+    },
+    {
+      "tag": "빼앗기",
+      "score": 93
+    },
+    {
+      "tag": "뺏기",
+      "score": 93
+    },
+    {
+      "tag": "싸가지",
+      "score": 86
+    },
+    {
+      "tag": "약혼녀",
+      "score": 86
+    },
+    {
+      "tag": "회사",
+      "score": 86
+    },
+    {
+      "tag": "회사원",
+      "score": 86
+    },
+    {
+      "tag": "마조",
+      "score": 86
+    },
+    {
+      "tag": "순애",
+      "score": 72
+    },
+    {
+      "tag": "감금",
+      "score": 67
+    },
+    {
+      "tag": "유저바라기",
+      "score": 67
+    },
+    {
+      "tag": "고자극",
+      "score": 67
     }
   ],
   "trending": [
     {
-      "tag": "유저바라기",
-      "score": 126
+      "tag": "혐관",
+      "score": 74
     },
     {
-      "tag": "로맨스",
-      "score": 120
-    },
-    {
-      "tag": "역키잡",
-      "score": 88
-    },
-    {
-      "tag": "사극",
-      "score": 88
-    },
-    {
-      "tag": "순애",
-      "score": 88
-    },
-    {
-      "tag": "능글",
-      "score": 88
-    },
-    {
-      "tag": "다정",
-      "score": 88
-    },
-    {
-      "tag": "연하",
-      "score": 88
-    },
-    {
-      "tag": "hl",
-      "score": 88
-    },
-    {
-      "tag": "bl",
-      "score": 88
-    },
-    {
-      "tag": "일진",
-      "score": 70
-    },
-    {
-      "tag": "양아치",
-      "score": 38
-    },
-    {
-      "tag": "학교물",
-      "score": 38
-    },
-    {
-      "tag": "존잘",
-      "score": 38
-    },
-    {
-      "tag": "존예",
-      "score": 38
-    },
-    {
-      "tag": "연애",
-      "score": 38
-    },
-    {
-      "tag": "달달",
-      "score": 38
-    },
-    {
-      "tag": "비서",
-      "score": 36
-    },
-    {
-      "tag": "냉미남",
-      "score": 36
-    },
-    {
-      "tag": "문란남",
-      "score": 36
-    },
-    {
-      "tag": "사디스트",
-      "score": 36
-    },
-    {
-      "tag": "오피스로맨스",
-      "score": 36
-    },
-    {
-      "tag": "여우",
-      "score": 36
-    },
-    {
-      "tag": "hlbl",
-      "score": 36
-    },
-    {
-      "tag": "낮이밤이",
-      "score": 36
-    },
-    {
-      "tag": "능글남",
-      "score": 36
-    },
-    {
-      "tag": "학원물",
-      "score": 32
-    },
-    {
-      "tag": "학교",
-      "score": 32
-    },
-    {
-      "tag": "짝사랑",
-      "score": 32
+      "tag": "삼각관계",
+      "score": 74
     },
     {
       "tag": "일상",
-      "score": 32
+      "score": 74
+    },
+    {
+      "tag": "결혼",
+      "score": 74
+    },
+    {
+      "tag": "대학생",
+      "score": 74
+    },
+    {
+      "tag": "직장인",
+      "score": 74
+    },
+    {
+      "tag": "경멸",
+      "score": 74
     }
   ],
   "best": [
     {
+      "tag": "판타지",
+      "score": 95
+    },
+    {
+      "tag": "bl",
+      "score": 95
+    },
+    {
+      "tag": "hl",
+      "score": 95
+    },
+    {
+      "tag": "헌터",
+      "score": 93
+    },
+    {
+      "tag": "능력",
+      "score": 93
+    },
+    {
+      "tag": "게이트",
+      "score": 93
+    },
+    {
       "tag": "현대판타지",
-      "score": 100
+      "score": 93
     },
     {
-      "tag": "히빌물",
-      "score": 100
+      "tag": "길드",
+      "score": 93
     },
     {
-      "tag": "히어로",
-      "score": 100
+      "tag": "다공일수",
+      "score": 93
     },
     {
-      "tag": "빌런",
-      "score": 100
+      "tag": "황제",
+      "score": 2
     },
     {
-      "tag": "다인캐",
-      "score": 100
+      "tag": "제국",
+      "score": 2
     },
     {
-      "tag": "설득",
-      "score": 63
+      "tag": "소환",
+      "score": 2
     },
     {
-      "tag": "복수",
-      "score": 63
+      "tag": "마법",
+      "score": 2
     },
     {
-      "tag": "힐링",
-      "score": 37
+      "tag": "로맨스판타지",
+      "score": 2
     },
     {
-      "tag": "초능력",
-      "score": 37
-    },
-    {
-      "tag": "각성자",
-      "score": 37
-    },
-    {
-      "tag": "청춘",
-      "score": 37
-    },
-    {
-      "tag": "혐관",
-      "score": 32
-    },
-    {
-      "tag": "싸가지",
-      "score": 32
-    },
-    {
-      "tag": "로판",
-      "score": 32
-    },
-    {
-      "tag": "북부대공",
-      "score": 32
-    },
-    {
-      "tag": "황녀",
-      "score": 32
-    },
-    {
-      "tag": "꼬시기",
-      "score": 32
-    },
-    {
-      "tag": "극한",
-      "score": 32
-    },
-    {
-      "tag": "철벽",
-      "score": 32
+      "tag": "소유욕",
+      "score": 2
     }
   ],
   "new": [
     {
       "tag": "hl",
-      "score": 225
-    },
-    {
-      "tag": "로맨스",
-      "score": 175
+      "score": 247
     },
     {
       "tag": "bl",
+      "score": 206
+    },
+    {
+      "tag": "소유욕",
       "score": 146
     },
     {
-      "tag": "비서",
-      "score": 79
-    },
-    {
-      "tag": "냉미남",
-      "score": 79
-    },
-    {
-      "tag": "문란남",
-      "score": 79
-    },
-    {
-      "tag": "사디스트",
-      "score": 79
-    },
-    {
-      "tag": "오피스로맨스",
-      "score": 79
-    },
-    {
-      "tag": "여우",
-      "score": 79
-    },
-    {
-      "tag": "hlbl",
-      "score": 79
-    },
-    {
-      "tag": "낮이밤이",
-      "score": 79
-    },
-    {
-      "tag": "능글남",
-      "score": 79
-    },
-    {
-      "tag": "학교",
-      "score": 75
-    },
-    {
-      "tag": "일상",
-      "score": 68
-    },
-    {
-      "tag": "판타지",
-      "score": 67
-    },
-    {
-      "tag": "정략결혼",
-      "score": 63
-    },
-    {
-      "tag": "게이트",
-      "score": 61
-    },
-    {
-      "tag": "능력",
-      "score": 61
-    },
-    {
-      "tag": "마법",
-      "score": 61
-    },
-    {
-      "tag": "부활",
-      "score": 61
-    },
-    {
-      "tag": "각성",
-      "score": 61
-    },
-    {
-      "tag": "영웅",
-      "score": 61
-    },
-    {
-      "tag": "로판",
-      "score": 57
-    },
-    {
-      "tag": "망국의황녀",
-      "score": 57
-    },
-    {
-      "tag": "억지웃음",
-      "score": 57
-    },
-    {
-      "tag": "계략녀",
-      "score": 57
-    },
-    {
-      "tag": "구원",
-      "score": 57
-    },
-    {
-      "tag": "roro",
-      "score": 57
+      "tag": "혐관",
+      "score": 140
     },
     {
       "tag": "집착",
-      "score": 56
+      "score": 128
     },
     {
-      "tag": "다정",
-      "score": 55
+      "tag": "로맨스",
+      "score": 104
+    },
+    {
+      "tag": "빼앗기",
+      "score": 93
+    },
+    {
+      "tag": "뺏기",
+      "score": 93
+    },
+    {
+      "tag": "삼각관계",
+      "score": 93
+    },
+    {
+      "tag": "싸가지",
+      "score": 86
+    },
+    {
+      "tag": "약혼녀",
+      "score": 86
+    },
+    {
+      "tag": "회사",
+      "score": 86
+    },
+    {
+      "tag": "회사원",
+      "score": 86
+    },
+    {
+      "tag": "마조",
+      "score": 86
+    },
+    {
+      "tag": "판타지",
+      "score": 85
+    },
+    {
+      "tag": "순애",
+      "score": 72
+    },
+    {
+      "tag": "감금",
+      "score": 67
+    },
+    {
+      "tag": "유저바라기",
+      "score": 67
+    },
+    {
+      "tag": "고자극",
+      "score": 67
+    },
+    {
+      "tag": "게이트",
+      "score": 60
+    },
+    {
+      "tag": "능력",
+      "score": 60
+    },
+    {
+      "tag": "마법",
+      "score": 60
+    },
+    {
+      "tag": "부활",
+      "score": 60
+    },
+    {
+      "tag": "각성",
+      "score": 60
+    },
+    {
+      "tag": "영웅",
+      "score": 60
+    },
+    {
+      "tag": "후회",
+      "score": 54
+    },
+    {
+      "tag": "여우",
+      "score": 54
+    },
+    {
+      "tag": "능글",
+      "score": 54
+    },
+    {
+      "tag": "히어로",
+      "score": 25
+    },
+    {
+      "tag": "빌런",
+      "score": 25
     }
   ],
   "interaction": [
     {
-      "tag": "현대판타지",
-      "score": 7066627
-    },
-    {
-      "tag": "히빌물",
-      "score": 7066627
-    },
-    {
-      "tag": "히어로",
-      "score": 7066627
-    },
-    {
-      "tag": "빌런",
-      "score": 7066627
-    },
-    {
-      "tag": "다인캐",
-      "score": 7066627
-    },
-    {
-      "tag": "설득",
-      "score": 5976430
-    },
-    {
-      "tag": "복수",
-      "score": 5976430
-    },
-    {
-      "tag": "로판",
-      "score": 2532072
-    },
-    {
-      "tag": "꼬시기",
-      "score": 2496478
-    },
-    {
-      "tag": "철벽",
-      "score": 2496478
-    },
-    {
-      "tag": "혐관",
-      "score": 2490953
-    },
-    {
-      "tag": "싸가지",
-      "score": 2353147
-    },
-    {
-      "tag": "북부대공",
-      "score": 2353147
-    },
-    {
-      "tag": "황녀",
-      "score": 2353147
-    },
-    {
-      "tag": "극한",
-      "score": 2353147
-    },
-    {
-      "tag": "청춘",
-      "score": 1239800
-    },
-    {
-      "tag": "힐링",
-      "score": 1206168
-    },
-    {
-      "tag": "초능력",
-      "score": 1090197
-    },
-    {
-      "tag": "각성자",
-      "score": 1090197
-    },
-    {
       "tag": "hl",
-      "score": 1075169
-    },
-    {
-      "tag": "로맨스",
-      "score": 955674
+      "score": 8753222
     },
     {
       "tag": "bl",
-      "score": 780273
-    },
-    {
-      "tag": "다정",
-      "score": 395294
+      "score": 8513421
     },
     {
       "tag": "판타지",
-      "score": 363202
+      "score": 8107627
     },
     {
-      "tag": "학교",
-      "score": 319844
+      "tag": "능력",
+      "score": 4753073
     },
     {
-      "tag": "유저바라기",
-      "score": 317328
+      "tag": "게이트",
+      "score": 4753073
     },
     {
-      "tag": "정략결혼",
-      "score": 300479
+      "tag": "헌터",
+      "score": 4508746
+    },
+    {
+      "tag": "현대판타지",
+      "score": 4508746
+    },
+    {
+      "tag": "길드",
+      "score": 4508746
+    },
+    {
+      "tag": "다공일수",
+      "score": 4508746
+    },
+    {
+      "tag": "소유욕",
+      "score": 3760348
+    },
+    {
+      "tag": "마법",
+      "score": 3463209
+    },
+    {
+      "tag": "황제",
+      "score": 3218882
+    },
+    {
+      "tag": "제국",
+      "score": 3218882
+    },
+    {
+      "tag": "소환",
+      "score": 3218882
+    },
+    {
+      "tag": "로맨스판타지",
+      "score": 3218882
+    },
+    {
+      "tag": "로맨스",
+      "score": 549880
+    },
+    {
+      "tag": "혐관",
+      "score": 531432
     },
     {
       "tag": "집착",
-      "score": 293638
+      "score": 512945
     },
     {
-      "tag": "일상",
-      "score": 265574
+      "tag": "삼각관계",
+      "score": 453996
     },
     {
-      "tag": "일진",
-      "score": 259316
+      "tag": "빼앗기",
+      "score": 357316
+    },
+    {
+      "tag": "뺏기",
+      "score": 357316
+    },
+    {
+      "tag": "순애",
+      "score": 307057
+    },
+    {
+      "tag": "싸가지",
+      "score": 250165
+    },
+    {
+      "tag": "약혼녀",
+      "score": 250165
+    },
+    {
+      "tag": "회사",
+      "score": 250165
+    },
+    {
+      "tag": "회사원",
+      "score": 250165
+    },
+    {
+      "tag": "마조",
+      "score": 250165
+    },
+    {
+      "tag": "부활",
+      "score": 244327
+    },
+    {
+      "tag": "각성",
+      "score": 244327
+    },
+    {
+      "tag": "영웅",
+      "score": 244327
     }
   ],
   "genres": [
     {
-      "tag": "로맨스",
-      "score": 535,
-      "pct": 46
-    },
-    {
-      "tag": "순애",
-      "score": 264,
-      "pct": 23
+      "tag": "판타지",
+      "score": 275,
+      "pct": 37
     },
     {
       "tag": "일상",
-      "score": 164,
+      "score": 245,
+      "pct": 33
+    },
+    {
+      "tag": "로맨스",
+      "score": 104,
       "pct": 14
     },
     {
-      "tag": "로판",
-      "score": 121,
+      "tag": "순애",
+      "score": 72,
       "pct": 10
     },
     {
-      "tag": "판타지",
-      "score": 67,
-      "pct": 6
+      "tag": "하렘",
+      "score": 23,
+      "pct": 3
     },
     {
       "tag": "기타",
-      "score": 22,
+      "score": 18,
       "pct": 2
     }
   ],
   "trendingPlots": [
     {
-      "id": "74947be4-e310-43f8-add5-e3ea34fd1749",
-      "name": "이사백",
-      "imageUrl": "https://image.zeta-ai.io/profile-image/74947be4-e310-43f8-add5-e3ea34fd1749/b5002178-8286-44af-906a-7670335ee10a.jpeg",
+      "id": "e8c4d39a-153f-4887-b29a-0c1f5b252cf3",
+      "name": "같은 침대 써도 넌 평생 남이야",
+      "imageUrl": "https://image.zeta-ai.io/plot-cover-image/e8c4d39a-153f-4887-b29a-0c1f5b252cf3/5ef3f7cf-8f0b-4723-bff3-73ddcc9febc1.png",
       "hashtags": [
-        "역키잡",
-        "사극",
-        "순애",
-        "능글",
-        "다정"
+        "혐관",
+        "삼각관계",
+        "일상",
+        "결혼",
+        "대학생"
       ],
-      "interactionCount": 86061,
+      "interactionCount": 96680,
       "interactionDelta": null,
       "rankChange": null,
-      "creatorHandle": "Hongok",
-      "creatorNickname": "홍옥",
-      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/4c7929e4-838c-4720-96e1-5da273229904/a4185124-4170-4b73-8c34-46771c962eb5.jpeg",
-      "rank": 13,
+      "creatorHandle": "purely.era.",
+      "creatorNickname": "퓨에라",
+      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f1fcf407-b71d-4f06-aeea-5723d887ab91/3ea84173-898d-4a18-b568-b48fd125c613.png",
+      "rank": 27,
       "interactionHistory": [
-        86061
-      ]
-    },
-    {
-      "id": "e2a04325-76d6-401e-b640-ce382ae9cc93",
-      "name": "양아치랑 사귀기",
-      "imageUrl": "https://image.zeta-ai.io/plot-cover-image/e2a04325-76d6-401e-b640-ce382ae9cc93/b913bb5e-fc98-43b9-8f64-b252886d07b4.png",
-      "hashtags": [
-        "양아치",
-        "학교물",
-        "일진",
-        "존잘",
-        "존예"
-      ],
-      "interactionCount": 109713,
-      "interactionDelta": 4559,
-      "rankChange": -24,
-      "creatorHandle": "Gdragonisgod",
-      "creatorNickname": "[G-DRAGON LOVER]",
-      "creatorImageUrl": null,
-      "rank": 63,
-      "interactionHistory": [
-        100208,
-        105154,
-        109713
-      ]
-    },
-    {
-      "id": "f533e57e-6b4a-4d03-b261-37412a04c061",
-      "name": "천도현",
-      "imageUrl": "https://image.zeta-ai.io/profile-image/f533e57e-6b4a-4d03-b261-37412a04c061/941cd3a1-8c34-455e-a1d0-a9b25010e44a.png",
-      "hashtags": [
-        "비서",
-        "냉미남",
-        "문란남",
-        "사디스트",
-        "오피스로맨스"
-      ],
-      "interactionCount": 250932,
-      "interactionDelta": null,
-      "rankChange": null,
-      "creatorHandle": "Tetany",
-      "creatorNickname": "테타니",
-      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/657bdbcc-afa8-4660-8de2-975cfbcfabfc/97407e86-b6ed-4149-b3b8-21786cdcbc09.png",
-      "rank": 65,
-      "interactionHistory": [
-        219346,
-        222288,
-        226534,
-        236306,
-        250932,
-        250932
-      ]
-    },
-    {
-      "id": "056590e8-d151-4cdf-9934-bae54f7230bb",
-      "name": "짝사랑은 무서운 게 없어!",
-      "imageUrl": "https://image.zeta-ai.io/profile-image/056590e8-d151-4cdf-9934-bae54f7230bb/7b3a824c-ca2e-4da5-b6f1-9b15ca15cc6b.png",
-      "hashtags": [
-        "학원물",
-        "학교",
-        "로맨스",
-        "짝사랑",
-        "일상"
-      ],
-      "interactionCount": 149603,
-      "interactionDelta": null,
-      "rankChange": null,
-      "creatorHandle": "rudtjr742",
-      "creatorNickname": "rudtjr742",
-      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/0b3e2592-79bc-432c-9031-e3b955706c59/2065117f-9a47-41f4-b11a-5b0377d5e46e.png",
-      "rank": 69,
-      "interactionHistory": [
-        132173,
-        134815,
-        138759,
-        143575,
-        149603,
-        149603
+        96680
       ]
     }
   ],
   "bestPlots": [
     {
-      "id": "7b09ba78-c392-402b-a5eb-5821f011f3ad",
-      "name": "빌런 하세요.",
-      "imageUrl": "https://image.zeta-ai.io/plot-cover-image/7b09ba78-c392-402b-a5eb-5821f011f3ad/a6945dbf-9c78-4981-b2be-5d94c89d609b.png",
+      "id": "7ba83726-5f75-4796-a99d-7c5672b74627",
+      "name": "-Five Apex-",
+      "imageUrl": "https://image.zeta-ai.io/profile-image/7ba83726-5f75-4796-a99d-7c5672b74627/fb224ee5-4a2a-4be9-b086-f7bee2d0be92.jpeg",
       "hashtags": [
+        "헌터",
+        "능력",
+        "게이트",
         "현대판타지",
-        "히빌물",
-        "히어로",
-        "빌런",
-        "설득"
+        "길드"
       ],
-      "interactionCount": 5976430,
-      "interactionDelta": 8942,
-      "rankChange": -1,
-      "creatorHandle": "Fire_Duck",
-      "creatorNickname": "불타는오리",
-      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/669fd2f5-008e-41c3-96dc-13571628eeba/722f0c1d-84c0-436f-908f-bb05e9eae5e9.png",
-      "rank": 38,
+      "interactionCount": 4508746,
+      "interactionDelta": 32189,
+      "rankChange": -3,
+      "creatorHandle": "RbRbRiRi4534",
+      "creatorNickname": "뀨뀨꺄꺄",
+      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f57f5c11-9877-44f1-8d1b-10a4610ae29d/ad84b2ab-84d1-454c-a2d2-c2e4a6ab533e.jpeg",
+      "rank": 8,
       "interactionHistory": [
-        5946613,
-        5949351,
-        5955330,
-        5967488,
-        5976430
+        4448522,
+        4461754,
+        4476557,
+        4508746
       ]
     },
     {
-      "id": "1d52a7bc-0533-42aa-95de-ac6927e7ff54",
-      "name": "히어로들은 여름을 즐기고 싶어!",
-      "imageUrl": "https://image.zeta-ai.io/plot-cover-image/1d52a7bc-0533-42aa-95de-ac6927e7ff54/57ed8571-9532-47ae-9710-642a4fd8e11f.png",
+      "id": "eb05ca19-b6fc-43ed-969d-c3d75cdfaea9",
+      "name": "카르디온 드 아실",
+      "imageUrl": "https://image.zeta-ai.io/profile-image/eb05ca19-b6fc-43ed-969d-c3d75cdfaea9/953dfd42-dda6-41f3-8b4a-6a6be361b397.jpeg",
       "hashtags": [
-        "현대판타지",
-        "히빌물",
-        "히어로",
-        "빌런",
-        "다인캐"
+        "황제",
+        "제국",
+        "판타지",
+        "소환",
+        "마법"
       ],
-      "interactionCount": 1090197,
-      "interactionDelta": 6551,
-      "rankChange": -1,
-      "creatorHandle": "Fire_Duck",
-      "creatorNickname": "불타는오리",
-      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/669fd2f5-008e-41c3-96dc-13571628eeba/722f0c1d-84c0-436f-908f-bb05e9eae5e9.png",
-      "rank": 64,
+      "interactionCount": 3218882,
+      "interactionDelta": 11166,
+      "rankChange": -2,
+      "creatorHandle": "RbRbRiRi4534",
+      "creatorNickname": "뀨뀨꺄꺄",
+      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f57f5c11-9877-44f1-8d1b-10a4610ae29d/ad84b2ab-84d1-454c-a2d2-c2e4a6ab533e.jpeg",
+      "rank": 99,
       "interactionHistory": [
-        1071088,
-        1073912,
-        1077919,
-        1077919,
-        1083646,
-        1090197
-      ]
-    },
-    {
-      "id": "fdcb7f9b-aafe-4012-886f-be6934c4f909",
-      "name": "카시안 아르하르트",
-      "imageUrl": "https://image.zeta-ai.io/profile-image/fdcb7f9b-aafe-4012-886f-be6934c4f909/c6de8beb-e7c0-46cb-9384-2cf362411ee1.jpeg",
-      "hashtags": [
-        "혐관",
-        "싸가지",
-        "로판",
-        "북부대공",
-        "황녀"
-      ],
-      "interactionCount": 2353147,
-      "interactionDelta": 3742,
-      "rankChange": -1,
-      "creatorHandle": "disgusting_G",
-      "creatorNickname": "disgusting_G",
-      "creatorImageUrl": null,
-      "rank": 69,
-      "interactionHistory": [
-        2349405,
-        2353147
+        3197433,
+        3202146,
+        3207716,
+        3218882
       ]
     }
   ],
   "newPlots": [
     {
-      "id": "f533e57e-6b4a-4d03-b261-37412a04c061",
-      "name": "천도현",
-      "imageUrl": "https://image.zeta-ai.io/profile-image/f533e57e-6b4a-4d03-b261-37412a04c061/941cd3a1-8c34-455e-a1d0-a9b25010e44a.png",
+      "id": "7b7bcb68-85ab-49ed-85f6-c5a23d3859de",
+      "name": "주인님이 되어주실래요?",
+      "imageUrl": "https://image.zeta-ai.io/profile-image/7b7bcb68-85ab-49ed-85f6-c5a23d3859de/729a194d-fd80-430b-9a03-de1835c44a21.png",
       "hashtags": [
-        "비서",
-        "냉미남",
-        "문란남",
-        "사디스트",
-        "오피스로맨스"
+        "혐관",
+        "빼앗기",
+        "뺏기",
+        "싸가지",
+        "삼각관계"
       ],
-      "interactionCount": 250932,
-      "interactionDelta": 14626,
-      "rankChange": 2,
-      "creatorHandle": "Tetany",
-      "creatorNickname": "테타니",
-      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/657bdbcc-afa8-4660-8de2-975cfbcfabfc/97407e86-b6ed-4149-b3b8-21786cdcbc09.png",
-      "rank": 22,
+      "interactionCount": 250165,
+      "interactionDelta": 4689,
+      "rankChange": 1,
+      "creatorHandle": "purely.era.",
+      "creatorNickname": "퓨에라",
+      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f1fcf407-b71d-4f06-aeea-5723d887ab91/3ea84173-898d-4a18-b568-b48fd125c613.png",
+      "rank": 15,
       "interactionHistory": [
-        219346,
-        222288,
-        226534,
-        236306,
-        250932,
-        250932
+        242486,
+        243756,
+        245476,
+        250165
+      ]
+    },
+    {
+      "id": "4aa3c6a9-b45d-4495-84c6-75873f49d06a",
+      "name": "아니, 저 \"강도\"라니까요?",
+      "imageUrl": "https://image.zeta-ai.io/profile-image/4aa3c6a9-b45d-4495-84c6-75873f49d06a/6169ea94-bcdd-46c2-abf6-3c6ea3b0007b.png",
+      "hashtags": [
+        "언리밋",
+        "bl",
+        "hl",
+        "집착",
+        "소유욕"
+      ],
+      "interactionCount": 221207,
+      "interactionDelta": 10029,
+      "rankChange": 0,
+      "creatorHandle": "sdfgh",
+      "creatorNickname": "sdfgh",
+      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/5594820c-7c13-43c3-9f5a-c3fc3ad2a5bf/4e6c9759-9c05-48d9-8ea3-69dc5b9cd4b6.png",
+      "rank": 34,
+      "interactionHistory": [
+        200774,
+        205873,
+        205873,
+        211178,
+        211178,
+        221207
       ]
     },
     {
@@ -817,152 +630,69 @@
         "마법",
         "부활"
       ],
-      "interactionCount": 241648,
-      "interactionDelta": 2687,
+      "interactionCount": 244327,
+      "interactionDelta": 2679,
       "rankChange": -1,
       "creatorHandle": "RbRbRiRi4534",
       "creatorNickname": "뀨뀨꺄꺄",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f57f5c11-9877-44f1-8d1b-10a4610ae29d/ad84b2ab-84d1-454c-a2d2-c2e4a6ab533e.jpeg",
-      "rank": 40,
+      "rank": 41,
       "interactionHistory": [
-        232981,
         234232,
         236369,
         238961,
-        241648
+        241648,
+        244327
       ]
     },
     {
-      "id": "cf954f15-6a22-440b-8844-4b12d1c028c0",
-      "name": "적국에서 온 아내가 멍청한 척을 한다",
-      "imageUrl": "https://image.zeta-ai.io/plot-cover-image/cf954f15-6a22-440b-8844-4b12d1c028c0/5c54d8dd-c16c-43d8-bc9c-e30745102cfe.png",
+      "id": "cc272907-e3f9-4e55-bada-ff069f8532d8",
+      "name": "[언리밋] 이태건",
+      "imageUrl": "https://image.zeta-ai.io/profile-image/cc272907-e3f9-4e55-bada-ff069f8532d8/157fd48a-fcc1-4004-b69b-6e99fd97f189.jpeg",
       "hashtags": [
-        "로판",
-        "망국의황녀",
-        "정략결혼",
-        "로맨스",
-        "억지웃음"
-      ],
-      "interactionCount": 178925,
-      "interactionDelta": 10252,
-      "rankChange": 2,
-      "creatorHandle": "ORORIH_O",
-      "creatorNickname": "(๑¯∇¯๑)",
-      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/0d3babd0-168c-4038-a96c-ec3ad2640da0/b4bfd0d6-0d42-4cea-84bb-59d55bbcc163.png",
-      "rank": 44,
-      "interactionHistory": [
-        143020,
-        149357,
-        159945,
-        159945,
-        168673,
-        178925
-      ]
-    },
-    {
-      "id": "937bff6f-bb77-4a5e-9e59-d22ac67ab088",
-      "name": "오르보스",
-      "imageUrl": "https://image.zeta-ai.io/plot-cover-image/937bff6f-bb77-4a5e-9e59-d22ac67ab088/972fa2bd-2d81-49c3-b551-eb1d4db3e2cc.jpeg",
-      "hashtags": [
-        "인외",
         "집착",
         "소유욕",
-        "hl",
-        "bl"
+        "후회",
+        "여우",
+        "혐관"
       ],
-      "interactionCount": 187679,
-      "interactionDelta": 3003,
-      "rankChange": 0,
-      "creatorHandle": "Hamsterhintern",
-      "creatorNickname": "Hamsterhintern",
-      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/6e132b3c-b93e-4199-8e61-e3d55d313736/0257d46f-933c-40f4-a0a5-4c0a0acf3705.jpeg",
-      "rank": 52,
+      "interactionCount": 184587,
+      "interactionDelta": 2114,
+      "rankChange": -3,
+      "creatorHandle": "kiki.",
+      "creatorNickname": "키키",
+      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/4badd2d6-e3d1-49f5-939f-72f83052fbf6/e6d61166-a963-484b-a7b6-177dfb08a038.jpeg",
+      "rank": 47,
       "interactionHistory": [
-        177269,
-        178681,
-        178681,
-        181555,
-        184676,
-        187679
+        180045,
+        181060,
+        182473,
+        184587
       ]
     },
     {
-      "id": "056590e8-d151-4cdf-9934-bae54f7230bb",
-      "name": "짝사랑은 무서운 게 없어!",
-      "imageUrl": "https://image.zeta-ai.io/profile-image/056590e8-d151-4cdf-9934-bae54f7230bb/7b3a824c-ca2e-4da5-b6f1-9b15ca15cc6b.png",
+      "id": "c3d9b978-31b8-409b-9dfd-c1469b74d78e",
+      "name": "백도준",
+      "imageUrl": "https://image.zeta-ai.io/profile-image/c3d9b978-31b8-409b-9dfd-c1469b74d78e/f2a14ca0-1560-45a7-9ace-ebdccfbd9d96.png",
       "hashtags": [
-        "학원물",
-        "학교",
+        "판타지",
         "로맨스",
-        "짝사랑",
-        "일상"
+        "히어로",
+        "빌런",
+        "히빌물"
       ],
-      "interactionCount": 149603,
-      "interactionDelta": 6028,
-      "rankChange": 2,
-      "creatorHandle": "rudtjr742",
-      "creatorNickname": "rudtjr742",
-      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/0b3e2592-79bc-432c-9031-e3b955706c59/2065117f-9a47-41f4-b11a-5b0377d5e46e.png",
-      "rank": 55,
+      "interactionCount": 135672,
+      "interactionDelta": 10376,
+      "rankChange": 6,
+      "creatorHandle": "silly.pusheen",
+      "creatorNickname": "<3",
+      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/0000fd01-931b-459c-8ac7-ae3a226200fe/e7080941-e44b-4379-b9e2-42a830b050ce.jpeg",
+      "rank": 76,
       "interactionHistory": [
-        132173,
-        134815,
-        138759,
-        143575,
-        149603,
-        149603
-      ]
-    },
-    {
-      "id": "41004aa4-7870-44e7-b401-e0c39955185b",
-      "name": "계약 DM 파트너",
-      "imageUrl": "https://image.zeta-ai.io/plot-cover-image/41004aa4-7870-44e7-b401-e0c39955185b/f76584ff-89e6-40d5-91e4-668de9e91a0e.jpeg",
-      "hashtags": [
-        "hl",
-        "bl",
-        "꼬시기",
-        "어려움",
-        "철벽"
-      ],
-      "interactionCount": 143331,
-      "interactionDelta": 2811,
-      "rankChange": -2,
-      "creatorHandle": "RainyPaper9235",
-      "creatorNickname": "우왓",
-      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/54470669-39e5-4727-8b61-1d967066ad8e/3c56c110-885b-417e-915e-04c62a00c36b.jpeg",
-      "rank": 71,
-      "interactionHistory": [
-        134841,
-        136314,
-        138201,
-        140520,
-        143331
-      ]
-    },
-    {
-      "id": "42c49d14-6784-4660-8eb1-6f2fcef41826",
-      "name": "Leo",
-      "imageUrl": "https://image.zeta-ai.io/profile-image/42c49d14-6784-4660-8eb1-6f2fcef41826/49c8334e-38a2-4c8a-8dd0-e2c1fd45b0f5.png",
-      "hashtags": [
-        "로맨스",
-        "혼혈",
-        "학교",
-        "대학생",
-        "언리밋"
-      ],
-      "interactionCount": 170241,
-      "interactionDelta": 1630,
-      "rankChange": -1,
-      "creatorHandle": "ekgmlWkdS2",
-      "creatorNickname": "히히",
-      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/481cc07a-8bee-4543-a4b7-7d67516bf4bb/4cdb8992-a9bc-42fa-bcb7-6133bfcc5817.png",
-      "rank": 72,
-      "interactionHistory": [
-        163787,
-        164909,
-        166909,
-        168611,
-        170241
+        114574,
+        119345,
+        125296,
+        135672
       ]
     },
     {
@@ -976,46 +706,44 @@
         "언리밋모드",
         "일상"
       ],
-      "interactionCount": 115971,
-      "interactionDelta": 1531,
-      "rankChange": 0,
+      "interactionCount": 117331,
+      "interactionDelta": 1360,
+      "rankChange": 1,
       "creatorHandle": "Nia1",
       "creatorNickname": "니아",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/8dd1d5ff-d29c-45f7-9d99-97381133e5eb/84d53737-49d2-4b62-ae3f-b05398dccad1.png",
-      "rank": 79,
+      "rank": 78,
       "interactionHistory": [
-        111777,
         112034,
         112865,
         114440,
-        115971
+        115971,
+        117331
       ]
     },
     {
-      "id": "91daa8a2-1530-41e2-b57e-bcd59b3ebf37",
-      "name": "[보통]도해신",
-      "imageUrl": "https://image.zeta-ai.io/profile-image/91daa8a2-1530-41e2-b57e-bcd59b3ebf37/1a86565e-fdb5-4c29-b840-2eb050658b46/16308de0-338c-4476-a141-f3de61789120.png",
+      "id": "7edbae49-a086-4448-90a3-d011d47bf5a4",
+      "name": "나를 좀 봐줘요, 약혼자님!",
+      "imageUrl": "https://image.zeta-ai.io/plot-cover-image/7edbae49-a086-4448-90a3-d011d47bf5a4/4b4a1a98-defc-4a1b-ab17-6b3994e70b35.png",
       "hashtags": [
-        "맛돌맨",
-        "언리밋",
-        "혐관",
-        "혐오",
-        "재회"
+        "질투유발",
+        "질투",
+        "약혼",
+        "로맨스",
+        "순애"
       ],
-      "interactionCount": 137806,
-      "interactionDelta": 2912,
-      "rankChange": 0,
-      "creatorHandle": "MATDORIMAN",
-      "creatorNickname": "맛돌맨",
-      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/54057b85-1988-46b0-b003-6a1b1113c102/eb264600-b159-4490-9471-f50839680398.png",
-      "rank": 84,
+      "interactionCount": 122470,
+      "interactionDelta": 4306,
+      "rankChange": -3,
+      "creatorHandle": "Lilies_are_gods",
+      "creatorNickname": "쪼아여쪼아여",
+      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/e0763447-fd79-4ffd-b319-41ebd1cccc77/e0b592ea-6d5d-47ae-b4a7-dd8e9f858b5c.png",
+      "rank": 83,
       "interactionHistory": [
-        126807,
-        128252,
-        128252,
-        130796,
-        134894,
-        137806
+        115393,
+        116942,
+        118164,
+        122470
       ]
     },
     {
@@ -1029,74 +757,43 @@
         "뺏기",
         "빼앗기"
       ],
-      "interactionCount": 105959,
-      "interactionDelta": 910,
-      "rankChange": -1,
+      "interactionCount": 107151,
+      "interactionDelta": 1192,
+      "rankChange": 0,
       "creatorHandle": "Galabi",
       "creatorNickname": "가라비",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/91c9e18f-c305-4a36-90ff-ee901358ee91/24f4ee45-511e-4ab5-956c-5015fefdd93a.png",
       "rank": 94,
       "interactionHistory": [
-        102824,
         103417,
         104320,
         105049,
-        105959
-      ]
-    },
-    {
-      "id": "8187e2d4-8325-42c7-897b-245b47e63f38",
-      "name": "괴물 황자와의 정략혼",
-      "imageUrl": "https://image.zeta-ai.io/plot-cover-image/8187e2d4-8325-42c7-897b-245b47e63f38/6bdf6210-22bc-4d06-a9e2-8d0613118427.jpeg",
-      "hashtags": [
-        "hl",
-        "bl",
-        "오해",
-        "다정",
-        "황태자"
-      ],
-      "interactionCount": 121554,
-      "interactionDelta": 2573,
-      "rankChange": 2,
-      "creatorHandle": "Panda03",
-      "creatorNickname": "판다🐼",
-      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/cd62164b-42ff-4eae-a530-fb7d5fa6606b/e0f1bc2f-221c-4bc7-8c9f-bab2ae6a1184.png",
-      "rank": 95,
-      "interactionHistory": [
-        112652,
-        112652,
-        114192,
-        116692,
-        118981,
-        121554
+        105959,
+        107151
       ]
     }
   ],
   "tagTrend": {
     "순애": [
       {
-        "score": 6587,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 7717,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 7133,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 6034,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 6755,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 6806,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 7959,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 6714,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 7030,
         "ts": "2026-07-21T02:07:01.69+00:00"
-      },
-      {
-        "score": 7950,
-        "ts": "2026-07-21T05:44:20.808+00:00"
       },
       {
         "score": 8217,
@@ -1108,33 +805,33 @@
       },
       {
         "score": 264,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 72,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "bl": [
       {
-        "score": 10340,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 10651,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 10138,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 10423,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 9547,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 9260,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 9749,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 10177,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 9986,
         "ts": "2026-07-21T02:07:01.69+00:00"
-      },
-      {
-        "score": 9793,
-        "ts": "2026-07-21T05:44:20.808+00:00"
       },
       {
         "score": 9592,
@@ -1146,35 +843,35 @@
       },
       {
         "score": 410,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 396,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "gl": [
       {
-        "score": 1482,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 1059,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 1296,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 945,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 880,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 1118,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 775,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 1778,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 698,
         "ts": "2026-07-21T02:07:01.69+00:00"
       },
       {
-        "score": 867,
-        "ts": "2026-07-21T05:44:20.808+00:00"
-      },
-      {
         "score": 381,
         "ts": "2026-07-21T08:16:19.742+00:00"
       },
@@ -1184,35 +881,35 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 18,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "ntr_agg": [
       {
-        "score": 1030,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 1528,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 1658,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 1012,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 744,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 1100,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 466,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 1272,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 495,
         "ts": "2026-07-21T02:07:01.69+00:00"
       },
       {
-        "score": 566,
-        "ts": "2026-07-21T05:44:20.808+00:00"
-      },
-      {
         "score": 362,
         "ts": "2026-07-21T08:16:19.742+00:00"
       },
@@ -1222,33 +919,33 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "hpj_agg": [
       {
-        "score": 12009,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 12684,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 13111,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 11305,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 11722,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 10011,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 8826,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 8597,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 10100,
         "ts": "2026-07-21T02:07:01.69+00:00"
-      },
-      {
-        "score": 10172,
-        "ts": "2026-07-21T05:44:20.808+00:00"
       },
       {
         "score": 9723,
@@ -1260,33 +957,33 @@
       },
       {
         "score": 56,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 182,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "harem_agg": [
       {
-        "score": 340,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 308,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 447,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 281,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 526,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 251,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 295,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 530,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 290,
         "ts": "2026-07-21T02:07:01.69+00:00"
-      },
-      {
-        "score": 190,
-        "ts": "2026-07-21T05:44:20.808+00:00"
       },
       {
         "score": 603,
@@ -1298,33 +995,33 @@
       },
       {
         "score": 22,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 23,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "혐관": [
       {
-        "score": 4055,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 3959,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 4542,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 3635,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 3562,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 3971,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 3354,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 3413,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 3436,
         "ts": "2026-07-21T02:07:01.69+00:00"
-      },
-      {
-        "score": 3292,
-        "ts": "2026-07-21T05:44:20.808+00:00"
       },
       {
         "score": 3577,
@@ -1336,33 +1033,33 @@
       },
       {
         "score": 81,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 362,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "능글": [
       {
-        "score": 1623,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 1614,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 2595,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 2250,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 3018,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 2722,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 2978,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 2501,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 2228,
         "ts": "2026-07-21T02:07:01.69+00:00"
-      },
-      {
-        "score": 2304,
-        "ts": "2026-07-21T05:44:20.808+00:00"
       },
       {
         "score": 2613,
@@ -1374,33 +1071,33 @@
       },
       {
         "score": 293,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 54,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "소꿉친구": [
       {
-        "score": 1542,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 1634,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 2019,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 1930,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 1625,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 1480,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 2560,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 2576,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 2303,
         "ts": "2026-07-21T02:07:01.69+00:00"
-      },
-      {
-        "score": 2022,
-        "ts": "2026-07-21T05:44:20.808+00:00"
       },
       {
         "score": 2734,
@@ -1412,35 +1109,35 @@
       },
       {
         "score": 24,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 7,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "배신": [
       {
-        "score": 335,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 322,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 346,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 364,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 305,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 109,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 8,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 449,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 267,
         "ts": "2026-07-21T02:07:01.69+00:00"
       },
       {
-        "score": 204,
-        "ts": "2026-07-21T05:44:20.808+00:00"
-      },
-      {
         "score": 0,
         "ts": "2026-07-21T08:16:19.742+00:00"
       },
@@ -1450,35 +1147,35 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "오지콤": [
       {
-        "score": 244,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 246,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 422,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 441,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 893,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 1091,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 548,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 608,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 170,
         "ts": "2026-07-21T02:07:01.69+00:00"
       },
       {
-        "score": 255,
-        "ts": "2026-07-21T05:44:20.808+00:00"
-      },
-      {
         "score": 397,
         "ts": "2026-07-21T08:16:19.742+00:00"
       },
@@ -1488,33 +1185,33 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "짝사랑": [
       {
-        "score": 1399,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 1095,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 1323,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 1036,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 1281,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 1257,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 1950,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 810,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 1249,
         "ts": "2026-07-21T02:07:01.69+00:00"
-      },
-      {
-        "score": 1299,
-        "ts": "2026-07-21T05:44:20.808+00:00"
       },
       {
         "score": 1214,
@@ -1526,33 +1223,33 @@
       },
       {
         "score": 142,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 18,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "fantasy_agg": [
       {
-        "score": 5765,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 5751,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 3914,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 4164,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 6250,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 5394,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 4025,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 4643,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 4460,
         "ts": "2026-07-21T02:07:01.69+00:00"
-      },
-      {
-        "score": 5213,
-        "ts": "2026-07-21T05:44:20.808+00:00"
       },
       {
         "score": 4299,
@@ -1564,35 +1261,35 @@
       },
       {
         "score": 267,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 461,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "isekai_agg": [
       {
-        "score": 370,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 452,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 126,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 295,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 625,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 330,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 335,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 475,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 570,
         "ts": "2026-07-21T02:07:01.69+00:00"
       },
       {
-        "score": 252,
-        "ts": "2026-07-21T05:44:20.808+00:00"
-      },
-      {
         "score": 470,
         "ts": "2026-07-21T08:16:19.742+00:00"
       },
@@ -1602,35 +1299,35 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "무협": [
       {
-        "score": 543,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 156,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 386,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 429,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 131,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 294,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 84,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 215,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 87,
         "ts": "2026-07-21T02:07:01.69+00:00"
       },
       {
-        "score": 57,
-        "ts": "2026-07-21T05:44:20.808+00:00"
-      },
-      {
         "score": 228,
         "ts": "2026-07-21T08:16:19.742+00:00"
       },
@@ -1640,25 +1337,29 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "sf": [
       {
-        "score": 27,
-        "ts": "2026-07-19T13:04:07.28+00:00"
-      },
-      {
-        "score": 12,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 2,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "ts": "2026-07-20T12:12:23.068+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 0,
@@ -1666,10 +1367,6 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T05:44:20.808+00:00"
-      },
-      {
-        "score": 0,
         "ts": "2026-07-21T08:16:19.742+00:00"
       },
       {
@@ -1678,35 +1375,35 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "thriller_agg": [
       {
-        "score": 450,
-        "ts": "2026-07-19T13:04:07.28+00:00"
-      },
-      {
-        "score": 219,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 492,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 132,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 0,
+        "ts": "2026-07-20T12:12:23.068+00:00"
+      },
+      {
+        "score": 432,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 324,
         "ts": "2026-07-21T02:07:01.69+00:00"
       },
       {
-        "score": 0,
-        "ts": "2026-07-21T05:44:20.808+00:00"
-      },
-      {
         "score": 18,
         "ts": "2026-07-21T08:16:19.742+00:00"
       },
@@ -1716,35 +1413,35 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "학원": [
       {
         "score": 0,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 270,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 297,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 285,
         "ts": "2026-07-21T02:07:01.69+00:00"
       },
       {
-        "score": 15,
-        "ts": "2026-07-21T05:44:20.808+00:00"
-      },
-      {
         "score": 0,
         "ts": "2026-07-21T08:16:19.742+00:00"
       },
@@ -1754,25 +1451,29 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "현대": [
       {
-        "score": 162,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 0,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 276,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 246,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 198,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 0,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 33,
@@ -1780,10 +1481,6 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T05:44:20.808+00:00"
-      },
-      {
-        "score": 0,
         "ts": "2026-07-21T08:16:19.742+00:00"
       },
       {
@@ -1792,35 +1489,35 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "수인": [
       {
-        "score": 1007,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 1333,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 1391,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 1443,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 722,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 321,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 779,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 486,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 827,
         "ts": "2026-07-21T02:07:01.69+00:00"
       },
       {
-        "score": 667,
-        "ts": "2026-07-21T05:44:20.808+00:00"
-      },
-      {
         "score": 610,
         "ts": "2026-07-21T08:16:19.742+00:00"
       },
@@ -1830,35 +1527,35 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "재벌": [
       {
-        "score": 1031,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 1424,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 762,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 1063,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 926,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 992,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 987,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 1043,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 1771,
         "ts": "2026-07-21T02:07:01.69+00:00"
       },
       {
-        "score": 1077,
-        "ts": "2026-07-21T05:44:20.808+00:00"
-      },
-      {
         "score": 1713,
         "ts": "2026-07-21T08:16:19.742+00:00"
       },
@@ -1868,25 +1565,29 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 18,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "연예계": [
       {
         "score": 0,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 0,
@@ -1894,10 +1595,6 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T05:44:20.808+00:00"
-      },
-      {
-        "score": 0,
         "ts": "2026-07-21T08:16:19.742+00:00"
       },
       {
@@ -1906,35 +1603,35 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "게임": [
       {
         "score": 36,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
         "score": 32,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 28,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 320,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 268,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 212,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 54,
         "ts": "2026-07-21T02:07:01.69+00:00"
       },
       {
-        "score": 26,
-        "ts": "2026-07-21T05:44:20.808+00:00"
-      },
-      {
         "score": 24,
         "ts": "2026-07-21T08:16:19.742+00:00"
       },
@@ -1944,33 +1641,33 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "일상": [
       {
-        "score": 2076,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 3059,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 2391,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 2728,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 1182,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 1611,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 2491,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 2561,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 1239,
         "ts": "2026-07-21T02:07:01.69+00:00"
-      },
-      {
-        "score": 1440,
-        "ts": "2026-07-21T05:44:20.808+00:00"
       },
       {
         "score": 1667,
@@ -1982,33 +1679,33 @@
       },
       {
         "score": 164,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 245,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "대학생": [
       {
-        "score": 1452,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 1469,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 1459,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 1021,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 1561,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 2007,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 1594,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 1689,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 1564,
         "ts": "2026-07-21T02:07:01.69+00:00"
-      },
-      {
-        "score": 1964,
-        "ts": "2026-07-21T05:44:20.808+00:00"
       },
       {
         "score": 2532,
@@ -2020,33 +1717,33 @@
       },
       {
         "score": 29,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 222,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "일진": [
       {
-        "score": 701,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 1038,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 644,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 777,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 991,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 704,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 615,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 947,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 795,
         "ts": "2026-07-21T02:07:01.69+00:00"
-      },
-      {
-        "score": 777,
-        "ts": "2026-07-21T05:44:20.808+00:00"
       },
       {
         "score": 868,
@@ -2058,33 +1755,33 @@
       },
       {
         "score": 256,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "조직": [
       {
-        "score": 1004,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 1167,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 1492,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 1647,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 998,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 1008,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 697,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 974,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 1687,
         "ts": "2026-07-21T02:07:01.69+00:00"
-      },
-      {
-        "score": 846,
-        "ts": "2026-07-21T05:44:20.808+00:00"
       },
       {
         "score": 911,
@@ -2096,33 +1793,33 @@
       },
       {
         "score": 0,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ],
     "정략결혼": [
       {
-        "score": 229,
-        "ts": "2026-07-19T13:04:07.28+00:00"
+        "score": 240,
+        "ts": "2026-07-19T15:52:21.511+00:00"
       },
       {
-        "score": 308,
-        "ts": "2026-07-19T22:44:32.952+00:00"
+        "score": 354,
+        "ts": "2026-07-20T02:28:44.447+00:00"
       },
       {
-        "score": 516,
-        "ts": "2026-07-20T09:54:15.613+00:00"
+        "score": 519,
+        "ts": "2026-07-20T12:12:23.068+00:00"
       },
       {
-        "score": 692,
-        "ts": "2026-07-20T19:37:19.529+00:00"
+        "score": 733,
+        "ts": "2026-07-20T21:05:56.975+00:00"
       },
       {
         "score": 257,
         "ts": "2026-07-21T02:07:01.69+00:00"
-      },
-      {
-        "score": 443,
-        "ts": "2026-07-21T05:44:20.808+00:00"
       },
       {
         "score": 256,
@@ -2134,24 +1831,28 @@
       },
       {
         "score": 63,
-        "ts": "2026-07-21T11:02:10.898Z"
+        "ts": "2026-07-21T11:02:10.898+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-07-21T13:25:33.932Z"
       }
     ]
   },
   "tagScores": {
-    "순애": 264,
-    "bl": 410,
-    "gl": 0,
+    "순애": 72,
+    "bl": 396,
+    "gl": 18,
     "ntr_agg": 0,
-    "hpj_agg": 56,
-    "harem_agg": 22,
-    "혐관": 81,
-    "능글": 293,
-    "소꿉친구": 24,
+    "hpj_agg": 182,
+    "harem_agg": 23,
+    "혐관": 362,
+    "능글": 54,
+    "소꿉친구": 7,
     "배신": 0,
     "오지콤": 0,
-    "짝사랑": 142,
-    "fantasy_agg": 267,
+    "짝사랑": 18,
+    "fantasy_agg": 461,
     "isekai_agg": 0,
     "무협": 0,
     "sf": 0,
@@ -2159,61 +1860,71 @@
     "학원": 0,
     "현대": 0,
     "수인": 0,
-    "재벌": 0,
+    "재벌": 18,
     "연예계": 0,
     "게임": 0,
-    "일상": 164,
-    "대학생": 29,
-    "일진": 256,
+    "일상": 245,
+    "대학생": 222,
+    "일진": 0,
     "조직": 0,
-    "정략결혼": 63
+    "정략결혼": 0
   },
   "tagScoresDelta": {
-    "순애": -7953,
-    "bl": -9182,
-    "gl": null,
-    "ntr_agg": null,
-    "hpj_agg": null,
-    "harem_agg": -581,
-    "혐관": -3496,
-    "능글": -2320,
-    "소꿉친구": null,
+    "순애": -192,
+    "bl": -14,
+    "gl": 18,
+    "ntr_agg": 0,
+    "hpj_agg": 126,
+    "harem_agg": 1,
+    "혐관": 281,
+    "능글": -239,
+    "소꿉친구": -17,
     "배신": 0,
-    "오지콤": null,
-    "짝사랑": -1072,
-    "fantasy_agg": -4032,
-    "isekai_agg": null,
-    "무협": null,
+    "오지콤": 0,
+    "짝사랑": -124,
+    "fantasy_agg": 194,
+    "isekai_agg": 0,
+    "무협": 0,
     "sf": 0,
-    "thriller_agg": null,
+    "thriller_agg": 0,
     "학원": 0,
     "현대": 0,
-    "수인": null,
-    "재벌": null,
+    "수인": 0,
+    "재벌": 18,
     "연예계": 0,
-    "게임": null,
-    "일상": -1503,
-    "대학생": -2503,
-    "일진": -612,
-    "조직": null,
-    "정략결혼": -193
+    "게임": 0,
+    "일상": 81,
+    "대학생": 193,
+    "일진": null,
+    "조직": 0,
+    "정략결혼": null
   },
   "tagScoresDeltaRef": {
-    "순애": 3,
-    "bl": 3,
-    "harem_agg": 3,
-    "혐관": 3,
-    "능글": 3,
-    "배신": 3,
-    "짝사랑": 3,
-    "fantasy_agg": 3,
-    "sf": 3,
-    "학원": 3,
-    "현대": 3,
-    "연예계": 3,
-    "일상": 3,
-    "대학생": 3,
-    "일진": 3,
-    "정략결혼": 3
+    "순애": 2,
+    "bl": 2,
+    "gl": 2,
+    "ntr_agg": 2,
+    "hpj_agg": 2,
+    "harem_agg": 2,
+    "혐관": 2,
+    "능글": 2,
+    "소꿉친구": 2,
+    "배신": 2,
+    "오지콤": 2,
+    "짝사랑": 2,
+    "fantasy_agg": 2,
+    "isekai_agg": 2,
+    "무협": 2,
+    "sf": 2,
+    "thriller_agg": 2,
+    "학원": 2,
+    "현대": 2,
+    "수인": 2,
+    "재벌": 2,
+    "연예계": 2,
+    "게임": 2,
+    "일상": 2,
+    "대학생": 2,
+    "조직": 2
   }
 }
