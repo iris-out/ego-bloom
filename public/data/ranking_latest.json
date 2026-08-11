@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-11T19:57:44.930Z",
+  "updatedAt": "2026-08-11T20:43:43.295Z",
   "combined": [
     {
       "tag": "hl",
@@ -491,123 +491,123 @@
   "interaction": [
     {
       "tag": "hl",
-      "score": 274637675
+      "score": 274754814
     },
     {
       "tag": "bl",
-      "score": 219608685
+      "score": 219681966
     },
     {
       "tag": "집착",
-      "score": 135372957
+      "score": 135413050
     },
     {
       "tag": "로맨스",
-      "score": 112410361
+      "score": 112480714
     },
     {
       "tag": "소유욕",
-      "score": 97836843
+      "score": 97861880
     },
     {
       "tag": "순애",
-      "score": 93615445
+      "score": 93675386
     },
     {
       "tag": "다정",
-      "score": 73198237
+      "score": 73218478
     },
     {
       "tag": "능글",
-      "score": 54461569
+      "score": 54487007
     },
     {
       "tag": "무뚝뚝",
-      "score": 49819724
+      "score": 49835386
     },
     {
       "tag": "혐관",
-      "score": 47432624
+      "score": 47448378
     },
     {
       "tag": "연애",
-      "score": 44574048
+      "score": 44600452
     },
     {
       "tag": "판타지",
-      "score": 42402881
+      "score": 42419185
     },
     {
       "tag": "일진",
-      "score": 42106135
+      "score": 42114637
     },
     {
       "tag": "유저바라기",
-      "score": 39364186
+      "score": 39396828
     },
     {
       "tag": "현대판타지",
-      "score": 38928466
+      "score": 38941813
     },
     {
       "tag": "다공일수",
-      "score": 38361703
+      "score": 38371174
     },
     {
       "tag": "소꿉친구",
-      "score": 37660596
+      "score": 37677488
     },
     {
       "tag": "강압적",
-      "score": 36260546
+      "score": 36265022
     },
     {
       "tag": "조직",
-      "score": 36200622
+      "score": 36208895
     },
     {
       "tag": "후회",
-      "score": 35107837
+      "score": 35123772
     },
     {
       "tag": "쓰레기",
-      "score": 34931076
+      "score": 34942067
     },
     {
       "tag": "학교",
-      "score": 34013988
+      "score": 34022541
     },
     {
       "tag": "조직보스",
-      "score": 33378936
+      "score": 33388346
     },
     {
       "tag": "피폐",
-      "score": 31763356
+      "score": 31774520
     },
     {
       "tag": "찐따",
-      "score": 30965277
+      "score": 30971920
     },
     {
       "tag": "마법",
-      "score": 28167664
+      "score": 28176224
     },
     {
       "tag": "다인캐",
-      "score": 27470060
+      "score": 27479131
     },
     {
       "tag": "인외",
-      "score": 26999984
+      "score": 27003587
     },
     {
       "tag": "철벽",
-      "score": 26607203
+      "score": 26613564
     },
     {
       "tag": "감금",
-      "score": 26109179
+      "score": 26111787
     }
   ],
   "genres": [
@@ -654,8 +654,8 @@
         "연애",
         "로맨스"
       ],
-      "interactionCount": 115052,
-      "interactionDelta": 20087,
+      "interactionCount": 122835,
+      "interactionDelta": 27870,
       "rankChange": 0,
       "creatorHandle": "liver_1892.",
       "creatorNickname": "liver",
@@ -664,7 +664,8 @@
       "interactionHistory": [
         25367,
         32614,
-        41502
+        41502,
+        63687
       ]
     },
     {
@@ -678,8 +679,8 @@
         "백합가능",
         "농구부"
       ],
-      "interactionCount": 403003,
-      "interactionDelta": 9978,
+      "interactionCount": 404979,
+      "interactionDelta": 11954,
       "rankChange": 5,
       "creatorHandle": "wataametabetaina",
       "creatorNickname": "わたあめ",
@@ -687,7 +688,8 @@
       "rank": 2,
       "interactionHistory": [
         363089,
-        371132
+        371132,
+        378731
       ]
     },
     {
@@ -701,8 +703,8 @@
         "bl",
         "hl"
       ],
-      "interactionCount": 219442,
-      "interactionDelta": 17818,
+      "interactionCount": 223752,
+      "interactionDelta": 22128,
       "rankChange": -2,
       "creatorHandle": "Nazarr_oO",
       "creatorNickname": "어휘력떨어짐",
@@ -713,7 +715,8 @@
         105976,
         111177,
         124371,
-        142772
+        142772,
+        169820
       ]
     },
     {
@@ -727,8 +730,8 @@
         "대학교",
         "학교"
       ],
-      "interactionCount": 58030,
-      "interactionDelta": 2947,
+      "interactionCount": 58682,
+      "interactionDelta": 3599,
       "rankChange": 27,
       "creatorHandle": "TamestChart2222",
       "creatorNickname": "TamestChart2222",
@@ -746,20 +749,20 @@
         "소유욕",
         "배덕"
       ],
-      "interactionCount": 164904,
-      "interactionDelta": 2416,
+      "interactionCount": 165376,
+      "interactionDelta": 2888,
       "rankChange": 15,
       "creatorHandle": "9_.27am_",
       "creatorNickname": "시가",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/44311f26-4121-4980-a76e-7c4da974f155/d43bf376-4d4e-4039-8884-efcef11d4806.png",
       "rank": 6,
       "interactionHistory": [
-        138639,
         141837,
         143503,
         144953,
         147221,
-        150160
+        150160,
+        155014
       ]
     },
     {
@@ -773,8 +776,8 @@
         "능글",
         "인기남"
       ],
-      "interactionCount": 541793,
-      "interactionDelta": 4131,
+      "interactionCount": 543059,
+      "interactionDelta": 5397,
       "rankChange": 1,
       "creatorHandle": "MusclyFoot1634",
       "creatorNickname": "바니바니",
@@ -782,7 +785,8 @@
       "rank": 7,
       "interactionHistory": [
         521959,
-        525126
+        525126,
+        530671
       ]
     },
     {
@@ -796,13 +800,16 @@
         "여사친",
         "hl"
       ],
-      "interactionCount": 320920,
-      "interactionDelta": 1769,
+      "interactionCount": 321497,
+      "interactionDelta": 2346,
       "rankChange": 48,
       "creatorHandle": "seoon_Like",
       "creatorNickname": "_세온_",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/db53a46f-fe5e-4201-8573-fac1008fca2a/0dc5aa50-dddf-4f4f-85e2-7c1257a871ae.png",
-      "rank": 8
+      "rank": 8,
+      "interactionHistory": [
+        314300
+      ]
     },
     {
       "id": "51a65073-cf69-4e36-885c-01ca98e0c436",
@@ -815,20 +822,20 @@
         "집착",
         "동갑"
       ],
-      "interactionCount": 115834,
-      "interactionDelta": 6191,
+      "interactionCount": 116639,
+      "interactionDelta": 6996,
       "rankChange": 2,
       "creatorHandle": "MonCookie_0V0",
       "creatorNickname": "몬스터쿠키",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/c204b659-3157-497b-b71c-119bdc3e0480/b3671fed-4a88-4c5c-b189-d27fa9585141.png",
       "rank": 9,
       "interactionHistory": [
-        91209,
         94019,
         95396,
         96494,
         98646,
-        103488
+        103488,
+        106738
       ]
     },
     {
@@ -842,20 +849,20 @@
         "존잘",
         "연하"
       ],
-      "interactionCount": 270964,
-      "interactionDelta": 4611,
+      "interactionCount": 271869,
+      "interactionDelta": 5516,
       "rankChange": 1,
       "creatorHandle": "yuneayong",
       "creatorNickname": "연녕",
       "creatorImageUrl": null,
       "rank": 11,
       "interactionHistory": [
-        216283,
         223894,
         225686,
         228441,
         235114,
-        245347
+        245347,
+        254251
       ]
     },
     {
@@ -869,13 +876,16 @@
         "판타지",
         "rpg"
       ],
-      "interactionCount": 379805,
-      "interactionDelta": 2042,
+      "interactionCount": 380265,
+      "interactionDelta": 2502,
       "rankChange": 39,
       "creatorHandle": "HAYUNG12516",
       "creatorNickname": "하융",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/61b1cb80-5d29-41cc-95d8-809ac556862c/81653831-a02b-46b6-a5c0-8a765fe94a31.png",
-      "rank": 12
+      "rank": 12,
+      "interactionHistory": [
+        372834
+      ]
     },
     {
       "id": "53d28f6e-8935-4771-bfad-d4183778887e",
@@ -888,20 +898,20 @@
         "조직보스",
         "말랑콩떡"
       ],
-      "interactionCount": 243869,
-      "interactionDelta": 7781,
+      "interactionCount": 244735,
+      "interactionDelta": 8647,
       "rankChange": -10,
       "creatorHandle": "KellpI",
       "creatorNickname": "켈피",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d0d06840-c71d-4e37-b8eb-bd00041215bb/4fec5f0f-c469-41ee-ad16-3e7c1f0c4e7a.png",
       "rank": 13,
       "interactionHistory": [
-        169762,
         176321,
         181337,
         186202,
         192532,
-        202713
+        202713,
+        220220
       ]
     },
     {
@@ -915,8 +925,8 @@
         "순애",
         "유저바라기"
       ],
-      "interactionCount": 102815,
-      "interactionDelta": 7093,
+      "interactionCount": 104608,
+      "interactionDelta": 8886,
       "rankChange": -10,
       "creatorHandle": "N_WAVE_Leviatan",
       "creatorNickname": "네이브 레비",
@@ -926,7 +936,8 @@
         72060,
         73167,
         74824,
-        79163
+        79163,
+        88026
       ]
     },
     {
@@ -940,7 +951,7 @@
         "hl",
         "옆집"
       ],
-      "interactionCount": 249067,
+      "interactionCount": 249637,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Preference",
@@ -959,20 +970,20 @@
         "복싱",
         "mma"
       ],
-      "interactionCount": 332079,
-      "interactionDelta": 8249,
+      "interactionCount": 333285,
+      "interactionDelta": 9455,
       "rankChange": -1,
       "creatorHandle": "Kacao",
       "creatorNickname": "카카오",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/226b2401-c096-46ef-b3d5-5a55f37db445/6f88e368-72eb-4594-956f-e6247e9521e9.png",
       "rank": 16,
       "interactionHistory": [
-        266018,
         275380,
         280665,
         284313,
         288914,
-        299946
+        299946,
+        311554
       ]
     },
     {
@@ -986,18 +997,18 @@
         "hl",
         "집착"
       ],
-      "interactionCount": 2209897,
-      "interactionDelta": 2444,
+      "interactionCount": 2210592,
+      "interactionDelta": 3139,
       "rankChange": -1,
       "creatorHandle": "isangsungyokja",
       "creatorNickname": "상자",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/72dc3679-4dcc-4249-ae32-ef507ece97ca/b052b724-def1-47c5-9e0c-7d0a7df15829.jpeg",
       "rank": 17,
       "interactionHistory": [
-        2194116,
         2195537,
         2196075,
-        2196810
+        2196810,
+        2203334
       ]
     },
     {
@@ -1011,20 +1022,20 @@
         "hl",
         "bl"
       ],
-      "interactionCount": 1173956,
-      "interactionDelta": 5734,
+      "interactionCount": 1175309,
+      "interactionDelta": 7087,
       "rankChange": 11,
       "creatorHandle": "Hamsterhintern",
       "creatorNickname": "Hamsterhintern",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/6e132b3c-b93e-4199-8e61-e3d55d313736/0257d46f-933c-40f4-a0a5-4c0a0acf3705.jpeg",
       "rank": 18,
       "interactionHistory": [
-        1143188,
-        1143188,
+        1146537,
         1148166,
         1149554,
         1152196,
-        1155814
+        1155814,
+        1161678
       ]
     },
     {
@@ -1038,7 +1049,7 @@
         "능글",
         "hl"
       ],
-      "interactionCount": 500114,
+      "interactionCount": 500536,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Piano_poor",
@@ -1057,8 +1068,8 @@
         "로맨스",
         "순애"
       ],
-      "interactionCount": 355214,
-      "interactionDelta": 6158,
+      "interactionCount": 355913,
+      "interactionDelta": 6857,
       "rankChange": -2,
       "creatorHandle": "Lilies_are_gods",
       "creatorNickname": "쪼아여쪼아여",
@@ -1066,7 +1077,8 @@
       "rank": 20,
       "interactionHistory": [
         339618,
-        345894
+        345894,
+        349056
       ]
     },
     {
@@ -1080,20 +1092,20 @@
         "언리밋",
         "유저바라기"
       ],
-      "interactionCount": 312416,
-      "interactionDelta": 3184,
+      "interactionCount": 313186,
+      "interactionDelta": 3954,
       "rankChange": 41,
       "creatorHandle": "PerkyChain0889",
       "creatorNickname": "뿌이뿌",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/0afa0811-45c0-44e8-a2b8-f2fe37a984a6/1960beda-66e4-48f9-89ed-a37a8d1b8fb2.png",
       "rank": 21,
       "interactionHistory": [
-        288037,
         291374,
         293190,
         294514,
         296645,
-        300280
+        300280,
+        304270
       ]
     },
     {
@@ -1107,7 +1119,7 @@
         "교사",
         "귀여움"
       ],
-      "interactionCount": 596401,
+      "interactionCount": 597040,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Serena0607",
@@ -1115,12 +1127,12 @@
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/831ea384-8a99-4f49-b005-41b3c1bb0235/01663156-0b41-4f50-927f-0cdd9d4eb271.png",
       "rank": 22,
       "interactionHistory": [
-        575960,
         578392,
         579972,
+        579972,
         581435,
-        581435,
-        583051
+        583051,
+        585894
       ]
     },
     {
@@ -1134,18 +1146,18 @@
         "재회",
         "질투"
       ],
-      "interactionCount": 591208,
-      "interactionDelta": 2481,
+      "interactionCount": 591800,
+      "interactionDelta": 3073,
       "rankChange": 34,
       "creatorHandle": "MusclyFoot1634",
       "creatorNickname": "바니바니",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d5992717-1339-4e53-ac26-1a591c3303b6/ba50fcb4-c7ac-428d-812d-bff5be835917.png",
       "rank": 23,
       "interactionHistory": [
-        561259,
         566513,
         568152,
-        569809
+        569809,
+        582155
       ]
     },
     {
@@ -1159,8 +1171,8 @@
         "소유욕",
         "순애"
       ],
-      "interactionCount": 245930,
-      "interactionDelta": 2782,
+      "interactionCount": 246492,
+      "interactionDelta": 3344,
       "rankChange": -1,
       "creatorHandle": "RIZE_700",
       "creatorNickname": "리제",
@@ -1168,7 +1180,8 @@
       "rank": 24,
       "interactionHistory": [
         231259,
-        234468
+        234468,
+        238714
       ]
     },
     {
@@ -1182,8 +1195,8 @@
         "집착",
         "매도"
       ],
-      "interactionCount": 897656,
-      "interactionDelta": 3233,
+      "interactionCount": 897886,
+      "interactionDelta": 3463,
       "rankChange": 75,
       "creatorHandle": "purely.era.",
       "creatorNickname": "퓨에라",
@@ -1204,7 +1217,7 @@
         "로맨스",
         "억지웃음"
       ],
-      "interactionCount": 1788561,
+      "interactionCount": 1792747,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "ORORIH_O",
@@ -1212,10 +1225,10 @@
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/0d3babd0-168c-4038-a96c-ec3ad2640da0/7f6c2468-93e4-41a0-9d43-45e0465fe69d.png",
       "rank": 26,
       "interactionHistory": [
-        1726313,
+        1734257,
         1734257,
         1738108,
-        1738108,
+        1741692,
         1746858,
         1753715
       ]
@@ -1231,20 +1244,20 @@
         "질투",
         "보스"
       ],
-      "interactionCount": 1265664,
-      "interactionDelta": 6195,
+      "interactionCount": 1266996,
+      "interactionDelta": 7527,
       "rankChange": 40,
       "creatorHandle": "SUBEPOTETO",
       "creatorNickname": "poteto",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/44e53f55-6a31-45ea-9a8e-b241a586d213/50244241-1a84-4be4-a9fe-c611181263a2.png",
       "rank": 28,
       "interactionHistory": [
-        1244668,
         1247099,
         1248205,
         1251528,
         1251528,
-        1254073
+        1254073,
+        1257307
       ]
     },
     {
@@ -1258,8 +1271,8 @@
         "치어리더",
         "전학생"
       ],
-      "interactionCount": 531782,
-      "interactionDelta": 4791,
+      "interactionCount": 532998,
+      "interactionDelta": 6007,
       "rankChange": -25,
       "creatorHandle": "ch3.zyn_",
       "creatorNickname": "이 채 화",
@@ -1269,7 +1282,8 @@
         487562,
         489538,
         493459,
-        503652
+        503652,
+        515684
       ]
     },
     {
@@ -1282,20 +1296,20 @@
         "해수욕장",
         "여사친"
       ],
-      "interactionCount": 150409,
-      "interactionDelta": 7554,
+      "interactionCount": 151922,
+      "interactionDelta": 9067,
       "rankChange": -20,
       "creatorHandle": "ddddd49",
       "creatorNickname": "닉네임뭘로하지",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/8cbbd214-3140-4ec1-a0e0-b7b3dc875538/ab6cf291-2a7f-42ac-b518-fbf8f2328c82.jpeg",
       "rank": 31,
       "interactionHistory": [
-        60104,
         72610,
         80012,
         89567,
         99405,
-        111272
+        111272,
+        128259
       ]
     },
     {
@@ -1309,7 +1323,7 @@
         "bl",
         "hl"
       ],
-      "interactionCount": 301300,
+      "interactionCount": 301710,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Preference",
@@ -1328,19 +1342,19 @@
         "성장",
         "모험"
       ],
-      "interactionCount": 164514,
-      "interactionDelta": 2062,
+      "interactionCount": 165567,
+      "interactionDelta": 3115,
       "rankChange": 38,
       "creatorHandle": "S1esta",
       "creatorNickname": "시에스타",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/20e2984e-4129-4d0d-917a-539322fa7b46/ff884c1e-c0b2-44dd-b382-f966bfcc7d64.png",
       "rank": 33,
       "interactionHistory": [
-        150547,
         151849,
         152574,
         153479,
-        154744
+        154744,
+        156144
       ]
     },
     {
@@ -1354,15 +1368,14 @@
         "정략결혼",
         "로판"
       ],
-      "interactionCount": 1159557,
-      "interactionDelta": 3554,
+      "interactionCount": 1160087,
+      "interactionDelta": 4084,
       "rankChange": -3,
       "creatorHandle": "I._.an",
       "creatorNickname": "이안",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/1710220e-c5de-4278-a1d0-05df67e6f66f/7ffdb328-2c2c-4c32-8a5e-b02c674fca11.jpeg",
       "rank": 34,
       "interactionHistory": [
-        1128813,
         1133104,
         1135003,
         1137140,
@@ -1381,20 +1394,20 @@
         "능글",
         "집착"
       ],
-      "interactionCount": 420365,
-      "interactionDelta": 3260,
+      "interactionCount": 420976,
+      "interactionDelta": 3871,
       "rankChange": 43,
       "creatorHandle": "dain00",
       "creatorNickname": "우미",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/4df55811-b172-406a-9798-7eecfffe86a3/04afdd86-3c35-4a3b-afea-531338e0f6c9.jpeg",
       "rank": 35,
       "interactionHistory": [
-        401405,
         403327,
         404278,
-        405505,
         407098,
-        407098
+        407098,
+        413210,
+        413210
       ]
     },
     {
@@ -1408,8 +1421,8 @@
         "대학생",
         "언리밋"
       ],
-      "interactionCount": 399477,
-      "interactionDelta": 3182,
+      "interactionCount": 400459,
+      "interactionDelta": 4164,
       "rankChange": 13,
       "creatorHandle": "ekgmlWkdS2",
       "creatorNickname": "히히",
@@ -1427,20 +1440,20 @@
         "섹시",
         "짝사랑"
       ],
-      "interactionCount": 1099728,
-      "interactionDelta": 9543,
+      "interactionCount": 1100822,
+      "interactionDelta": 10637,
       "rankChange": 56,
       "creatorHandle": "FastBump9775",
       "creatorNickname": "FastBump9775",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ecb71b0f-1513-4074-aae7-a39c4aee1594/67553285-cbe4-48c0-8742-e2057027249d.png",
       "rank": 37,
       "interactionHistory": [
-        1073769,
-        1073769,
+        1076526,
         1078059,
         1080233,
         1082162,
-        1086215
+        1086215,
+        1090185
       ]
     },
     {
@@ -1454,7 +1467,7 @@
         "교사",
         "다인캐"
       ],
-      "interactionCount": 285400,
+      "interactionCount": 285755,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "spm",
@@ -1462,11 +1475,11 @@
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/00c46bb2-ba8b-4637-9729-0fa7fc9ffb48/8216d699-3ce0-4189-a3a9-d6140889ef46.png",
       "rank": 38,
       "interactionHistory": [
-        273827,
         275169,
         275583,
         276444,
-        277395
+        277395,
+        279122
       ]
     },
     {
@@ -1480,8 +1493,8 @@
         "로맨스",
         "다정"
       ],
-      "interactionCount": 1055913,
-      "interactionDelta": 2097,
+      "interactionCount": 1056637,
+      "interactionDelta": 2821,
       "rankChange": 20,
       "creatorHandle": "heesun.ae",
       "creatorNickname": "조이",
@@ -1489,7 +1502,8 @@
       "rank": 39,
       "interactionHistory": [
         1042855,
-        1045524
+        1045524,
+        1050013
       ]
     },
     {
@@ -1503,19 +1517,19 @@
         "소꿉친구들",
         "남녀무리"
       ],
-      "interactionCount": 2216788,
-      "interactionDelta": 3863,
+      "interactionCount": 2217672,
+      "interactionDelta": 4747,
       "rankChange": -5,
       "creatorHandle": "2._Zure",
       "creatorNickname": "아이름",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f776bb07-f673-4c38-995f-fe7fcdde42c9/c9a7f172-b0b2-4d39-8a82-5ade239b5bb9.jpeg",
       "rank": 40,
       "interactionHistory": [
-        2184398,
         2188531,
         2189777,
         2192595,
-        2200261
+        2200261,
+        2205746
       ]
     },
     {
@@ -1529,8 +1543,8 @@
         "연애",
         "싸가지"
       ],
-      "interactionCount": 889358,
-      "interactionDelta": 2670,
+      "interactionCount": 889610,
+      "interactionDelta": 2922,
       "rankChange": 5,
       "creatorHandle": "malixe",
       "creatorNickname": "malixe",
@@ -1548,8 +1562,8 @@
         "대천사",
         "배우"
       ],
-      "interactionCount": 892197,
-      "interactionDelta": 2516,
+      "interactionCount": 892977,
+      "interactionDelta": 3296,
       "rankChange": 22,
       "creatorHandle": "Ducky67",
       "creatorNickname": "🐥DUCKY🐥",
@@ -1567,16 +1581,16 @@
         "츤데레",
         "연애"
       ],
-      "interactionCount": 1143354,
-      "interactionDelta": 3619,
+      "interactionCount": 1143655,
+      "interactionDelta": 3920,
       "rankChange": 34,
       "creatorHandle": "pure_luv",
       "creatorNickname": "순애최고",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/0372d2ad-603d-4328-9c99-015855b22589/b9e042a5-91b8-4428-9228-1a3a9da87c7b.png",
       "rank": 45,
       "interactionHistory": [
-        1126463,
         1128488,
+        1129307,
         1130598,
         1132011,
         1134166,
@@ -1594,15 +1608,16 @@
         "존잘",
         "찐따"
       ],
-      "interactionCount": 61898,
-      "interactionDelta": 1669,
+      "interactionCount": 62407,
+      "interactionDelta": 2178,
       "rankChange": -33,
       "creatorHandle": "Msddcz",
       "creatorNickname": "츠키",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/747a6730-9f8b-4cf9-abea-d77ead20e0c2/d27b3c24-0363-46f7-80e6-b1d99010aab0.png",
       "rank": 46,
       "interactionHistory": [
-        53749
+        53749,
+        57237
       ]
     },
     {
@@ -1616,17 +1631,17 @@
         "hl",
         "bl"
       ],
-      "interactionCount": 716275,
-      "interactionDelta": 3240,
+      "interactionCount": 717212,
+      "interactionDelta": 4177,
       "rankChange": -10,
       "creatorHandle": "dksfk",
       "creatorNickname": "안라[An.Ra]",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/16411d6a-a5fd-4c6a-8b1a-869aa0c2edcd/85040db3-3e3c-40b8-a9fb-d190c5ad2289.png",
       "rank": 47,
       "interactionHistory": [
-        693557,
         696048,
-        697012
+        697012,
+        707544
       ]
     },
     {
@@ -1639,8 +1654,8 @@
         "육아",
         "육아스트레스"
       ],
-      "interactionCount": 191620,
-      "interactionDelta": 1230,
+      "interactionCount": 191803,
+      "interactionDelta": 1413,
       "rankChange": -15,
       "creatorHandle": "PrimBid2134",
       "creatorNickname": ".",
@@ -1648,7 +1663,8 @@
       "rank": 48,
       "interactionHistory": [
         181908,
-        184265
+        184265,
+        187810
       ]
     },
     {
@@ -1662,15 +1678,16 @@
         "대학생",
         "hl"
       ],
-      "interactionCount": 564810,
-      "interactionDelta": 4237,
+      "interactionCount": 565141,
+      "interactionDelta": 4568,
       "rankChange": -29,
       "creatorHandle": "muchea_nyang",
       "creatorNickname": "muchea '-'~?",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/c87a67ac-1b68-4d64-855c-624ededa4941/ffa8f4f8-7194-424a-ba73-cfcc0a15ba7e.png",
       "rank": 50,
       "interactionHistory": [
-        554966
+        554966,
+        560573
       ]
     },
     {
@@ -1684,7 +1701,7 @@
         "시한부",
         "이별"
       ],
-      "interactionCount": 945699,
+      "interactionCount": 946235,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "dddonnn",
@@ -1692,7 +1709,6 @@
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/b89248ea-b67d-4f19-9172-79ed0024c456/912f0c56-c853-4751-92ba-e058bd27cfd2.jpeg",
       "rank": 51,
       "interactionHistory": [
-        933063,
         934417,
         934913,
         935589
@@ -1709,20 +1725,20 @@
         "아내바라기",
         "순애"
       ],
-      "interactionCount": 1604554,
-      "interactionDelta": 6123,
+      "interactionCount": 1605700,
+      "interactionDelta": 7269,
       "rankChange": -35,
       "creatorHandle": "CyanBog7925",
       "creatorNickname": "윰댕",
       "creatorImageUrl": null,
       "rank": 53,
       "interactionHistory": [
-        1562140,
         1567047,
         1568902,
         1571271,
         1574914,
-        1581235
+        1581235,
+        1589046
       ]
     },
     {
@@ -1736,7 +1752,7 @@
         "알바",
         "폭스남"
       ],
-      "interactionCount": 292782,
+      "interactionCount": 293175,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "parkjjang",
@@ -1744,11 +1760,12 @@
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d2a0c2fd-234f-4321-969b-b4c2f63b8401/97c1ad69-c17b-4715-a70c-f7386a19f44e.png",
       "rank": 54,
       "interactionHistory": [
-        276626,
         278329,
         279130,
         279876,
-        281518
+        281518,
+        283464,
+        287152
       ]
     },
     {
@@ -1762,13 +1779,16 @@
         "양아치",
         "순애"
       ],
-      "interactionCount": 510409,
-      "interactionDelta": 4560,
+      "interactionCount": 510934,
+      "interactionDelta": 5085,
       "rankChange": 4,
       "creatorHandle": "2flaxx",
       "creatorNickname": "이림",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/8b6fb3cb-3346-4e41-953c-bd1c83cd8996/e55dd59b-c17e-47c4-b380-977971686a77.jpeg",
-      "rank": 55
+      "rank": 55,
+      "interactionHistory": [
+        505849
+      ]
     },
     {
       "id": "6c90edf5-6384-4f41-bd8f-c9c1511218aa",
@@ -1781,13 +1801,16 @@
         "대륙",
         "다공일수"
       ],
-      "interactionCount": 624512,
-      "interactionDelta": 3349,
+      "interactionCount": 625507,
+      "interactionDelta": 4344,
       "rankChange": 16,
       "creatorHandle": "RbRbRiRi4534",
       "creatorNickname": "뀨뀨꺄꺄",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f57f5c11-9877-44f1-8d1b-10a4610ae29d/2812560a-3dcc-4f56-8128-4fc5a9e9e332.jpeg",
-      "rank": 56
+      "rank": 56,
+      "interactionHistory": [
+        617590
+      ]
     },
     {
       "id": "6c229365-9e74-492b-bb20-fee8c230aa97",
@@ -1800,8 +1823,8 @@
         "능력자",
         "미스터리"
       ],
-      "interactionCount": 519825,
-      "interactionDelta": 2290,
+      "interactionCount": 520448,
+      "interactionDelta": 2913,
       "rankChange": 27,
       "creatorHandle": "Zvxif",
       "creatorNickname": "공팔",
@@ -1810,7 +1833,8 @@
       "interactionHistory": [
         506410,
         507085,
-        509497
+        509497,
+        514110
       ]
     },
     {
@@ -1824,8 +1848,8 @@
         "소꿉친구",
         "달달"
       ],
-      "interactionCount": 510275,
-      "interactionDelta": 3787,
+      "interactionCount": 510990,
+      "interactionDelta": 4502,
       "rankChange": -16,
       "creatorHandle": "dXooXb",
       "creatorNickname": "당도",
@@ -1833,7 +1857,8 @@
       "rank": 59,
       "interactionHistory": [
         486198,
-        487415
+        487415,
+        500344
       ]
     },
     {
@@ -1847,7 +1872,7 @@
         "일진",
         "양아치"
       ],
-      "interactionCount": 369353,
+      "interactionCount": 369820,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "2flaxx",
@@ -1866,9 +1891,9 @@
         "아빠",
         "다정"
       ],
-      "interactionCount": 581477,
-      "interactionDelta": 8862,
-      "rankChange": 31,
+      "interactionCount": 582097,
+      "interactionDelta": null,
+      "rankChange": null,
       "creatorHandle": "sube_pure_love",
       "creatorNickname": "순애보",
       "creatorImageUrl": null,
@@ -1888,7 +1913,7 @@
         "판타지",
         "로맨스판타지"
       ],
-      "interactionCount": 5644977,
+      "interactionCount": 5646689,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "iroha_XI",
@@ -1896,12 +1921,12 @@
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ad50dca9-1b62-4804-898c-13d3aeedd526/0d54b1bf-2434-4ef0-8adc-5a7824cea992.jpeg",
       "rank": 62,
       "interactionHistory": [
-        5588543,
+        5596014,
         5596014,
         5599645,
-        5599645,
         5603758,
-        5608914
+        5608914,
+        5615409
       ]
     },
     {
@@ -1915,8 +1940,8 @@
         "순애남",
         "bl"
       ],
-      "interactionCount": 506529,
-      "interactionDelta": 2293,
+      "interactionCount": 506917,
+      "interactionDelta": 2681,
       "rankChange": -39,
       "creatorHandle": "Sandlife",
       "creatorNickname": "모래",
@@ -1924,7 +1949,8 @@
       "rank": 63,
       "interactionHistory": [
         494952,
-        497545
+        497545,
+        501472
       ]
     },
     {
@@ -1938,15 +1964,15 @@
         "다각관계",
         "연애"
       ],
-      "interactionCount": 509925,
-      "interactionDelta": 3659,
+      "interactionCount": 510327,
+      "interactionDelta": 4061,
       "rankChange": -2,
       "creatorHandle": "oahminn",
       "creatorNickname": "오아민",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/799cfafc-2f6f-461d-bacb-24776007fa8d/85ba68ab-1521-412a-8512-a7071dab13e0.jpeg",
       "rank": 64,
       "interactionHistory": [
-        498225
+        506266
       ]
     },
     {
@@ -1957,8 +1983,8 @@
         "hl",
         "blㄱㄴ"
       ],
-      "interactionCount": 982940,
-      "interactionDelta": 6871,
+      "interactionCount": 983679,
+      "interactionDelta": 7610,
       "rankChange": 9,
       "creatorHandle": "FatalWiper6131",
       "creatorNickname": "하하",
@@ -1967,7 +1993,8 @@
       "interactionHistory": [
         966336,
         967442,
-        968359
+        968359,
+        976069
       ]
     },
     {
@@ -1981,15 +2008,14 @@
         "언리밋모드",
         "야구"
       ],
-      "interactionCount": 561754,
-      "interactionDelta": 3408,
+      "interactionCount": 562200,
+      "interactionDelta": 3854,
       "rankChange": -28,
       "creatorHandle": "Nia1",
       "creatorNickname": "니아",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/8dd1d5ff-d29c-45f7-9d99-97381133e5eb/84d53737-49d2-4b62-ae3f-b05398dccad1.png",
       "rank": 66,
       "interactionHistory": [
-        547496,
         551039
       ]
     },
@@ -2004,17 +2030,17 @@
         "참교육",
         "언리밋"
       ],
-      "interactionCount": 1198798,
-      "interactionDelta": 10747,
+      "interactionCount": 1199465,
+      "interactionDelta": 11414,
       "rankChange": 22,
       "creatorHandle": "Nia1",
       "creatorNickname": "니아",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/8dd1d5ff-d29c-45f7-9d99-97381133e5eb/84d53737-49d2-4b62-ae3f-b05398dccad1.png",
       "rank": 67,
       "interactionHistory": [
-        1162237,
         1174275,
-        1178140
+        1178140,
+        1188051
       ]
     },
     {
@@ -2028,20 +2054,20 @@
         "교생",
         "선생님"
       ],
-      "interactionCount": 1329885,
-      "interactionDelta": 3892,
+      "interactionCount": 1330961,
+      "interactionDelta": 4968,
       "rankChange": -43,
       "creatorHandle": "chueicui",
       "creatorNickname": "cui",
       "creatorImageUrl": null,
       "rank": 69,
       "interactionHistory": [
-        1305284,
-        1305284,
+        1307661,
         1308653,
         1310654,
         1315726,
-        1315726
+        1315726,
+        1320572
       ]
     },
     {
@@ -2055,20 +2081,20 @@
         "다인캐",
         "일상"
       ],
-      "interactionCount": 215396,
-      "interactionDelta": 4135,
+      "interactionCount": 215652,
+      "interactionDelta": 4391,
       "rankChange": -43,
       "creatorHandle": "Drunk_Dragon",
       "creatorNickname": "만취용",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/1f1edd4a-8926-4df1-8fe1-6c35ba3422d2/00f25d31-724d-4ef4-818f-a6f7f54067c5.png",
       "rank": 70,
       "interactionHistory": [
-        201365,
-        201365,
         203546,
         204172,
         205059,
-        206183
+        206183,
+        208804,
+        211261
       ]
     },
     {
@@ -2082,7 +2108,7 @@
         "인외",
         "집착"
       ],
-      "interactionCount": 890805,
+      "interactionCount": 891800,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Hamsterhintern",
@@ -2105,7 +2131,7 @@
         "까칠",
         "츤데레"
       ],
-      "interactionCount": 1297042,
+      "interactionCount": 1297627,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Dodge_0",
@@ -2113,9 +2139,9 @@
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d09b8847-4ce2-4918-b315-dd5e74a99b4a/0a56b643-da8c-40c0-9c5f-268cf815cad6.png",
       "rank": 72,
       "interactionHistory": [
-        1280972,
         1282801,
         1283563,
+        1284575,
         1284575,
         1285990,
         1288082
@@ -2132,8 +2158,8 @@
         "도움",
         "패배"
       ],
-      "interactionCount": 382049,
-      "interactionDelta": 2063,
+      "interactionCount": 382937,
+      "interactionDelta": 2951,
       "rankChange": -35,
       "creatorHandle": "Mommi",
       "creatorNickname": "모미",
@@ -2151,8 +2177,8 @@
         "동거",
         "장기연애"
       ],
-      "interactionCount": 1079252,
-      "interactionDelta": 4970,
+      "interactionCount": 1079687,
+      "interactionDelta": 5405,
       "rankChange": -46,
       "creatorHandle": "Sundol887",
       "creatorNickname": "박박선돌",
@@ -2160,7 +2186,8 @@
       "rank": 74,
       "interactionHistory": [
         1068686,
-        1072138
+        1072138,
+        1074282
       ]
     },
     {
@@ -2174,7 +2201,7 @@
         "혐관",
         "이세계"
       ],
-      "interactionCount": 2607676,
+      "interactionCount": 2608599,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Ung_E",
@@ -2182,10 +2209,10 @@
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ebbea183-ccca-4411-9863-f8561c3758fc/816810d3-6b66-4b7c-bacc-34c261ed7c3d.png",
       "rank": 75,
       "interactionHistory": [
-        2586132,
+        2589966,
         2589966,
         2591030,
-        2591030,
+        2592779,
         2594199,
         2596665
       ]
@@ -2201,7 +2228,7 @@
         "커플무리",
         "연애"
       ],
-      "interactionCount": 874212,
+      "interactionCount": 874815,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "yunichoe147",
@@ -2220,7 +2247,7 @@
         "다공일수",
         "언리밋"
       ],
-      "interactionCount": 1673761,
+      "interactionCount": 1674742,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "xoiiou",
@@ -2228,11 +2255,11 @@
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/68fef95b-6088-4925-9903-e2a0362b7983/d6e0dd49-5025-45e0-a599-58475b0317e9.jpeg",
       "rank": 77,
       "interactionHistory": [
-        1632238,
         1638596,
         1640529,
         1643243,
-        1647517
+        1647517,
+        1653701
       ]
     },
     {
@@ -2244,8 +2271,8 @@
         "군인",
         "순애"
       ],
-      "interactionCount": 397427,
-      "interactionDelta": 2123,
+      "interactionCount": 397947,
+      "interactionDelta": 2643,
       "rankChange": -53,
       "creatorHandle": "nyahaa",
       "creatorNickname": "nyahaa",
@@ -2263,8 +2290,8 @@
         "찐따",
         "순애"
       ],
-      "interactionCount": 680706,
-      "interactionDelta": 4450,
+      "interactionCount": 681730,
+      "interactionDelta": 5474,
       "rankChange": 3,
       "creatorHandle": "Galabi",
       "creatorNickname": "가라비",
@@ -2288,7 +2315,7 @@
         "구원",
         "순애"
       ],
-      "interactionCount": 1084806,
+      "interactionCount": 1085474,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "Iux.e2_",
@@ -2296,7 +2323,6 @@
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d98ebd79-2c31-42d3-ba17-40b3aca17a3d/f71597e9-c845-44fe-b413-c4e12bf0721b.png",
       "rank": 80,
       "interactionHistory": [
-        1070816,
         1074321
       ]
     },
@@ -2311,13 +2337,16 @@
         "재회",
         "구원"
       ],
-      "interactionCount": 208934,
-      "interactionDelta": 1108,
+      "interactionCount": 209130,
+      "interactionDelta": 1304,
       "rankChange": 2,
       "creatorHandle": "GOMI99",
       "creatorNickname": "GOMI99",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/0c14f50b-93d6-443c-9f41-6ec776ff601e/77da5b10-d355-4872-bd2e-5d114160817e.jpeg",
-      "rank": 81
+      "rank": 81,
+      "interactionHistory": [
+        205203
+      ]
     },
     {
       "id": "1925b0a0-15d8-4141-a4fc-ad395c683695",
@@ -2330,13 +2359,16 @@
         "손녀",
         "할아버지"
       ],
-      "interactionCount": 158188,
-      "interactionDelta": 2844,
+      "interactionCount": 158760,
+      "interactionDelta": 3416,
       "rankChange": -68,
       "creatorHandle": "KellpI",
       "creatorNickname": "켈피",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d0d06840-c71d-4e37-b8eb-bd00041215bb/4fec5f0f-c469-41ee-ad16-3e7c1f0c4e7a.png",
-      "rank": 82
+      "rank": 82,
+      "interactionHistory": [
+        150735
+      ]
     },
     {
       "id": "90845874-4012-4a40-9055-30f27efc79e2",
@@ -2349,7 +2381,7 @@
         "순애",
         "무뚝뚝"
       ],
-      "interactionCount": 536393,
+      "interactionCount": 536962,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "VitalBean7095",
@@ -2368,18 +2400,18 @@
         "소꿉친구",
         "동거"
       ],
-      "interactionCount": 570833,
-      "interactionDelta": 3520,
+      "interactionCount": 571484,
+      "interactionDelta": 4171,
       "rankChange": -13,
       "creatorHandle": "2flaxx",
       "creatorNickname": "이림",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/8b6fb3cb-3346-4e41-953c-bd1c83cd8996/e55dd59b-c17e-47c4-b380-977971686a77.jpeg",
       "rank": 86,
       "interactionHistory": [
-        553388,
         555520,
         556471,
-        562734
+        562734,
+        565643
       ]
     },
     {
@@ -2393,7 +2425,7 @@
         "커플무리",
         "동거"
       ],
-      "interactionCount": 508103,
+      "interactionCount": 508393,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "SmallKnee9335",
@@ -2412,7 +2444,7 @@
         "여우",
         "연애"
       ],
-      "interactionCount": 399314,
+      "interactionCount": 400109,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "na_ong",
@@ -2420,12 +2452,12 @@
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/54469f1a-fd46-4e67-8eb2-d2e1d5decc4c/34a1a5f3-2d4a-4136-8765-8eb14186f68d.jpeg",
       "rank": 88,
       "interactionHistory": [
-        381942,
         384302,
         385781,
         386772,
         388839,
-        388839
+        390789,
+        393283
       ]
     },
     {
@@ -2439,15 +2471,16 @@
         "여우",
         "hlbl"
       ],
-      "interactionCount": 533762,
-      "interactionDelta": 4250,
+      "interactionCount": 534265,
+      "interactionDelta": 4753,
       "rankChange": -23,
       "creatorHandle": "Tetany",
       "creatorNickname": "테타니",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/657bdbcc-afa8-4660-8de2-975cfbcfabfc/97407e86-b6ed-4149-b3b8-21786cdcbc09.png",
       "rank": 89,
       "interactionHistory": [
-        519558
+        519558,
+        527452
       ]
     },
     {
@@ -2461,8 +2494,8 @@
         "먼치킨",
         "동료"
       ],
-      "interactionCount": 911364,
-      "interactionDelta": 2746,
+      "interactionCount": 912205,
+      "interactionDelta": 3587,
       "rankChange": -25,
       "creatorHandle": "Tetany",
       "creatorNickname": "테타니",
@@ -2470,7 +2503,8 @@
       "rank": 90,
       "interactionHistory": [
         897208,
-        898567
+        898567,
+        904653
       ]
     },
     {
@@ -2484,19 +2518,19 @@
         "까칠",
         "순애"
       ],
-      "interactionCount": 505700,
-      "interactionDelta": 1423,
+      "interactionCount": 506080,
+      "interactionDelta": 1803,
       "rankChange": -11,
       "creatorHandle": "to_boy",
       "creatorNickname": "투데이",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/8b4b0765-9c52-4fae-a7a5-845375ac00d2/00966c61-3ff9-4f24-9e95-3e423aac478a.png",
       "rank": 91,
       "interactionHistory": [
-        491477,
         493572,
         494246,
         495045,
-        496610
+        496610,
+        501356
       ]
     },
     {
@@ -2510,16 +2544,16 @@
         "마법",
         "언리밋"
       ],
-      "interactionCount": 1438354,
-      "interactionDelta": 13644,
-      "rankChange": -34,
+      "interactionCount": 1439143,
+      "interactionDelta": null,
+      "rankChange": null,
       "creatorHandle": "VitalCloud0345",
       "creatorNickname": "몽연(夢緣)",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/9113b8b9-566f-420d-95df-3bd136b4df05/f0b8b177-58b9-443a-97c2-526215402b56.webp",
       "rank": 92,
       "interactionHistory": [
-        1408669,
         1412724,
+        1415186,
         1415186,
         1418008,
         1421005,
@@ -2537,8 +2571,8 @@
         "무뚝뚝",
         "철벽"
       ],
-      "interactionCount": 985387,
-      "interactionDelta": 2941,
+      "interactionCount": 985937,
+      "interactionDelta": 3491,
       "rankChange": -15,
       "creatorHandle": "MatF",
       "creatorNickname": "맛프",
@@ -2546,7 +2580,8 @@
       "rank": 94,
       "interactionHistory": [
         970462,
-        970915
+        970915,
+        978905
       ]
     },
     {
@@ -2560,9 +2595,9 @@
         "대학생",
         "뺏기"
       ],
-      "interactionCount": 551640,
-      "interactionDelta": 5037,
-      "rankChange": -7,
+      "interactionCount": 552110,
+      "interactionDelta": null,
+      "rankChange": null,
       "creatorHandle": "liver_1892.",
       "creatorNickname": "liver",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/02499925-9508-4de7-8d66-e7904a318812/217b0083-fe66-4b06-9ded-f27f582544d5.png",
@@ -2586,15 +2621,16 @@
         "hl",
         "첫눈에반함"
       ],
-      "interactionCount": 391662,
-      "interactionDelta": 2382,
+      "interactionCount": 392250,
+      "interactionDelta": 2970,
       "rankChange": -53,
       "creatorHandle": "TamestChart7971",
       "creatorNickname": "TamestChart7971",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/c5dc4177-f9e7-4c0a-88d0-b6f212377d97/f68fd997-9645-4777-b6d6-d52f25a546ef.png",
       "rank": 97,
       "interactionHistory": [
-        380477
+        380477,
+        386258
       ]
     },
     {
@@ -2608,20 +2644,20 @@
         "순애",
         "남궁세가"
       ],
-      "interactionCount": 197669,
-      "interactionDelta": 1990,
+      "interactionCount": 198432,
+      "interactionDelta": 2753,
       "rankChange": -45,
       "creatorHandle": "Lilies_are_gods",
       "creatorNickname": "쪼아여쪼아여",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/e0763447-fd79-4ffd-b319-41ebd1cccc77/e0b592ea-6d5d-47ae-b4a7-dd8e9f858b5c.png",
       "rank": 99,
       "interactionHistory": [
-        179894,
         182021,
         182995,
         184364,
-        185948,
-        187811
+        184364,
+        187811,
+        191576
       ]
     },
     {
@@ -2635,16 +2671,13 @@
         "음담패설",
         "더티토크"
       ],
-      "interactionCount": 1994303,
+      "interactionCount": 1994938,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "zxceon",
       "creatorNickname": "백유원",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/0da26dd7-52e1-4f3c-8595-9cd959978074/7a44c1f6-dfd4-4cff-a397-f71da680670f.png",
-      "rank": 100,
-      "interactionHistory": [
-        1979611
-      ]
+      "rank": 100
     }
   ],
   "bestPlots": [
@@ -2659,19 +2692,19 @@
         "쓰레기",
         "차가움"
       ],
-      "interactionCount": 4472252,
-      "interactionDelta": 15812,
+      "interactionCount": 4476881,
+      "interactionDelta": 20441,
       "rankChange": 0,
       "creatorHandle": "RainyPaper9235",
       "creatorNickname": "우왓",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/54470669-39e5-4727-8b61-1d967066ad8e/d0d63a4f-aacb-409b-a41e-58cc352d0acf.jpeg",
       "rank": 1,
       "interactionHistory": [
-        4363051,
         4376126,
         4380985,
+        4380985,
         4389141,
-        4389141,
+        4398642,
         4414060
       ]
     },
@@ -2686,19 +2719,19 @@
         "무심",
         "무뚝뚝"
       ],
-      "interactionCount": 7833595,
-      "interactionDelta": 9331,
+      "interactionCount": 7835809,
+      "interactionDelta": 11545,
       "rankChange": 0,
       "creatorHandle": "RoFan",
       "creatorNickname": "로판특공대",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/5047bd6f-31e5-43e5-b0d5-aa8fd6c0eced/fff4ccea-5068-4abc-9c44-1bc89c9b3d3a.jpeg",
       "rank": 3,
       "interactionHistory": [
-        7779060,
         7785020,
         7787482,
         7790154,
-        7794152
+        7794152,
+        7801950
       ]
     },
     {
@@ -2712,20 +2745,20 @@
         "연애",
         "친구"
       ],
-      "interactionCount": 2743413,
-      "interactionDelta": 8152,
+      "interactionCount": 2745282,
+      "interactionDelta": 10021,
       "rankChange": 0,
       "creatorHandle": "Arch_2",
       "creatorNickname": "아치이",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/4434cdbd-0ad1-4487-a852-23a0bf1b650f/00c8d0bc-14c5-422b-b6e1-83beccd57dda.png",
       "rank": 4,
       "interactionHistory": [
-        2683627,
         2692156,
         2696669,
         2701351,
         2706936,
-        2706936
+        2706936,
+        2713498
       ]
     },
     {
@@ -2739,20 +2772,20 @@
         "판타지",
         "로맨스판타지"
       ],
-      "interactionCount": 5644977,
-      "interactionDelta": 7611,
+      "interactionCount": 5646689,
+      "interactionDelta": 9323,
       "rankChange": 0,
       "creatorHandle": "iroha_XI",
       "creatorNickname": "이로하",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ad50dca9-1b62-4804-898c-13d3aeedd526/0d54b1bf-2434-4ef0-8adc-5a7824cea992.jpeg",
       "rank": 5,
       "interactionHistory": [
-        5588543,
+        5596014,
         5596014,
         5599645,
-        5599645,
         5603758,
-        5608914
+        5608914,
+        5615409
       ]
     },
     {
@@ -2766,20 +2799,20 @@
         "능청",
         "사극"
       ],
-      "interactionCount": 3785105,
-      "interactionDelta": 4748,
+      "interactionCount": 3786259,
+      "interactionDelta": 5902,
       "rankChange": 0,
       "creatorHandle": "Seiyan",
       "creatorNickname": "Seiyan",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ab5d3bde-98a6-4c8b-b7c0-b230718cf1aa/e13d09d6-eb0d-455e-b9fc-d7cd097c92eb.jpeg",
       "rank": 7,
       "interactionHistory": [
-        3744175,
         3749145,
         3751460,
         3753724,
-        3753724,
-        3758211
+        3758211,
+        3763359,
+        3771770
       ]
     },
     {
@@ -2793,19 +2826,19 @@
         "언리밋",
         "꼬시기"
       ],
-      "interactionCount": 5435245,
-      "interactionDelta": 8344,
+      "interactionCount": 5437623,
+      "interactionDelta": 10722,
       "rankChange": 0,
       "creatorHandle": "ekgmlWkdS2",
       "creatorNickname": "히히",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/481cc07a-8bee-4543-a4b7-7d67516bf4bb/4cdb8992-a9bc-42fa-bcb7-6133bfcc5817.png",
       "rank": 9,
       "interactionHistory": [
-        5373140,
         5380113,
         5384141,
         5388562,
-        5394593
+        5394593,
+        5403026
       ]
     },
     {
@@ -2819,15 +2852,14 @@
         "집착",
         "소꿉친구"
       ],
-      "interactionCount": 7906410,
-      "interactionDelta": 6480,
+      "interactionCount": 7908458,
+      "interactionDelta": 8528,
       "rankChange": 0,
       "creatorHandle": "Rang--",
       "creatorNickname": "Rang--",
       "creatorImageUrl": null,
       "rank": 11,
       "interactionHistory": [
-        7847396,
         7854924,
         7858174,
         7862530,
@@ -2846,19 +2878,19 @@
         "무뚝뚝",
         "다정"
       ],
-      "interactionCount": 6533926,
-      "interactionDelta": 3805,
+      "interactionCount": 6534852,
+      "interactionDelta": 4731,
       "rankChange": 0,
       "creatorHandle": "ham_cheese",
       "creatorNickname": "햄치즈",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f3100a2e-3d9e-4115-97f6-d221b2ff3c51/7cd0944b-a53f-4db0-9a22-545e945750ee.jpeg",
       "rank": 13,
       "interactionHistory": [
-        6498216,
         6502796,
         6504967,
         6507351,
-        6510768
+        6510768,
+        6515931
       ]
     },
     {
@@ -2872,20 +2904,20 @@
         "다정",
         "남사친"
       ],
-      "interactionCount": 1793644,
-      "interactionDelta": 4010,
+      "interactionCount": 1795209,
+      "interactionDelta": 5575,
       "rankChange": 0,
       "creatorHandle": "RainyPaper9235",
       "creatorNickname": "우왓",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/54470669-39e5-4727-8b61-1d967066ad8e/d0d63a4f-aacb-409b-a41e-58cc352d0acf.jpeg",
       "rank": 15,
       "interactionHistory": [
-        1753485,
         1759101,
         1761723,
         1761723,
         1764878,
-        1769262
+        1769262,
+        1782187
       ]
     },
     {
@@ -2899,19 +2931,19 @@
         "조직",
         "조직보스"
       ],
-      "interactionCount": 5649545,
-      "interactionDelta": 7557,
+      "interactionCount": 5651814,
+      "interactionDelta": 9826,
       "rankChange": 0,
       "creatorHandle": "NumbGolf2363",
       "creatorNickname": "NumbGolf2363",
       "creatorImageUrl": null,
       "rank": 17,
       "interactionHistory": [
-        5586578,
         5593079,
         5597231,
         5602429,
-        5609607
+        5609607,
+        5618612
       ]
     },
     {
@@ -2925,19 +2957,19 @@
         "느와르",
         "남편"
       ],
-      "interactionCount": 5003179,
-      "interactionDelta": 7577,
+      "interactionCount": 5004710,
+      "interactionDelta": 9108,
       "rankChange": 0,
       "creatorHandle": "_rose_0411",
       "creatorNickname": "별루미콩",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/8aae6a5c-4df6-4f8b-9b72-293861d4515c/c0e5ee68-93f0-4e98-ba33-a268f5188d77.jpeg",
       "rank": 18,
       "interactionHistory": [
-        4946944,
         4954488,
         4957654,
         4960553,
-        4965988
+        4965988,
+        4973127
       ]
     },
     {
@@ -2951,19 +2983,20 @@
         "동갑",
         "이별"
       ],
-      "interactionCount": 1490589,
-      "interactionDelta": 7948,
+      "interactionCount": 1492050,
+      "interactionDelta": 9409,
       "rankChange": 0,
       "creatorHandle": "dXooXb",
       "creatorNickname": "당도",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/38101caf-8341-459b-bc9f-3a4a60e1f0d7/bee7e0c3-1653-4ae6-813e-2fcaa68a2c61.png",
       "rank": 20,
       "interactionHistory": [
-        1439021,
         1444945,
         1447615,
         1450498,
-        1455935
+        1455935,
+        1463839,
+        1472255
       ]
     },
     {
@@ -2977,19 +3010,19 @@
         "소꿉친구들",
         "재벌"
       ],
-      "interactionCount": 3975214,
-      "interactionDelta": 7023,
+      "interactionCount": 3977026,
+      "interactionDelta": 8835,
       "rankChange": 0,
       "creatorHandle": "2._Zure",
       "creatorNickname": "아이름",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f776bb07-f673-4c38-995f-fe7fcdde42c9/c9a7f172-b0b2-4d39-8a82-5ade239b5bb9.jpeg",
       "rank": 21,
       "interactionHistory": [
-        3915340,
         3923764,
         3929100,
         3933071,
-        3939498
+        3939498,
+        3948028
       ]
     },
     {
@@ -3003,19 +3036,19 @@
         "남혐",
         "로맨스"
       ],
-      "interactionCount": 1339875,
-      "interactionDelta": 3143,
+      "interactionCount": 1340714,
+      "interactionDelta": 3982,
       "rankChange": 0,
       "creatorHandle": "Bumbu_00",
       "creatorNickname": "버므부",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/54a31428-7507-4d05-a82b-ec5f43d5b5a6/e22eb0b1-c901-4e49-bbe6-3b5eede0ceb0.png",
       "rank": 22,
       "interactionHistory": [
-        1317860,
+        1320742,
         1320742,
         1321971,
         1323964,
-        1326082,
+        1329120,
         1329120
       ]
     },
@@ -3030,19 +3063,19 @@
         "로맨스",
         "짝사랑"
       ],
-      "interactionCount": 6421631,
-      "interactionDelta": 4488,
+      "interactionCount": 6422545,
+      "interactionDelta": 5402,
       "rankChange": 0,
       "creatorHandle": "MonCookie_0V0",
       "creatorNickname": "몬스터쿠키",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/c204b659-3157-497b-b71c-119bdc3e0480/b3671fed-4a88-4c5c-b189-d27fa9585141.png",
       "rank": 23,
       "interactionHistory": [
-        6376486,
         6382928,
         6385522,
         6388450,
-        6394055
+        6394055,
+        6400449
       ]
     },
     {
@@ -3056,15 +3089,14 @@
         "다정",
         "수인"
       ],
-      "interactionCount": 9618564,
-      "interactionDelta": 4417,
+      "interactionCount": 9620021,
+      "interactionDelta": 5874,
       "rankChange": 0,
       "creatorHandle": "MiNiNiMi",
       "creatorNickname": "입체파",
       "creatorImageUrl": null,
       "rank": 24,
       "interactionHistory": [
-        9584152,
         9588318,
         9589724,
         9592145,
@@ -3083,19 +3115,19 @@
         "길드",
         "판타지"
       ],
-      "interactionCount": 6925771,
-      "interactionDelta": 9200,
+      "interactionCount": 6927803,
+      "interactionDelta": 11232,
       "rankChange": 0,
       "creatorHandle": "RbRbRiRi4534",
       "creatorNickname": "뀨뀨꺄꺄",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f57f5c11-9877-44f1-8d1b-10a4610ae29d/2812560a-3dcc-4f56-8128-4fc5a9e9e332.jpeg",
       "rank": 25,
       "interactionHistory": [
-        6864965,
         6872926,
         6876258,
         6881645,
-        6886670
+        6886670,
+        6894453
       ]
     },
     {
@@ -3109,19 +3141,19 @@
         "오해",
         "부부"
       ],
-      "interactionCount": 1433150,
-      "interactionDelta": 4607,
+      "interactionCount": 1434381,
+      "interactionDelta": 5838,
       "rankChange": 0,
       "creatorHandle": "Chchchch8",
       "creatorNickname": "삐뽀",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/c4ee6b89-4363-47e7-b720-fa0b5a3516fe/227e8dba-7dc7-4b77-843e-644598525808.png",
       "rank": 26,
       "interactionHistory": [
-        1402733,
         1405958,
         1407508,
         1408838,
-        1411192
+        1411192,
+        1415654
       ]
     },
     {
@@ -3135,20 +3167,20 @@
         "조직보스",
         "갑을관계"
       ],
-      "interactionCount": 3418913,
-      "interactionDelta": 4815,
+      "interactionCount": 3420086,
+      "interactionDelta": 5988,
       "rankChange": -1,
       "creatorHandle": "zeta_bang",
       "creatorNickname": "젵뺑이친다",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d8d94ceb-f33d-43f4-b88e-13f6f6550727/8ef3541a-e350-4945-b7d1-16e2f735f606.jpeg",
       "rank": 28,
       "interactionHistory": [
-        3381496,
         3386123,
         3386123,
         3388336,
         3390432,
-        3394351
+        3394351,
+        3399461
       ]
     },
     {
@@ -3162,19 +3194,19 @@
         "다공일수",
         "언리밋"
       ],
-      "interactionCount": 1673761,
-      "interactionDelta": 5151,
+      "interactionCount": 1674742,
+      "interactionDelta": 6132,
       "rankChange": 0,
       "creatorHandle": "xoiiou",
       "creatorNickname": "소요",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/68fef95b-6088-4925-9903-e2a0362b7983/d6e0dd49-5025-45e0-a599-58475b0317e9.jpeg",
       "rank": 29,
       "interactionHistory": [
-        1632238,
         1638596,
         1640529,
         1643243,
-        1647517
+        1647517,
+        1653701
       ]
     },
     {
@@ -3188,19 +3220,19 @@
         "쓰레기",
         "소유욕"
       ],
-      "interactionCount": 12403625,
-      "interactionDelta": 5363,
+      "interactionCount": 12405159,
+      "interactionDelta": 6897,
       "rankChange": 0,
       "creatorHandle": "MiNiNiMi",
       "creatorNickname": "입체파",
       "creatorImageUrl": null,
       "rank": 31,
       "interactionHistory": [
-        12355918,
         12362162,
         12365411,
         12368746,
-        12373347
+        12373347,
+        12379618
       ]
     },
     {
@@ -3214,19 +3246,20 @@
         "육아",
         "무뚝뚝"
       ],
-      "interactionCount": 3106301,
-      "interactionDelta": 3975,
+      "interactionCount": 3107439,
+      "interactionDelta": 5113,
       "rankChange": 0,
       "creatorHandle": "Skiu",
       "creatorNickname": "영슼",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/013e1a6e-2ed2-4847-9861-36627ab31ff9/0527f495-47cf-4f0c-9fdc-f2d017caa9f3.jpeg",
       "rank": 32,
       "interactionHistory": [
-        3083712,
         3086051,
         3087470,
         3088745,
-        3090557
+        3090557,
+        3093667,
+        3097630
       ]
     },
     {
@@ -3240,19 +3273,19 @@
         "집착",
         "재벌"
       ],
-      "interactionCount": 2399712,
-      "interactionDelta": 8293,
+      "interactionCount": 2401571,
+      "interactionDelta": 10152,
       "rankChange": 0,
       "creatorHandle": "letsgoooooo",
       "creatorNickname": "마이멜로디",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ce376f5b-d621-4d27-aea3-98f31ef75450/21fec5ec-eee6-42cc-904a-339669921b9c.jpeg",
       "rank": 33,
       "interactionHistory": [
-        2336351,
         2344895,
         2348427,
         2352499,
-        2358475
+        2358475,
+        2366684
       ]
     },
     {
@@ -3266,20 +3299,20 @@
         "혐관",
         "갱생"
       ],
-      "interactionCount": 1414124,
-      "interactionDelta": 3295,
+      "interactionCount": 1415235,
+      "interactionDelta": 4406,
       "rankChange": 0,
       "creatorHandle": "FastBump9775",
       "creatorNickname": "FastBump9775",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ecb71b0f-1513-4074-aae7-a39c4aee1594/67553285-cbe4-48c0-8742-e2057027249d.png",
       "rank": 36,
       "interactionHistory": [
-        1393658,
         1397261,
         1397261,
         1398360,
         1399606,
-        1401512
+        1401512,
+        1403992
       ]
     },
     {
@@ -3293,20 +3326,20 @@
         "사디스트",
         "오피스로맨스"
       ],
-      "interactionCount": 1607945,
-      "interactionDelta": 3279,
+      "interactionCount": 1608537,
+      "interactionDelta": 3871,
       "rankChange": 0,
       "creatorHandle": "Tetany",
       "creatorNickname": "테타니",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/657bdbcc-afa8-4660-8de2-975cfbcfabfc/97407e86-b6ed-4149-b3b8-21786cdcbc09.png",
       "rank": 37,
       "interactionHistory": [
-        1584844,
         1587869,
         1589452,
         1593045,
         1593045,
-        1597207
+        1597207,
+        1600718
       ]
     },
     {
@@ -3320,16 +3353,16 @@
         "츤데레",
         "연애"
       ],
-      "interactionCount": 1143354,
-      "interactionDelta": 2173,
+      "interactionCount": 1143655,
+      "interactionDelta": 2474,
       "rankChange": 2,
       "creatorHandle": "pure_luv",
       "creatorNickname": "순애최고",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/0372d2ad-603d-4328-9c99-015855b22589/b9e042a5-91b8-4428-9228-1a3a9da87c7b.png",
       "rank": 39,
       "interactionHistory": [
-        1126463,
         1128488,
+        1129307,
         1130598,
         1132011,
         1134166,
@@ -3347,20 +3380,20 @@
         "순애",
         "로맨스"
       ],
-      "interactionCount": 1170487,
-      "interactionDelta": 4357,
+      "interactionCount": 1171833,
+      "interactionDelta": 5703,
       "rankChange": 3,
       "creatorHandle": "jobdori__",
       "creatorNickname": "𓌉𓇋⋆｡˚🍜잡도리탕 요리사🍜˚｡⋆𓌉𓇋",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/4cd69b9c-6490-4040-bff3-86f2cd88f4e8/fac061dc-a677-4bdf-ad33-02e7772e853d.png",
       "rank": 40,
       "interactionHistory": [
-        1124874,
         1131650,
         1134850,
         1138181,
         1143942,
-        1149985
+        1149985,
+        1157634
       ]
     },
     {
@@ -3374,19 +3407,19 @@
         "제국",
         "로맨스판타지"
       ],
-      "interactionCount": 6634689,
-      "interactionDelta": 4513,
+      "interactionCount": 6635999,
+      "interactionDelta": 5823,
       "rankChange": -3,
       "creatorHandle": "RbRbRiRi4534",
       "creatorNickname": "뀨뀨꺄꺄",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f57f5c11-9877-44f1-8d1b-10a4610ae29d/2812560a-3dcc-4f56-8128-4fc5a9e9e332.jpeg",
       "rank": 42,
       "interactionHistory": [
-        6596705,
         6602012,
         6604208,
         6607050,
-        6610549
+        6610549,
+        6615153
       ]
     },
     {
@@ -3400,15 +3433,14 @@
         "로맨스",
         "순애"
       ],
-      "interactionCount": 3921228,
-      "interactionDelta": 4906,
+      "interactionCount": 3922001,
+      "interactionDelta": 5679,
       "rankChange": -1,
       "creatorHandle": "Hinster2580",
       "creatorNickname": "힌스터 | 노제에 피 말린다...",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/fa57f54e-33fb-4234-81e9-ecb36b1f8fd4/e5b063cc-cd35-48da-927e-55e465d52925.png",
       "rank": 43,
       "interactionHistory": [
-        3881068,
         3885716,
         3887896,
         3891365,
@@ -3427,19 +3459,19 @@
         "계략",
         "대형견"
       ],
-      "interactionCount": 5578066,
-      "interactionDelta": 4725,
+      "interactionCount": 5579447,
+      "interactionDelta": 6106,
       "rankChange": 1,
       "creatorHandle": "ekqwkd",
       "creatorNickname": "익명",
       "creatorImageUrl": null,
       "rank": 45,
       "interactionHistory": [
-        5535909,
         5541361,
         5543102,
         5545961,
-        5550117
+        5550117,
+        5555499
       ]
     },
     {
@@ -3453,20 +3485,20 @@
         "일공다수",
         "언리밋"
       ],
-      "interactionCount": 1635166,
-      "interactionDelta": 1517,
+      "interactionCount": 1636300,
+      "interactionDelta": 2651,
       "rankChange": -1,
       "creatorHandle": "xoiiou",
       "creatorNickname": "소요",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/68fef95b-6088-4925-9903-e2a0362b7983/d6e0dd49-5025-45e0-a599-58475b0317e9.jpeg",
       "rank": 46,
       "interactionHistory": [
-        1622109,
         1624327,
         1625000,
+        1625606,
         1627078,
-        1627078,
-        1628732
+        1628732,
+        1630995
       ]
     },
     {
@@ -3480,18 +3512,18 @@
         "로맨스",
         "억지웃음"
       ],
-      "interactionCount": 1788561,
-      "interactionDelta": 10839,
+      "interactionCount": 1792747,
+      "interactionDelta": 15025,
       "rankChange": 0,
       "creatorHandle": "ORORIH_O",
       "creatorNickname": "(๑¯∇¯๑)",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/0d3babd0-168c-4038-a96c-ec3ad2640da0/7f6c2468-93e4-41a0-9d43-45e0465fe69d.png",
       "rank": 47,
       "interactionHistory": [
-        1726313,
+        1734257,
         1734257,
         1738108,
-        1738108,
+        1741692,
         1746858,
         1753715
       ]
@@ -3507,18 +3539,18 @@
         "로맨스",
         "사랑"
       ],
-      "interactionCount": 1582513,
-      "interactionDelta": 2811,
+      "interactionCount": 1583420,
+      "interactionDelta": 3718,
       "rankChange": 1,
       "creatorHandle": "Jotttt",
       "creatorNickname": "14일 출소 호잇",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/6e67b6a8-a3d2-4fea-b95e-ba7493885ff9/f179514d-b4cd-4196-8c94-d18ab5d8db46.png",
       "rank": 48,
       "interactionHistory": [
-        1554453,
         1558011,
         1559839,
         1559839,
+        1564842,
         1564842,
         1568611
       ]
@@ -3534,19 +3566,19 @@
         "로맨스판타지",
         "소유욕"
       ],
-      "interactionCount": 2885459,
-      "interactionDelta": 3102,
+      "interactionCount": 2886204,
+      "interactionDelta": 3847,
       "rankChange": -1,
       "creatorHandle": "seoie",
       "creatorNickname": "서이",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/335adfbe-df47-4906-8532-7d00afeabc9c/1f015b5a-7b39-48cf-a042-e598c8c9e687.jpeg",
       "rank": 49,
       "interactionHistory": [
-        2862713,
         2866280,
         2867868,
         2869681,
-        2871547
+        2871547,
+        2874506
       ]
     },
     {
@@ -3560,20 +3592,20 @@
         "섹시",
         "짝사랑"
       ],
-      "interactionCount": 1099728,
-      "interactionDelta": 3877,
+      "interactionCount": 1100822,
+      "interactionDelta": 4971,
       "rankChange": 0,
       "creatorHandle": "FastBump9775",
       "creatorNickname": "FastBump9775",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ecb71b0f-1513-4074-aae7-a39c4aee1594/67553285-cbe4-48c0-8742-e2057027249d.png",
       "rank": 50,
       "interactionHistory": [
-        1073769,
-        1073769,
+        1076526,
         1078059,
         1080233,
         1082162,
-        1086215
+        1086215,
+        1090185
       ]
     },
     {
@@ -3587,19 +3619,19 @@
         "히빌물",
         "설득"
       ],
-      "interactionCount": 7592132,
-      "interactionDelta": 6624,
+      "interactionCount": 7593103,
+      "interactionDelta": 7595,
       "rankChange": 0,
       "creatorHandle": "Fire_Duck",
       "creatorNickname": "불타는오리",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/669fd2f5-008e-41c3-96dc-13571628eeba/722f0c1d-84c0-436f-908f-bb05e9eae5e9.png",
       "rank": 51,
       "interactionHistory": [
-        7539869,
         7546408,
         7550223,
         7554918,
-        7560009
+        7560009,
+        7567483
       ]
     },
     {
@@ -3613,19 +3645,19 @@
         "hl",
         "첫사랑"
       ],
-      "interactionCount": 1365076,
-      "interactionDelta": 2029,
+      "interactionCount": 1365429,
+      "interactionDelta": 2382,
       "rankChange": 0,
       "creatorHandle": "yune1023ne",
       "creatorNickname": "윤윤",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/5dd61fa7-21db-4858-9f92-5352089cf18e/9da04ec3-ae0a-4a2b-b1cb-d3eec4630e80.jpeg",
       "rank": 52,
       "interactionHistory": [
-        1350377,
         1352158,
         1353329,
+        1354356,
         1355905,
-        1355905,
+        1357301,
         1357301
       ]
     },
@@ -3640,19 +3672,19 @@
         "로맨스",
         "판타지"
       ],
-      "interactionCount": 9570127,
-      "interactionDelta": 6505,
+      "interactionCount": 9572173,
+      "interactionDelta": 8551,
       "rankChange": 0,
       "creatorHandle": "Petit_Lily",
       "creatorNickname": "小百合",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/3b621866-23ad-45e1-9d98-89854aa9534b/f3e236e0-c710-4f5d-922e-95dc7392b1a0.jpeg",
       "rank": 53,
       "interactionHistory": [
-        9515525,
         9522816,
         9526447,
         9531377,
-        9537486
+        9537486,
+        9544969
       ]
     },
     {
@@ -3666,19 +3698,19 @@
         "음담패설",
         "친구"
       ],
-      "interactionCount": 5090971,
-      "interactionDelta": 4690,
+      "interactionCount": 5092082,
+      "interactionDelta": 5801,
       "rankChange": 0,
       "creatorHandle": "DarkSlur4865",
       "creatorNickname": "DarkSlur4865",
       "creatorImageUrl": null,
       "rank": 54,
       "interactionHistory": [
-        5060540,
         5063930,
         5065642,
         5067150,
-        5070244
+        5070244,
+        5073604
       ]
     },
     {
@@ -3692,19 +3724,19 @@
         "빌런",
         "설득"
       ],
-      "interactionCount": 7449472,
-      "interactionDelta": 4675,
+      "interactionCount": 7451135,
+      "interactionDelta": 6338,
       "rankChange": 0,
       "creatorHandle": "Fire_Duck",
       "creatorNickname": "불타는오리",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/669fd2f5-008e-41c3-96dc-13571628eeba/722f0c1d-84c0-436f-908f-bb05e9eae5e9.png",
       "rank": 55,
       "interactionHistory": [
-        7412592,
         7417147,
         7419227,
         7422693,
-        7426543
+        7426543,
+        7431507
       ]
     },
     {
@@ -3718,15 +3750,14 @@
         "집착",
         "피폐"
       ],
-      "interactionCount": 9425992,
-      "interactionDelta": 4902,
+      "interactionCount": 9427288,
+      "interactionDelta": 6198,
       "rankChange": 0,
       "creatorHandle": "qordmsgh_",
       "creatorNickname": "백야",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/cf5a19ad-75fd-4584-b4b0-f120aef3edb0/271ae181-9f94-439d-9125-1ae460fe7056.jpeg",
       "rank": 56,
       "interactionHistory": [
-        9378228,
         9385623,
         9389008,
         9392689,
@@ -3745,20 +3776,20 @@
         "아내바라기",
         "순애"
       ],
-      "interactionCount": 1604554,
-      "interactionDelta": 6123,
+      "interactionCount": 1605700,
+      "interactionDelta": 7269,
       "rankChange": 0,
       "creatorHandle": "CyanBog7925",
       "creatorNickname": "윰댕",
       "creatorImageUrl": null,
       "rank": 57,
       "interactionHistory": [
-        1562140,
         1567047,
         1568902,
         1571271,
         1574914,
-        1581235
+        1581235,
+        1589046
       ]
     },
     {
@@ -3772,17 +3803,16 @@
         "연하",
         "짝사랑"
       ],
-      "interactionCount": 1284672,
-      "interactionDelta": 3481,
+      "interactionCount": 1285943,
+      "interactionDelta": 4752,
       "rankChange": 0,
       "creatorHandle": "Dodge_0",
       "creatorNickname": "닷지전문가",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d09b8847-4ce2-4918-b315-dd5e74a99b4a/0a56b643-da8c-40c0-9c5f-268cf815cad6.png",
       "rank": 58,
       "interactionHistory": [
-        1255093,
-        1255093,
         1259605,
+        1260939,
         1263113,
         1266319,
         1269902
@@ -3799,15 +3829,14 @@
         "일진",
         "양아치"
       ],
-      "interactionCount": 15321941,
-      "interactionDelta": 6732,
+      "interactionCount": 15323699,
+      "interactionDelta": 8490,
       "rankChange": 2,
       "creatorHandle": "NZzWw",
       "creatorNickname": "누워서만드는캐릭터",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/fa12acea-55ca-43e9-89a7-1ee438721e2d/373127a1-2d89-4b7f-b07c-c2941dae2822.jpeg",
       "rank": 59,
       "interactionHistory": [
-        15255474,
         15264201,
         15268627,
         15273041,
@@ -3826,15 +3855,14 @@
         "사내연애",
         "여우"
       ],
-      "interactionCount": 3821886,
-      "interactionDelta": 3689,
+      "interactionCount": 3823124,
+      "interactionDelta": 4927,
       "rankChange": -1,
       "creatorHandle": "na_ong",
       "creatorNickname": "나옹🐱",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/54469f1a-fd46-4e67-8eb2-d2e1d5decc4c/34a1a5f3-2d4a-4136-8765-8eb14186f68d.jpeg",
       "rank": 60,
       "interactionHistory": [
-        3790950,
         3793659,
         3795827,
         3798318,
@@ -3853,20 +3881,20 @@
         "질투",
         "보스"
       ],
-      "interactionCount": 1265664,
-      "interactionDelta": 3840,
+      "interactionCount": 1266996,
+      "interactionDelta": 5172,
       "rankChange": -1,
       "creatorHandle": "SUBEPOTETO",
       "creatorNickname": "poteto",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/44e53f55-6a31-45ea-9a8e-b241a586d213/50244241-1a84-4be4-a9fe-c611181263a2.png",
       "rank": 61,
       "interactionHistory": [
-        1244668,
         1247099,
         1248205,
         1251528,
         1251528,
-        1254073
+        1254073,
+        1257307
       ]
     },
     {
@@ -3880,18 +3908,18 @@
         "복수",
         "재회"
       ],
-      "interactionCount": 1871454,
-      "interactionDelta": 2938,
+      "interactionCount": 1872264,
+      "interactionDelta": 3748,
       "rankChange": 0,
       "creatorHandle": "Lilies_are_gods",
       "creatorNickname": "쪼아여쪼아여",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/e0763447-fd79-4ffd-b319-41ebd1cccc77/e0b592ea-6d5d-47ae-b4a7-dd8e9f858b5c.png",
       "rank": 62,
       "interactionHistory": [
-        1850938,
         1853612,
+        1854824,
         1856444,
-        1856444,
+        1858170,
         1858170,
         1860778
       ]
@@ -3907,15 +3935,14 @@
         "츤데레",
         "동갑"
       ],
-      "interactionCount": 2864538,
-      "interactionDelta": 6869,
+      "interactionCount": 2866017,
+      "interactionDelta": 8348,
       "rankChange": 0,
       "creatorHandle": "cyozn",
       "creatorNickname": "cyozn",
       "creatorImageUrl": null,
       "rank": 63,
       "interactionHistory": [
-        2819538,
         2823848,
         2825993,
         2828230,
@@ -3934,18 +3961,18 @@
         "빌런",
         "다인캐"
       ],
-      "interactionCount": 2392808,
-      "interactionDelta": 3872,
+      "interactionCount": 2393681,
+      "interactionDelta": 4745,
       "rankChange": 0,
       "creatorHandle": "Fire_Duck",
       "creatorNickname": "불타는오리",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/669fd2f5-008e-41c3-96dc-13571628eeba/722f0c1d-84c0-436f-908f-bb05e9eae5e9.png",
       "rank": 65,
       "interactionHistory": [
-        2361408,
-        2361408,
+        2365819,
         2368442,
         2370462,
+        2373414,
         2373414,
         2376944
       ]
@@ -3961,17 +3988,17 @@
         "까칠",
         "츤데레"
       ],
-      "interactionCount": 1297042,
-      "interactionDelta": 2712,
+      "interactionCount": 1297627,
+      "interactionDelta": 3297,
       "rankChange": 0,
       "creatorHandle": "Dodge_0",
       "creatorNickname": "닷지전문가",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d09b8847-4ce2-4918-b315-dd5e74a99b4a/0a56b643-da8c-40c0-9c5f-268cf815cad6.png",
       "rank": 66,
       "interactionHistory": [
-        1280972,
         1282801,
         1283563,
+        1284575,
         1284575,
         1285990,
         1288082
@@ -3988,15 +4015,14 @@
         "남자친구",
         "연애"
       ],
-      "interactionCount": 4797513,
-      "interactionDelta": 3654,
+      "interactionCount": 4798159,
+      "interactionDelta": 4300,
       "rankChange": 0,
       "creatorHandle": "K_uma",
       "creatorNickname": "쿠마 𝕂𝕌𝕄𝔸",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/93172d46-0077-47ca-8380-863462aba1e1/aec997fa-0376-4ff1-8a18-bd0176ee2b34.png",
       "rank": 67,
       "interactionHistory": [
-        4764340,
         4768207,
         4770435,
         4773104,
@@ -4015,17 +4041,17 @@
         "로맨스",
         "소유욕"
       ],
-      "interactionCount": 1345314,
-      "interactionDelta": 2452,
+      "interactionCount": 1345680,
+      "interactionDelta": 2818,
       "rankChange": 0,
       "creatorHandle": "SUBEPOTETO",
       "creatorNickname": "poteto",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/44e53f55-6a31-45ea-9a8e-b241a586d213/50244241-1a84-4be4-a9fe-c611181263a2.png",
       "rank": 68,
       "interactionHistory": [
-        1326240,
         1329101,
         1330252,
+        1331663,
         1331663,
         1334039,
         1336533
@@ -4042,15 +4068,14 @@
         "미련",
         "슬픔"
       ],
-      "interactionCount": 4649119,
-      "interactionDelta": 4138,
+      "interactionCount": 4649784,
+      "interactionDelta": 4803,
       "rankChange": 0,
       "creatorHandle": "zi____ii",
       "creatorNickname": "지원",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/b406b928-0692-4598-a828-9aea2051ec73/391e172f-28b5-43e8-96b3-6afe3c273272.png",
       "rank": 69,
       "interactionHistory": [
-        4624292,
         4626749,
         4628234,
         4629688,
@@ -4069,20 +4094,20 @@
         "갑을관계",
         "존예"
       ],
-      "interactionCount": 1026103,
-      "interactionDelta": 1349,
+      "interactionCount": 1026631,
+      "interactionDelta": 1877,
       "rankChange": 0,
       "creatorHandle": "FoodY",
       "creatorNickname": "푸디",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/29efe888-b256-4c5c-8b74-1b880739e368/ef755d42-eed6-4912-97b8-98d21b81174b.png",
       "rank": 70,
       "interactionHistory": [
-        1013675,
-        1016626,
+        1015615,
+        1017543,
         1017543,
         1019221,
-        1019221,
-        1020780
+        1020780,
+        1022605
       ]
     },
     {
@@ -4096,15 +4121,14 @@
         "강압적",
         "소유욕"
       ],
-      "interactionCount": 24935223,
-      "interactionDelta": 4115,
+      "interactionCount": 24936478,
+      "interactionDelta": 5370,
       "rankChange": 0,
       "creatorHandle": "BBangbbangei",
       "creatorNickname": "pikminnnnn",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d5feec71-20ab-41ec-84e6-d54b999a277d/2a0efdb2-32ee-4669-b568-09460c87fb29.jpeg",
       "rank": 71,
       "interactionHistory": [
-        24900716,
         24905522,
         24907808,
         24909970,
@@ -4123,20 +4147,20 @@
         "교생",
         "선생님"
       ],
-      "interactionCount": 1329885,
-      "interactionDelta": 3892,
+      "interactionCount": 1330961,
+      "interactionDelta": 4968,
       "rankChange": 0,
       "creatorHandle": "chueicui",
       "creatorNickname": "cui",
       "creatorImageUrl": null,
       "rank": 74,
       "interactionHistory": [
-        1305284,
-        1305284,
+        1307661,
         1308653,
         1310654,
         1315726,
-        1315726
+        1315726,
+        1320572
       ]
     },
     {
@@ -4150,15 +4174,14 @@
         "학교",
         "여자"
       ],
-      "interactionCount": 8392965,
-      "interactionDelta": 3706,
+      "interactionCount": 8393654,
+      "interactionDelta": 4395,
       "rankChange": 0,
       "creatorHandle": "Smoke.sy.",
       "creatorNickname": "자객",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/5fedc122-726f-4583-b5f0-483087cf1c83/815fc18b-8b85-4808-bc7b-3e5736ca4100.png",
       "rank": 75,
       "interactionHistory": [
-        8349737,
         8356247,
         8358842,
         8361704,
@@ -4177,18 +4200,18 @@
         "혐관",
         "이세계"
       ],
-      "interactionCount": 2607676,
-      "interactionDelta": 3357,
+      "interactionCount": 2608599,
+      "interactionDelta": 4280,
       "rankChange": 0,
       "creatorHandle": "Ung_E",
       "creatorNickname": "웅이",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ebbea183-ccca-4411-9863-f8561c3758fc/816810d3-6b66-4b7c-bacc-34c261ed7c3d.png",
       "rank": 76,
       "interactionHistory": [
-        2586132,
+        2589966,
         2589966,
         2591030,
-        2591030,
+        2592779,
         2594199,
         2596665
       ]
@@ -4204,18 +4227,18 @@
         "연애",
         "츤데레"
       ],
-      "interactionCount": 1597948,
-      "interactionDelta": 2811,
+      "interactionCount": 1598911,
+      "interactionDelta": 3774,
       "rankChange": 0,
       "creatorHandle": "FirEEgg_",
       "creatorNickname": "재미뎌요",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/b5be2b1c-7135-49d4-8158-795fbe383648/0de4ca49-876e-4026-ad16-4c80bb59e034.jpeg",
       "rank": 77,
       "interactionHistory": [
-        1573895,
+        1577147,
         1577147,
         1578892,
-        1578892,
+        1580441,
         1582563,
         1586202
       ]
@@ -4231,20 +4254,20 @@
         "로코",
         "rpg"
       ],
-      "interactionCount": 1060007,
-      "interactionDelta": 4078,
+      "interactionCount": 1060687,
+      "interactionDelta": 4758,
       "rankChange": 0,
       "creatorHandle": "Seiyan",
       "creatorNickname": "Seiyan",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ab5d3bde-98a6-4c8b-b7c0-b230718cf1aa/e13d09d6-eb0d-455e-b9fc-d7cd097c92eb.jpeg",
       "rank": 78,
       "interactionHistory": [
-        1030476,
         1034325,
         1036588,
         1038355,
         1041253,
-        1045293
+        1045293,
+        1050809
       ]
     },
     {
@@ -4258,15 +4281,14 @@
         "동생",
         "가족"
       ],
-      "interactionCount": 2519948,
-      "interactionDelta": 4995,
+      "interactionCount": 2521365,
+      "interactionDelta": 6412,
       "rankChange": 0,
       "creatorHandle": "gogume",
       "creatorNickname": "고구미",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/6960d81a-1817-42f7-bf4d-d93eeca6d9f6/567acd4e-c541-477e-bf1e-0cfdba34c8de.png",
       "rank": 79,
       "interactionHistory": [
-        2482865,
         2488220,
         2490367,
         2492872,
@@ -4285,15 +4307,14 @@
         "장난꾸러기",
         "순애"
       ],
-      "interactionCount": 924859,
-      "interactionDelta": 2481,
+      "interactionCount": 925406,
+      "interactionDelta": 3028,
       "rankChange": 0,
       "creatorHandle": "cookii",
       "creatorNickname": "𐙚𝕂𝕦앤끄",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/a98dc46d-9840-4593-81fa-52368c64a0e1/7b97d75f-c2ce-4860-916d-548d5a33eb35.webp",
       "rank": 80,
       "interactionHistory": [
-        902249,
         905584,
         907213,
         908751,
@@ -4312,15 +4333,14 @@
         "bj",
         "로맨스"
       ],
-      "interactionCount": 5284252,
-      "interactionDelta": 3672,
+      "interactionCount": 5285309,
+      "interactionDelta": 4729,
       "rankChange": 0,
       "creatorHandle": "na_ong",
       "creatorNickname": "나옹🐱",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/54469f1a-fd46-4e67-8eb2-d2e1d5decc4c/34a1a5f3-2d4a-4136-8765-8eb14186f68d.jpeg",
       "rank": 81,
       "interactionHistory": [
-        5253544,
         5257999,
         5260178,
         5262107,
@@ -4339,17 +4359,16 @@
         "일진",
         "순애"
       ],
-      "interactionCount": 1091725,
-      "interactionDelta": 1477,
+      "interactionCount": 1092240,
+      "interactionDelta": 1992,
       "rankChange": 1,
       "creatorHandle": "2flaxx",
       "creatorNickname": "이림",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/8b6fb3cb-3346-4e41-953c-bd1c83cd8996/e55dd59b-c17e-47c4-b380-977971686a77.jpeg",
       "rank": 82,
       "interactionHistory": [
-        1074288,
-        1074288,
         1076788,
+        1077642,
         1078872,
         1081183,
         1083652
@@ -4366,15 +4385,14 @@
         "로맨스",
         "조직보스"
       ],
-      "interactionCount": 2004151,
-      "interactionDelta": 4745,
+      "interactionCount": 2005377,
+      "interactionDelta": 5971,
       "rankChange": 1,
       "creatorHandle": "seoie",
       "creatorNickname": "서이",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/335adfbe-df47-4906-8532-7d00afeabc9c/1f015b5a-7b39-48cf-a042-e598c8c9e687.jpeg",
       "rank": 83,
       "interactionHistory": [
-        1966125,
         1971648,
         1974393,
         1976783,
@@ -4393,15 +4411,14 @@
         "마법",
         "헌터"
       ],
-      "interactionCount": 3963923,
-      "interactionDelta": 3552,
+      "interactionCount": 3964909,
+      "interactionDelta": 4538,
       "rankChange": -2,
       "creatorHandle": "RbRbRiRi4534",
       "creatorNickname": "뀨뀨꺄꺄",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f57f5c11-9877-44f1-8d1b-10a4610ae29d/2812560a-3dcc-4f56-8128-4fc5a9e9e332.jpeg",
       "rank": 84,
       "interactionHistory": [
-        3935063,
         3939326,
         3941748,
         3943585,
@@ -4420,16 +4437,16 @@
         "마법",
         "언리밋"
       ],
-      "interactionCount": 1438354,
-      "interactionDelta": 3580,
+      "interactionCount": 1439143,
+      "interactionDelta": 4369,
       "rankChange": 0,
       "creatorHandle": "VitalCloud0345",
       "creatorNickname": "몽연(夢緣)",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/9113b8b9-566f-420d-95df-3bd136b4df05/f0b8b177-58b9-443a-97c2-526215402b56.webp",
       "rank": 85,
       "interactionHistory": [
-        1408669,
         1412724,
+        1415186,
         1415186,
         1418008,
         1421005,
@@ -4447,15 +4464,14 @@
         "hl",
         "여우"
       ],
-      "interactionCount": 4476776,
-      "interactionDelta": 1996,
+      "interactionCount": 4477144,
+      "interactionDelta": 2364,
       "rankChange": 0,
       "creatorHandle": "BigRifle5482",
       "creatorNickname": "루시",
       "creatorImageUrl": null,
       "rank": 86,
       "interactionHistory": [
-        4458793,
         4461537,
         4462894,
         4464382,
@@ -4474,19 +4490,19 @@
         "차가움",
         "무관심"
       ],
-      "interactionCount": 1133618,
-      "interactionDelta": 1605,
+      "interactionCount": 1134107,
+      "interactionDelta": 2094,
       "rankChange": 0,
       "creatorHandle": "parkjjang",
       "creatorNickname": "parkjjang",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d2a0c2fd-234f-4321-969b-b4c2f63b8401/97c1ad69-c17b-4715-a70c-f7386a19f44e.png",
       "rank": 87,
       "interactionHistory": [
-        1117726,
+        1119894,
         1119894,
         1120728,
-        1120728,
-        1123832,
+        1121942,
+        1125865,
         1125865
       ]
     },
@@ -4501,15 +4517,14 @@
         "bl",
         "언리밋"
       ],
-      "interactionCount": 8165721,
-      "interactionDelta": 4644,
+      "interactionCount": 8166912,
+      "interactionDelta": 5835,
       "rankChange": 0,
       "creatorHandle": "Lune_25",
       "creatorNickname": "룽",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d6b5fec2-51ed-4cc4-a248-f1e6d0935421/a54abcde-9bdc-4a29-acfe-a27a6a0bcd06.jpeg",
       "rank": 90,
       "interactionHistory": [
-        8132542,
         8136076,
         8137719,
         8139858,
@@ -4528,20 +4543,20 @@
         "hl",
         "bl"
       ],
-      "interactionCount": 1173956,
-      "interactionDelta": 5734,
+      "interactionCount": 1175309,
+      "interactionDelta": 7087,
       "rankChange": 1,
       "creatorHandle": "Hamsterhintern",
       "creatorNickname": "Hamsterhintern",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/6e132b3c-b93e-4199-8e61-e3d55d313736/0257d46f-933c-40f4-a0a5-4c0a0acf3705.jpeg",
       "rank": 91,
       "interactionHistory": [
-        1143188,
-        1143188,
+        1146537,
         1148166,
         1149554,
         1152196,
-        1155814
+        1155814,
+        1161678
       ]
     },
     {
@@ -4555,17 +4570,16 @@
         "로맨스",
         "여우"
       ],
-      "interactionCount": 1324369,
-      "interactionDelta": 1777,
+      "interactionCount": 1324921,
+      "interactionDelta": 2329,
       "rankChange": -1,
       "creatorHandle": "Mang_bung",
       "creatorNickname": "망붕이",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/94ff3d7e-2089-4f1a-aee9-548e56d724b0/b1020a8e-8572-48d9-b6a3-dc270a6cf5f0.jpeg",
       "rank": 92,
       "interactionHistory": [
-        1308343,
-        1308343,
         1310654,
+        1311564,
         1312583,
         1314341,
         1317053
@@ -4582,15 +4596,14 @@
         "hl",
         "연애"
       ],
-      "interactionCount": 6190717,
-      "interactionDelta": 3799,
+      "interactionCount": 6191484,
+      "interactionDelta": 4566,
       "rankChange": 0,
       "creatorHandle": "RearCoal3700",
       "creatorNickname": "집가고 싶다",
       "creatorImageUrl": null,
       "rank": 93,
       "interactionHistory": [
-        6149435,
         6154175,
         6156711,
         6159626,
@@ -4609,18 +4622,18 @@
         "라이벌",
         "특수부대"
       ],
-      "interactionCount": 1217502,
-      "interactionDelta": 2625,
+      "interactionCount": 1217940,
+      "interactionDelta": 3063,
       "rankChange": 0,
       "creatorHandle": "Pocha",
       "creatorNickname": "Pocha",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/7df0152e-5c88-444e-80de-b6d9a47ab8e7/7c904fde-234c-456c-937f-d05cc2eb49ed.jpeg",
       "rank": 94,
       "interactionHistory": [
-        1195473,
+        1198496,
         1198496,
         1199494,
-        1199494,
+        1200832,
         1202229,
         1205771
       ]
@@ -4636,15 +4649,14 @@
         "소유욕",
         "집착"
       ],
-      "interactionCount": 3393501,
-      "interactionDelta": 4692,
+      "interactionCount": 3394294,
+      "interactionDelta": 5485,
       "rankChange": 0,
       "creatorHandle": "seoie",
       "creatorNickname": "서이",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/335adfbe-df47-4906-8532-7d00afeabc9c/1f015b5a-7b39-48cf-a042-e598c8c9e687.jpeg",
       "rank": 95,
       "interactionHistory": [
-        3362280,
         3365662,
         3367726,
         3369962,
@@ -4663,18 +4675,18 @@
         "변호사",
         "새엄마"
       ],
-      "interactionCount": 856706,
-      "interactionDelta": 2049,
+      "interactionCount": 857973,
+      "interactionDelta": 3316,
       "rankChange": 0,
       "creatorHandle": "Serena0607",
       "creatorNickname": "세레나",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/831ea384-8a99-4f49-b005-41b3c1bb0235/01663156-0b41-4f50-927f-0cdd9d4eb271.png",
       "rank": 96,
       "interactionHistory": [
-        837928,
         839969,
+        840900,
         842190,
-        842190,
+        844459,
         847673,
         847673
       ]
@@ -4690,8 +4702,8 @@
         "로맨스",
         "능글"
       ],
-      "interactionCount": 1344305,
-      "interactionDelta": 3255,
+      "interactionCount": 1344996,
+      "interactionDelta": 3946,
       "rankChange": 1,
       "creatorHandle": "ekgmlWkdS2",
       "creatorNickname": "히히",
@@ -4713,15 +4725,14 @@
         "집착",
         "언리밋"
       ],
-      "interactionCount": 4765909,
-      "interactionDelta": 3990,
+      "interactionCount": 4767257,
+      "interactionDelta": 5338,
       "rankChange": -1,
       "creatorHandle": "zeta_bang",
       "creatorNickname": "젵뺑이친다",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d8d94ceb-f33d-43f4-b88e-13f6f6550727/8ef3541a-e350-4945-b7d1-16e2f735f606.jpeg",
       "rank": 98,
       "interactionHistory": [
-        4737075,
         4740964,
         4742431,
         4744308,
@@ -4740,8 +4751,8 @@
         "능글",
         "느와르"
       ],
-      "interactionCount": 12245256,
-      "interactionDelta": 5347,
+      "interactionCount": 12246464,
+      "interactionDelta": 6555,
       "rankChange": 0,
       "creatorHandle": "White_fox.",
       "creatorNickname": "백여우",
@@ -4763,7 +4774,7 @@
         "정략결혼",
         "로판"
       ],
-      "interactionCount": 1159557,
+      "interactionCount": 1160087,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "I._.an",
@@ -4771,7 +4782,6 @@
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/1710220e-c5de-4278-a1d0-05df67e6f66f/7ffdb328-2c2c-4c32-8a5e-b02c674fca11.jpeg",
       "rank": 100,
       "interactionHistory": [
-        1128813,
         1133104,
         1135003,
         1137140,
@@ -4792,20 +4802,20 @@
         "교사",
         "귀여움"
       ],
-      "interactionCount": 596401,
-      "interactionDelta": 2245,
+      "interactionCount": 597040,
+      "interactionDelta": 2884,
       "rankChange": 0,
       "creatorHandle": "Serena0607",
       "creatorNickname": "세레나",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/831ea384-8a99-4f49-b005-41b3c1bb0235/01663156-0b41-4f50-927f-0cdd9d4eb271.png",
       "rank": 2,
       "interactionHistory": [
-        575960,
         578392,
         579972,
+        579972,
         581435,
-        581435,
-        583051
+        583051,
+        585894
       ]
     },
     {
@@ -4819,20 +4829,20 @@
         "능글",
         "집착"
       ],
-      "interactionCount": 420365,
-      "interactionDelta": 3260,
+      "interactionCount": 420976,
+      "interactionDelta": 3871,
       "rankChange": 0,
       "creatorHandle": "dain00",
       "creatorNickname": "우미",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/4df55811-b172-406a-9798-7eecfffe86a3/04afdd86-3c35-4a3b-afea-531338e0f6c9.jpeg",
       "rank": 4,
       "interactionHistory": [
-        401405,
         403327,
         404278,
-        405505,
         407098,
-        407098
+        407098,
+        413210,
+        413210
       ]
     },
     {
@@ -4846,19 +4856,20 @@
         "bl",
         "hl"
       ],
-      "interactionCount": 379723,
-      "interactionDelta": 1835,
+      "interactionCount": 380091,
+      "interactionDelta": 2203,
       "rankChange": 0,
       "creatorHandle": "141203",
       "creatorNickname": "그레이 블루",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/68416f4d-57b8-421c-9e14-fd82b9cd20b8/002d1790-117d-44ce-a13a-83ef0d535fe4.jpeg",
       "rank": 5,
       "interactionHistory": [
-        363951,
         366513,
         367629,
         368475,
-        369668
+        369668,
+        372130,
+        374906
       ]
     },
     {
@@ -4872,20 +4883,20 @@
         "여우",
         "연애"
       ],
-      "interactionCount": 399314,
-      "interactionDelta": 2241,
+      "interactionCount": 400109,
+      "interactionDelta": 3036,
       "rankChange": 0,
       "creatorHandle": "na_ong",
       "creatorNickname": "나옹🐱",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/54469f1a-fd46-4e67-8eb2-d2e1d5decc4c/34a1a5f3-2d4a-4136-8765-8eb14186f68d.jpeg",
       "rank": 6,
       "interactionHistory": [
-        381942,
         384302,
         385781,
         386772,
         388839,
-        388839
+        390789,
+        393283
       ]
     },
     {
@@ -4899,20 +4910,20 @@
         "폭군",
         "혐관"
       ],
-      "interactionCount": 394555,
-      "interactionDelta": 1747,
+      "interactionCount": 394985,
+      "interactionDelta": 2177,
       "rankChange": 0,
       "creatorHandle": "d4ngyl",
       "creatorNickname": "단귤",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/8ef3da0f-f452-4846-9cfd-181933bbe375/81343af8-c6e2-4924-a1b3-2325cc05c786.jpeg",
       "rank": 8,
       "interactionHistory": [
-        375971,
         378528,
         379926,
         381121,
-        382741,
-        385035
+        385035,
+        385035,
+        388584
       ]
     },
     {
@@ -4926,19 +4937,20 @@
         "hl",
         "bl"
       ],
-      "interactionCount": 380315,
-      "interactionDelta": 1299,
+      "interactionCount": 380694,
+      "interactionDelta": 1678,
       "rankChange": 0,
       "creatorHandle": "siwonpr",
       "creatorNickname": "시원하다",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/c2ea5a98-c620-4440-bae7-46c995396771/b9d19a42-d8d5-49a9-a6c0-baf3cbdf4aa9.png",
       "rank": 9,
       "interactionHistory": [
-        370042,
         371508,
         372190,
         372692,
-        373912
+        373912,
+        375271,
+        377235
       ]
     },
     {
@@ -4952,20 +4964,20 @@
         "hl",
         "비서"
       ],
-      "interactionCount": 307793,
-      "interactionDelta": 2714,
+      "interactionCount": 308602,
+      "interactionDelta": 3523,
       "rankChange": 0,
       "creatorHandle": "Gogumamatang",
       "creatorNickname": "고구마마탕",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/40023206-5137-468e-b20d-7e3f942bd608/4bf5ab05-0a11-44e9-8197-50c0ac8c3da0.webp",
       "rank": 10,
       "interactionHistory": [
-        287956,
         290421,
-        292234,
+        293521,
         293521,
         295344,
-        298211
+        298211,
+        301682
       ]
     },
     {
@@ -4979,20 +4991,20 @@
         "복싱",
         "mma"
       ],
-      "interactionCount": 332079,
-      "interactionDelta": 8249,
+      "interactionCount": 333285,
+      "interactionDelta": 9455,
       "rankChange": 1,
       "creatorHandle": "Kacao",
       "creatorNickname": "카카오",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/226b2401-c096-46ef-b3d5-5a55f37db445/6f88e368-72eb-4594-956f-e6247e9521e9.png",
       "rank": 11,
       "interactionHistory": [
-        266018,
         275380,
         280665,
         284313,
         288914,
-        299946
+        299946,
+        311554
       ]
     },
     {
@@ -5006,19 +5018,20 @@
         "용족",
         "판타지"
       ],
-      "interactionCount": 387792,
-      "interactionDelta": 2727,
+      "interactionCount": 388288,
+      "interactionDelta": 3223,
       "rankChange": 0,
       "creatorHandle": "Lilies_are_gods",
       "creatorNickname": "쪼아여쪼아여",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/e0763447-fd79-4ffd-b319-41ebd1cccc77/e0b592ea-6d5d-47ae-b4a7-dd8e9f858b5c.png",
       "rank": 13,
       "interactionHistory": [
-        368940,
         371257,
         372027,
         373299,
-        374763
+        374763,
+        377881,
+        381285
       ]
     },
     {
@@ -5032,20 +5045,20 @@
         "동거",
         "능글"
       ],
-      "interactionCount": 326692,
-      "interactionDelta": 1534,
+      "interactionCount": 327061,
+      "interactionDelta": 1903,
       "rankChange": 0,
       "creatorHandle": "Banchangage",
       "creatorNickname": "반찬가게",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f11a4d86-5ebe-41b1-907c-cac0a3d2872e/f3283d5e-17fd-49f8-be39-5404aa617fa1.jpeg",
       "rank": 14,
       "interactionHistory": [
-        311780,
         314380,
         315357,
         315357,
         316059,
-        317963
+        317963,
+        322543
       ]
     },
     {
@@ -5059,19 +5072,20 @@
         "태권도",
         "파트너"
       ],
-      "interactionCount": 319815,
-      "interactionDelta": 2210,
+      "interactionCount": 320378,
+      "interactionDelta": 2773,
       "rankChange": 1,
       "creatorHandle": "bluezerry",
       "creatorNickname": "ʙʟᴜᴇʙᴇʀʀʏ",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d87823cd-de23-409c-b566-836f6471bab8/5cf26435-99ae-4bbf-9ac5-4d315470c0bb.jpeg",
       "rank": 15,
       "interactionHistory": [
-        294243,
         298260,
         300049,
         302111,
-        304384
+        304384,
+        308621,
+        313725
       ]
     },
     {
@@ -5085,19 +5099,20 @@
         "알바",
         "폭스남"
       ],
-      "interactionCount": 292782,
-      "interactionDelta": 1755,
+      "interactionCount": 293175,
+      "interactionDelta": 2148,
       "rankChange": 0,
       "creatorHandle": "parkjjang",
       "creatorNickname": "parkjjang",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d2a0c2fd-234f-4321-969b-b4c2f63b8401/97c1ad69-c17b-4715-a70c-f7386a19f44e.png",
       "rank": 17,
       "interactionHistory": [
-        276626,
         278329,
         279130,
         279876,
-        281518
+        281518,
+        283464,
+        287152
       ]
     },
     {
@@ -5111,19 +5126,20 @@
         "bl",
         "오메가버스"
       ],
-      "interactionCount": 308671,
-      "interactionDelta": 1552,
+      "interactionCount": 308996,
+      "interactionDelta": 1877,
       "rankChange": 0,
       "creatorHandle": "Moo.kae_07",
       "creatorNickname": "무캐",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/1950aa5d-868c-469e-b409-777e32d021a1/084c083b-ecde-4f25-87ff-6e6327b4a94e.jpeg",
       "rank": 18,
       "interactionHistory": [
-        294614,
         296316,
         296906,
         297992,
-        299593
+        299593,
+        301483,
+        304281
       ]
     },
     {
@@ -5137,19 +5153,20 @@
         "실수",
         "오해"
       ],
-      "interactionCount": 273177,
-      "interactionDelta": 1967,
+      "interactionCount": 273723,
+      "interactionDelta": 2513,
       "rankChange": 0,
       "creatorHandle": "Lilies_are_gods",
       "creatorNickname": "쪼아여쪼아여",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/e0763447-fd79-4ffd-b319-41ebd1cccc77/e0b592ea-6d5d-47ae-b4a7-dd8e9f858b5c.png",
       "rank": 19,
       "interactionHistory": [
-        256415,
         258855,
         259798,
         260926,
-        262544
+        262544,
+        264379,
+        267765
       ]
     },
     {
@@ -5163,19 +5180,20 @@
         "짝사랑",
         "삼각관계"
       ],
-      "interactionCount": 251224,
-      "interactionDelta": 626,
+      "interactionCount": 251516,
+      "interactionDelta": 918,
       "rankChange": 0,
       "creatorHandle": "KonyangE",
       "creatorNickname": "코냥이",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/7a00ff4c-2ac1-48a2-a35a-9977d59e4601/ff802e74-3298-40d0-991c-187c3095bbb0.png",
       "rank": 20,
       "interactionHistory": [
-        239946,
         241971,
         242780,
         244009,
-        245269
+        245269,
+        246699,
+        248689
       ]
     },
     {
@@ -5189,19 +5207,20 @@
         "순애",
         "hl"
       ],
-      "interactionCount": 292237,
-      "interactionDelta": 2704,
+      "interactionCount": 292631,
+      "interactionDelta": 3098,
       "rankChange": 0,
       "creatorHandle": "sonakiiii",
       "creatorNickname": "소나기",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/932b6295-9869-4582-8eca-ac20e6bd20bb/76c2f36c-48f3-4f88-80af-aa9c6f6b17cb.png",
       "rank": 22,
       "interactionHistory": [
-        277262,
         278856,
         279399,
         280267,
-        281283
+        281283,
+        282895,
+        286525
       ]
     },
     {
@@ -5215,20 +5234,20 @@
         "혐관",
         "무시"
       ],
-      "interactionCount": 282279,
-      "interactionDelta": 943,
+      "interactionCount": 282496,
+      "interactionDelta": 1160,
       "rankChange": 0,
       "creatorHandle": "Ung_E",
       "creatorNickname": "웅이",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/ebbea183-ccca-4411-9863-f8561c3758fc/816810d3-6b66-4b7c-bacc-34c261ed7c3d.png",
       "rank": 23,
       "interactionHistory": [
-        271781,
-        271781,
         272939,
+        273394,
         274610,
-        275707,
-        277258
+        277258,
+        277258,
+        279250
       ]
     },
     {
@@ -5242,19 +5261,20 @@
         "상사",
         "금욕"
       ],
-      "interactionCount": 266218,
-      "interactionDelta": 1108,
+      "interactionCount": 266360,
+      "interactionDelta": 1250,
       "rankChange": 0,
       "creatorHandle": "MusclyFoot1634",
       "creatorNickname": "바니바니",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d5992717-1339-4e53-ac26-1a591c3303b6/ba50fcb4-c7ac-428d-812d-bff5be835917.png",
       "rank": 24,
       "interactionHistory": [
-        257299,
         258791,
         259396,
         260202,
-        260922
+        260922,
+        262401,
+        263873
       ]
     },
     {
@@ -5268,20 +5288,20 @@
         "타투이스트",
         "집착"
       ],
-      "interactionCount": 271017,
-      "interactionDelta": 1397,
+      "interactionCount": 271141,
+      "interactionDelta": 1521,
       "rankChange": 0,
       "creatorHandle": "huhuhu0524",
       "creatorNickname": "후후후",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/7212e667-6657-4e51-8026-f84b536803e2/3d2f88c0-af06-4c02-8379-0f7098781e5c.webp",
       "rank": 25,
       "interactionHistory": [
-        256244,
         258323,
         259518,
-        259518,
         260429,
-        264499
+        260429,
+        264499,
+        267134
       ]
     },
     {
@@ -5295,20 +5315,20 @@
         "판타지",
         "다공일수"
       ],
-      "interactionCount": 302209,
-      "interactionDelta": 1039,
+      "interactionCount": 302744,
+      "interactionDelta": 1574,
       "rankChange": 0,
       "creatorHandle": "berry_001",
       "creatorNickname": "먉",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f681d40c-168b-46e1-9488-e79922f08967/58f203e3-c48f-4138-9733-d13d4d3ab6e7.jpeg",
       "rank": 26,
       "interactionHistory": [
-        290049,
         291949,
         292812,
         293853,
         295050,
-        295050
+        296778,
+        299080
       ]
     },
     {
@@ -5322,19 +5342,20 @@
         "일상",
         "로맨스"
       ],
-      "interactionCount": 212786,
-      "interactionDelta": 1316,
+      "interactionCount": 213122,
+      "interactionDelta": 1652,
       "rankChange": 0,
       "creatorHandle": "short_arms_cat",
       "creatorNickname": "팔 짧은 냥이",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/6aa23283-0f0c-4612-9e67-c84bc5098b89/a746d839-1033-4f41-af1a-0a07e8803d79.webp",
       "rank": 27,
       "interactionHistory": [
-        202594,
         203717,
         204104,
         204851,
-        205728
+        205728,
+        206728,
+        208654
       ]
     },
     {
@@ -5348,19 +5369,20 @@
         "로코",
         "직장상사"
       ],
-      "interactionCount": 273058,
-      "interactionDelta": 1469,
+      "interactionCount": 273501,
+      "interactionDelta": 1912,
       "rankChange": 0,
       "creatorHandle": "bluezerry",
       "creatorNickname": "ʙʟᴜᴇʙᴇʀʀʏ",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d87823cd-de23-409c-b566-836f6471bab8/5cf26435-99ae-4bbf-9ac5-4d315470c0bb.jpeg",
       "rank": 28,
       "interactionHistory": [
-        260623,
         262068,
         262718,
         263349,
-        264485
+        264485,
+        266503,
+        269174
       ]
     },
     {
@@ -5374,19 +5396,20 @@
         "제자",
         "복싱"
       ],
-      "interactionCount": 196019,
-      "interactionDelta": 1261,
+      "interactionCount": 196497,
+      "interactionDelta": 1739,
       "rankChange": 0,
       "creatorHandle": "Gogumamatang",
       "creatorNickname": "고구마마탕",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/40023206-5137-468e-b20d-7e3f942bd608/4bf5ab05-0a11-44e9-8197-50c0ac8c3da0.webp",
       "rank": 30,
       "interactionHistory": [
-        184423,
         185835,
         186512,
         187401,
-        188726
+        188726,
+        190118,
+        192847
       ]
     },
     {
@@ -5400,19 +5423,20 @@
         "환생",
         "저승사자"
       ],
-      "interactionCount": 333879,
-      "interactionDelta": 1034,
+      "interactionCount": 334118,
+      "interactionDelta": 1273,
       "rankChange": 0,
       "creatorHandle": "skrmsp",
       "creatorNickname": "나그네",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/2470daab-2a0d-4191-99ee-6f1465239248/52b55d3c-70d9-4be2-ada0-bb568110f514.png",
       "rank": 31,
       "interactionHistory": [
-        322049,
         323504,
         324055,
         324851,
-        326377
+        326377,
+        327891,
+        330484
       ]
     },
     {
@@ -5426,19 +5450,20 @@
         "대학교",
         "어장"
       ],
-      "interactionCount": 205180,
-      "interactionDelta": 649,
+      "interactionCount": 205284,
+      "interactionDelta": 753,
       "rankChange": 0,
       "creatorHandle": "Chess.Mat2",
       "creatorNickname": "체스메이트",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/25c3bae5-128d-4629-a008-9ede8f48320b/3b4a973e-3531-4afe-8984-3a67ac7c413a.png",
       "rank": 33,
       "interactionHistory": [
-        199215,
         200250,
         200598,
         201014,
-        201425
+        201425,
+        202059,
+        203147
       ]
     },
     {
@@ -5452,20 +5477,20 @@
         "양아치",
         "청게"
       ],
-      "interactionCount": 240232,
-      "interactionDelta": 1096,
+      "interactionCount": 240349,
+      "interactionDelta": 1213,
       "rankChange": 0,
       "creatorHandle": "keung",
       "creatorNickname": "컹",
       "creatorImageUrl": null,
       "rank": 34,
       "interactionHistory": [
-        227940,
         229795,
         230609,
         231446,
         233213,
-        234852
+        234852,
+        237365
       ]
     },
     {
@@ -5479,20 +5504,20 @@
         "순애",
         "남궁세가"
       ],
-      "interactionCount": 197669,
-      "interactionDelta": 1990,
+      "interactionCount": 198432,
+      "interactionDelta": 2753,
       "rankChange": 2,
       "creatorHandle": "Lilies_are_gods",
       "creatorNickname": "쪼아여쪼아여",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/e0763447-fd79-4ffd-b319-41ebd1cccc77/e0b592ea-6d5d-47ae-b4a7-dd8e9f858b5c.png",
       "rank": 35,
       "interactionHistory": [
-        179894,
         182021,
         182995,
         184364,
-        185948,
-        187811
+        184364,
+        187811,
+        191576
       ]
     },
     {
@@ -5506,20 +5531,20 @@
         "남매",
         "존잘남"
       ],
-      "interactionCount": 210681,
-      "interactionDelta": 1802,
+      "interactionCount": 210974,
+      "interactionDelta": 2095,
       "rankChange": -1,
       "creatorHandle": "Msddcz",
       "creatorNickname": "츠키",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/747a6730-9f8b-4cf9-abea-d77ead20e0c2/d27b3c24-0363-46f7-80e6-b1d99010aab0.png",
       "rank": 37,
       "interactionHistory": [
-        195626,
-        195626,
+        197304,
         198455,
         199590,
         201832,
-        204046
+        204046,
+        206477
       ]
     },
     {
@@ -5533,19 +5558,20 @@
         "유저바라기",
         "연애"
       ],
-      "interactionCount": 192530,
-      "interactionDelta": 1724,
+      "interactionCount": 192860,
+      "interactionDelta": 2054,
       "rankChange": 0,
       "creatorHandle": "liver_1892.",
       "creatorNickname": "liver",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/02499925-9508-4de7-8d66-e7904a318812/217b0083-fe66-4b06-9ded-f27f582544d5.png",
       "rank": 39,
       "interactionHistory": [
-        182961,
         184131,
         184640,
         185535,
-        186201
+        186201,
+        187305,
+        188849
       ]
     },
     {
@@ -5559,20 +5585,20 @@
         "다인캐",
         "일상"
       ],
-      "interactionCount": 215396,
-      "interactionDelta": 1385,
+      "interactionCount": 215652,
+      "interactionDelta": 1641,
       "rankChange": 0,
       "creatorHandle": "Drunk_Dragon",
       "creatorNickname": "만취용",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/1f1edd4a-8926-4df1-8fe1-6c35ba3422d2/00f25d31-724d-4ef4-818f-a6f7f54067c5.png",
       "rank": 40,
       "interactionHistory": [
-        201365,
-        201365,
         203546,
         204172,
         205059,
-        206183
+        206183,
+        208804,
+        211261
       ]
     },
     {
@@ -5586,19 +5612,19 @@
         "연상",
         "누나"
       ],
-      "interactionCount": 184166,
-      "interactionDelta": 1055,
+      "interactionCount": 184249,
+      "interactionDelta": 1138,
       "rankChange": 0,
       "creatorHandle": "seoon_Like",
       "creatorNickname": "_세온_",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/db53a46f-fe5e-4201-8573-fac1008fca2a/0dc5aa50-dddf-4f4f-85e2-7c1257a871ae.png",
       "rank": 42,
       "interactionHistory": [
-        176501,
         177834,
         178131,
         178600,
-        179158
+        179158,
+        180461
       ]
     },
     {
@@ -5612,19 +5638,19 @@
         "순애",
         "연애"
       ],
-      "interactionCount": 178293,
-      "interactionDelta": 842,
+      "interactionCount": 178560,
+      "interactionDelta": 1109,
       "rankChange": 0,
       "creatorHandle": "liver_1892.",
       "creatorNickname": "liver",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/02499925-9508-4de7-8d66-e7904a318812/217b0083-fe66-4b06-9ded-f27f582544d5.png",
       "rank": 45,
       "interactionHistory": [
-        171101,
         171948,
         172461,
         172781,
-        173287
+        173287,
+        174666
       ]
     },
     {
@@ -5638,19 +5664,19 @@
         "권태기",
         "싸움"
       ],
-      "interactionCount": 177650,
-      "interactionDelta": 790,
+      "interactionCount": 177777,
+      "interactionDelta": 917,
       "rankChange": 0,
       "creatorHandle": "malixe",
       "creatorNickname": "malixe",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/98382511-0067-444c-890f-e8ab03b700ea/b9c75495-8a01-4b4a-bcc4-80f9d6ce7e2d.png",
       "rank": 46,
       "interactionHistory": [
-        172195,
         172625,
         172872,
         173087,
-        173534
+        173534,
+        174328
       ]
     },
     {
@@ -5664,19 +5690,19 @@
         "캐릭터수",
         "bl"
       ],
-      "interactionCount": 191559,
-      "interactionDelta": 1538,
+      "interactionCount": 191907,
+      "interactionDelta": 1886,
       "rankChange": 1,
       "creatorHandle": "shvnicreamm",
       "creatorNickname": "슈니",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/1a528812-70aa-4ebe-8ef3-ed2eb8223bcd/3ff2b047-5143-4013-8971-e81a9de6af78.png",
       "rank": 47,
       "interactionHistory": [
-        172820,
         176203,
         177241,
         178803,
-        180734
+        180734,
+        182938
       ]
     },
     {
@@ -5690,19 +5716,19 @@
         "탈출",
         "간호사"
       ],
-      "interactionCount": 165219,
-      "interactionDelta": 1014,
+      "interactionCount": 165544,
+      "interactionDelta": 1339,
       "rankChange": 0,
       "creatorHandle": "CoralAnger2104",
       "creatorNickname": "CoralAnger2104",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/e8b33c82-ca58-4828-964a-4ba94b90fefc/c138ef99-acc9-468c-9932-dc0cd1c94ca6.png",
       "rank": 49,
       "interactionHistory": [
-        157693,
         158556,
         159070,
         159294,
-        159713
+        159713,
+        160710
       ]
     },
     {
@@ -5716,19 +5742,19 @@
         "오메가",
         "우울증"
       ],
-      "interactionCount": 190601,
-      "interactionDelta": 1726,
+      "interactionCount": 190907,
+      "interactionDelta": 2032,
       "rankChange": 1,
       "creatorHandle": "StumpyJuice8971",
       "creatorNickname": "츄릅",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/85c090bb-b3a5-474b-8705-9185be6276df/a9be5fb5-c213-4e16-89d3-c7808b0fa655.jpeg",
       "rank": 50,
       "interactionHistory": [
-        179036,
         180576,
         181340,
         181986,
-        182938
+        182938,
+        184775
       ]
     },
     {
@@ -5742,19 +5768,19 @@
         "다각관계",
         "로맨스"
       ],
-      "interactionCount": 188975,
-      "interactionDelta": 1045,
+      "interactionCount": 189352,
+      "interactionDelta": 1422,
       "rankChange": -1,
       "creatorHandle": "dain00",
       "creatorNickname": "우미",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/4df55811-b172-406a-9798-7eecfffe86a3/04afdd86-3c35-4a3b-afea-531338e0f6c9.jpeg",
       "rank": 51,
       "interactionHistory": [
-        181009,
         181757,
         182141,
         182632,
-        183367
+        183367,
+        184481
       ]
     },
     {
@@ -5768,20 +5794,20 @@
         "극한설정",
         "고등학생"
       ],
-      "interactionCount": 386860,
-      "interactionDelta": 5180,
+      "interactionCount": 388597,
+      "interactionDelta": 6917,
       "rankChange": 3,
       "creatorHandle": "wataametabetaina",
       "creatorNickname": "わたあめ",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/0c3d2aff-25cd-4160-9de7-72a016d099d9/6d87fb83-f81b-4787-9777-7a491a56b306.png",
       "rank": 52,
       "interactionHistory": [
-        321789,
         337664,
         341928,
         348853,
         356328,
-        356328
+        356328,
+        364123
       ]
     },
     {
@@ -5795,19 +5821,19 @@
         "성장",
         "모험"
       ],
-      "interactionCount": 164514,
-      "interactionDelta": 2062,
+      "interactionCount": 165567,
+      "interactionDelta": 3115,
       "rankChange": -1,
       "creatorHandle": "S1esta",
       "creatorNickname": "시에스타",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/20e2984e-4129-4d0d-917a-539322fa7b46/ff884c1e-c0b2-44dd-b382-f966bfcc7d64.png",
       "rank": 53,
       "interactionHistory": [
-        150547,
         151849,
         152574,
         153479,
-        154744
+        154744,
+        156144
       ]
     },
     {
@@ -5821,19 +5847,19 @@
         "집착",
         "소유욕"
       ],
-      "interactionCount": 191666,
-      "interactionDelta": 1255,
+      "interactionCount": 192204,
+      "interactionDelta": 1793,
       "rankChange": -1,
       "creatorHandle": "BB1BB0",
       "creatorNickname": "삐리빠라삐뽀로뿌루뽀",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/cfc02cf2-e0f4-4061-812a-06c4c35d6c30/6a6c093f-6d53-44c5-95fd-bde1939d247d.png",
       "rank": 54,
       "interactionHistory": [
-        181947,
         183861,
         184469,
         185111,
-        186158
+        186158,
+        187662
       ]
     },
     {
@@ -5847,19 +5873,19 @@
         "기념일",
         "츤데레"
       ],
-      "interactionCount": 151246,
-      "interactionDelta": 323,
+      "interactionCount": 151335,
+      "interactionDelta": 412,
       "rankChange": -1,
       "creatorHandle": "Sundol887",
       "creatorNickname": "박박선돌",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/5ade3643-1750-4349-8e0e-821ff97c9414/e6e2db91-9a47-45a1-80bd-d3f10b196bad.png",
       "rank": 55,
       "interactionHistory": [
-        147416,
         148090,
         148287,
         148510,
-        148627
+        148627,
+        149025
       ]
     },
     {
@@ -5873,19 +5899,19 @@
         "망한사랑",
         "무뚝뚝"
       ],
-      "interactionCount": 182675,
-      "interactionDelta": 2096,
+      "interactionCount": 183221,
+      "interactionDelta": 2642,
       "rankChange": 0,
       "creatorHandle": "RoFan",
       "creatorNickname": "로판특공대",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/5047bd6f-31e5-43e5-b0d5-aa8fd6c0eced/fff4ccea-5068-4abc-9c44-1bc89c9b3d3a.jpeg",
       "rank": 56,
       "interactionHistory": [
-        167093,
         168924,
         169877,
         171310,
         172440,
+        173658,
         173658
       ]
     },
@@ -5900,19 +5926,19 @@
         "집착",
         "순애"
       ],
-      "interactionCount": 175446,
-      "interactionDelta": 1169,
+      "interactionCount": 175687,
+      "interactionDelta": 1410,
       "rankChange": 0,
       "creatorHandle": "_Any",
       "creatorNickname": "띵굴띵굴",
       "creatorImageUrl": null,
       "rank": 57,
       "interactionHistory": [
-        166346,
         167687,
         168157,
         168648,
-        169761
+        169761,
+        170744
       ]
     },
     {
@@ -5925,19 +5951,19 @@
         "노란장판",
         "망한사랑"
       ],
-      "interactionCount": 178262,
-      "interactionDelta": 1572,
+      "interactionCount": 178680,
+      "interactionDelta": 1990,
       "rankChange": 1,
       "creatorHandle": "1935",
       "creatorNickname": "Be_thankful",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/a0bc9d3b-4882-47e3-a219-11545c55a661/faad875c-2a86-42d0-8bc8-8fb547b46cf3.png",
       "rank": 59,
       "interactionHistory": [
-        162615,
         165061,
         166134,
         167000,
-        168902
+        168902,
+        170985
       ]
     },
     {
@@ -5951,19 +5977,19 @@
         "부부",
         "아내"
       ],
-      "interactionCount": 144443,
-      "interactionDelta": 745,
+      "interactionCount": 144735,
+      "interactionDelta": 1037,
       "rankChange": -2,
       "creatorHandle": "_Jin2",
       "creatorNickname": "진이",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/9731e36e-aafe-428e-989b-e97b6855d3f0/8e883417-8ce7-478c-87fa-030f5ebb2b48.png",
       "rank": 60,
       "interactionHistory": [
-        135602,
         137475,
         137904,
         138479,
-        139569
+        139569,
+        140808
       ]
     },
     {
@@ -5977,20 +6003,20 @@
         "소유욕",
         "배덕"
       ],
-      "interactionCount": 164904,
-      "interactionDelta": 2416,
+      "interactionCount": 165376,
+      "interactionDelta": 2888,
       "rankChange": 0,
       "creatorHandle": "9_.27am_",
       "creatorNickname": "시가",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/44311f26-4121-4980-a76e-7c4da974f155/d43bf376-4d4e-4039-8884-efcef11d4806.png",
       "rank": 61,
       "interactionHistory": [
-        138639,
         141837,
         143503,
         144953,
         147221,
-        150160
+        150160,
+        155014
       ]
     },
     {
@@ -6004,19 +6030,19 @@
         "피폐",
         "히어로"
       ],
-      "interactionCount": 137200,
-      "interactionDelta": 334,
+      "interactionCount": 137239,
+      "interactionDelta": 373,
       "rankChange": 0,
       "creatorHandle": "PLSavior",
       "creatorNickname": "PL Savior",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/5d155729-b9f3-43e0-b88c-d7bf9b73ec3d/0784f30d-224f-45b5-9169-ffb06b1b5642.png",
       "rank": 63,
       "interactionHistory": [
-        131449,
         131963,
         132239,
         132776,
-        133465
+        133465,
+        134208
       ]
     },
     {
@@ -6029,20 +6055,20 @@
         "해수욕장",
         "여사친"
       ],
-      "interactionCount": 150409,
-      "interactionDelta": 7554,
+      "interactionCount": 151922,
+      "interactionDelta": 9067,
       "rankChange": 18,
       "creatorHandle": "ddddd49",
       "creatorNickname": "닉네임뭘로하지",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/8cbbd214-3140-4ec1-a0e0-b7b3dc875538/ab6cf291-2a7f-42ac-b518-fbf8f2328c82.jpeg",
       "rank": 64,
       "interactionHistory": [
-        60104,
         72610,
         80012,
         89567,
         99405,
-        111272
+        111272,
+        128259
       ]
     },
     {
@@ -6056,19 +6082,19 @@
         "히어로물",
         "s급"
       ],
-      "interactionCount": 132528,
-      "interactionDelta": 609,
+      "interactionCount": 132582,
+      "interactionDelta": 663,
       "rankChange": 0,
       "creatorHandle": "Luna._.7",
       "creatorNickname": "커피콩",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/5fd47c01-4ce0-4912-b658-2a2a820f08e5/474222ec-5e82-4292-9bf3-4760763d3876.png",
       "rank": 66,
       "interactionHistory": [
-        122972,
         124641,
         125318,
         126076,
-        126727
+        126727,
+        127888
       ]
     },
     {
@@ -6082,19 +6108,19 @@
         "연상",
         "여경"
       ],
-      "interactionCount": 120452,
-      "interactionDelta": 482,
+      "interactionCount": 120768,
+      "interactionDelta": 798,
       "rankChange": -1,
       "creatorHandle": "Flower_caT",
       "creatorNickname": "꽃냥이",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/d094c32f-63b0-4e10-9c0a-4de5d007ed87/b11ab46b-0878-45f3-aec6-8c1c3343e84d.png",
       "rank": 69,
       "interactionHistory": [
-        115703,
         116202,
         116442,
         116725,
-        117021
+        117021,
+        117504
       ]
     },
     {
@@ -6107,19 +6133,19 @@
         "순애",
         "말괄량이"
       ],
-      "interactionCount": 123181,
-      "interactionDelta": 1251,
+      "interactionCount": 123538,
+      "interactionDelta": 1608,
       "rankChange": -1,
       "creatorHandle": "hnbfrlok2",
       "creatorNickname": "에에케",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/b53223d6-3ae8-49a5-a8c9-c68fdfd90c82/b5462e98-f7a2-4de8-a73f-22059426cf55.jpeg",
       "rank": 70,
       "interactionHistory": [
-        117060,
         117502,
         117925,
         118245,
-        118783
+        118783,
+        119707
       ]
     },
     {
@@ -6133,19 +6159,19 @@
         "마왕",
         "모험"
       ],
-      "interactionCount": 142415,
-      "interactionDelta": 768,
+      "interactionCount": 142597,
+      "interactionDelta": 950,
       "rankChange": 1,
       "creatorHandle": "hasiyan",
       "creatorNickname": "하시얀",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/c72a2cb4-7139-4f74-846c-3d3a7ddb82c5/732f1f80-02be-4d5a-b907-0d9007965a4f.webp",
       "rank": 71,
       "interactionHistory": [
-        134205,
         134828,
         135300,
         136081,
-        136863
+        136863,
+        137990
       ]
     },
     {
@@ -6159,19 +6185,19 @@
         "애착인형",
         "hl"
       ],
-      "interactionCount": 146707,
-      "interactionDelta": 447,
+      "interactionCount": 146734,
+      "interactionDelta": 474,
       "rankChange": -5,
       "creatorHandle": "nyxrose",
       "creatorNickname": "nyxrose",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/fb520d0c-9940-4095-b33a-e8842562af8d/db0f4b60-4179-47f8-8a06-bb78e840e0d0.jpeg",
       "rank": 72,
       "interactionHistory": [
-        143234,
         143629,
         143878,
         144137,
-        144419
+        144419,
+        144875
       ]
     },
     {
@@ -6185,19 +6211,19 @@
         "언리밋모드",
         "일상"
       ],
-      "interactionCount": 130273,
-      "interactionDelta": 737,
+      "interactionCount": 130775,
+      "interactionDelta": 1239,
       "rankChange": -3,
       "creatorHandle": "EvilSkunk6292",
       "creatorNickname": "EvilSkunk6292",
       "creatorImageUrl": null,
       "rank": 73,
       "interactionHistory": [
-        124048,
         124773,
         125161,
         125590,
-        126085
+        126085,
+        127477
       ]
     },
     {
@@ -6211,19 +6237,19 @@
         "올림포스",
         "로맨스"
       ],
-      "interactionCount": 157586,
-      "interactionDelta": 1224,
+      "interactionCount": 157752,
+      "interactionDelta": 1390,
       "rankChange": -1,
       "creatorHandle": "NOBLE0",
       "creatorNickname": "누아블",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/b1db820f-1fdd-4420-addf-8721e790d662/46e34ebc-980b-43d2-a596-9ede9e48d486.jpeg",
       "rank": 74,
       "interactionHistory": [
-        148402,
         149291,
         149745,
         150374,
-        151069
+        151069,
+        152237
       ]
     },
     {
@@ -6237,19 +6263,19 @@
         "사역마",
         "검은머리"
       ],
-      "interactionCount": 132261,
-      "interactionDelta": 1256,
+      "interactionCount": 132426,
+      "interactionDelta": 1421,
       "rankChange": -1,
       "creatorHandle": "SunWoo1857",
       "creatorNickname": "선우",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/b2c4059f-779f-4b86-9cb7-e8841e388caa/76196556-e78e-4db4-ad0c-c80e199329d2.png",
       "rank": 75,
       "interactionHistory": [
-        126542,
         127296,
         127474,
         127670,
-        128057
+        128057,
+        128815
       ]
     },
     {
@@ -6263,19 +6289,19 @@
         "능글공",
         "재벌공"
       ],
-      "interactionCount": 162126,
-      "interactionDelta": 445,
+      "interactionCount": 162173,
+      "interactionDelta": 492,
       "rankChange": -1,
       "creatorHandle": "Tetany",
       "creatorNickname": "테타니",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/657bdbcc-afa8-4660-8de2-975cfbcfabfc/97407e86-b6ed-4149-b3b8-21786cdcbc09.png",
       "rank": 76,
       "interactionHistory": [
-        153911,
         155535,
         156222,
         156786,
-        157655
+        157655,
+        158708
       ]
     },
     {
@@ -6289,19 +6315,19 @@
         "피폐",
         "소유욕"
       ],
-      "interactionCount": 164455,
-      "interactionDelta": 334,
+      "interactionCount": 164848,
+      "interactionDelta": 727,
       "rankChange": -1,
       "creatorHandle": "King_DDG",
       "creatorNickname": "오없세 노출제한에 절망한 왕떡국.",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/f8f20c78-f162-4437-bf65-ca3ff015618e/57d37f32-0c26-4837-9b9d-e782870bf771.jpeg",
       "rank": 77,
       "interactionHistory": [
-        158144,
         159125,
         159364,
         159742,
-        160707
+        160707,
+        161931
       ]
     },
     {
@@ -6315,8 +6341,8 @@
         "신분차이",
         "혼인"
       ],
-      "interactionCount": 148000,
-      "interactionDelta": 870,
+      "interactionCount": 148230,
+      "interactionDelta": 1100,
       "rankChange": -1,
       "creatorHandle": "Hilm",
       "creatorNickname": "𝓗𝓲𝓵𝓶🌙",
@@ -6334,8 +6360,8 @@
         "언리밋",
         "그리스로마신화"
       ],
-      "interactionCount": 136719,
-      "interactionDelta": 1298,
+      "interactionCount": 136905,
+      "interactionDelta": 1484,
       "rankChange": -1,
       "creatorHandle": "ekgmlWkdS2",
       "creatorNickname": "히히",
@@ -6353,8 +6379,8 @@
         "참교육",
         "복수"
       ],
-      "interactionCount": 285250,
-      "interactionDelta": 1230,
+      "interactionCount": 285421,
+      "interactionDelta": 1401,
       "rankChange": -1,
       "creatorHandle": "Lilies_are_gods",
       "creatorNickname": "쪼아여쪼아여",
@@ -6372,8 +6398,8 @@
         "로맨스",
         "연애"
       ],
-      "interactionCount": 113962,
-      "interactionDelta": 481,
+      "interactionCount": 114215,
+      "interactionDelta": 734,
       "rankChange": -1,
       "creatorHandle": "liver_1892.",
       "creatorNickname": "liver",
@@ -6396,8 +6422,8 @@
         "동거",
         "로맨스"
       ],
-      "interactionCount": 126447,
-      "interactionDelta": 603,
+      "interactionCount": 126740,
+      "interactionDelta": 896,
       "rankChange": -1,
       "creatorHandle": "Red_panda",
       "creatorNickname": "레서판다 좋아",
@@ -6415,8 +6441,8 @@
         "연예인",
         "대형견"
       ],
-      "interactionCount": 120852,
-      "interactionDelta": 1203,
+      "interactionCount": 121188,
+      "interactionDelta": 1539,
       "rankChange": 0,
       "creatorHandle": "Fox1289",
       "creatorNickname": "여우",
@@ -6434,8 +6460,8 @@
         "청혼",
         "알바"
       ],
-      "interactionCount": 131319,
-      "interactionDelta": 394,
+      "interactionCount": 131488,
+      "interactionDelta": 563,
       "rankChange": 0,
       "creatorHandle": "maybi",
       "creatorNickname": "maybi",
@@ -6453,8 +6479,8 @@
         "연하",
         "귀여움"
       ],
-      "interactionCount": 108295,
-      "interactionDelta": 543,
+      "interactionCount": 108389,
+      "interactionDelta": 637,
       "rankChange": 0,
       "creatorHandle": "Manamune",
       "creatorNickname": "Mana0724",
@@ -6472,8 +6498,8 @@
         "방송",
         "bl"
       ],
-      "interactionCount": 130701,
-      "interactionDelta": 636,
+      "interactionCount": 130829,
+      "interactionDelta": 764,
       "rankChange": 0,
       "creatorHandle": "hoing_wang",
       "creatorNickname": "호잉왕",
@@ -6491,8 +6517,8 @@
         "마교",
         "남궁세가"
       ],
-      "interactionCount": 105404,
-      "interactionDelta": 327,
+      "interactionCount": 105410,
+      "interactionDelta": 333,
       "rankChange": -1,
       "creatorHandle": "Hawaiianspaghetti",
       "creatorNickname": "하와이안스파게티",
@@ -6510,8 +6536,8 @@
         "헌터",
         "게이트"
       ],
-      "interactionCount": 101327,
-      "interactionDelta": 952,
+      "interactionCount": 101593,
+      "interactionDelta": 1218,
       "rankChange": 0,
       "creatorHandle": "Fire_Duck",
       "creatorNickname": "불타는오리",
@@ -6529,20 +6555,20 @@
         "순애",
         "첫사랑"
       ],
-      "interactionCount": 110268,
-      "interactionDelta": 2290,
+      "interactionCount": 110988,
+      "interactionDelta": 3010,
       "rankChange": 6,
       "creatorHandle": "seoie",
       "creatorNickname": "서이",
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/335adfbe-df47-4906-8532-7d00afeabc9c/1f015b5a-7b39-48cf-a042-e598c8c9e687.jpeg",
       "rank": 91,
       "interactionHistory": [
-        80329,
         84714,
         86183,
         88915,
         92724,
-        96106
+        96106,
+        101501
       ]
     },
     {
@@ -6556,12 +6582,12 @@
         "각성자",
         "탑"
       ],
-      "interactionCount": 106086,
-      "interactionDelta": 1231,
+      "interactionCount": 106349,
+      "interactionDelta": 1494,
       "rankChange": -1,
       "creatorHandle": "FatGolf9835",
       "creatorNickname": "어흐령",
-      "creatorImageUrl": null,
+      "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/0b64b979-7773-4a8f-b791-638d61a1818b/9a8f1e1e-47b4-49f8-9a26-2069a44781d7.png",
       "rank": 92
     },
     {
@@ -6575,8 +6601,8 @@
         "대한민국",
         "한국"
       ],
-      "interactionCount": 92783,
-      "interactionDelta": 77,
+      "interactionCount": 92900,
+      "interactionDelta": 194,
       "rankChange": -1,
       "creatorHandle": "Kacao",
       "creatorNickname": "카카오",
@@ -6594,8 +6620,8 @@
         "동거",
         "연상"
       ],
-      "interactionCount": 89282,
-      "interactionDelta": 508,
+      "interactionCount": 89412,
+      "interactionDelta": 638,
       "rankChange": -1,
       "creatorHandle": "yebin5122",
       "creatorNickname": "예빈",
@@ -6613,8 +6639,8 @@
         "양아치",
         "여우"
       ],
-      "interactionCount": 113239,
-      "interactionDelta": 865,
+      "interactionCount": 113319,
+      "interactionDelta": 945,
       "rankChange": -1,
       "creatorHandle": "Soxosil217",
       "creatorNickname": "217",
@@ -6632,8 +6658,8 @@
         "서큐버스",
         "로맨스"
       ],
-      "interactionCount": 87553,
-      "interactionDelta": 591,
+      "interactionCount": 87657,
+      "interactionDelta": 695,
       "rankChange": 0,
       "creatorHandle": "StoutTwine0981",
       "creatorNickname": "순애최고",
@@ -6651,7 +6677,7 @@
         "집착",
         "동갑"
       ],
-      "interactionCount": 115834,
+      "interactionCount": 116639,
       "interactionDelta": null,
       "rankChange": null,
       "creatorHandle": "MonCookie_0V0",
@@ -6659,12 +6685,12 @@
       "creatorImageUrl": "https://image.zeta-ai.io/user-profile-image/c204b659-3157-497b-b71c-119bdc3e0480/b3671fed-4a88-4c5c-b189-d27fa9585141.png",
       "rank": 98,
       "interactionHistory": [
-        91209,
         94019,
         95396,
         96494,
         98646,
-        103488
+        103488,
+        106738
       ]
     },
     {
@@ -6678,8 +6704,8 @@
         "제국",
         "중세판타지"
       ],
-      "interactionCount": 102342,
-      "interactionDelta": 469,
+      "interactionCount": 102421,
+      "interactionDelta": 548,
       "rankChange": -1,
       "creatorHandle": "Kacao",
       "creatorNickname": "카카오",
@@ -6697,8 +6723,8 @@
         "츤데레",
         "일진"
       ],
-      "interactionCount": 86676,
-      "interactionDelta": 362,
+      "interactionCount": 86720,
+      "interactionDelta": 406,
       "rankChange": -1,
       "creatorHandle": "_Han_lov",
       "creatorNickname": "김한월",
@@ -6713,36 +6739,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 7696,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 6715,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 7950,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 9221,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 8211,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 9227,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 9702,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 8731,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 8354,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 9057,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 9480,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 8821,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "bl": [
@@ -6751,36 +6777,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 10068,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 9677,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 8827,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 8706,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 8520,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 8695,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 8755,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 8913,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 9785,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 8686,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 9348,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 9038,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "gl": [
@@ -6789,36 +6815,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 1581,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 1694,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 2036,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 1118,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 901,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 636,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 1147,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 858,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 460,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 694,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 814,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 737,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "ntr_agg": [
@@ -6827,20 +6853,20 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 299,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 107,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 181,
-        "ts": "2026-08-10T19:51:13.791+00:00"
-      },
-      {
-        "score": 793,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
         "score": 22,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T05:01:28.72+00:00"
+      },
+      {
+        "score": 22,
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 22,
@@ -6848,15 +6874,15 @@
       },
       {
         "score": 18,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
         "score": 16,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 16,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "hpj_agg": [
@@ -6865,36 +6891,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 8659,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 8274,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 9431,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 8335,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 8488,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 8560,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 8365,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 7889,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 7662,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 7964,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 8358,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 8460,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "harem_agg": [
@@ -6903,36 +6929,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 198,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 264,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 123,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 181,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 250,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 148,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 159,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 0,
-        "ts": "2026-08-11T15:55:21.037+00:00"
-      },
-      {
-        "score": 195,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 30,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T18:54:28.014+00:00"
+      },
+      {
+        "score": 0,
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "혐관": [
@@ -6941,36 +6967,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 2152,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 3179,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 2654,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 1993,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 2159,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 2269,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 2171,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 1857,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 1970,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 1914,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 1995,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 2176,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "능글": [
@@ -6979,36 +7005,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 2757,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 2591,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 2621,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 2222,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 2963,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 2592,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 2645,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 2914,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 3814,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 2991,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 3095,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 3657,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "소꿉친구": [
@@ -7017,36 +7043,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 2080,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 1934,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 1672,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 2145,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 1771,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 2563,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 2140,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 2369,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 1802,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 1912,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 2683,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 1582,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "배신": [
@@ -7055,20 +7081,20 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 482,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 508,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 569,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
         "score": 233,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 324,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 282,
@@ -7076,15 +7102,15 @@
       },
       {
         "score": 245,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 342,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 269,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 242,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "오지콤": [
@@ -7093,36 +7119,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 881,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 765,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 679,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 792,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 680,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 1048,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 959,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 1029,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 770,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 1007,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 965,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 1060,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "짝사랑": [
@@ -7131,36 +7157,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 1228,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 985,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 1747,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 2331,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 2039,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 1511,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 2173,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 1928,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 1335,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 1833,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 1683,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 1680,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "fantasy_agg": [
@@ -7169,36 +7195,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 5308,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 5101,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 3898,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 3382,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 3736,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 3773,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 3368,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 4128,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 3089,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 3502,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 3601,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 4366,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "isekai_agg": [
@@ -7207,20 +7233,20 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 794,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 777,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 195,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 232,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 304,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 349,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 177,
@@ -7228,15 +7254,15 @@
       },
       {
         "score": 218,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 308,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 502,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 498,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "무협": [
@@ -7245,36 +7271,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 116,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 230,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 270,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 594,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 151,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 340,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 596,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 273,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 420,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 509,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 585,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 345,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "sf": [
@@ -7283,20 +7309,20 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 27,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 159,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 117,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 0,
@@ -7304,15 +7330,15 @@
       },
       {
         "score": 0,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 0,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 114,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 90,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "thriller_agg": [
@@ -7322,19 +7348,19 @@
       },
       {
         "score": 218,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 627,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 455,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 725,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 232,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 232,
@@ -7342,15 +7368,15 @@
       },
       {
         "score": 52,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
         "score": 52,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 52,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "학원": [
@@ -7360,19 +7386,19 @@
       },
       {
         "score": 0,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 0,
@@ -7380,15 +7406,15 @@
       },
       {
         "score": 0,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "현대": [
@@ -7397,36 +7423,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 150,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 201,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 253,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 295,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 331,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 169,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 160,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 254,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 131,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 26,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 25,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 61,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "수인": [
@@ -7435,36 +7461,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 1159,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 1041,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 1372,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 1416,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 1019,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 879,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 1118,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 780,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 754,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 561,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 915,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 672,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "재벌": [
@@ -7473,36 +7499,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 990,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 810,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 853,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 1115,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 940,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 1222,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 1713,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 1384,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 1112,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 1061,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 1762,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 1220,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "연예계": [
@@ -7512,19 +7538,19 @@
       },
       {
         "score": 0,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 0,
@@ -7532,15 +7558,15 @@
       },
       {
         "score": 0,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "게임": [
@@ -7550,35 +7576,35 @@
       },
       {
         "score": 0,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 144,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 252,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 0,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 0,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 228,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 207,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 120,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 78,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 36,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "일상": [
@@ -7587,36 +7613,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 1480,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 1181,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 2361,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 1784,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 968,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 946,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 881,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 1063,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 745,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 617,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 1261,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 1164,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "대학생": [
@@ -7625,36 +7651,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 2238,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 2241,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 1179,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 1558,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 1596,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 2683,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 2467,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 1869,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 1894,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 1550,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 1953,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 1841,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "일진": [
@@ -7663,36 +7689,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 561,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 719,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 1029,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 933,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 1368,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 1107,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 815,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 1085,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 756,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 707,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 770,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 1276,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "조직": [
@@ -7701,36 +7727,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 838,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 668,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 830,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 760,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 778,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 708,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 594,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 631,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 601,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 652,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 697,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 679,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ],
     "정략결혼": [
@@ -7739,36 +7765,36 @@
         "ts": "2026-08-09T22:23:47.379+00:00"
       },
       {
-        "score": 462,
-        "ts": "2026-08-10T07:19:59.227+00:00"
+        "score": 579,
+        "ts": "2026-08-10T09:12:55.638+00:00"
       },
       {
         "score": 502,
-        "ts": "2026-08-10T19:51:13.791+00:00"
+        "ts": "2026-08-10T20:35:27.064+00:00"
       },
       {
-        "score": 504,
-        "ts": "2026-08-11T03:38:10.238+00:00"
+        "score": 1175,
+        "ts": "2026-08-11T05:01:28.72+00:00"
       },
       {
         "score": 1244,
-        "ts": "2026-08-11T09:55:27.896+00:00"
+        "ts": "2026-08-11T10:44:47.984+00:00"
       },
       {
         "score": 1172,
         "ts": "2026-08-11T14:16:11.3+00:00"
       },
       {
-        "score": 724,
-        "ts": "2026-08-11T15:55:21.037+00:00"
+        "score": 781,
+        "ts": "2026-08-11T16:52:56.814+00:00"
       },
       {
-        "score": 1106,
-        "ts": "2026-08-11T17:53:21.028+00:00"
+        "score": 1316,
+        "ts": "2026-08-11T18:54:28.014+00:00"
       },
       {
         "score": 1249,
-        "ts": "2026-08-11T19:57:43.005Z"
+        "ts": "2026-08-11T20:43:42.305Z"
       }
     ]
   },
@@ -7833,33 +7859,33 @@
     "정략결혼": -67
   },
   "tagScoresDeltaRef": {
-    "순애": 1,
-    "bl": 1,
-    "gl": 1,
-    "ntr_agg": 1,
-    "hpj_agg": 1,
-    "harem_agg": 1,
-    "혐관": 1,
-    "능글": 1,
-    "소꿉친구": 1,
-    "배신": 1,
-    "오지콤": 1,
-    "짝사랑": 1,
-    "fantasy_agg": 1,
-    "isekai_agg": 1,
-    "무협": 1,
-    "sf": 1,
-    "thriller_agg": 1,
-    "학원": 1,
-    "현대": 1,
-    "수인": 1,
-    "재벌": 1,
-    "연예계": 1,
-    "게임": 1,
-    "일상": 1,
-    "대학생": 1,
-    "일진": 1,
-    "조직": 1,
-    "정략결혼": 1
+    "순애": 2,
+    "bl": 2,
+    "gl": 2,
+    "ntr_agg": 2,
+    "hpj_agg": 2,
+    "harem_agg": 2,
+    "혐관": 2,
+    "능글": 2,
+    "소꿉친구": 2,
+    "배신": 2,
+    "오지콤": 2,
+    "짝사랑": 2,
+    "fantasy_agg": 2,
+    "isekai_agg": 2,
+    "무협": 2,
+    "sf": 2,
+    "thriller_agg": 2,
+    "학원": 2,
+    "현대": 2,
+    "수인": 2,
+    "재벌": 2,
+    "연예계": 2,
+    "게임": 2,
+    "일상": 2,
+    "대학생": 2,
+    "일진": 2,
+    "조직": 2,
+    "정략결혼": 2
   }
 }
