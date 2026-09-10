@@ -676,7 +676,6 @@ export default defineConfig(({ mode }) => {
       rolldownOptions: {
         output: {
           manualChunks(id) {
-            if (id.includes('highcharts')) return 'vendor-highcharts';
             if (id.includes('three') || id.includes('@react-three')) return 'vendor-three';
           },
         },
