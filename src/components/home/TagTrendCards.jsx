@@ -1,7 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { formatNumber } from '../../utils/tierCalculator';
+import Segmented from '../ui/Segmented';
+import Delta from '../ui/Delta';
+import Sparkline from '../ui/Sparkline';
+import Num from '../ui/Num';
 
-// 카테고리 / 패밀리 키 + 라벨은 TagBubbleSection 과 동일하게 유지한다.
+// 카테고리 / 카드 키 + 라벨은 TagBubbleSection 과 동일하게 유지한다.
 const CATEGORIES = [
   {
     key: 'romance',
@@ -51,149 +54,42 @@ const CATEGORIES = [
   },
 ];
 
-// 패밀리별 강조 색상 — 카테고리 톤을 따른다 (로맨스=로즈, 장르=인디고, 설정=앰버 계열)
-const ACCENT = '#e11d48';
-const FAMILY_ACCENT = {
-  // 로맨스 / 감정
-  순애: { color: '#f472b6', emoji: '💗' },
-  bl: { color: '#60a5fa', emoji: '💙' },
-  gl: { color: '#f9a8d4', emoji: '🌸' },
-  ntr_agg: { color: '#fb7185', emoji: '🔥' },
-  hpj_agg: { color: '#c084fc', emoji: '🥀' },
-  harem_agg: { color: '#fbbf24', emoji: '👑' },
-  혐관: { color: '#f87171', emoji: '⚔️' },
-  능글: { color: '#fcd34d', emoji: '😏' },
-  소꿉친구: { color: '#7dd3fc', emoji: '🧒' },
-  배신: { color: '#fca5a5', emoji: '🗡️' },
-  오지콤: { color: '#a5b4fc', emoji: '🌀' },
-  짝사랑: { color: '#f9a8d4', emoji: '💌' },
-  // 세계관 / 장르
-  fantasy_agg: { color: '#818cf8', emoji: '✨' },
-  isekai_agg: { color: '#a78bfa', emoji: '🌌' },
-  무협: { color: '#fbbf24', emoji: '🥋' },
-  sf: { color: '#22d3ee', emoji: '🛸' },
-  thriller_agg: { color: '#f87171', emoji: '🔪' },
-  학원: { color: '#5eead4', emoji: '🎓' },
-  현대: { color: '#93c5fd', emoji: '🏙️' },
-  수인: { color: '#fbbf24', emoji: '🐾' },
-  // 설정 / 상황
-  재벌: { color: '#fbbf24', emoji: '💎' },
-  연예계: { color: '#f472b6', emoji: '🎤' },
-  게임: { color: '#34d399', emoji: '🎮' },
-  일상: { color: '#86efac', emoji: '☕' },
-  대학생: { color: '#7dd3fc', emoji: '📚' },
-  일진: { color: '#f87171', emoji: '💢' },
-  조직: { color: '#9ca3af', emoji: '🕴️' },
-  정략결혼: { color: '#fbbf24', emoji: '💍' },
-};
-
-const UP_COLOR = '#4ade80';
-const DOWN_COLOR = '#f87171';
-const NEUTRAL_COLOR = '#9ca3af';
-
-const SPARK_WIDTH = 120;
-const SPARK_HEIGHT = 32;
-
-function getAccent(key) {
-  return FAMILY_ACCENT[key] || { color: ACCENT, emoji: '🏷️' };
-}
-
-// tagTrend[key] 시계열을 폴리라인 좌표로 정규화
-function buildSparkline(points) {
-  const scores = (points || [])
-    .map((p) => (typeof p?.score === 'number' ? p.score : null))
-    .filter((s) => s != null);
-  if (scores.length < 2) return null;
-
-  const min = Math.min(...scores);
-  const max = Math.max(...scores);
-  const range = max - min || 1;
-  const stepX = SPARK_WIDTH / (scores.length - 1);
-  const padY = 3;
-  const usableH = SPARK_HEIGHT - padY * 2;
-
-  return scores
-    .map((s, i) => {
-      const x = i * stepX;
-      const y = padY + (1 - (s - min) / range) * usableH;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(' ');
-}
-
-function DeltaBadge({ delta, score }) {
-  if (delta == null || delta === 0) {
-    return <span className="text-[11px] font-semibold tabular-nums" style={{ color: NEUTRAL_COLOR }}>— 변동 없음</span>;
-  }
-  const isUp = delta > 0;
-  const color = isUp ? UP_COLOR : DOWN_COLOR;
-  const arrow = isUp ? '▲' : '▼';
-  const abs = Math.abs(delta);
-  const base = score != null && score - delta > 0 ? score - delta : null;
-  const pct = base ? `${((abs / base) * 100).toFixed(1)}%` : null;
-  return (
-    <span className="text-[11px] font-bold tabular-nums" style={{ color }}>
-      {arrow} {formatNumber(abs)}
-      {pct && <span className="ml-1 font-semibold opacity-80">({pct})</span>}
-    </span>
-  );
-}
-
 function TagCard({ card, score, delta, trendPoints, onTagClick }) {
-  const accent = getAccent(card.key);
-  const sparkPoints = useMemo(() => buildSparkline(trendPoints), [trendPoints]);
+  const sparkValues = useMemo(
+    () => (trendPoints || []).map((p) => (typeof p?.score === 'number' ? p.score : null)).filter((v) => v != null),
+    [trendPoints]
+  );
 
   return (
     <button
       type="button"
       onClick={() => onTagClick?.(card.key)}
-      className="group relative flex flex-col gap-2 overflow-hidden rounded-xl border border-white/10 bg-white/[0.05] px-3.5 py-3 text-left transition-transform duration-200 ease-out will-change-transform hover:-translate-y-1 motion-reduce:transform-none motion-reduce:transition-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e11d48]/60"
-      style={{
-        backgroundImage: `linear-gradient(135deg, ${accent.color}14 0%, rgba(255,255,255,0.03) 55%)`,
-      }}
+      className="eb-tile flex flex-col gap-2 text-left transition-transform duration-[120ms] ease-out hover:-translate-y-0.5 motion-reduce:transform-none"
     >
-      {/* 라벨 행 */}
-      <div className="flex items-center gap-1.5 min-w-0">
-        <span aria-hidden className="text-[14px] leading-none">{accent.emoji}</span>
-        <span className="truncate text-[13px] font-bold text-white/90">{card.label}</span>
-      </div>
-      <span className="truncate text-[10px] text-white/35 -mt-1">{card.subLabel}</span>
-
-      {/* 점수 */}
-      <div className="flex items-baseline gap-1">
-        <span className="text-[22px] font-extrabold tabular-nums leading-none" style={{ color: accent.color }}>
-          {formatNumber(score)}
-        </span>
-        <span className="text-[10px] font-semibold text-white/40">pt</span>
+      <div className="min-w-0">
+        <h2 className="t-h2 truncate">{card.label}</h2>
+        <p className="t-small truncate" style={{ color: 'var(--fg-3)' }}>{card.subLabel}</p>
       </div>
 
-      {/* 변동 */}
-      <DeltaBadge delta={delta} score={score} />
+      <div className="flex items-baseline gap-1.5">
+        <Num value={score} size="h1" />
+        <span className="t-small" style={{ color: 'var(--fg-3)' }}>pt</span>
+      </div>
 
-      {/* 스파크라인 */}
-      {sparkPoints && (
-        <svg
-          className="mt-0.5 w-full"
-          viewBox={`0 0 ${SPARK_WIDTH} ${SPARK_HEIGHT}`}
-          height={SPARK_HEIGHT}
-          preserveAspectRatio="none"
-          aria-hidden
-        >
-          <polyline
-            points={sparkPoints}
-            fill="none"
-            stroke={accent.color}
-            strokeWidth="1.5"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            opacity="0.9"
-          />
-        </svg>
+      <Delta value={delta} />
+
+      {sparkValues.length >= 2 && (
+        <Sparkline values={sparkValues} className="w-full h-7 sm:h-9" />
       )}
     </button>
   );
 }
 
+/**
+ * 인기 태그 화면 — 카테고리 세그먼트 + 태그 트렌드 타일 그리드.
+ * 카드 클릭 시 메인 탭의 해당 태그 레일로 점프(onTagClick).
+ * props: { tagScores, tagScoresDelta, tagTrend, onTagClick, activeTabOverride }
+ */
 export default function TagTrendCards({
   tagScores = null,
   tagScoresDelta = null,
@@ -204,7 +100,7 @@ export default function TagTrendCards({
   // 사용자가 직접 선택한 카테고리. null 이면 override / 기본값을 따른다.
   const [userCategory, setUserCategory] = useState(null);
 
-  // activeTabOverride(카테고리 키 또는 패밀리 키)를 카테고리 키로 정규화
+  // activeTabOverride(카테고리 키 또는 카드 키)를 카테고리 키로 정규화
   const overrideCategory = useMemo(() => {
     if (!activeTabOverride) return null;
     if (CATEGORIES.some((c) => c.key === activeTabOverride)) return activeTabOverride;
@@ -226,34 +122,14 @@ export default function TagTrendCards({
 
   if (!tagScores) return null;
 
-  return (
-    <section className="flex flex-col gap-3" aria-label="인기 태그">
-      {/* 카테고리 칩 */}
-      <div className="flex flex-wrap items-center gap-2">
-        {CATEGORIES.map((cat) => {
-          const isActive = cat.key === activeCategory;
-          return (
-            <button
-              key={cat.key}
-              type="button"
-              onClick={() => setUserCategory(cat.key)}
-              className={`rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition-colors duration-150 motion-reduce:transition-none ${
-                isActive
-                  ? 'text-white shadow-sm'
-                  : 'bg-white/10 text-white/70 hover:bg-white/[0.16] hover:text-white/90'
-              }`}
-              style={isActive ? { backgroundColor: ACCENT } : undefined}
-              aria-pressed={isActive}
-            >
-              {cat.label}
-            </button>
-          );
-        })}
-      </div>
+  const segOptions = CATEGORIES.map((c) => ({ value: c.key, label: c.label }));
 
-      {/* 카드 그리드 */}
+  return (
+    <section className="flex flex-col gap-4" aria-label="인기 태그">
+      <Segmented options={segOptions} value={activeCategory} onChange={setUserCategory} className="w-fit" />
+
       {visibleCards.length > 0 ? (
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {visibleCards.map(({ card, score }) => (
             <TagCard
               key={card.key}
@@ -266,7 +142,7 @@ export default function TagTrendCards({
           ))}
         </div>
       ) : (
-        <p className="py-6 text-center text-[12px] text-white/35">표시할 태그 데이터가 없습니다.</p>
+        <p className="py-6 text-center t-body" style={{ color: 'var(--fg-3)' }}>표시할 태그 데이터가 없습니다.</p>
       )}
     </section>
   );

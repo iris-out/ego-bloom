@@ -130,14 +130,6 @@
 ::selection { background: var(--accent); color: var(--accent-fg); }
 :focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
 
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--line) transparent;
-}
-*::-webkit-scrollbar { width: 6px; height: 6px; }
-*::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
-
 /* --------------------------------------------------------------------
    Tailwind 4 매핑
    -------------------------------------------------------------------- */
@@ -199,10 +191,25 @@
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
 
+  /* .eb-scroll-x 같은 @layer components 클래스가 scrollbar-width: none 으로
+     덮어쓸 수 있도록, 범용 스크롤바 리셋도 반드시 @layer base 안에 둔다(layer 밖
+     규칙은 명시도와 무관하게 항상 이긴다 — 위 주석 참고). */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
   html {
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
-    overflow-x: hidden;
+    /* overflow-x: hidden 은 html/body 를 스크롤 컨테이너로 만들어 하위 position:
+       sticky 의 기준 박스를 뷰포트가 아닌 이 컨테이너로 바꿔버린다(헤더가 sticky
+       를 잃는 원인이었다). clip 은 스크롤 컨테이너를 만들지 않으면서 가로 넘침만
+       잘라낸다. */
+    overflow-x: clip;
     scrollbar-gutter: stable;
     background: var(--bg);
   }
@@ -221,7 +228,7 @@
     padding-right: env(safe-area-inset-right);
     padding-bottom: env(safe-area-inset-bottom);
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   a { color: inherit; text-decoration: none; }
@@ -413,6 +420,16 @@
 }
 .animate-emblem-reveal { animation: eb-emblem-reveal 200ms ease-out both; }
 
+/* 스포트라이트/라이브뷰 카드 전환용 크로스페이드다. from/to 애니메이션이라
+   중간에 멈춰도 최종 상태는 항상 opacity: 1 로 안착한다(인라인 style 로
+   opacity 를 계속 토글하던 이전 방식은 특정 타이밍에 불투명도가 고정되는
+   버그가 있었다). */
+@keyframes eb-crossfade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.eb-crossfade { animation: eb-crossfade-in 200ms ease-out; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation: none !important;
@@ -421,266 +438,11 @@
 }
 
 /* ==========================================================================
-   LEGACY — 화면 마이그레이션 후 제거한다.
-   아직 새 화면으로 옮기지 않은 컴포넌트가 참조하는 클래스와 변수만 남긴다.
-   그라데이션, backdrop-filter, blur/drop-shadow 필터, 무한 애니메이션은
-   기계적으로 제거 가능한 범위에서 걷어냈다.
+   레거시 블록에서 살아남은 것만 남는다. 나머지 alias 토큰, 애니메이션, .nav,
+   .profile-layout, .card, .glass-*, .skeleton-bone 등은 그 어떤 화면도 더 이상
+   참조하지 않아 걷어냈다.
    ========================================================================== */
-
-:root {
-  /* 구 토큰을 새 토큰에 alias 한다. */
-  --bg-base: var(--bg);
-  --bg-primary: var(--bg);
-  --bg-profile: var(--bg);
-  --bg-tier: var(--bg);
-  --c-surface-1: var(--surface);
-  --c-rule: var(--line);
-  --bg-secondary: var(--surface-2);
-  --card: var(--surface);
-  --border: var(--line);
-  --c-text-primary: var(--fg);
-  --text-primary: var(--fg);
-  --c-text-secondary: var(--fg-2);
-  --text-secondary: var(--fg-2);
-  --c-text-tertiary: var(--fg-3);
-  --text-tertiary: var(--fg-3);
-  --accent-bright: var(--accent-ink);
-  --accent-dark: var(--accent);
-  --shadow-card: var(--shadow);
-  --skeleton-base: var(--surface-2);
-  --skeleton-shine: var(--line);
-  --nav-height: 54px;
-  --font-mono: "Pretendard Variable", Pretendard, monospace;
-  --c-up: var(--up);
-  --c-down: var(--down);
-  --c-label: var(--fg-3);
-  --label-tracking: 0.07em;
-
-  /* 구 티어 색상 — 새 --t-*, --c-* 팔레트에 맞춘다. */
-  --tier-b: var(--c-b);
-  --tier-a: var(--c-a);
-  --tier-s: var(--c-s);
-  --tier-r: var(--c-r);
-  --tier-sr: var(--c-sr);
-  --tier-x: var(--c-x);
-  --tier-bronze: var(--t-bronze);
-  --tier-silver: var(--t-silver);
-  --tier-gold: var(--t-gold);
-  --tier-platinum: var(--t-platinum);
-  --tier-diamond: var(--t-diamond);
-  --tier-master: var(--t-master);
-  --tier-champion: var(--t-champion);
-
-  /* c-glass-* — backdrop-filter 를 걷어냈으므로 불투명 표면으로 대체한다. */
-  --c-glass-bg: var(--surface-2);
-  --c-glass-bg-hover: var(--surface-2);
-  --c-glass-border: var(--line);
-  --c-glass-blur: 0px;
-}
-
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes slide-down {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes di-expand {
-  from { opacity: 0; transform: translateY(-12px) scaleX(0.6) scaleY(0.5); }
-  to   { opacity: 1; transform: translateY(0) scaleX(1) scaleY(1); }
-}
-@keyframes slideUp {
-  0%   { opacity: 0; transform: translateY(30px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-@keyframes star-twinkle {
-  0%, 100% { opacity: var(--star-base-opacity, 0.25); transform: scale(1); }
-  50%       { opacity: var(--star-peak-opacity, 0.65); transform: scale(1.4); }
-}
-@keyframes hero-fade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-/* tier-erupt: 원래 filter: blur()/brightness() 를 썼다. 규칙상 filter 애니메이션을
-   금지하므로 transform/opacity 만 남긴다 (ProfileHeader.jsx 가 여전히 참조한다). */
-@keyframes tier-erupt {
-  0%   { transform: scale(0.4); opacity: 0; }
-  40%  { transform: scale(1.12); opacity: 1; }
-  65%  { transform: scale(0.96); opacity: 1; }
-  100% { transform: scale(1.0); opacity: 1; }
-}
-
-.animate-enter        { animation: fade-in-up 0.28s ease-out both; }
-.animate-fade-in-up   { animation: fade-in-up 0.35s ease-out both; }
-.animate-fade-in      { animation: fade-in-up 0.2s ease-out both; }
-.animate-slide-down   { animation: slide-down 0.25s ease-out both; }
-.animate-di-expand    { animation: di-expand 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
-.animate-slide-up     { animation: slideUp 0.32s cubic-bezier(0.22,1,0.36,1) both; }
-.hero-fade             { animation: hero-fade 0.6s ease-out both; }
-.tier-erupt             { animation: tier-erupt 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
-
-.stagger-1 { animation: fade-in-up 0.35s ease-out both; animation-delay: 0ms; }
-.stagger-2 { animation: fade-in-up 0.35s ease-out both; animation-delay: 60ms; }
-.stagger-3 { animation: fade-in-up 0.35s ease-out both; animation-delay: 120ms; }
-.stagger-4 { animation: fade-in-up 0.35s ease-out both; animation-delay: 180ms; }
-.stagger-5 { animation: fade-in-up 0.35s ease-out both; animation-delay: 240ms; }
-@media (max-width: 640px) {
-  .stagger-1 { animation-delay: 0ms; }
-  .stagger-2 { animation-delay: 40ms; }
-  .stagger-3 { animation-delay: 80ms; }
-  .stagger-4 { animation-delay: 120ms; }
-  .stagger-5 { animation-delay: 160ms; }
-}
-
-/* StarField(HomePage, LiveViewModal) 가 여전히 참조하는 무한 반짝임이다.
-   화면을 옮기면서 함께 제거한다. */
-.star-twinkle { animation: star-twinkle var(--star-dur, 3s) ease-in-out infinite; }
-
-.nav {
-  position: sticky;
-  top: var(--pwa-banner-h, 0px);
-  z-index: 100;
-  height: var(--nav-height);
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-}
-.nav-inner {
-  width: 100%;
-  max-width: 680px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  gap: 10px;
-  min-width: 0;
-}
-@media (min-width: 1024px) {
-  .nav-inner { max-width: 1280px; padding: 0 6%; }
-}
-.nav-logo {
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--fg);
-  letter-spacing: -0.3px;
-  flex: 1;
-}
-.nav-logo em { font-style: normal; color: var(--accent-ink); }
-.nav-back {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--fg-2);
-  padding: 6px 0;
-  transition: color 0.15s;
-  cursor: pointer;
-  background: none;
-  border: none;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-@media (hover: hover) { .nav-back:hover { color: var(--accent-ink); } }
-.nav-back svg { width: 16px; height: 16px; flex-shrink: 0; }
-.nav-btn {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--fg-2);
-  transition: color 0.15s, background 0.15s;
-}
-@media (hover: hover) { .nav-btn:hover { color: var(--fg); background: var(--surface); } }
-.nav-btn svg { width: 16px; height: 16px; }
-
-.profile-layout {
-  display: flex;
-  flex-direction: column;
-  padding-top: 16px;
-}
-.profile-layout-tabbar { order: 2; }
-.profile-layout-sidebar { order: 1; }
-.profile-layout-main    { order: 3; }
-@media (min-width: 1024px) {
-  .profile-layout {
-    display: grid;
-    grid-template-columns: 36% 1fr;
-    grid-template-rows: auto 1fr;
-    column-gap: 24px;
-    align-items: start;
-    padding-top: 20px;
-  }
-  .profile-layout-tabbar { grid-column: 2; grid-row: 1; order: unset; }
-  .profile-layout-sidebar {
-    grid-column: 1;
-    grid-row: 1 / -1;
-    order: unset;
-    position: sticky;
-    top: 16px;
-    align-self: start;
-  }
-  .profile-layout-main { grid-column: 2; grid-row: 2; order: unset; min-width: 0; }
-}
-
-.bg-profile { background: var(--bg); }
-.bg-tier {
-  /* 원래 격자 무늬를 그라데이션 2장으로 그렸다. 그라데이션은 --foil 하나만
-     허용하므로 걷어내고 평평한 배경으로 남긴다. */
-  background: var(--bg);
-  opacity: 1;
-}
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 14px 12px;
-}
-
-/* 유리 표면 — backdrop-filter 를 걷어내고 불투명한 --surface-2 로 대체했다. */
-.glass-card {
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-}
-.glass-card-sm {
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-}
-.glass-pill {
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-}
-
-.skeleton-bone {
-  background: var(--surface-2);
-  border-radius: 6px;
-}
 
 .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-none::-webkit-scrollbar { display: none; }

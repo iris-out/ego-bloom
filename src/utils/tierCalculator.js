@@ -1,11 +1,11 @@
 // ===== CHARACTER TIER SYSTEM (per-character interaction count) =====
 export const CHARACTER_TIERS = [
-  { name: 'B', key: 'b', min: 0, color: '#A0AEC0', bg: '#EDF2F7', text: '#4A5568' },
-  { name: 'A', key: 'a', min: 1000, color: '#48BB78', bg: '#F0FFF4', text: '#22543D' },
-  { name: 'S', key: 's', min: 10000, color: '#4299E1', bg: '#EBF8FF', text: '#2A4365' },
-  { name: 'R', key: 'r', min: 100000, color: '#9F7AEA', bg: '#FAF5FF', text: '#44337A' },
-  { name: 'SR', key: 'sr', min: 1000000, color: '#ED8936', bg: '#FFFAF0', text: '#7B341E' },
-  { name: 'X', key: 'x', min: 10000000, color: '#F56565', bg: '#FFF5F5', text: '#742A2A' },
+  { name: 'B', key: 'b', min: 0 },
+  { name: 'A', key: 'a', min: 1000 },
+  { name: 'S', key: 's', min: 10000 },
+  { name: 'R', key: 'r', min: 100000 },
+  { name: 'SR', key: 'sr', min: 1000000 },
+  { name: 'X', key: 'x', min: 10000000 },
 ];
 
 /** Returns tooltip text for tier criteria */
@@ -49,14 +49,14 @@ function calcSubdivision(ratio) {
 
 // ===== 크리에이터 티어 시스템 (ELO 점수 기준) =====
 export const CREATOR_TIERS = [
-  { key: 'unranked', name: 'Unranked', min: -1, gradient: 'from-gray-700 to-gray-800', color: '#718096' },
-  { key: 'bronze', name: 'Bronze', min: 0, gradient: 'from-amber-700 to-amber-900', color: '#B7791F' },
-  { key: 'silver', name: 'Silver', min: 12000, gradient: 'from-gray-300 to-gray-500', color: '#A0AEC0' },
-  { key: 'gold', name: 'Gold', min: 85000, gradient: 'from-yellow-300 to-yellow-600', color: '#ECC94B' },
-  { key: 'platinum', name: 'Platinum', min: 868500, gradient: 'from-cyan-300 to-cyan-600', color: '#38B2AC' },
-  { key: 'diamond', name: 'Diamond', min: 3908250, gradient: 'from-blue-400 to-blue-700', color: '#4299E1' },
-  { key: 'master', name: 'Master', min: 17370000, gradient: 'from-yellow-300 to-yellow-600', color: '#FFD700' },
-  { key: 'champion', name: 'Champion', min: 78165000, gradient: 'from-red-500 to-red-800', color: '#F56565' },
+  { key: 'unranked', name: 'Unranked', min: -1 },
+  { key: 'bronze', name: 'Bronze', min: 0 },
+  { key: 'silver', name: 'Silver', min: 12000 },
+  { key: 'gold', name: 'Gold', min: 85000 },
+  { key: 'platinum', name: 'Platinum', min: 868500 },
+  { key: 'diamond', name: 'Diamond', min: 3908250 },
+  { key: 'master', name: 'Master', min: 17370000 },
+  { key: 'champion', name: 'Champion', min: 78165000 },
 ];
 
 // 새로운 ELO V4.1 점수 산정 방식이다. (팔로워 x300, 음성 x100, 기준 완화)
@@ -242,9 +242,7 @@ export function formatNumber(num) {
 export function formatEloScore(rawScore) {
   if (rawScore == null || !Number.isFinite(rawScore)) return '0';
   const scaled = rawScore / 1000;
-  const abs = Math.abs(scaled);
-  const decimals = abs > 0 && abs < 100 ? 1 : 0;
-  return new Intl.NumberFormat('ko-KR', { maximumFractionDigits: decimals }).format(scaled);
+  return new Intl.NumberFormat('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(scaled);
 }
 
 export function toKST(dateInput) {

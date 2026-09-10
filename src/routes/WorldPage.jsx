@@ -2,7 +2,7 @@ import React, { Suspense, useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Sky, KeyboardControls, useKeyboardControls, Stars } from '@react-three/drei';
-import { ChevronLeft, Loader2 } from 'lucide-react';
+import { ChevronLeft, Loader2, Settings } from 'lucide-react';
 import * as THREE from 'three';
 import JoystickControls from '../components/JoystickControls';
 
@@ -1043,14 +1043,16 @@ function River({ timeOfDay }) {
 
 // ─── 빌딩 ────────────────────────────────────────────────────────────────
 
+// WebGL 머티리얼 색은 CSS 커스텀 프로퍼티를 읽지 못하므로, 바인더 Velvet 팔레트의
+// --t-* 값을 그대로 복제해 로컬에 둔다 (src/design/tiers.js 와 값만 동기화).
 function getTierColor(t) {
-  if (t==='champion') return '#F97316';
-  if (t==='master')   return '#D946EF';
-  if (t==='diamond')  return '#3B82F6';
-  if (t==='platinum') return '#E2E8F0';
-  if (t==='gold')     return '#FBBF24';
-  if (t==='silver')   return '#9CA3AF';
-  if (t==='bronze')   return '#C58356';
+  if (t==='champion') return '#FF6B5B';
+  if (t==='master')   return '#C58CFF';
+  if (t==='diamond')  return '#6AA8FF';
+  if (t==='platinum') return '#6FD3C8';
+  if (t==='gold')     return '#E8C04A';
+  if (t==='silver')   return '#B8C0CC';
+  if (t==='bronze')   return '#C98B5E';
   return '#444';
 }
 function getTierWidth(t) {
@@ -1425,9 +1427,10 @@ function WorldControls({ joystickValues, mobileVertical, acceleration, cameraTar
 function MiniMap({ buildings, cameraTargetRef }) {
   const canvasRef = useRef();
   const SIZE = 150, RANGE = 280;
+  // Canvas 2D fillStyle도 CSS 커스텀 프로퍼티를 읽지 못한다. getTierColor와 같은 팔레트를 쓴다.
   const TIER_COLORS = {
-    champion:'#DC2626', master:'#9333EA', diamond:'#2563EB',
-    platinum:'#94A3B8', gold:'#D97706', silver:'#6B7280', bronze:'#92400E'
+    champion:'#FF6B5B', master:'#C58CFF', diamond:'#6AA8FF',
+    platinum:'#6FD3C8', gold:'#E8C04A', silver:'#B8C0CC', bronze:'#C98B5E'
   };
 
   useEffect(() => {
@@ -1463,9 +1466,12 @@ function MiniMap({ buildings, cameraTargetRef }) {
   }, [buildings, cameraTargetRef]);
 
   return (
-    <div className="absolute top-4 right-4 z-[60] rounded-xl overflow-hidden border border-white/15 shadow-lg">
+    <div
+      className="absolute top-4 right-4 z-[60] rounded-tile overflow-hidden border-2 border-line"
+      style={{ boxShadow: 'var(--shadow-overlay)' }}
+    >
       <canvas ref={canvasRef} width={SIZE} height={SIZE} />
-      <div className="absolute bottom-1 left-0 right-0 text-center text-[8px] text-white/25 tracking-widest pointer-events-none">MINIMAP</div>
+      <div className="absolute bottom-1 left-0 right-0 text-center t-label text-fg-3 tracking-widest pointer-events-none">MINIMAP</div>
     </div>
   );
 }
@@ -1477,14 +1483,17 @@ function ControlHint() {
   useEffect(() => { const t = setTimeout(() => setOpacity(0), 4000); return () => clearTimeout(t); }, []);
   return (
     <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[60] pointer-events-none transition-opacity duration-1000" style={{ opacity }}>
-      <div className="bg-black/50 backdrop-blur-md border border-white/10 rounded-full px-5 py-2 flex items-center gap-3 text-white/50 text-[10px] tracking-wider whitespace-nowrap">
-        <span><span className="text-white/75 font-medium">W/A/S/D</span> 이동</span>
-        <span className="text-white/20">|</span>
-        <span><span className="text-white/75 font-medium">드래그</span> 회전</span>
-        <span className="text-white/20">|</span>
-        <span><span className="text-white/75 font-medium">휠</span> 줌</span>
-        <span className="text-white/20">|</span>
-        <span><span className="text-white/75 font-medium">Space/Ctrl</span> 고도</span>
+      <div
+        className="bg-surface border-2 border-line rounded-chip px-5 py-2 flex items-center gap-3 text-fg-2 t-small tracking-wide whitespace-nowrap"
+        style={{ boxShadow: 'var(--shadow-overlay)' }}
+      >
+        <span><span className="text-fg font-medium">W/A/S/D</span> 이동</span>
+        <span className="text-fg-3">|</span>
+        <span><span className="text-fg font-medium">드래그</span> 회전</span>
+        <span className="text-fg-3">|</span>
+        <span><span className="text-fg font-medium">휠</span> 줌</span>
+        <span className="text-fg-3">|</span>
+        <span><span className="text-fg font-medium">Space/Ctrl</span> 고도</span>
       </div>
     </div>
   );
@@ -1563,47 +1572,57 @@ export default function WorldPage() {
       { name:'up',      keys:['Space','ShiftLeft','ShiftRight'] },
       { name:'down',    keys:['ControlLeft','ControlRight'] },
     ]}>
-      <div className="w-screen h-screen relative bg-[#05050a] overflow-hidden select-none touch-none">
+      <div className="w-screen h-screen relative bg-bg overflow-hidden select-none touch-none">
         <JoystickControls joystickValues={joystickValues} />
 
         {/* 좌상단 헤더 */}
         <div className="absolute top-4 left-4 z-[60] flex items-center gap-3 pointer-events-none">
-          <button onClick={() => navigate('/')} className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-colors pointer-events-auto shadow-lg">
-            <ChevronLeft size={20} className="text-black" />
+          <button onClick={() => navigate('/')} className="eb-btn-icon pointer-events-auto" style={{ boxShadow: 'var(--shadow-overlay)' }} aria-label="홈으로 돌아가기">
+            <ChevronLeft size={20} />
           </button>
           <button onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-            className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-colors pointer-events-auto shadow-lg">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            className="eb-btn-icon pointer-events-auto" style={{ boxShadow: 'var(--shadow-overlay)' }} aria-label="월드 설정 열기">
+            <Settings size={18} strokeWidth={2} />
           </button>
-          {/* 데이터 수집 안내 버튼 */}
-          <div className="px-4 py-2 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex flex-col justify-center">
-            <span className="text-white text-[13px] font-bold tracking-wide">Ego-Bloom City</span>
-            <span className="text-white/50 text-[9px] tracking-widest uppercase">{TIME_LABELS[timeOfDay]} · {weather !== 'clear' ? WEATHER_LABELS[weather]+' · ' : ''}{buildings.length} Creators</span>
+          {/* 월드 상태 표시 */}
+          <div className="px-4 py-2 rounded-chip bg-surface border-2 border-line flex flex-col justify-center" style={{ boxShadow: 'var(--shadow-overlay)' }}>
+            <span className="t-ui text-fg tracking-wide">Ego-Bloom City</span>
+            <span className="t-label text-fg-3 tracking-widest uppercase">{TIME_LABELS[timeOfDay]} · {weather !== 'clear' ? WEATHER_LABELS[weather]+' · ' : ''}{buildings.length} Creators</span>
           </div>
         </div>
 
         {/* 설정 패널 */}
         {isSettingsOpen && (
-          <div className="absolute top-16 left-4 z-[70] w-68 bg-black/85 backdrop-blur-xl border border-white/10 rounded-2xl p-5 pointer-events-auto" style={{width:'17rem'}}>
-            <h3 className="text-white font-bold text-sm mb-4">월드 설정</h3>
+          <div
+            className="absolute top-16 left-4 z-[70] w-68 bg-surface border-2 border-line rounded-tile p-5 pointer-events-auto"
+            style={{ width: '17rem', boxShadow: 'var(--shadow-overlay)' }}
+          >
+            <h3 className="t-h3 text-fg mb-4">월드 설정</h3>
             <div className="flex flex-col gap-4">
 
               {/* 미니맵 표시 */}
               <div className="flex items-center justify-between mt-3">
-                <span className="text-white/70 text-xs">미니맵 표시</span>
+                <span className="t-small text-fg-2">미니맵 표시</span>
                 <button onClick={() => setShowMinimap(!showMinimap)}
-                  className={`w-10 h-5 rounded-full transition-colors relative ${showMinimap?'bg-blue-600':'bg-white/10'}`}>
-                  <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${showMinimap?'left-6':'left-1'}`}/>
+                  className="w-10 h-5 rounded-chip transition-colors relative"
+                  style={{ background: showMinimap ? 'var(--accent)' : 'var(--surface-2)' }}
+                  aria-pressed={showMinimap}
+                >
+                  <div
+                    className="absolute top-0.5 w-4 h-4 rounded-full bg-bg transition-all"
+                    style={{ left: showMinimap ? '22px' : '2px' }}
+                  />
                 </button>
               </div>
 
               {/* 시간대 */}
               <div className="flex flex-col gap-1.5">
-                <span className="text-white/70 text-xs">시간대</span>
+                <span className="t-small text-fg-2">시간대</span>
                 <div className="grid grid-cols-4 gap-1">
                   {Object.entries(TIME_LABELS).map(([k,v]) => (
                     <button key={k} onClick={() => setTimeOfDay(k)}
-                      className={`py-1 rounded-lg text-[10px] font-medium transition-colors ${timeOfDay===k?'bg-blue-600 text-white':'bg-white/10 text-white/50 hover:bg-white/20'}`}>
+                      className="eb-chip justify-center h-auto py-1 px-0"
+                      aria-pressed={timeOfDay===k}>
                       {v}
                     </button>
                   ))}
@@ -1612,11 +1631,12 @@ export default function WorldPage() {
 
               {/* 날씨 */}
               <div className="flex flex-col gap-1.5">
-                <span className="text-white/70 text-xs">날씨</span>
+                <span className="t-small text-fg-2">날씨</span>
                 <div className="grid grid-cols-4 gap-1">
                   {Object.entries(WEATHER_LABELS).map(([k,v]) => (
                     <button key={k} onClick={() => setWeather(k)}
-                      className={`py-1 rounded-lg text-[10px] font-medium transition-colors ${weather===k?'bg-blue-600 text-white':'bg-white/10 text-white/50 hover:bg-white/20'}`}>
+                      className="eb-chip justify-center h-auto py-1 px-0"
+                      aria-pressed={weather===k}>
                       {v}
                     </button>
                   ))}
@@ -1625,11 +1645,12 @@ export default function WorldPage() {
 
               {/* 그래픽 품질 */}
               <div className="flex flex-col gap-1.5">
-                <span className="text-white/70 text-xs">그래픽 품질</span>
+                <span className="t-small text-fg-2">그래픽 품질</span>
                 <div className="flex gap-1">
                   {[['low','낮음'],['medium','보통'],['high','높음']].map(([k,v]) => (
                     <button key={k} onClick={() => setQuality(k)}
-                      className={`flex-1 py-1 rounded-lg text-[10px] font-medium transition-colors ${quality===k?'bg-blue-600 text-white':'bg-white/10 text-white/50 hover:bg-white/20'}`}>
+                      className="eb-chip justify-center h-auto py-1 px-0 flex-1"
+                      aria-pressed={quality===k}>
                       {v}
                     </button>
                   ))}
@@ -1639,7 +1660,7 @@ export default function WorldPage() {
               {/* 카메라 속도 */}
               <div className="flex flex-col gap-1.5 mt-2">
                 <div className="flex justify-between">
-                  <span className="text-white/70 text-xs">카메라 속도</span>
+                  <span className="t-small text-fg-2">카메라 속도</span>
                 </div>
                 <div className="grid grid-cols-4 gap-1">
                   {[
@@ -1649,7 +1670,8 @@ export default function WorldPage() {
                     { l: '매우빠름', v: 2000 }
                   ].map(s => (
                     <button key={s.v} onClick={() => setAcceleration(s.v)}
-                      className={`py-1 rounded-lg text-[10px] font-medium transition-colors ${acceleration===s.v?'bg-blue-600 text-white':'bg-white/10 text-white/50 hover:bg-white/20'}`}>
+                      className="eb-chip justify-center h-auto py-1 px-0"
+                      aria-pressed={acceleration===s.v}>
                       {s.l}
                     </button>
                   ))}
@@ -1668,22 +1690,22 @@ export default function WorldPage() {
 
         {/* 모바일 수직 이동 버튼 — 우상단 미니맵 아래 */}
         <div className="lg:hidden absolute right-4 z-[60] flex flex-col gap-2 pointer-events-none" style={{top:'180px'}}>
-          <button 
-            onPointerDown={(e) => { e.preventDefault(); mobileVertical.current = 1; }} 
-            onPointerUp={(e) => { e.preventDefault(); mobileVertical.current = 0; }} 
+          <button
+            onPointerDown={(e) => { e.preventDefault(); mobileVertical.current = 1; }}
+            onPointerUp={(e) => { e.preventDefault(); mobileVertical.current = 0; }}
             onPointerLeave={() => mobileVertical.current = 0}
             onPointerCancel={() => mobileVertical.current = 0}
-            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white active:bg-white/30 pointer-events-auto select-none"
+            className="w-12 h-12 rounded-full bg-surface-2 border-2 border-line flex items-center justify-center text-fg active:translate-y-px pointer-events-auto select-none"
             style={{ touchAction: 'none' }}
           >
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
           </button>
-          <button 
-            onPointerDown={(e) => { e.preventDefault(); mobileVertical.current = -1; }} 
-            onPointerUp={(e) => { e.preventDefault(); mobileVertical.current = 0; }} 
+          <button
+            onPointerDown={(e) => { e.preventDefault(); mobileVertical.current = -1; }}
+            onPointerUp={(e) => { e.preventDefault(); mobileVertical.current = 0; }}
             onPointerLeave={() => mobileVertical.current = 0}
             onPointerCancel={() => mobileVertical.current = 0}
-            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white active:bg-white/30 pointer-events-auto select-none"
+            className="w-12 h-12 rounded-full bg-surface-2 border-2 border-line flex items-center justify-center text-fg active:translate-y-px pointer-events-auto select-none"
             style={{ touchAction: 'none' }}
           >
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
@@ -1774,10 +1796,10 @@ export default function WorldPage() {
         </Canvas>
 
         {loading && (
-          <div className="absolute inset-0 z-[70] flex items-center justify-center bg-[#05050a]">
+          <div className="absolute inset-0 z-[70] flex items-center justify-center bg-bg">
             <div className="flex flex-col items-center gap-3">
-              <Loader2 className="animate-spin text-white/50" size={32} />
-              <span className="text-white/70 text-sm font-medium tracking-widest uppercase">Generating City...</span>
+              <Loader2 className="animate-spin text-fg-2" size={32} />
+              <span className="t-ui text-fg-2 tracking-widest uppercase">Generating City...</span>
             </div>
           </div>
         )}

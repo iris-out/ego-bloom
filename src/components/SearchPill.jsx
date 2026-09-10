@@ -1,8 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, History } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Search, History, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getRecentSearches, addRecentSearch, removeRecentSearch, getLastSearch, setLastSearch } from '../utils/storage';
+import { getRecentSearches, addRecentSearch, getLastSearch, setLastSearch } from '../utils/storage';
 
+/**
+ * 제작자 검색 필드다. 최근 검색어를 드롭다운으로 보여주고, 제출 시 프로필로 이동한다.
+ * @param {object} props
+ * @param {string} [props.className]
+ * @param {object} [props.style]
+ * @param {boolean} [props.suggestionsAbove] 드롭다운을 필드 위로 펼칠지(모바일 하단 바용).
+ */
 export default function SearchPill({ className = '', style, suggestionsAbove = false }) {
   const navigate = useNavigate();
   const [input, setInput] = useState(() => getLastSearch());
@@ -20,7 +27,7 @@ export default function SearchPill({ className = '', style, suggestionsAbove = f
   useEffect(() => {
     if (!input.trim()) { setSuggestions([]); return; }
     setSuggestions(
-      recentSearches.filter(t => t.toLowerCase().includes(input.toLowerCase())).slice(0, 5)
+      recentSearches.filter((t) => t.toLowerCase().includes(input.toLowerCase())).slice(0, 5),
     );
   }, [input, recentSearches]);
 
@@ -47,49 +54,62 @@ export default function SearchPill({ className = '', style, suggestionsAbove = f
   const displayItems = input.trim() ? suggestions : recentSearches.slice(0, 5);
 
   return (
-    <form ref={pillRef} onSubmit={handleSubmit} className={className} style={style}>
+    <form ref={pillRef} onSubmit={handleSubmit} className={`relative ${className}`} style={style}>
       <label
-        className="glass-pill rounded-full flex items-center w-full h-11 px-4 gap-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.3)] relative cursor-text"
-        style={{ background: focused ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.12)', transition: 'background 0.2s ease' }}
+        className="flex items-center w-full h-10 px-3.5 gap-2 cursor-text"
+        style={{
+          background: 'var(--surface-2)',
+          border: `2px solid ${focused ? 'var(--accent-ink)' : 'var(--line)'}`,
+          borderRadius: 'var(--radius-pill)',
+          transition: 'border-color 120ms ease',
+        }}
       >
-        <Search size={18} className="text-white/70 shrink-0" />
-        <div className="flex-1 relative">
-          <input
-            type="text"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onFocus={() => { setShowSuggestions(true); setFocused(true); }}
-            onBlur={() => { setTimeout(() => setShowSuggestions(false), 200); setFocused(false); }}
-            placeholder="@핸들, ID, URL 검색"
-            className="w-full bg-transparent border-none text-[14px] text-white placeholder-white/40 font-light py-2 focus:outline-none"
-          />
-        </div>
-        <button type="submit" disabled={!input.trim()}
-          className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white shrink-0 hover:bg-white/20 transition-colors disabled:opacity-30">
-          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 stroke-current stroke-2 fill-none"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+        <Search size={16} strokeWidth={2} className="shrink-0" style={{ color: 'var(--fg-3)' }} />
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onFocus={() => { setShowSuggestions(true); setFocused(true); }}
+          onBlur={() => { setTimeout(() => setShowSuggestions(false), 200); setFocused(false); }}
+          placeholder="@핸들로 제작자 찾기"
+          className="flex-1 min-w-0 bg-transparent border-none t-body outline-none"
+          style={{ color: 'var(--fg)' }}
+        />
+        <button
+          type="submit"
+          disabled={!input.trim()}
+          className="shrink-0 flex items-center justify-center disabled:opacity-30"
+          style={{ width: 24, height: 24, borderRadius: '50%', color: 'var(--fg-2)' }}
+          aria-label="검색"
+        >
+          <ArrowRight size={14} strokeWidth={2} />
         </button>
       </label>
 
       {showSuggestions && displayItems.length > 0 && (
         <div
-          className="fixed overflow-hidden animate-fade-in"
+          className="fixed overflow-hidden"
           style={{
             ...dropdownStyle,
-            zIndex: 9999,
-            background: 'rgb(10, 11, 18)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
+            zIndex: 60,
+            background: 'var(--surface)',
+            border: '1px solid var(--line)',
+            borderRadius: 'var(--radius-m)',
+            boxShadow: 'var(--shadow-overlay)',
           }}
         >
           {!input.trim() && (
-            <div className="px-4 pt-2.5 pb-1 text-[10px] font-semibold tracking-widest text-white/30 uppercase">최근 검색</div>
+            <div className="px-4 pt-2.5 pb-1 t-label" style={{ color: 'var(--fg-3)' }}>최근 검색</div>
           )}
           {displayItems.map((s, i) => (
-            <button key={i} type="button"
+            <button
+              key={i}
+              type="button"
               onMouseDown={() => { setInput(s); navigate(`/profile?creator=${encodeURIComponent(s)}`); setShowSuggestions(false); }}
-              className="w-full text-left px-4 py-2.5 text-[13px] text-white/70 hover:bg-white/[0.06] hover:text-white transition-colors flex items-center gap-2">
-              <History size={12} className="opacity-40" />{s}
+              className="w-full text-left px-4 py-2.5 t-small flex items-center gap-2"
+              style={{ color: 'var(--fg-2)' }}
+            >
+              <History size={12} strokeWidth={2} style={{ color: 'var(--fg-3)' }} />{s}
             </button>
           ))}
         </div>

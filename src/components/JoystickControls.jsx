@@ -48,16 +48,16 @@ function Joystick({ onMove, onEnd }) {
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
-      className="w-28 h-28 rounded-full border border-white/20 bg-white/10 backdrop-blur-md relative flex items-center justify-center pointer-events-auto touch-none select-none"
+      className="w-28 h-28 rounded-full border-2 border-line bg-surface-2 relative flex items-center justify-center pointer-events-auto touch-none select-none"
     >
-      <div 
-        className="w-12 h-12 bg-white/80 rounded-full shadow-[0_0_15px_rgba(255,255,255,0.5)] pointer-events-none"
+      <div
+        className="w-12 h-12 bg-fg rounded-full pointer-events-none"
         style={{ transform: `translate(${nubPos.x}px, ${nubPos.y}px)` }}
       />
     </div>

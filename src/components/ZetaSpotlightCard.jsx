@@ -1,117 +1,42 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import './ZetaSpotlightCard.css';
+import CharCard from './ui/CharCard';
+import { getCharacterTier } from '../utils/tierCalculator';
+import { characterZetaUrl } from '../utils/tagCharacters';
 
-function formatCount(num) {
-  if (num >= 100000000) return (num / 100000000).toFixed(2) + '억';
-  if (num >= 10000) return (num / 10000).toFixed(2) + '만';
-  return (num ?? 0).toLocaleString();
-}
-
-const ZetaSpotlightCard = ({ characters }) => {
-  const [index, setIndex] = useState(0);
-
+/**
+ * 전역 랭킹에 오른 캐릭터들을 카드 레일로 보여준다.
+ * 예전의 단일 카드 캐러셀 대신, CharCard 를 .eb-scroll-x 슬리브에 나열한다.
+ * @param {object} props
+ * @param {Array} props.characters globalRank 로 이미 정렬된 캐릭터 목록.
+ */
+export default function ZetaSpotlightCard({ characters }) {
   if (!characters || characters.length === 0) return null;
 
-  const current = characters[index];
-
-  // Determine rank type kicker label
-  let kicker = '랭킹';
-  if (current.globalRank === current.trendingRank) kicker = '트렌딩';
-  else if (current.globalRank === current.bestRank) kicker = '베스트';
-  else if (current.globalRank === current.newRank) kicker = '신작';
-
-  const next = () => setIndex((prev) => (prev + 1) % characters.length);
-  const prev = () => setIndex((prev) => (prev - 1 + characters.length) % characters.length);
-
-  // Optimize image size (requesting 192px width for 96x96 thumb @2x)
-  const baseImgUrl = current.imageUrl || current.imageUrls?.[0];
-  const optimizedImgUrl = baseImgUrl
-    ? (baseImgUrl.includes('?') ? `${baseImgUrl}&w=192` : `${baseImgUrl}?w=192`)
-    : null;
-
-  const rankDiff = current.rankDiff;
-  let diffEl = null;
-  if (typeof rankDiff === 'number' && rankDiff > 0) {
-    diffEl = <span className="zeta-rank-diff up">▲ {rankDiff}</span>;
-  } else if (typeof rankDiff === 'number' && rankDiff < 0) {
-    diffEl = <span className="zeta-rank-diff down">▼ {Math.abs(rankDiff)}</span>;
-  }
-
   return (
-    <div className="zeta-spotlight-wrapper">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={current.id}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="zeta-spotlight-item"
-        >
-          <div className="zeta-spotlight-card">
-            {/* Left column */}
-            <div className="zeta-spotlight-left">
-              <div className="zeta-kicker">{kicker}</div>
-
-              <div className="zeta-left-main">
-                <div className="zeta-thumb">
-                  {optimizedImgUrl ? (
-                    <img src={optimizedImgUrl} alt={current.name} />
-                  ) : null}
-                </div>
-
-                <div className="zeta-text-block">
-                  <h2 className="zeta-name" title={current.name}>
-                    {current.name}
-                  </h2>
-                  {current.shortDescription ? (
-                    <p className="zeta-desc">{current.shortDescription}</p>
-                  ) : null}
-                  <div className="zeta-interaction">
-                    💬 {formatCount(current.interactionCount)}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right gold block */}
-            <div className="zeta-gold-block">
-              <div className="zeta-gold-top">순위</div>
-              <div className="zeta-gold-number">
-                {String(current.globalRank ?? 0).padStart(2, '0')}
-              </div>
-              <div className="zeta-gold-bottom">{diffEl}</div>
-            </div>
-          </div>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Navigation Controls */}
-      {characters.length > 1 && (
-        <div className="zeta-controls-container">
-          <div className="zeta-spotlight-nav-inline">
-            <button className="zeta-nav-btn" onClick={prev} aria-label="이전">
-              <ChevronLeft size={20} />
-            </button>
-            <div className="zeta-spotlight-dots-inline">
-              {characters.map((_, i) => (
-                <div
-                  key={i}
-                  className={`zeta-dot ${i === index ? 'active' : ''}`}
-                  onClick={() => setIndex(i)}
-                />
-              ))}
-            </div>
-            <button className="zeta-nav-btn" onClick={next} aria-label="다음">
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        </div>
-      )}
+    <div>
+      <div className="flex items-baseline justify-between mb-2">
+        <h2 className="t-h3">랭킹에 오른 캐릭터</h2>
+        <span className="t-small" style={{ color: 'var(--fg-3)' }}>{characters.length}장</span>
+      </div>
+      <div className="eb-scroll-x">
+        {characters.map((char) => {
+          const tier = getCharacterTier(char.interactionCount || 0);
+          const imageUrl = char.imageUrl || char.imageUrls?.[0];
+          return (
+            <CharCard
+              key={char.id}
+              name={char.name}
+              imageUrl={imageUrl}
+              rarity={tier.key}
+              rank={char.globalRank}
+              count={char.interactionCount}
+              countLabel="대화"
+              size="rail"
+              href={characterZetaUrl(char.id)}
+              target="_blank"
+            />
+          );
+        })}
+      </div>
     </div>
   );
-};
-
-export default ZetaSpotlightCard;
+}

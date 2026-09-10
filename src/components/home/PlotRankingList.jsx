@@ -1,19 +1,24 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { toBlob, toCanvas } from 'html-to-image';
 import { Camera } from 'lucide-react';
-import PlotRankingItem, { PlotPosterCard } from './PlotRankingItem';
+import { PlotTopCard, PlotRow } from './PlotRankingItem';
 import FilterDropdown from './FilterDropdown';
-import ScrollArrows from '../ui/ScrollArrows';
+import Segmented from '../ui/Segmented';
+import Num from '../ui/Num';
+import Delta from '../ui/Delta';
 import { proxyThumbnailUrl } from '../../utils/imageUtils';
-import { formatNumber } from '../../utils/tierCalculator';
-import { useIsPC } from '../../hooks/useMediaQuery';
 
 const SUB_TABS = ['트렌딩', '베스트', '신작'];
 const DATA_KEYS = { '트렌딩': 'trendingPlots', '베스트': 'bestPlots', '신작': 'newPlots' };
+const SUB_TAB_OPTIONS = SUB_TABS.map((t) => ({ value: t, label: t }));
+const LIST_COL_OPTIONS = [{ value: 1, label: '1열' }, { value: 2, label: '2열' }];
 
 const LOAD_STEPS = [30, 30, 40]; // 30 → +30 → +40
 
 const NTR_TAGS = new Set(['ntr', 'ntl', '빼앗김', '뺏김', '배신', '바람', '불륜', '네토라레']);
+const SNAP_GENRE = new Set(['로맨스', '판타지', '무협', 'sf', '스릴러', '공포', '현대', '게임', '스포츠', '일상', '학원', '이세계', '전생', '회귀', '빙의', '시스템', '성좌', '대체역사', '밀리터리', '추리', '착각', '아포칼립스', '디스토피아', '사이버펑크', '스팀펑크', '로판', '무가', '하렘', '역하렘', '피카레스크', '군상극', '먼치킨', '착각계', '전문직', '인방', '재벌', '연예계', '요리', '음악', '미술']);
+const SNAP_ORIENT = new Set(['hl', 'bl', 'gl', '백합', '비엘', '언리밋']);
+const SNAP_DYN = new Set(['순애', '빼앗김', '뺏김', '불륜', '배신', '바람', 'ntr']);
 
 function applyFilter(plots, sortBy, direction) {
   const sorted = [...plots].sort((a, b) => {
@@ -62,9 +67,24 @@ function computeTopTags(plots) {
 }
 
 function computeNtrCount(plots) {
-  return plots.filter(p =>
-    (p.hashtags || []).some(t => NTR_TAGS.has(t?.toLowerCase()))
+  return plots.filter((p) =>
+    (p.hashtags || []).some((t) => NTR_TAGS.has(t?.toLowerCase()))
   ).length;
+}
+
+function snapPriorityTags(hashtags) {
+  if (!hashtags || hashtags.length === 0) return [];
+  let g = null, o = null, d = null;
+  const rest = [];
+  for (const tag of hashtags) {
+    if (!tag) continue;
+    const lower = tag.toLowerCase();
+    if (!g && SNAP_GENRE.has(lower)) { g = tag; continue; }
+    if (!o && SNAP_ORIENT.has(lower)) { o = tag; continue; }
+    if (!d && SNAP_DYN.has(lower)) { d = tag; continue; }
+    rest.push(tag);
+  }
+  return [g, o, d, ...rest].filter(Boolean).slice(0, 3);
 }
 
 /**
@@ -122,7 +142,7 @@ async function fetchToDataUrl(url, size = 48, quality = 0.85) {
 
 /** img 요소들의 src를 작은 JPEG data URL로 교체. 이미 로드된 건 바로 canvas로 그려 즉시 처리. */
 async function inlineImages(imgElements) {
-  const imgs = [...imgElements].filter(img => img.src && !img.src.startsWith('data:'));
+  const imgs = [...imgElements].filter((img) => img.src && !img.src.startsWith('data:'));
   const origSrcs = new Map();
   const needFetch = new Map(); // url → [img, img, ...]
 
@@ -178,14 +198,18 @@ function restoreImages(origSrcs) {
 // read their raw pixels, and assemble the final PNG from a pixel buffer — never
 // allocating a canvas taller than one slice — so the output can exceed the cap.
 const SNAPSHOT_SLICE_HEIGHT = 3500; // safe per-slice canvas height (< 4096 floor)
-const SNAPSHOT_BG = '#0F0B1F';
 
-async function captureTallNode(node, width, totalHeight) {
+function readSnapshotBg() {
+  const v = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  return v || undefined;
+}
+
+async function captureTallNode(node, width, totalHeight, backgroundColor) {
   // Single slice fits comfortably → keep the simple, fast one-shot path.
   if (totalHeight <= SNAPSHOT_SLICE_HEIGHT) {
     return toBlob(node, {
       pixelRatio: 1,
-      backgroundColor: SNAPSHOT_BG,
+      backgroundColor,
       cacheBust: false,
       skipFonts: true,
       width,
@@ -200,7 +224,7 @@ async function captureTallNode(node, width, totalHeight) {
     // [y, y+sliceHeight) band into a small canvas.
     const canvas = await toCanvas(node, {
       pixelRatio: 1,
-      backgroundColor: SNAPSHOT_BG,
+      backgroundColor,
       cacheBust: false,
       skipFonts: true,
       width,
@@ -219,241 +243,36 @@ async function captureTallNode(node, width, totalHeight) {
   return new Blob([png], { type: 'image/png' });
 }
 
-// ─── Snapshot ranking row — mobile-style vertical, fully inline-styled ─────
-const SNAP_GENRE = new Set(['로맨스','판타지','무협','sf','스릴러','공포','현대','게임','스포츠','일상','학원','이세계','전생','회귀','빙의','시스템','성좌','대체역사','밀리터리','추리','착각','아포칼립스','디스토피아','사이버펑크','스팀펑크','로판','무가','하렘','역하렘','피카레스크','군상극','먼치킨','착각계','전문직','인방','재벌','연예계','요리','음악','미술']);
-const SNAP_ORIENT = new Set(['hl','bl','gl','백합','비엘','언리밋']);
-const SNAP_DYN = new Set(['순애','빼앗김','뺏김','불륜','배신','바람','ntr']);
-
-function snapPriorityTags(hashtags) {
-  if (!hashtags || hashtags.length === 0) return [];
-  let g = null, o = null, d = null;
-  const rest = [];
-  for (const tag of hashtags) {
-    if (!tag) continue;
-    const lower = tag.toLowerCase();
-    if (!g && SNAP_GENRE.has(lower)) { g = tag; continue; }
-    if (!o && SNAP_ORIENT.has(lower)) { o = tag; continue; }
-    if (!d && SNAP_DYN.has(lower)) { d = tag; continue; }
-    rest.push(tag);
-  }
-  return [g, o, d, ...rest].filter(Boolean).slice(0, 3);
-}
-
-function snapSplitFormatted(str) {
-  const m = str.match(/^(-?[0-9,.]+)([만천억]?)$/);
-  return m ? { num: m[1], unit: m[2] } : { num: str, unit: '' };
-}
-
-function snapPctStr(delta, current) {
-  if (delta == null || !current || delta <= 0) return null;
-  const base = current - delta;
-  if (base <= 0) return null;
-  return ((delta / base) * 100).toFixed(1) + '%';
-}
-
-function SnapshotRankingItem({ plot, rank, maxDelta }) {
-  const { name, imageUrl, hashtags = [], interactionCount = 0, interactionDelta, rankChange, creatorHandle } = plot;
-  const tags = snapPriorityTags(hashtags).slice(0, 2);
-  const pct = snapPctStr(interactionDelta, interactionCount);
-  const { num, unit } = snapSplitFormatted(formatNumber(interactionCount));
-  const deltaRatio = maxDelta > 0 && interactionDelta > 0 ? Math.max(0.12, Math.min(0.85, interactionDelta / maxDelta)) : 0;
-  const rankColor = rank === 1 ? '#facc15' : rank <= 3 ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.35)';
-  const medalBg =
-    rank === 1 ? 'rgba(250,204,21,0.05)' :
-    rank === 2 ? 'rgba(203,213,225,0.04)' :
-    rank === 3 ? 'rgba(217,119,6,0.05)' : 'transparent';
-
-  return (
-    <div style={{
-      padding: '14px 14px 14px 12px',
-      background: medalBg,
-      borderLeft: deltaRatio > 0 ? `2px solid rgba(74,222,128,${deltaRatio})` : '2px solid transparent',
-      borderBottom: '1px solid rgba(255,255,255,0.05)',
-    }}>
-      {/* Row 1: rank + avatar + name/handle + chats */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <span style={{
-          fontSize: '18px',
-          fontWeight: 700,
-          textAlign: 'center',
-          width: '28px',
-          flexShrink: 0,
-          fontVariantNumeric: 'tabular-nums',
-          color: rankColor,
-        }}>{rank}</span>
-
-        <div style={{
-          width: '48px',
-          height: '48px',
-          borderRadius: '9999px',
-          overflow: 'hidden',
-          flexShrink: 0,
-          background: 'rgba(255,255,255,0.1)',
-        }}>
-          {imageUrl && (
-            <img
-              src={proxyThumbnailUrl(imageUrl, 64, { forExport: true })}
-              alt=""
-              crossOrigin="anonymous"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          )}
-        </div>
-
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-            <span style={{
-              fontSize: '19px',
-              fontWeight: 600,
-              color: '#fff',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              lineHeight: 1.2,
-              minWidth: 0,
-              flex: '0 1 auto',
-            }}>{name}</span>
-            {rankChange === null ? (
-              <span style={{
-                flexShrink: 0,
-                fontSize: '10px',
-                fontWeight: 700,
-                padding: '1px 5px',
-                borderRadius: '4px',
-                background: 'rgba(59,130,246,0.2)',
-                color: '#93c5fd',
-                border: '1px solid rgba(59,130,246,0.3)',
-              }}>NEW</span>
-            ) : rankChange > 0 ? (
-              <span style={{ flexShrink: 0, fontSize: '12px', fontWeight: 700, color: '#4ade80' }}>▲{rankChange}</span>
-            ) : rankChange < 0 ? (
-              <span style={{ flexShrink: 0, fontSize: '12px', fontWeight: 700, color: '#f87171' }}>▼{Math.abs(rankChange)}</span>
-            ) : null}
-          </div>
-          {creatorHandle && (
-            <div style={{
-              fontSize: '14px',
-              color: 'rgba(255,255,255,0.38)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              marginTop: '1px',
-            }}>@{creatorHandle}</div>
-          )}
-        </div>
-
-        <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 'auto' }}>
-          <span style={{
-            fontVariantNumeric: 'tabular-nums',
-            letterSpacing: '-0.03em',
-            fontFamily: 'var(--font-mono), ui-monospace, monospace',
-          }}>
-            <span style={{ fontSize: '26px', fontWeight: 700, color: '#fff' }}>{num}</span>
-            {unit && <span style={{ fontSize: '15px', fontWeight: 600, color: 'rgba(255,255,255,0.5)', marginLeft: '1px' }}>{unit}</span>}
-          </span>
-        </div>
-      </div>
-
-      {/* Row 2: tags + delta */}
-      {(tags.length > 0 || (interactionDelta != null && interactionDelta > 0)) && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', paddingLeft: '88px' }}>
-          {tags.map((t, i) => (
-            <span key={i} style={{
-              fontSize: '12px',
-              padding: '1px 8px',
-              borderRadius: '9999px',
-              background: 'rgba(255,255,255,0.08)',
-              color: 'rgba(255,255,255,0.55)',
-              whiteSpace: 'nowrap',
-              maxWidth: '120px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}>{t}</span>
-          ))}
-          {interactionDelta != null && interactionDelta > 0 && (
-            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'baseline', gap: '6px', flexShrink: 0 }}>
-              {pct && (
-                <span style={{ fontSize: '14px', fontWeight: 700, color: '#34d399', fontVariantNumeric: 'tabular-nums' }}>
-                  +{pct}
-                </span>
-              )}
-              <span style={{ fontSize: '13px', color: 'rgba(167,243,208,0.9)', fontVariantNumeric: 'tabular-nums' }}>
-                +{formatNumber(interactionDelta)}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Snapshot header (inline-styled for reliable capture) ───────────────────
+// ─── Snapshot header (토큰만 사용, 캡처용 별도 트리) ─────────────────────────
 function SnapshotHeader({ subTab, updatedAt, topTags, ntrCount, totalCount }) {
   return (
-    <div style={{
-      padding: '20px 20px 16px',
-      borderBottom: '1px solid rgba(255,255,255,0.08)',
-      marginBottom: '4px',
-    }}>
-      {/* Branding row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
-          <path d="M8 12 L12 8 L16 12 L12 16 Z" fill="rgba(129,140,248,0.8)" />
-        </svg>
-        <span style={{ fontWeight: 700, fontSize: '15px', color: '#fff', letterSpacing: '-0.02em' }}>EGO-BLOOM</span>
-        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.05em' }}>RANKING SNAPSHOT</span>
+    <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid var(--line)' }}>
+      <div className="flex items-center gap-2.5" style={{ marginBottom: 6 }}>
+        <span className="t-h3" style={{ color: 'var(--fg)' }}>EGO-BLOOM</span>
+        <span className="t-label" style={{ color: 'var(--fg-3)' }}>RANKING SNAPSHOT</span>
       </div>
 
-      {/* Title row */}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '12px', whiteSpace: 'nowrap' }}>
-        <span style={{ fontSize: '22px', fontWeight: 700, color: '#fff', letterSpacing: '-0.03em' }}>
-          {subTab} TOP {totalCount}
-        </span>
-        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
-          {formatKST(updatedAt)}
-        </span>
+      <div className="flex items-baseline gap-2 whitespace-nowrap" style={{ marginBottom: 12 }}>
+        <span className="t-h1" style={{ color: 'var(--fg)' }}>{subTab} TOP {totalCount}</span>
+        <span className="t-small" style={{ color: 'var(--fg-3)' }}>{formatKST(updatedAt)}</span>
       </div>
 
-      {/* Stats row — single line, no wrap */}
-      <div style={{ display: 'flex', gap: '18px', flexWrap: 'nowrap', alignItems: 'center', whiteSpace: 'nowrap' }}>
-        {/* Top tags */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-          <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.06em', textTransform: 'uppercase', flexShrink: 0 }}>인기 태그</span>
-          <div style={{ display: 'flex', gap: '4px', flexWrap: 'nowrap' }}>
+      <div className="flex items-center gap-4 flex-wrap whitespace-nowrap">
+        <div className="flex items-center gap-1.5">
+          <span className="t-label" style={{ color: 'var(--fg-3)' }}>인기 태그</span>
+          <div className="flex gap-1">
             {topTags.map(({ tag, count }) => (
-              <span key={tag} style={{
-                fontSize: '11px',
-                color: 'rgba(167,139,250,0.9)',
-                background: 'rgba(167,139,250,0.1)',
-                border: '1px solid rgba(167,139,250,0.2)',
-                borderRadius: '999px',
-                padding: '1px 8px',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                lineHeight: 1.5,
-              }}>
-                {tag} <span style={{ opacity: 0.6 }}>{count}</span>
-              </span>
+              <span key={tag} className="eb-chip">{tag} <span style={{ opacity: 0.6, marginLeft: 3 }}>{count}</span></span>
             ))}
           </div>
         </div>
-
-        {/* NTR count */}
         {ntrCount > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>NTR/NTL 포함</span>
-            <span style={{
-              fontSize: '12px', fontWeight: 700,
-              color: 'rgba(248,113,113,0.9)',
-              background: 'rgba(248,113,113,0.08)',
-              border: '1px solid rgba(248,113,113,0.2)',
-              borderRadius: '999px',
-              padding: '1px 10px',
-              whiteSpace: 'nowrap',
-              lineHeight: 1.5,
-            }}>
+          <div className="flex items-center gap-1.5">
+            <span className="t-label" style={{ color: 'var(--fg-3)' }}>NTR/NTL 포함</span>
+            <span
+              className="t-small"
+              style={{ fontWeight: 700, color: 'var(--down)', background: 'color-mix(in srgb, var(--down) 12%, var(--bg))', borderRadius: 'var(--radius-pill)', padding: '1px 10px' }}
+            >
               {ntrCount}개
             </span>
           </div>
@@ -463,22 +282,70 @@ function SnapshotHeader({ subTab, updatedAt, topTags, ntrCount, totalCount }) {
   );
 }
 
+// ─── Snapshot row — Num/Delta 재사용, 토큰만 사용 ────────────────────────────
+function SnapshotRow({ plot, rank }) {
+  const { name, imageUrl, hashtags = [], interactionCount = 0, interactionDelta, rankChange, creatorHandle } = plot;
+  const tags = snapPriorityTags(hashtags).slice(0, 2);
+
+  return (
+    <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--line)' }}>
+      <div className="flex items-center gap-3">
+        <span className="t-figure shrink-0 text-right tabular-nums" style={{ width: 28, color: 'var(--fg-2)' }}>{rank}</span>
+
+        <div className="shrink-0 rounded-full overflow-hidden" style={{ width: 44, height: 44, background: 'var(--surface-2)' }}>
+          {imageUrl && (
+            <img
+              src={proxyThumbnailUrl(imageUrl, 64, { forExport: true })}
+              alt=""
+              crossOrigin="anonymous"
+              width={44}
+              height={44}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <p className="t-h3 truncate" style={{ color: 'var(--fg)' }}>{name}</p>
+            {rankChange === null ? (
+              <span className="t-label shrink-0" style={{ color: 'var(--accent-ink)' }}>NEW</span>
+            ) : (
+              <Delta value={rankChange} format={(n) => String(n)} />
+            )}
+          </div>
+          {creatorHandle && <p className="t-small truncate" style={{ color: 'var(--fg-2)' }}>@{creatorHandle}</p>}
+        </div>
+
+        <div className="shrink-0 text-right">
+          <Num value={interactionCount} />
+        </div>
+      </div>
+
+      {(tags.length > 0 || interactionDelta > 0) && (
+        <div className="flex items-center gap-1.5 flex-wrap" style={{ marginTop: 6, paddingLeft: 75 }}>
+          {tags.map((t) => (
+            <span key={t} className="eb-chip">{t}</span>
+          ))}
+          {interactionDelta > 0 && <Delta value={interactionDelta} className="ml-auto" />}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PlotRankingList({ rankingData }) {
   const [subTab, setSubTab] = useState('트렌딩');
   const [filter, setFilter] = useState({ sortBy: '순위', direction: '내림차순' });
   const [stepIndex, setStepIndex] = useState(0);
   const [capturing, setCapturing] = useState(false);
-  const isPC = useIsPC();
-  // PC 전용: 7위~ 리스트의 1열/2열 보기 (모바일은 항상 단일 열)
   const [listCols, setListCols] = useState(2);
   const sentinelRef = useRef(null);
   const snapshotRef = useRef(null);
   const loadingRef = useRef(false);
-  const posterRailRef = useRef(null);
 
   const rawPlots = rankingData?.[DATA_KEYS[subTab]] || [];
   const plots = useMemo(() => applyFilter(rawPlots, filter.sortBy, filter.direction), [rawPlots, filter]);
-  const maxDelta = useMemo(() => Math.max(0, ...plots.map(p => p.interactionDelta ?? 0)), [plots]);
 
   const displayCount = getDisplayCount(stepIndex);
   const visiblePlots = plots.slice(0, displayCount);
@@ -493,7 +360,7 @@ export default function PlotRankingList({ rankingData }) {
     if (loadingRef.current || !hasMore) return;
     loadingRef.current = true;
     setTimeout(() => {
-      setStepIndex(prev => prev + 1);
+      setStepIndex((prev) => prev + 1);
       loadingRef.current = false;
     }, 120);
   }, [hasMore]);
@@ -507,7 +374,7 @@ export default function PlotRankingList({ rankingData }) {
   useEffect(() => {
     if (!sentinelRef.current) return;
     const observer = new IntersectionObserver(
-      entries => { if (entries[0].isIntersecting) loadMore(); },
+      (entries) => { if (entries[0].isIntersecting) loadMore(); },
       { rootMargin: '200px' }
     );
     observer.observe(sentinelRef.current);
@@ -520,14 +387,14 @@ export default function PlotRankingList({ rankingData }) {
     let origSrcs = null;
     try {
       // capturing=true 이후 React가 스냅샷 트리를 마운트할 때까지 대기
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       if (!snapshotRef.current) throw new Error('snapshot node not mounted');
 
       // 이미지가 모두 로드될 때까지 대기 (visible list와 동일 URL이므로 캐시에서 즉시 로드되는 경우가 대부분)
       const imgEls = snapshotRef.current.querySelectorAll('img');
-      await Promise.all([...imgEls].map(img => {
+      await Promise.all([...imgEls].map((img) => {
         if (img.complete && img.naturalWidth > 0) return null;
-        return new Promise(res => {
+        return new Promise((res) => {
           const done = () => { img.onload = null; img.onerror = null; res(); };
           img.onload = done;
           img.onerror = done;
@@ -546,7 +413,7 @@ export default function PlotRankingList({ rankingData }) {
       // Capture in vertical slices and stitch — a one-shot canvas would be
       // clipped at the device's max canvas height (~8192px), dropping the
       // lower-ranked rows. See captureTallNode.
-      const blob = await captureTallNode(node, 560, node.scrollHeight);
+      const blob = await captureTallNode(node, 560, node.scrollHeight, readSnapshotBg());
       if (!blob) throw new Error('snapshot capture returned null');
 
       const dateStr = rankingData.updatedAt
@@ -566,190 +433,101 @@ export default function PlotRankingList({ rankingData }) {
     }
   }
 
-  function handleSubTab(t) {
-    setSubTab(t);
-  }
-
   return (
     <div className="flex flex-col flex-1">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3">
         {/* 서브탭 + 기준 시각 */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex gap-1.5">
-            {SUB_TABS.map(t => (
-              <button
-                key={t}
-                onClick={() => handleSubTab(t)}
-                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-[13px] sm:text-[15px] font-semibold transition-all ${
-                  subTab === t
-                    ? 'text-white shadow-sm'
-                    : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
-                }`}
-                style={subTab === t
-                  ? { background: '#e11d48', boxShadow: '0 4px 14px -4px rgba(225,29,72,0.6)' }
-                  : undefined}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <Segmented options={SUB_TAB_OPTIONS} value={subTab} onChange={setSubTab} aria-label="랭킹 구간" />
           {rankingData?.updatedAt && (
-            <span className="text-[11px] text-white/45 shrink-0">
+            <span className="t-small shrink-0" style={{ color: 'var(--fg-3)' }}>
               {formatKST(rankingData.updatedAt)}
             </span>
           )}
         </div>
 
-        {/* 우측: (PC) 1열/2열 토글 + 스냅샷 버튼 + 필터 */}
+        {/* 우측: (lg) 1열/2열 토글 + 스냅샷 버튼 + 정렬 */}
         <div className="flex items-center gap-2">
-          {isPC && (
-            <div
-              className="flex items-center rounded-full border border-white/12 bg-white/5 p-0.5"
-              role="group"
-              aria-label="리스트 열 수"
-            >
-              {[1, 2].map(n => (
-                <button
-                  key={n}
-                  onClick={() => setListCols(n)}
-                  aria-pressed={listCols === n}
-                  title={`${n}열 보기`}
-                  className={`px-2.5 py-1 rounded-full text-[12px] font-semibold transition-colors ${
-                    listCols === n
-                      ? 'bg-white/15 text-white'
-                      : 'text-white/50 hover:text-white/80'
-                  }`}
-                >
-                  {n}열
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="hidden lg:block">
+            <Segmented options={LIST_COL_OPTIONS} value={listCols} onChange={setListCols} aria-label="리스트 열 수" />
+          </div>
           <button
+            type="button"
             onClick={captureSnapshot}
             disabled={capturing || !rankingData}
             title="랭킹 스냅샷 저장"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all duration-200 text-[12px] font-medium disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{
-              background: capturing ? 'rgba(167,139,250,0.15)' : 'rgba(255,255,255,0.05)',
-              borderColor: capturing ? 'rgba(167,139,250,0.4)' : 'rgba(255,255,255,0.12)',
-              color: capturing ? 'rgba(167,139,250,0.9)' : 'rgba(255,255,255,0.55)',
-            }}
+            className="eb-btn eb-btn-secondary !h-9 !px-3 !text-[12px] gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {capturing ? (
-              <span className="w-3.5 h-3.5 border-2 border-violet-400/60 border-t-violet-400 rounded-full animate-spin" />
+              <span
+                className="w-3.5 h-3.5 rounded-full animate-spin"
+                style={{ border: '2px solid var(--accent-ink)', borderTopColor: 'transparent' }}
+              />
             ) : (
               <Camera size={13} />
             )}
             <span className="hidden sm:inline">{capturing ? '저장 중…' : '스냅샷'}</span>
           </button>
-          <FilterDropdown
-            sortBy={filter.sortBy}
-            direction={filter.direction}
-            onChange={setFilter}
-          />
+          <FilterDropdown sortBy={filter.sortBy} direction={filter.direction} onChange={setFilter} />
         </div>
       </div>
 
       {!rankingData ? (
-        /* 스켈레톤 */
-        <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-3 gap-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                className="rounded-xl border border-white/10 bg-white/[0.04] animate-pulse"
-                style={{ aspectRatio: '2 / 3' }}
-              />
+        <div className="eb-skel flex flex-col gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="eb-bone" style={{ aspectRatio: '5 / 7' }} />
             ))}
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="eb-panel overflow-hidden">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5">
-                <div className="h-5 w-8 rounded bg-white/10 animate-pulse" />
-                <div className="h-11 w-11 rounded-lg bg-white/10 animate-pulse shrink-0" />
+              <div key={i} className="flex items-center gap-3 px-3" style={{ height: 60, borderBottom: i < 5 ? '1px solid var(--line)' : 'none' }}>
+                <div className="eb-bone" style={{ width: 24, height: 20 }} />
+                <div className="eb-bone shrink-0" style={{ width: 40, height: 56 }} />
                 <div className="flex-1 space-y-1.5">
-                  <div className="h-4 w-3/4 rounded bg-white/10 animate-pulse" />
-                  <div className="h-3 w-1/2 rounded bg-white/5 animate-pulse" />
+                  <div className="eb-bone h-4 w-3/4" />
+                  <div className="eb-bone h-3 w-1/2" />
                 </div>
-                <div className="h-4 w-10 rounded bg-white/10 animate-pulse" />
+                <div className="eb-bone h-4 w-10" />
               </div>
             ))}
           </div>
         </div>
       ) : plots.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center text-white/45 text-[14px]">
+        <div className="flex-1 flex items-center justify-center t-body" style={{ color: 'var(--fg-3)' }}>
           데이터 없음
         </div>
       ) : (
         <>
-          {isPC ? (
-            <>
-              {/* PC: 1~6위 카탈로그 — 한 줄 6개 포스터 카드 */}
-              {visiblePlots.length > 0 && (
-                <div className="mb-5 grid grid-cols-6 gap-3 xl:gap-4">
-                  {visiblePlots.slice(0, 6).map((plot, i) => (
-                    <PlotPosterCard key={plot.id} plot={plot} rank={i + 1} fill />
-                  ))}
-                </div>
-              )}
+          {/* Top 10 — 5x2 (390: 2열) CharCard 그리드 */}
+          {visiblePlots.length > 0 && (
+            <div className="mb-5 grid grid-cols-2 sm:grid-cols-5 gap-3 xl:gap-4">
+              {visiblePlots.slice(0, 10).map((plot, i) => (
+                <PlotTopCard key={plot.id} plot={plot} rank={i + 1} priority={i === 0} />
+              ))}
+            </div>
+          )}
 
-              {/* PC: 7위~ 리스트 — 1열/2열 토글 */}
-              {visiblePlots.length > 6 && (
-                <div className={listCols === 2 ? 'grid grid-cols-2 gap-2' : 'flex flex-col gap-2'}>
-                  {visiblePlots.slice(6).map((plot, i) => (
-                    <PlotRankingItem
-                      key={plot.id}
-                      plot={plot}
-                      rank={i + 7}
-                      maxDelta={maxDelta}
-                    />
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <>
-              {/* 모바일: Top 10 — 가로 스크롤 포스터 레일 (넷플릭스). 순위 숫자는 카드 외부 좌측. */}
-              {visiblePlots.length > 0 && (
-                <div className="relative mb-4">
-                  <ScrollArrows targetRef={posterRailRef} />
-                  <div
-                    ref={posterRailRef}
-                    className="flex gap-4 sm:gap-5 overflow-x-auto overflow-y-hidden pb-3 pt-2 pl-3 snap-x snap-mandatory scrollbar-hide"
-                  >
-                    {visiblePlots.slice(0, 10).map((plot, i) => (
-                      <PlotPosterCard key={plot.id} plot={plot} rank={i + 1} />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 모바일: Rank 11+ — compact dense list */}
-              {visiblePlots.length > 10 && (
-                <div className="flex flex-col gap-2">
-                  {visiblePlots.slice(10).map((plot, i) => (
-                    <PlotRankingItem
-                      key={plot.id}
-                      plot={plot}
-                      rank={i + 11}
-                      maxDelta={maxDelta}
-                    />
-                  ))}
-                </div>
-              )}
-            </>
+          {/* 11위~ 리스트 — 하나의 패널, lg 에서만 1열/2열 토글 */}
+          {visiblePlots.length > 10 && (
+            <div className="eb-panel overflow-hidden">
+              <div className={listCols === 2 ? 'flex flex-col lg:grid lg:grid-cols-2' : 'flex flex-col'}>
+                {visiblePlots.slice(10).map((plot, i) => (
+                  <PlotRow key={plot.id} plot={plot} rank={i + 11} />
+                ))}
+              </div>
+            </div>
           )}
 
           {/* 무한 스크롤 센티넬 */}
           {hasMore && (
             <div ref={sentinelRef} className="flex items-center justify-center py-6">
               <div className="flex gap-1.5">
-                {[0, 1, 2].map(i => (
+                {[0, 1, 2].map((i) => (
                   <div
                     key={i}
-                    className="w-1.5 h-1.5 rounded-full bg-white/25 animate-pulse"
-                    style={{ animationDelay: `${i * 0.15}s` }}
+                    className="eb-skel rounded-full"
+                    style={{ width: 6, height: 6, background: 'var(--fg-3)', animationDelay: `${i * 0.15}s` }}
                   />
                 ))}
               </div>
@@ -757,7 +535,7 @@ export default function PlotRankingList({ rankingData }) {
           )}
 
           {!hasMore && plots.length > 30 && (
-            <div className="py-4 text-center text-[12px] text-white/40">
+            <div className="py-4 text-center t-small" style={{ color: 'var(--fg-3)' }}>
               총 {plots.length}개 표시됨
             </div>
           )}
@@ -768,64 +546,31 @@ export default function PlotRankingList({ rankingData }) {
       {capturing && rankingData && plots.length > 0 && (
         <div
           aria-hidden="true"
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            opacity: 0,
-            pointerEvents: 'none',
-            zIndex: -1,
-            width: '560px',
-            height: 0,
-            overflow: 'visible',
-          }}
+          style={{ position: 'fixed', top: 0, left: 0, opacity: 0, pointerEvents: 'none', zIndex: -1, width: '560px', height: 0, overflow: 'visible' }}
         >
-        <div
-          ref={snapshotRef}
-          style={{
-            width: '560px',
-            background: '#0F0B1F',
-            color: '#ffffff',
-            fontFamily: 'Pretendard Variable, -apple-system, BlinkMacSystemFont, sans-serif',
-          }}
-        >
-          <SnapshotHeader
-            subTab={subTab}
-            updatedAt={rankingData.updatedAt}
-            topTags={snapshotStats.topTags}
-            ntrCount={snapshotStats.ntrCount}
-            totalCount={plots.length}
-          />
+          <div
+            ref={snapshotRef}
+            style={{ width: '560px', background: 'var(--bg)', color: 'var(--fg)', fontFamily: 'var(--font-sans)' }}
+          >
+            <SnapshotHeader
+              subTab={subTab}
+              updatedAt={rankingData.updatedAt}
+              topTags={snapshotStats.topTags}
+              ntrCount={snapshotStats.ntrCount}
+              totalCount={plots.length}
+            />
 
-          {/* All plots — mobile vertical style */}
-          <div>
-            {plots.map((plot, i) => (
-              <SnapshotRankingItem
-                key={plot.id}
-                plot={plot}
-                rank={i + 1}
-                maxDelta={maxDelta}
-              />
-            ))}
-          </div>
+            <div>
+              {plots.map((plot, i) => (
+                <SnapshotRow key={plot.id} plot={plot} rank={i + 1} />
+              ))}
+            </div>
 
-          {/* Footer */}
-          <div style={{
-            padding: '14px 20px',
-            borderTop: '1px solid rgba(255,255,255,0.06)',
-            marginTop: '4px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)' }}>
-              ego-bloom.vercel.app
-            </span>
-            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)' }}>
-              {formatKST(rankingData.updatedAt)}
-            </span>
+            <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span className="t-small" style={{ color: 'var(--fg-3)' }}>ego-bloom.vercel.app</span>
+              <span className="t-small" style={{ color: 'var(--fg-3)' }}>{formatKST(rankingData.updatedAt)}</span>
+            </div>
           </div>
-        </div>
         </div>
       )}
     </div>

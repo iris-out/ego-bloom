@@ -1,13 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../utils/supabase';
-
-const PULSE_STYLE = '@keyframes admin-pulse{0%,100%{opacity:.5}50%{opacity:1}}';
-if (typeof document !== 'undefined' && !document.getElementById('admin-pulse-kf')) {
-  const s = document.createElement('style');
-  s.id = 'admin-pulse-kf';
-  s.textContent = PULSE_STYLE;
-  document.head.appendChild(s);
-}
+import { useMediaQuery } from '../hooks/useMediaQuery';
 
 function formatDate(iso) {
   if (!iso) return '-';
@@ -27,11 +20,28 @@ async function adminFetch(method, token, body, query = '') {
   return res.json();
 }
 
+/** 액션/상태 배지. up=차단 해제(초록), down=차단(빨강) 성격의 pill. */
+function StatusBadge({ tone, children }) {
+  const colorVar = tone === 'up' ? '--up' : '--down';
+  return (
+    <span
+      className="t-label inline-flex items-center h-5 px-2.5 shrink-0"
+      style={{
+        borderRadius: 'var(--radius-pill)',
+        background: `color-mix(in srgb, var(${colorVar}) 16%, var(--bg))`,
+        color: `var(${colorVar})`,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
 function SkeletonList() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div className="eb-skel flex flex-col gap-2">
       {[1, 2, 3].map(i => (
-        <div key={i} style={{ height: 40, borderRadius: 8, background: 'rgba(255,255,255,0.05)', animation: 'admin-pulse 1.5s ease-in-out infinite', opacity: 1 - i * 0.15 }} />
+        <div key={i} className="eb-bone h-10" style={{ opacity: 1 - i * 0.15 }} />
       ))}
     </div>
   );
@@ -67,15 +77,7 @@ export default function AdminPage() {
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 640px)');
-    setIsMobile(mq.matches);
-    const handler = (e) => setIsMobile(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
+  const isMobile = useMediaQuery('(max-width: 640px)');
 
   useEffect(() => {
     if (!supabase) return;
@@ -178,22 +180,40 @@ export default function AdminPage() {
 
   if (!supabase) {
     return (
-      <div style={S.center}>
-        <p style={{ color: '#f87171' }}>VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY 환경변수가 설정되지 않았습니다.</p>
+      <div className="min-h-[100dvh] bg-bg flex items-center justify-center px-6">
+        <p className="t-body" style={{ color: 'var(--down)' }}>
+          VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY 환경변수가 설정되지 않았습니다.
+        </p>
       </div>
     );
   }
 
   if (!session) {
     return (
-      <div style={S.center}>
-        <div style={S.card}>
-          <h1 style={{ ...S.h1, marginBottom: 24 }}>관리자 로그인</h1>
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <input type="email" placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)} required style={S.input} />
-            <input type="password" placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)} required style={S.input} />
-            {loginError && <p style={{ color: '#f87171', fontSize: 13, margin: 0 }}>{loginError}</p>}
-            <button type="submit" disabled={loginLoading} style={S.primaryBtn}>{loginLoading ? '로그인 중…' : '로그인'}</button>
+      <div className="min-h-[100dvh] bg-bg flex items-center justify-center px-6">
+        <div className="eb-panel p-8 w-full max-w-[340px]">
+          <h1 className="t-h1 text-fg mb-6">관리자 로그인</h1>
+          <form onSubmit={handleLogin} className="flex flex-col gap-3">
+            <input
+              type="email"
+              placeholder="이메일"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              className="eb-input"
+            />
+            <input
+              type="password"
+              placeholder="비밀번호"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              className="eb-input"
+            />
+            {loginError && <p className="t-small m-0" style={{ color: 'var(--down)' }}>{loginError}</p>}
+            <button type="submit" disabled={loginLoading} className="eb-btn eb-btn-primary">
+              {loginLoading ? '로그인 중…' : '로그인'}
+            </button>
           </form>
         </div>
       </div>
@@ -201,101 +221,124 @@ export default function AdminPage() {
   }
 
   return (
-    <div style={S.page}>
-      <div style={S.topBar}>
-        <span style={S.h1}>관리자 패널</span>
-        <span style={{ color: '#9ca3af', fontSize: 13 }}>{session.user.email}</span>
-        <button onClick={handleLogout} style={S.ghostBtn}>로그아웃</button>
+    <div className="min-h-[100dvh] bg-bg text-fg px-6 py-8 max-w-[960px] mx-auto">
+      <div className="flex items-center gap-4 mb-6 border-b border-line pb-4">
+        <span className="t-h1 flex-1">관리자 패널</span>
+        <span className="t-small text-fg-2">{session.user.email}</span>
+        <button onClick={handleLogout} className="eb-btn eb-btn-secondary">로그아웃</button>
       </div>
 
       {/* 외부 탭 */}
-      <div style={S.tabGroup}>
-        <button style={tab === 'block' ? S.tabActive : S.tabInactive} onClick={() => setTab('block')}>사용자 차단</button>
-        <button style={tab === 'history' ? S.tabActive : S.tabInactive} onClick={() => setTab('history')}>차단 이력</button>
+      <div className="eb-seg mb-7 w-fit" role="tablist">
+        <button role="tab" aria-selected={tab === 'block'} onClick={() => setTab('block')}>사용자 차단</button>
+        <button role="tab" aria-selected={tab === 'history'} onClick={() => setTab('history')}>차단 이력</button>
       </div>
 
       {tab === 'block' && (
         <>
           {/* 내부 탭 */}
-          <div style={S.innerTabGroup}>
-            <button style={blockTab === 'single' ? S.innerTabActive : S.innerTabInactive} onClick={() => { setBlockTab('single'); setMsg(null); }}>단일 차단</button>
-            <button style={blockTab === 'multi' ? S.innerTabActive : S.innerTabInactive} onClick={() => { setBlockTab('multi'); setMsg(null); }}>다중 차단</button>
+          <div className="eb-seg mb-5 w-fit" role="tablist">
+            <button
+              role="tab"
+              aria-selected={blockTab === 'single'}
+              onClick={() => { setBlockTab('single'); setMsg(null); }}
+            >
+              단일 차단
+            </button>
+            <button
+              role="tab"
+              aria-selected={blockTab === 'multi'}
+              onClick={() => { setBlockTab('multi'); setMsg(null); }}
+            >
+              다중 차단
+            </button>
           </div>
 
           {/* 단일 차단 */}
           {blockTab === 'single' && (
-            <section style={S.section}>
-              <form onSubmit={handleBlock} style={S.formRow}>
+            <section className="mb-10">
+              <form onSubmit={handleBlock} className="flex gap-2.5 items-center flex-wrap">
                 <input
                   placeholder="@핸들 또는 UUID"
                   value={query}
                   onChange={e => setQuery(e.target.value)}
-                  style={{ ...S.input, flex: 2, minWidth: 0 }}
+                  className="eb-input flex-[2] min-w-0"
                 />
                 <input
                   placeholder="차단 사유 (선택)"
                   value={reason}
                   onChange={e => setReason(e.target.value)}
-                  style={{ ...S.input, flex: 3, minWidth: 0 }}
+                  className="eb-input flex-[3] min-w-0"
                 />
-                <button type="submit" disabled={loading || !query.trim()} style={S.blockBtn}>차단</button>
+                <button type="submit" disabled={loading || !query.trim()} className="eb-btn eb-btn-secondary whitespace-nowrap" style={{ color: 'var(--down)' }}>
+                  차단
+                </button>
               </form>
-              {msg && <p style={{ color: msg.type === 'ok' ? '#4ade80' : '#f87171', fontSize: 13, marginTop: 8 }}>{msg.text}</p>}
+              {msg && (
+                <p className="t-small mt-2" style={{ color: msg.type === 'ok' ? 'var(--up)' : 'var(--down)' }}>
+                  {msg.text}
+                </p>
+              )}
             </section>
           )}
 
           {/* 다중 차단 */}
           {blockTab === 'multi' && (
-            <section style={S.section}>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', flexDirection: isMobile ? 'column' : 'row' }}>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, width: isMobile ? '100%' : undefined }}>
-                  <label style={{ color: '#6b7280', fontSize: 12 }}>핸들 또는 UUID (한 줄에 하나씩)</label>
+            <section className="mb-10">
+              <div className="flex gap-2.5 items-start flex-col sm:flex-row">
+                <div className="flex-1 flex flex-col gap-1.5 w-full">
+                  <label className="t-small text-fg-3">핸들 또는 UUID (한 줄에 하나씩)</label>
                   <textarea
                     placeholder={'@handle1\n@handle2\nuuid-...'}
                     value={bulkQuery}
                     onChange={e => setBulkQuery(e.target.value)}
                     rows={8}
                     disabled={bulkLoading}
-                    style={{ ...S.input, resize: 'vertical', fontFamily: 'monospace', fontSize: 13, lineHeight: 1.7 }}
+                    className="eb-input font-mono text-[13px] leading-[1.7] resize-y"
+                    style={{ borderRadius: 'var(--radius-s)', height: 'auto', padding: '10px 14px' }}
                   />
                 </div>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, width: isMobile ? '100%' : undefined }}>
-                  <label style={{ color: '#6b7280', fontSize: 12 }}>사유 (선택, 한 줄에 하나씩)</label>
+                <div className="flex-1 flex flex-col gap-1.5 w-full">
+                  <label className="t-small text-fg-3">사유 (선택, 한 줄에 하나씩)</label>
                   <textarea
                     placeholder={'스팸\n욕설\n(빈 줄이면 사유 없음)'}
                     value={bulkReason}
                     onChange={e => setBulkReason(e.target.value)}
                     rows={8}
                     disabled={bulkLoading}
-                    style={{ ...S.input, resize: 'vertical', fontFamily: 'monospace', fontSize: 13, lineHeight: 1.7 }}
+                    className="eb-input font-mono text-[13px] leading-[1.7] resize-y"
+                    style={{ borderRadius: 'var(--radius-s)', height: 'auto', padding: '10px 14px' }}
                   />
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
+              <div className="flex items-center gap-2.5 mt-2.5">
                 <button
                   onClick={handleBulkBlock}
                   disabled={bulkLoading || !bulkQuery.trim()}
-                  style={S.blockBtn}
+                  className="eb-btn eb-btn-secondary"
+                  style={{ color: 'var(--down)' }}
                 >
                   {bulkLoading ? `처리 중… (${bulkDone}/${bulkLines})` : `일괄 차단 ${bulkLines > 0 ? `(${bulkLines}명)` : ''}`}
                 </button>
                 {bulkResults.length > 0 && !bulkLoading && (
-                  <button onClick={() => { setBulkResults([]); setBulkQuery(''); setBulkReason(''); }} style={S.ghostBtn}>초기화</button>
+                  <button onClick={() => { setBulkResults([]); setBulkQuery(''); setBulkReason(''); }} className="eb-btn eb-btn-secondary">
+                    초기화
+                  </button>
                 )}
               </div>
 
               {bulkResults.length > 0 && (
-                <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 5 }}>
-                  <div style={{ color: '#6b7280', fontSize: 12, marginBottom: 4 }}>
+                <div className="mt-3.5 flex flex-col gap-1.5">
+                  <div className="t-small text-fg-3 mb-1">
                     성공 {bulkResults.filter(r => r.success).length} / 실패 {bulkResults.filter(r => !r.success).length}
                   </div>
                   {bulkResults.map((r, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: 8, fontSize: 13 }}>
-                      <span style={{ color: r.success ? '#4ade80' : '#f87171', fontSize: 14, lineHeight: 1 }}>{r.success ? '✓' : '✗'}</span>
-                      <span style={{ color: '#9ca3af', fontFamily: 'monospace', fontSize: 12 }}>{r.query}</span>
+                    <div key={i} className="flex items-baseline gap-2 t-small">
+                      <span style={{ color: r.success ? 'var(--up)' : 'var(--down)' }}>{r.success ? '✓' : '✗'}</span>
+                      <span className="font-mono text-fg-2">{r.query}</span>
                       {r.success
-                        ? <span style={{ color: '#4b5563', fontSize: 11 }}>{r.id}</span>
-                        : <span style={{ color: '#f87171', fontSize: 12 }}>{r.error}</span>
+                        ? <span className="text-fg-3">{r.id}</span>
+                        : <span style={{ color: 'var(--down)' }}>{r.error}</span>
                       }
                     </div>
                   ))}
@@ -305,47 +348,51 @@ export default function AdminPage() {
           )}
 
           {/* 차단된 사용자 목록 */}
-          <section style={S.section}>
-            <h2 style={S.h2}>차단된 사용자 ({listLoading ? '…' : `${blocked.length}명`})</h2>
+          <section className="mb-10">
+            <h2 className="t-h3 text-fg-2 mb-3.5">차단된 사용자 ({listLoading ? '…' : `${blocked.length}명`})</h2>
             {listLoading ? (
               <SkeletonList />
             ) : blocked.length === 0 ? (
-              <p style={{ color: '#6b7280', fontSize: 14 }}>차단된 사용자가 없습니다.</p>
+              <p className="t-body text-fg-3">차단된 사용자가 없습니다.</p>
             ) : isMobile ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div className="flex flex-col gap-2.5">
                 {blocked.map(u => (
-                  <div key={u.id} style={S.mobileCard}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                      <div style={{ minWidth: 0 }}>
-                        <span style={{ color: '#e5e7eb', fontWeight: 600, fontSize: 14 }}>{u.nickname || '-'}</span>
-                        <span style={{ color: '#6b7280', fontSize: 12, marginLeft: 6 }}>@{u.handle || '-'}</span>
+                  <div key={u.id} className="eb-panel p-3.5">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="min-w-0">
+                        <span className="t-ui text-fg">{u.nickname || '-'}</span>
+                        <span className="t-small text-fg-3 ml-1.5">@{u.handle || '-'}</span>
                       </div>
-                      <button onClick={() => handleUnblock(u.id, u.nickname)} style={{ ...S.ghostBtn, flexShrink: 0 }}>해제</button>
+                      <button onClick={() => handleUnblock(u.id, u.nickname)} className="eb-btn eb-btn-secondary shrink-0">해제</button>
                     </div>
-                    <div style={{ display: 'flex', gap: 14, marginTop: 6, flexWrap: 'wrap' }}>
-                      <span style={{ color: '#9ca3af', fontSize: 12 }}>ELO {u.elo_score?.toLocaleString() || '-'}</span>
-                      {u.blocked_reason && <span style={{ color: '#9ca3af', fontSize: 12 }}>{u.blocked_reason}</span>}
+                    <div className="flex gap-3.5 mt-1.5 flex-wrap">
+                      <span className="t-small text-fg-2">ELO {u.elo_score?.toLocaleString() || '-'}</span>
+                      {u.blocked_reason && <span className="t-small text-fg-2">{u.blocked_reason}</span>}
                     </div>
-                    <div style={{ color: '#6b7280', fontSize: 11, marginTop: 4 }}>{formatDate(u.blocked_at)}</div>
+                    <div className="t-small text-fg-3 mt-1">{formatDate(u.blocked_at)}</div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table style={S.table}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-[13px]">
                   <thead>
-                    <tr>{['닉네임', '핸들', 'ELO', '사유', '차단일', ''].map(h => <th key={h} style={S.th}>{h}</th>)}</tr>
+                    <tr>
+                      {['닉네임', '핸들', 'ELO', '사유', '차단일', ''].map(h => (
+                        <th key={h} className="t-small text-fg-3 font-semibold py-2 px-3 border-b border-line whitespace-nowrap">{h}</th>
+                      ))}
+                    </tr>
                   </thead>
                   <tbody>
                     {blocked.map(u => (
-                      <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                        <td style={S.td}>{u.nickname || '-'}</td>
-                        <td style={{ ...S.td, color: '#9ca3af' }}>@{u.handle || '-'}</td>
-                        <td style={S.td}>{u.elo_score?.toLocaleString() || '-'}</td>
-                        <td style={{ ...S.td, color: '#9ca3af' }}>{u.blocked_reason || '-'}</td>
-                        <td style={{ ...S.td, color: '#9ca3af', whiteSpace: 'nowrap' }}>{formatDate(u.blocked_at)}</td>
-                        <td style={S.td}>
-                          <button onClick={() => handleUnblock(u.id, u.nickname)} style={S.ghostBtn}>해제</button>
+                      <tr key={u.id} className="border-b border-line">
+                        <td className="py-2.5 px-3 text-fg">{u.nickname || '-'}</td>
+                        <td className="py-2.5 px-3 text-fg-2">@{u.handle || '-'}</td>
+                        <td className="py-2.5 px-3 text-fg">{u.elo_score?.toLocaleString() || '-'}</td>
+                        <td className="py-2.5 px-3 text-fg-2">{u.blocked_reason || '-'}</td>
+                        <td className="py-2.5 px-3 text-fg-2 whitespace-nowrap">{formatDate(u.blocked_at)}</td>
+                        <td className="py-2.5 px-3">
+                          <button onClick={() => handleUnblock(u.id, u.nickname)} className="eb-btn eb-btn-secondary">해제</button>
                         </td>
                       </tr>
                     ))}
@@ -358,50 +405,54 @@ export default function AdminPage() {
       )}
 
       {tab === 'history' && (
-        <section style={S.section}>
-          <h2 style={S.h2}>차단 이력</h2>
+        <section className="mb-10">
+          <h2 className="t-h3 text-fg-2 mb-3.5">차단 이력</h2>
           {historyLoading ? (
             <SkeletonList />
           ) : history.length === 0 ? (
-            <p style={{ color: '#6b7280', fontSize: 14 }}>이력이 없습니다.</p>
+            <p className="t-body text-fg-3">이력이 없습니다.</p>
           ) : isMobile ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="flex flex-col gap-2.5">
               {history.map(h => (
-                <div key={h.id} style={S.mobileCard}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                      <span style={h.action === 'block' ? S.badgeBlock : S.badgeUnblock}>
+                <div key={h.id} className="eb-panel p-3.5">
+                  <div className="flex justify-between items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <StatusBadge tone={h.action === 'block' ? 'down' : 'up'}>
                         {h.action === 'block' ? '차단' : '해제'}
-                      </span>
-                      <span style={{ color: '#e5e7eb', fontSize: 14, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h.target_nickname || '-'}</span>
+                      </StatusBadge>
+                      <span className="t-ui text-fg overflow-hidden text-ellipsis whitespace-nowrap">{h.target_nickname || '-'}</span>
                     </div>
-                    <span style={{ color: '#6b7280', fontSize: 11, flexShrink: 0 }}>{formatDate(h.created_at)}</span>
+                    <span className="t-small text-fg-3 shrink-0">{formatDate(h.created_at)}</span>
                   </div>
-                  <div style={{ color: '#9ca3af', fontSize: 12, marginTop: 4 }}>@{h.target_handle || '-'}</div>
-                  {h.reason && <div style={{ color: '#9ca3af', fontSize: 12 }}>{h.reason}</div>}
-                  <div style={{ color: '#6b7280', fontSize: 11, marginTop: 2 }}>{h.admin_email}</div>
+                  <div className="t-small text-fg-2 mt-1">@{h.target_handle || '-'}</div>
+                  {h.reason && <div className="t-small text-fg-2">{h.reason}</div>}
+                  <div className="t-small text-fg-3 mt-0.5">{h.admin_email}</div>
                 </div>
               ))}
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={S.table}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-[13px]">
                 <thead>
-                  <tr>{['액션', '닉네임', '핸들', '사유', '처리자', '일시'].map(h => <th key={h} style={S.th}>{h}</th>)}</tr>
+                  <tr>
+                    {['액션', '닉네임', '핸들', '사유', '처리자', '일시'].map(h => (
+                      <th key={h} className="t-small text-fg-3 font-semibold py-2 px-3 border-b border-line whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
                 </thead>
                 <tbody>
                   {history.map(h => (
-                    <tr key={h.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                      <td style={S.td}>
-                        <span style={h.action === 'block' ? S.badgeBlock : S.badgeUnblock}>
+                    <tr key={h.id} className="border-b border-line">
+                      <td className="py-2.5 px-3">
+                        <StatusBadge tone={h.action === 'block' ? 'down' : 'up'}>
                           {h.action === 'block' ? '차단' : '해제'}
-                        </span>
+                        </StatusBadge>
                       </td>
-                      <td style={S.td}>{h.target_nickname || '-'}</td>
-                      <td style={{ ...S.td, color: '#9ca3af' }}>@{h.target_handle || '-'}</td>
-                      <td style={{ ...S.td, color: '#9ca3af' }}>{h.reason || '-'}</td>
-                      <td style={{ ...S.td, color: '#9ca3af' }}>{h.admin_email}</td>
-                      <td style={{ ...S.td, color: '#9ca3af', whiteSpace: 'nowrap' }}>{formatDate(h.created_at)}</td>
+                      <td className="py-2.5 px-3 text-fg">{h.target_nickname || '-'}</td>
+                      <td className="py-2.5 px-3 text-fg-2">@{h.target_handle || '-'}</td>
+                      <td className="py-2.5 px-3 text-fg-2">{h.reason || '-'}</td>
+                      <td className="py-2.5 px-3 text-fg-2">{h.admin_email}</td>
+                      <td className="py-2.5 px-3 text-fg-2 whitespace-nowrap">{formatDate(h.created_at)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -413,32 +464,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-const S = {
-  center: { minHeight: '100dvh', background: '#0a0a0f', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  page: { minHeight: '100dvh', background: '#0a0a0f', color: '#e5e7eb', padding: '32px 24px', maxWidth: 960, margin: '0 auto' },
-  card: { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 32, width: 340 },
-  topBar: { display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24, borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 16 },
-  section: { marginBottom: 40 },
-  formRow: { display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' },
-  h1: { fontSize: 20, fontWeight: 700, color: '#fff', flex: 1, margin: 0 },
-  h2: { fontSize: 15, fontWeight: 600, color: '#d1d5db', marginBottom: 14, marginTop: 0 },
-  input: { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 14, outline: 'none', minWidth: 0 },
-  primaryBtn: { background: 'rgba(99,102,241,0.25)', border: '1px solid rgba(99,102,241,0.4)', borderRadius: 8, padding: '10px 0', color: '#c4b5fd', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
-  blockBtn: { background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.35)', borderRadius: 8, padding: '8px 18px', color: '#fca5a5', fontSize: 14, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' },
-  ghostBtn: { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '6px 14px', color: '#9ca3af', fontSize: 13, cursor: 'pointer' },
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: 13 },
-  th: { textAlign: 'left', color: '#6b7280', fontWeight: 600, padding: '8px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' },
-  td: { padding: '10px 12px', color: '#e5e7eb' },
-  // 외부 탭 (pill)
-  tabGroup: { display: 'flex', gap: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 999, padding: 4, width: 'fit-content', marginBottom: 28 },
-  tabActive: { background: 'rgba(99,102,241,0.3)', border: '1px solid rgba(99,102,241,0.45)', borderRadius: 999, padding: '7px 20px', color: '#c4b5fd', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
-  tabInactive: { background: 'transparent', border: '1px solid transparent', borderRadius: 999, padding: '7px 20px', color: '#6b7280', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
-  // 내부 탭 (세그먼트, 더 작고 subtle)
-  innerTabGroup: { display: 'flex', gap: 2, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: 3, width: 'fit-content', marginBottom: 18 },
-  innerTabActive: { background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '5px 16px', color: '#e5e7eb', fontSize: 13, fontWeight: 600, cursor: 'pointer' },
-  innerTabInactive: { background: 'transparent', border: '1px solid transparent', borderRadius: 6, padding: '5px 16px', color: '#4b5563', fontSize: 13, fontWeight: 500, cursor: 'pointer' },
-  mobileCard: { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '12px 14px' },
-  badgeBlock: { display: 'inline-block', background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 999, padding: '2px 10px', color: '#fca5a5', fontSize: 12, fontWeight: 600, flexShrink: 0 },
-  badgeUnblock: { display: 'inline-block', background: 'rgba(74,222,128,0.15)', border: '1px solid rgba(74,222,128,0.25)', borderRadius: 999, padding: '2px 10px', color: '#4ade80', fontSize: 12, fontWeight: 600, flexShrink: 0 },
-};

@@ -1,9 +1,11 @@
-import React, { useMemo, useEffect, useState } from 'react';
-import { formatCompactNumber, formatNumber, toKST } from '../utils/tierCalculator';
+import { useMemo } from 'react';
+import { formatNumber, getCharacterTier, toKST } from '../utils/tierCalculator';
 import { proxyThumbnailUrl } from '../utils/imageUtils';
+import { useRankingData } from '../hooks/useRankingData';
 import ContributionGraph from './ContributionGraph';
 import CreatorRadarChart from './CreatorRadarChart';
-import { WordCloud } from './ExtraCharts';
+import { TagChips } from './ExtraCharts';
+import CharCard from './ui/CharCard';
 
 const GENRE_BUCKETS = [
   {
@@ -48,16 +50,6 @@ const GENRE_BUCKETS = [
   },
 ];
 
-const GENRE_COLORS = {
-  '로맨스':   '#ec4899',
-  'BL/GL':    '#a78bfa',
-  '다크/피폐': '#6366f1',
-  '현대/학교': '#3b82f6',
-  '판타지':   '#8b5cf6',
-  '성격형':   '#14b8a6',
-  'NTR':      '#ef4444',
-};
-
 function StatRowCard({ stats, characters }) {
   const items = useMemo(() => {
     if (!stats || !characters) return [];
@@ -68,37 +60,31 @@ function StatRowCard({ stats, characters }) {
       ? [...characters].sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0))[0]
       : null;
     return [
-      { label: '총 대화량',        value: formatNumber(total),                             unit: '회', sub: null },
-      { label: '평균 캐릭터 대화',  value: formatNumber(avg),                               unit: '회', sub: `${charCount}개 캐릭터 기준` },
-      { label: '최고 대화 캐릭터',  value: formatCompactNumber(top?.interactionCount || 0), unit: '회', sub: top?.name || null },
-      { label: '음성 재생',         value: formatNumber(stats.voicePlayCount || 0),         unit: stats.voicePlayUnit || '회', sub: null },
+      { label: '총 대화량', value: formatNumber(total), unit: '회', sub: null },
+      { label: '평균 캐릭터 대화', value: formatNumber(avg), unit: '회', sub: `${charCount}개 캐릭터 기준` },
+      { label: '최고 대화 캐릭터', value: formatNumber(top?.interactionCount || 0), unit: '회', sub: top?.name || null },
+      { label: '음성 재생', value: formatNumber(stats.voicePlayCount || 0), unit: stats.voicePlayUnit || '회', sub: null },
     ];
   }, [stats, characters]);
 
+  if (items.length === 0) return null;
+
   return (
-    <div
-      className="rounded-2xl overflow-hidden mb-4"
-      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-    >
-      <p
-        className="text-[10px] font-bold uppercase tracking-wider text-white/30 px-4 pt-3 pb-2"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
-      >
-        주요 지표
-      </p>
+    <div className="eb-tile mb-4">
+      <p className="t-label mb-3" style={{ color: 'var(--fg-2)' }}>주요 지표</p>
       {items.map((item, i) => (
         <div
           key={item.label}
-          className="flex justify-between items-center px-4 py-2.5"
-          style={{ borderBottom: i < items.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
+          className="eb-row flex justify-between items-center py-2.5"
+          style={{ borderBottom: i < items.length - 1 ? 'var(--border-w) solid var(--line)' : 'none' }}
         >
-          <span className="text-[13px] text-white/50">{item.label}</span>
+          <span className="t-body" style={{ color: 'var(--fg-2)' }}>{item.label}</span>
           <div className="text-right">
-            <span className="text-[15px] font-bold text-white">
+            <span className="t-figure">
               {item.value}
-              <span className="text-[11px] font-normal text-white/35 ml-1">{item.unit}</span>
+              <span style={{ fontSize: '0.62em', fontWeight: 600, color: 'var(--fg-2)' }}>{item.unit}</span>
             </span>
-            {item.sub && <p className="text-[11px] text-white/30 mt-0.5">{item.sub}</p>}
+            {item.sub && <p className="t-small mt-0.5" style={{ color: 'var(--fg-3)' }}>{item.sub}</p>}
           </div>
         </div>
       ))}
@@ -112,35 +98,19 @@ function GenreBarCard({ data }) {
   if (visible.length === 0) return null;
   const max = Math.max(1, ...visible.map(d => d.count));
   return (
-    <div
-      className="rounded-2xl overflow-hidden mb-4"
-      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-    >
-      <p
-        className="text-[10px] font-bold uppercase tracking-wider text-white/30 px-4 pt-3 pb-2"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
-      >
-        장르 분포
-      </p>
-      <div className="px-4 py-2">
-        {visible.map((item, i) => {
+    <div className="eb-tile">
+      <p className="t-label mb-3" style={{ color: 'var(--fg-2)' }}>장르 분포</p>
+      <div className="space-y-3">
+        {visible.map(item => {
           const pct = Math.round((item.count / max) * 100);
-          const color = GENRE_COLORS[item.subject] || '#a78bfa';
           return (
-            <div
-              key={item.subject}
-              className="py-2"
-              style={{ borderBottom: i < visible.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
-            >
+            <div key={item.subject}>
               <div className="flex justify-between items-center mb-1.5">
-                <span className="text-[13px] text-white/50">{item.subject}</span>
-                <span className="text-[13px] font-bold text-white">{item.count}개</span>
+                <span className="t-small" style={{ color: 'var(--fg-2)' }}>{item.subject}</span>
+                <span className="t-small" style={{ fontWeight: 700 }}>{item.count}개</span>
               </div>
-              <div className="h-[5px] rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                <div
-                  className="h-full rounded-full transition-all duration-700"
-                  style={{ width: `${pct}%`, background: color }}
-                />
+              <div className="h-[10px]" style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-pill)' }}>
+                <div className="h-full" style={{ width: `${pct}%`, background: 'var(--accent)', borderRadius: 'var(--radius-pill)' }} />
               </div>
             </div>
           );
@@ -157,53 +127,33 @@ function AdvancedGaugeCard({ advanced }) {
       label: '언리밋 비율',
       value: `${advanced.freedomRatio.toFixed(1)}%`,
       pct: Math.min(100, advanced.freedomRatio),
-      color: '#34d399',
       desc: '무제한 대화 허용 캐릭터 비율',
     },
     {
       label: '매혹도',
       value: advanced.loyaltyRatio.toFixed(1),
       pct: Math.min(100, (advanced.loyaltyRatio / 200) * 100),
-      color: '#60a5fa',
       desc: '팔로워 1인당 대화 수',
     },
     {
       label: '히트 쏠림도',
       value: `${advanced.blockbusterRatio.toFixed(1)}%`,
       pct: Math.min(100, advanced.blockbusterRatio),
-      color: '#f59e0b',
       desc: '상위 2개 캐릭터 대화량 지분',
     },
   ];
   return (
-    <div
-      className="rounded-2xl overflow-hidden mb-4"
-      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-    >
-      <p
-        className="text-[10px] font-bold uppercase tracking-wider text-white/30 px-4 pt-3 pb-2"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
-      >
-        심화 지표
-      </p>
-      <div className="px-4 py-2">
-        {items.map((item, i) => (
-          <div
-            key={item.label}
-            className="py-2.5"
-            style={{ borderBottom: i < items.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
-          >
-            <div className="flex justify-between items-baseline mb-1.5">
-              <span className="text-[13px] text-white/50">{item.label}</span>
-              <span className="text-[15px] font-bold" style={{ color: item.color }}>{item.value}</span>
+    <div className="mb-4">
+      <p className="t-label mb-2" style={{ color: 'var(--fg-2)' }}>심화 지표</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {items.map(item => (
+          <div key={item.label} className="eb-tile">
+            <p className="t-small" style={{ color: 'var(--fg-2)' }}>{item.label}</p>
+            <p className="t-h2 mt-1 mb-2">{item.value}</p>
+            <div className="h-[6px]" style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-pill)' }}>
+              <div className="h-full" style={{ width: `${item.pct}%`, background: 'var(--accent)', borderRadius: 'var(--radius-pill)' }} />
             </div>
-            <div className="h-[6px] rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${item.pct}%`, background: item.color }}
-              />
-            </div>
-            <p className="text-[11px] text-white/25 mt-1">{item.desc}</p>
+            <p className="t-small mt-2" style={{ color: 'var(--fg-3)' }}>{item.desc}</p>
           </div>
         ))}
       </div>
@@ -212,13 +162,8 @@ function AdvancedGaugeCard({ advanced }) {
 }
 
 export default function StatsTab({ stats, characters }) {
-  const [rankingUpdatedAt, setRankingUpdatedAt] = useState(null);
-  useEffect(() => {
-    fetch('/data/ranking_latest.json')
-      .then(res => res.json())
-      .then(data => { if (data?.updatedAt) setRankingUpdatedAt(toKST(data.updatedAt)); })
-      .catch(() => {});
-  }, []);
+  const { data: rankingData } = useRankingData();
+  const rankingUpdatedAt = rankingData?.updatedAt ? toKST(rankingData.updatedAt) : null;
 
   const rankedChars = useMemo(() =>
     (characters || [])
@@ -262,81 +207,67 @@ export default function StatsTab({ stats, characters }) {
   }, [characters]);
 
   return (
-    <div className="space-y-0">
-      {/* 제작 히스토리 — 맨 위 */}
+    <div>
       <div className="mb-4"><ContributionGraph characters={characters} /></div>
 
-      {/* 레이더 차트 */}
-      <div
-        className="rounded-2xl overflow-hidden mb-4 px-4 py-3"
-        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-      >
-        <p className="text-[10px] font-bold uppercase tracking-wider text-white/30 mb-2">크리에이터 분석</p>
-        <CreatorRadarChart stats={stats} characters={characters} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div className="eb-tile flex flex-col items-center">
+          <p className="t-label self-start mb-2" style={{ color: 'var(--fg-2)' }}>크리에이터 분석</p>
+          <CreatorRadarChart stats={stats} characters={characters} />
+        </div>
+        <GenreBarCard data={hashtagRadarData} />
       </div>
 
       <StatRowCard stats={stats} characters={characters} />
-      <GenreBarCard data={hashtagRadarData} />
       <AdvancedGaugeCard advanced={advanced} />
 
-
       {rankedChars.length > 0 && (
-        <div
-          className="rounded-2xl overflow-hidden mb-4"
-          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-        >
-          <div
-            className="flex items-center justify-between px-4 pt-3 pb-2"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
-          >
-            <p className="text-[10px] font-bold uppercase tracking-wider text-white/30">글로벌 랭킹</p>
+        <div className="eb-tile mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="t-label" style={{ color: 'var(--fg-2)' }}>글로벌 랭킹</p>
             {rankingUpdatedAt && (
-              <span className="text-[10px] text-white/25">
+              <span className="t-small" style={{ color: 'var(--fg-3)' }}>
                 {rankingUpdatedAt.getMonth() + 1}/{rankingUpdatedAt.getDate()} 업데이트
               </span>
             )}
           </div>
-          {rankedChars.map((char, idx) => {
-            const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : null;
-            const rankColor = idx === 0 ? '#fbbf24' : idx === 1 ? '#e2e8f0' : idx === 2 ? '#fb923c' : '#a78bfa';
-            return (
-              <a
-                key={char.id}
-                href={`https://zeta-ai.io/ko/plots/${char.id}/profile`}
-                target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-white/[0.03]"
-                style={{ borderBottom: idx < rankedChars.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
-              >
-                <div className="w-6 text-center shrink-0">
-                  {medal
-                    ? <span className="text-sm">{medal}</span>
-                    : <span className="text-[11px] font-black" style={{ color: rankColor }}>#{idx + 1}</span>
-                  }
-                </div>
-                {char.imageUrl && (
-                  <img
-                    src={proxyThumbnailUrl(char.imageUrl, 96)}
-                    alt={char.name}
-                    className="w-8 h-8 rounded-full object-cover shrink-0"
-                    style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+          <div>
+            {rankedChars.map(char => {
+              const tier = getCharacterTier(char.interactionCount || 0);
+              const medalVar = char.globalRank === 1 ? '--t-gold' : char.globalRank === 2 ? '--t-silver' : char.globalRank === 3 ? '--t-bronze' : null;
+              const zetaUrl = `https://zeta-ai.io/ko/plots/${char.id}/profile`;
+              return (
+                <a
+                  key={char.id}
+                  href={zetaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="eb-row flex items-center gap-3 py-2 no-underline"
+                >
+                  <CharCard
+                    size="mini"
+                    name={char.name}
+                    imageUrl={char.imageUrl ? proxyThumbnailUrl(char.imageUrl, 96) : null}
+                    rarity={tier.key}
+                    interactive={false}
                   />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-semibold text-white truncate">{char.name}</p>
-                  <p className="text-[11px] text-white/35">
-                    {char.trendingRank ? '트렌딩' : char.bestRank ? '베스트' : '신작'}
-                  </p>
-                </div>
-                <span className="text-[15px] font-bold shrink-0" style={{ color: rankColor }}>
-                  #{char.globalRank}
-                </span>
-              </a>
-            );
-          })}
+                  <div className="flex-1 min-w-0">
+                    <p className="t-body truncate">{char.name}</p>
+                    <p className="t-small" style={{ color: 'var(--fg-3)' }}>
+                      {char.trendingRank ? '트렌딩' : char.bestRank ? '베스트' : '신작'}
+                    </p>
+                  </div>
+                  <span className="t-figure shrink-0" style={{ color: medalVar ? `var(${medalVar})` : 'var(--fg-2)' }}>
+                    #{char.globalRank}
+                  </span>
+                </a>
+              );
+            })}
+          </div>
         </div>
       )}
 
-      <div className="mt-4"><WordCloud characters={characters} /></div>
+      <TagChips characters={characters} />
     </div>
   );
 }

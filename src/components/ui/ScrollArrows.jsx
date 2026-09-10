@@ -40,12 +40,13 @@ function useScrollEdges(ref) {
 }
 
 /**
- * 가로 스크롤 영역의 좌/우 스크롤 어포던스. 스크롤 가능 방향에만 살짝 반투명한
- * 원형 버튼을 띄운다(모바일·데스크탑 공통). `position: relative` 부모 안에 둘 것.
+ * 가로 스크롤 영역의 좌/우 스크롤 어포던스. 스크롤 가능 방향에만 32 원형 버튼을 띄운다.
+ * 호버 가능한 포인터(마우스)에서만 노출한다 — 터치 기기는 스와이프로 충분하다.
+ * `position: relative` 부모 안에 둘 것.
  *
  * props: { targetRef, size? }
  */
-export default function ScrollArrows({ targetRef, size = 34 }) {
+export default function ScrollArrows({ targetRef, size = 32 }) {
   const { canLeft, canRight } = useScrollEdges(targetRef);
 
   const scroll = useCallback(
@@ -59,10 +60,9 @@ export default function ScrollArrows({ targetRef, size = 34 }) {
   );
 
   const base =
-    'absolute top-1/2 -translate-y-1/2 z-30 flex items-center justify-center rounded-full ' +
-    'bg-black/35 text-white/90 ring-1 ring-white/15 backdrop-blur-md ' +
-    'shadow-[0_4px_16px_rgba(0,0,0,0.45)] transition-opacity duration-200 ' +
-    'hover:bg-black/60 hover:text-white active:scale-95 motion-reduce:transition-none';
+    'hidden [@media(hover:hover)]:flex absolute top-1/2 -translate-y-1/2 z-30 items-center justify-center rounded-full ' +
+    'bg-surface-2 border border-line text-fg-2 hover:text-fg transition-opacity duration-200 ' +
+    'active:scale-95 motion-reduce:transition-none';
   const dim = { width: size, height: size };
   const icon = Math.round(size * 0.5);
 

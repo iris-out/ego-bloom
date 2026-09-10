@@ -18,6 +18,10 @@ const MEDAL_VAR = { 1: '--t-gold', 2: '--t-silver', 3: '--t-bronze' };
  * @param {{ label: string, value: string|number }[]} [props.stats] 2개 권장(대화, 팔로워).
  * @param {number} [props.rank] 1~3 이면 좌상단에 랭크 리본을 그린다.
  * @param {boolean} [props.compact]
+ * @param {string} [props.tierHref] 있으면 티어 엠블럼이 이 경로로 가는 링크가 된다(예: "/tier?creator=<handle>").
+ * @param {number} [props.avatarMaxHeight] px. 아바타 높이 상한(모바일에서 카드가 너무 커지는 것을 막을 때).
+ * @param {import('react').ReactNode} [props.children] ELO 아래에 렌더되는 슬롯(티어 진행 바 등).
+ * @param {() => void} [props.onClick]
  * @param {string} [props.className]
  */
 export default function PlayerCard({
@@ -30,6 +34,10 @@ export default function PlayerCard({
   stats = [],
   rank,
   compact = false,
+  tierHref,
+  avatarMaxHeight,
+  children,
+  onClick,
   className = '',
 }) {
   const medalVar = rank ? MEDAL_VAR[rank] : null;
@@ -42,6 +50,7 @@ export default function PlayerCard({
     <div
       className={`relative w-full eb-panel overflow-visible ${className}`}
       style={{ borderColor: frameVar, borderWidth: 'var(--frame-w)', boxShadow: 'var(--shadow)' }}
+      onClick={onClick}
     >
       {medalVar && (
         <div
@@ -52,7 +61,13 @@ export default function PlayerCard({
         </div>
       )}
 
-      <div className="relative aspect-square w-full overflow-hidden" style={{ borderRadius: 'calc(var(--radius-l) - var(--frame-w)) calc(var(--radius-l) - var(--frame-w)) 0 0' }}>
+      <div
+        className={`relative w-full aspect-square overflow-hidden ${avatarMaxHeight ? 'max-h-[var(--avatar-max-h)]' : ''}`}
+        style={{
+          borderRadius: 'calc(var(--radius-l) - var(--frame-w)) calc(var(--radius-l) - var(--frame-w)) 0 0',
+          ...(avatarMaxHeight ? { '--avatar-max-h': `${avatarMaxHeight}px` } : null),
+        }}
+      >
         {!showPlaceholder ? (
           <img
             src={avatarUrl}
@@ -74,12 +89,23 @@ export default function PlayerCard({
       </div>
 
       <div className="relative flex justify-center" style={{ marginTop: -24 }}>
-        <div
-          className="animate-emblem-reveal"
-          style={{ background: 'var(--surface)', borderRadius: '50%', padding: 3 }}
-        >
-          <TierMark tier={tier} division={division} size={48} />
-        </div>
+        {tierHref ? (
+          <a
+            href={tierHref}
+            aria-label="티어 가이드 보기"
+            className="animate-emblem-reveal"
+            style={{ background: 'var(--surface)', borderRadius: '50%', padding: 3 }}
+          >
+            <TierMark tier={tier} division={division} size={48} />
+          </a>
+        ) : (
+          <div
+            className="animate-emblem-reveal"
+            style={{ background: 'var(--surface)', borderRadius: '50%', padding: 3 }}
+          >
+            <TierMark tier={tier} division={division} size={48} />
+          </div>
+        )}
       </div>
 
       <div className="px-4 pb-4 pt-1 flex flex-col items-center text-center gap-1">
@@ -96,6 +122,8 @@ export default function PlayerCard({
             {formatEloScore(eloRaw)}
           </span>
         </div>
+
+        {children && <div className="w-full mt-2">{children}</div>}
 
         {!compact && stats.length > 0 && (
           <div className="mt-2 flex items-center gap-6">

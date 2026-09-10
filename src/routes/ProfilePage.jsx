@@ -1,18 +1,16 @@
-import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { AlertCircle, Loader2, RefreshCw, Archive, ChevronLeft } from 'lucide-react';
+import { AlertCircle, Loader2, RefreshCw, Archive, ChevronLeft, Link2, Check, IdCard, Tag } from 'lucide-react';
 import { computeEarnedTitles } from '../data/badges';
 import ProfileHeader from '../components/ProfileHeader';
 import SummaryTab from '../components/SummaryTab';
 import ZetaSpotlightCard from '../components/ZetaSpotlightCard';
-import HeroCard from '../components/HeroCard';
 import SkeletonUI from '../components/SkeletonUI';
 import ChangelogModal from '../components/ChangelogModal';
 import { proxyImageUrl, getPlotImageUrl, getPlotImageUrls } from '../utils/imageUtils';
-import { getCharacterTier, formatCompactNumber } from '../utils/tierCalculator';
-import ImageWithFallback from '../components/ImageWithFallback';
 import BirthdayBanner from '../components/BirthdayBanner';
-import { useServerStatus } from '../hooks/useServerStatus';
+import Segmented from '../components/ui/Segmented';
+import { useRankingData } from '../hooks/useRankingData';
 import { lazyWithRetry } from '../utils/lazyWithRetry';
 
 const AchievementsTab = lazyWithRetry(() => import('../components/AchievementsTab'), 'AchievementsTab');
@@ -20,24 +18,6 @@ const StatsTab = lazyWithRetry(() => import('../components/StatsTab'), 'StatsTab
 
 const CACHE_KEY_PREFIX = 'zeta_cache_v2_';
 const CACHE_DURATION = 30 * 60 * 1000;
-const RANKING_MAP_CACHE_KEY = 'zeta_ranking_map_v1';
-const RANKING_MAP_TTL_MS = 20 * 60 * 1000;
-
-function getCachedRankingMap() {
-  try {
-    const raw = sessionStorage.getItem(RANKING_MAP_CACHE_KEY);
-    if (!raw) return null;
-    const { map, ts } = JSON.parse(raw);
-    if (Date.now() - ts > RANKING_MAP_TTL_MS) return null;
-    return map;
-  } catch { return null; }
-}
-
-function setCachedRankingMap(map) {
-  try {
-    sessionStorage.setItem(RANKING_MAP_CACHE_KEY, JSON.stringify({ map, ts: Date.now() }));
-  } catch { /* ignore */ }
-}
 
 function mapPlots(rawPlots) {
   return (rawPlots || []).map(p => ({
@@ -96,149 +76,56 @@ async function fetchAllPlots(creatorId) {
   return all;
 }
 
-async function fetchRankingMap() {
-  const cached = getCachedRankingMap();
-  if (cached) return cached;
-  try {
-    // ranking_latest.json을 재활용 — 3개 Zeta API 호출 대신 이미 캐싱된 정적 파일 1회 요청
-    const res = await fetch('/data/ranking_latest.json');
-    if (!res.ok) throw new Error('ranking JSON fetch failed');
-    const rankingData = await res.json();
-    const map = {};
-    // ranking_latest.json은 rankChange 필드 사용 (API의 rankDiff와 동일 의미)
-    (rankingData.trendingPlots || []).forEach(p => {
-      map[p.id] = { ...map[p.id], trendingRank: p.rank, rankDiff: p.rankChange ?? 0 };
-    });
-    (rankingData.bestPlots || []).forEach(p => {
-      map[p.id] = { ...map[p.id], bestRank: p.rank };
-    });
-    (rankingData.newPlots || []).forEach(p => {
-      map[p.id] = { ...map[p.id], newRank: p.rank };
-    });
-    Object.values(map).forEach(r => {
-      const ranks = [r.trendingRank, r.bestRank, r.newRank].filter(x => x != null);
-      r.globalRank = ranks.length > 0 ? Math.min(...ranks) : null;
-      r.rankDiff = r.rankDiff ?? 0;
-      r.isNew = r.isNew ?? false;
-    });
-    setCachedRankingMap(map);
-    return map;
-  } catch { return {}; }
-}
-
 const TABS = [
-  { key: 'stats',        label: '통계'   },
-  { key: 'achievements', label: '업적'   },
-  { key: 'characters',   label: '캐릭터' },
+  { value: 'stats',        label: '통계'   },
+  { value: 'achievements', label: '업적'   },
+  { value: 'characters',   label: '캐릭터' },
 ];
-
-const TIER_BADGE_STYLES = {
-  B:  { color: '#A0AEC0', bg: 'rgba(160,174,192,0.15)', border: 'rgba(160,174,192,0.3)' },
-  A:  { color: '#48BB78', bg: 'rgba(72,187,120,0.15)',  border: 'rgba(72,187,120,0.3)' },
-  S:  { color: '#4299E1', bg: 'rgba(66,153,225,0.15)',  border: 'rgba(66,153,225,0.3)' },
-  R:  { color: '#9F7AEA', bg: 'rgba(159,122,234,0.15)', border: 'rgba(159,122,234,0.3)' },
-  SR: { color: '#ED8936', bg: 'rgba(237,137,54,0.15)',  border: 'rgba(237,137,54,0.3)' },
-  X:  { color: '#F56565', bg: 'rgba(245,101,101,0.15)', border: 'rgba(245,101,101,0.3)' },
-};
-
-const PALETTES = [
-  'from-indigo-500/20 to-blue-500/20',
-  'from-emerald-500/20 to-teal-500/20',
-  'from-rose-500/20 to-pink-500/20',
-  'from-amber-500/20 to-orange-500/20',
-  'from-sky-500/20 to-blue-500/20',
-  'from-violet-500/20 to-fuchsia-500/20',
-];
-
-function paletteIndex(name) {
-  let h = 0;
-  for (let i = 0; i < (name || '').length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff;
-  return h % PALETTES.length;
-}
-
-function SidebarCharCards({ characters }) {
-  const top20 = useMemo(() => {
-    if (!characters?.length) return [];
-    return [...characters]
-      .sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0))
-      .slice(0, 20);
-  }, [characters]);
-
-  if (top20.length === 0) return null;
-
-  return (
-    <div
-      className="hidden lg:block mt-4 rounded-2xl overflow-hidden"
-      style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
-    >
-      <p
-        className="text-[10px] font-bold uppercase tracking-wider text-white/30 px-4 pt-3 pb-2"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
-      >
-        캐릭터 TOP 20
-      </p>
-      <div className="flex flex-wrap gap-1.5 px-4 py-3">
-        {top20.map(char => {
-          const tier = getCharacterTier(char.interactionCount || 0);
-          const ts = TIER_BADGE_STYLES[tier.name] || TIER_BADGE_STYLES.B;
-          return (
-            <span
-              key={char.id}
-              title={char.name}
-              className="text-[11px] font-bold px-2 py-[3px] rounded-full"
-              style={{ color: ts.color, background: ts.bg, border: `1px solid ${ts.border}` }}
-            >
-              {tier.name}
-            </span>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 function ProfilePageHeader({ onBack, hasEarnedTitles, onEditTitle }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = useCallback(() => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }).catch(() => {});
+  }, []);
+
   return (
-    <header className="flex justify-between items-center px-6 pt-5 pb-2 relative z-20 lg:px-12">
-      <button
-        onClick={onBack}
-        className="w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
-      >
-        <ChevronLeft size={20} className="text-gray-300" />
+    <header className="flex justify-between items-center px-4 pt-5 pb-2 lg:px-12">
+      <button type="button" onClick={onBack} className="eb-btn-icon" aria-label="뒤로가기">
+        <ChevronLeft size={20} strokeWidth={2} />
       </button>
+      <span className="t-h3 hidden sm:inline">EGO-BLOOM</span>
       <div className="flex items-center gap-2">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M7 17 L17 17 L15 22 L9 22 Z" />
-          <line x1="6" y1="17" x2="18" y2="17" />
-          <line x1="12" y1="17" x2="12" y2="11" />
-          <path d="M12 6 Q10 2 12 1 Q14 2 12 6" />
-          <path d="M12 6 Q17 4 18 6 Q17 8 12 6" />
-          <path d="M12 6 Q14 10 12 11 Q10 10 12 6" />
-          <path d="M12 6 Q7 8 6 6 Q7 4 12 6" />
-          <circle cx="12" cy="6" r="1.2" />
-        </svg>
-        <span className="font-bold tracking-[0.15em] text-xs text-white uppercase">Ego-Bloom</span>
-      </div>
-      <div className="flex items-center gap-2">
+        <button type="button" onClick={handleCopyLink} className="eb-btn-icon" aria-label="링크 복사">
+          {copied ? <Check size={16} strokeWidth={2} /> : <Link2 size={16} strokeWidth={2} />}
+        </button>
         <button
+          type="button"
           onClick={() => { window.location.hash = 'recap'; }}
-          className="px-3 py-1.5 rounded-full text-[11px] font-bold transition-all hover:opacity-80"
-          style={{
-            background: 'linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.25))',
-            border: '1px solid rgba(139,92,246,0.35)',
-            color: '#c4b5fd',
-          }}
+          className="eb-btn-icon sm:hidden"
+          aria-label="카드 보기"
+        >
+          <IdCard size={16} strokeWidth={2} />
+        </button>
+        <button
+          type="button"
+          onClick={() => { window.location.hash = 'recap'; }}
+          className="hidden sm:inline-flex eb-btn eb-btn-secondary"
         >
           CARD
         </button>
         {hasEarnedTitles && (
-          <button
-            onClick={onEditTitle}
-            className="px-3 py-1.5 rounded-full text-[11px] font-semibold text-white/70 hover:text-white transition-all"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
-          >
-            칭호 변경
-          </button>
+          <>
+            <button type="button" onClick={onEditTitle} className="eb-btn-icon sm:hidden" aria-label="칭호 변경">
+              <Tag size={16} strokeWidth={2} />
+            </button>
+            <button type="button" onClick={onEditTitle} className="hidden sm:inline-flex eb-btn eb-btn-secondary">
+              칭호 변경
+            </button>
+          </>
         )}
       </div>
     </header>
@@ -249,7 +136,6 @@ export default function ProfilePage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialCreator = searchParams.get('creator');
-  const { status: serverStatus } = useServerStatus();
   const onBack = () => navigate('/');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -259,20 +145,48 @@ export default function ProfilePage() {
   const [cacheRemaining, setCacheRemaining] = useState(null);
   const [showChangelog, setShowChangelog] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
-  const [tierRevealed, setTierRevealed] = useState(false);
   const [history, setHistory] = useState(null); // 1일 전 대비 성장 baseline
 
-  const rankedCharacters = useMemo(() => {
+  const { data: rankingLatest } = useRankingData();
+
+  // ranking_latest.json → 캐릭터 id 로 찾는 전역 랭킹 맵. useRankingData 가 파일을 한 번만 받아오고,
+  // 여기서는 매번 파생만 한다.
+  const rankingMap = useMemo(() => {
+    const map = {};
+    if (!rankingLatest) return map;
+    (rankingLatest.trendingPlots || []).forEach(p => {
+      map[p.id] = { ...map[p.id], trendingRank: p.rank, rankDiff: p.rankChange ?? 0 };
+    });
+    (rankingLatest.bestPlots || []).forEach(p => {
+      map[p.id] = { ...map[p.id], bestRank: p.rank };
+    });
+    (rankingLatest.newPlots || []).forEach(p => {
+      map[p.id] = { ...map[p.id], newRank: p.rank };
+    });
+    Object.values(map).forEach(r => {
+      const ranks = [r.trendingRank, r.bestRank, r.newRank].filter(x => x != null);
+      r.globalRank = ranks.length > 0 ? Math.min(...ranks) : null;
+      r.rankDiff = r.rankDiff ?? 0;
+      r.isNew = r.isNew ?? false;
+    });
+    return map;
+  }, [rankingLatest]);
+
+  const characters = useMemo(() => {
     if (!data?.characters) return [];
-    return data.characters
+    return data.characters.map(c => ({ ...c, ...(rankingMap[c.id] || {}) }));
+  }, [data, rankingMap]);
+
+  const rankedCharacters = useMemo(() => {
+    return characters
       .filter(c => c.globalRank != null)
       .sort((a, b) => a.globalRank - b.globalRank);
-  }, [data]);
+  }, [characters]);
 
   const hasEarnedTitles = useMemo(() => {
     if (!data) return false;
-    return computeEarnedTitles({ characters: data.characters, stats: data.stats }).some(t => t.earned);
-  }, [data]);
+    return computeEarnedTitles({ characters, stats: data.stats }).some(t => t.earned);
+  }, [data, characters]);
 
   useEffect(() => {
     if (!initialCreator) { navigate('/', { replace: true }); }
@@ -295,10 +209,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (initialCreator) {
-      setTierRevealed(false);
       fetchData(initialCreator);
     }
-  }, [initialCreator]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [initialCreator]);
 
   const fetchData = async (inputStr, forceRefresh = false) => {
     let id = inputStr.trim();
@@ -308,7 +221,7 @@ export default function ProfilePage() {
       // UUID 형식이 아니면서, URL 형태도 아니라면 핸들(@) 검색으로 간주함
       const isUUID = /^[0-9a-fA-F-]{36}$/.test(id);
       const isURL = id.includes('/creators/');
-      
+
       if (!isUUID && !isURL && !id.startsWith('@')) {
         id = '@' + id;
       }
@@ -344,7 +257,7 @@ export default function ProfilePage() {
         const parts = id.split('/creators/');
         if (parts[1]) id = parts[1].split('/')[0];
       }
-      
+
       if (!id.match(/^[0-9a-fA-F-]{36}$/)) throw new Error('올바른 Creator ID 또는 @핸들이 아닙니다.');
 
       // 차단된 사용자 확인
@@ -365,12 +278,7 @@ export default function ProfilePage() {
           try {
             const parsed = JSON.parse(cached);
             if (Date.now() - parsed.timestamp < CACHE_DURATION) {
-              const rankingMap = await fetchRankingMap();
-              const updatedData = {
-                ...parsed.data,
-                characters: parsed.data.characters.map(c => ({ ...c, ...(rankingMap[c.id] || {}) })),
-              };
-              setData(updatedData); setCacheInfo({ cachedAt: parsed.timestamp }); setLoading(false);
+              setData(parsed.data); setCacheInfo({ cachedAt: parsed.timestamp }); setLoading(false);
               return;
             }
           } catch { localStorage.removeItem(cacheKey); }
@@ -384,8 +292,8 @@ export default function ProfilePage() {
       if (!profileRes.ok) throw new Error('사용자를 찾을 수 없습니다.');
       if (!statsRes.ok) throw new Error('통계 정보를 불러올 수 없습니다.');
 
-      const [profile, stats, allPlots, rankingMap] = await Promise.all([
-        profileRes.json(), statsRes.json(), fetchAllPlots(id), fetchRankingMap(),
+      const [profile, stats, allPlots] = await Promise.all([
+        profileRes.json(), statsRes.json(), fetchAllPlots(id),
       ]);
 
       if (stats.voicePlaySeconds != null && stats.voicePlayCount == null) {
@@ -432,14 +340,14 @@ export default function ProfilePage() {
         .then(h => { if (h && h.found) setHistory(h); })
         .catch(err => console.error('[Creator History Error]:', err));
 
-      const characters = allPlots.map(p => ({
+      // 전역 랭킹 필드(trendingRank 등)는 저장하지 않는다. 렌더 시 rankingMap 에서 파생한다.
+      const rawCharacters = allPlots.map(p => ({
         ...p,
         imageUrl: getPlotImageUrl(p),
         imageUrls: getPlotImageUrls(p),
-        ...(rankingMap[p.id] || {}),
       }));
 
-      const minimalCharacters = characters.map(c => ({
+      const minimalCharacters = rawCharacters.map(c => ({
         id: c.id, name: c.name,
         interactionCount: c.interactionCount,
         originalInteractionCount: c.originalInteractionCount,
@@ -449,11 +357,8 @@ export default function ProfilePage() {
         unlimitedAllowed: c.unlimitedAllowed, starCount: c.starCount,
         isLongDescriptionPublic: c.isLongDescriptionPublic,
         shortDescription: c.shortDescription,
-        trendingRank: c.trendingRank, bestRank: c.bestRank,
-        newRank: c.newRank, globalRank: c.globalRank,
-        rankDiff: c.rankDiff, isNew: c.isNew,
       }));
-      const finalData = { profile, stats, characters };
+      const finalData = { profile, stats, characters: rawCharacters };
       setData(finalData); setCacheInfo(null);
       try { localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: { ...finalData, characters: minimalCharacters } })); }
       catch { /* QuotaExceededError 무시 */ }
@@ -464,22 +369,22 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="bg-profile min-h-[100dvh]">
+      <div className="min-h-[100dvh]" style={{ background: 'var(--bg)' }}>
         <ProfilePageHeader onBack={onBack} hasEarnedTitles={hasEarnedTitles} onEditTitle={() => setEditingTitle(true)} />
-        <main className="max-w-[680px] mx-auto px-6 py-4 lg:max-w-[1280px] lg:px-[6%]"><SkeletonUI /></main>
+        <main className="max-w-[1200px] mx-auto px-4 py-4 lg:px-8"><SkeletonUI /></main>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-profile min-h-[100dvh]">
+      <div className="min-h-[100dvh]" style={{ background: 'var(--bg)' }}>
         <ProfilePageHeader onBack={onBack} hasEarnedTitles={hasEarnedTitles} onEditTitle={() => setEditingTitle(true)} />
-        <main className="max-w-[680px] mx-auto px-6 py-8 flex flex-col items-center gap-4 lg:max-w-[1280px] lg:px-[6%]">
-          <div className="flex items-center gap-2 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl border border-red-400/20">
-            <AlertCircle size={16} /><span>{error}</span>
+        <main className="max-w-[1200px] mx-auto px-4 py-8 flex flex-col items-center gap-4 lg:px-8">
+          <div className="flex items-center gap-2 t-body eb-panel px-4 py-3" style={{ color: 'var(--down)' }}>
+            <AlertCircle size={16} strokeWidth={2} /><span>{error}</span>
           </div>
-          <button onClick={onBack} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 transition-colors">
+          <button type="button" onClick={onBack} className="eb-btn eb-btn-secondary">
             ← 홈으로 돌아가기
           </button>
         </main>
@@ -490,92 +395,61 @@ export default function ProfilePage() {
   if (!data) return null;
 
   return (
-    <div className="bg-profile min-h-[100dvh] relative">
+    <div className="min-h-[100dvh]" style={{ background: 'var(--bg)' }}>
       <ProfilePageHeader onBack={onBack} hasEarnedTitles={hasEarnedTitles} onEditTitle={() => setEditingTitle(true)} />
 
-      <main className="max-w-[680px] mx-auto px-6 pb-20 relative z-10 lg:max-w-[1280px] lg:px-[6%]">
-        {/* 캐시 알림 */}
+      <main className="max-w-[1200px] mx-auto px-4 pb-20 lg:px-8">
         {cacheInfo && cacheRemaining !== null && (
-          <div className="animate-slide-down flex items-center justify-between px-4 py-2.5 mt-4 rounded-xl bg-white/[0.02] border border-white/[0.05] text-xs text-gray-500">
+          <div className="eb-panel flex items-center justify-between px-4 py-2.5 mt-4 t-small" style={{ color: 'var(--fg-2)' }}>
             <span className="flex items-center gap-1.5">
-              <Archive size={13} className="text-gray-400" />
-              <span className="font-medium">캐시 데이터 —</span>
-              <span className={`font-bold ${cacheRemaining <= 5 ? 'text-orange-400' : 'text-gray-400'}`}>
+              <Archive size={13} strokeWidth={2} style={{ color: 'var(--fg-3)' }} />
+              <span>캐시 데이터 —</span>
+              <span style={{ fontWeight: 700, color: cacheRemaining <= 5 ? 'var(--warn)' : 'var(--fg-2)' }}>
                 {cacheRemaining}분 후 만료
               </span>
             </span>
-            <button onClick={() => fetchData(initialCreator, true)}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:border-blue-500/40 hover:text-blue-400 transition-all font-medium text-gray-400">
-              <RefreshCw size={11} />새로고침
+            <button type="button" onClick={() => fetchData(initialCreator, true)} className="eb-chip inline-flex items-center gap-1">
+              <RefreshCw size={11} strokeWidth={2} />새로고침
             </button>
           </div>
         )}
 
-        <BirthdayBanner characters={data.characters} creatorName={data.profile?.nickname} />
+        <BirthdayBanner characters={characters} creatorName={data.profile?.nickname} />
 
-        <div className="profile-layout">
-          {/* 탭 바 — 전체 너비 상단 */}
-          <div className="profile-layout-tabbar">
-            <div
-              className="flex p-[3px] rounded-[9px] mb-4"
-              style={{ background: 'rgba(255,255,255,0.04)' }}
-            >
-              {TABS.map(t => (
-                <button
-                  key={t.key}
-                  onClick={() => setTab(t.key)}
-                  className="flex-1 py-[6px] lg:py-2 rounded-[7px] text-[11px] lg:text-[13px] font-semibold transition-all"
-                  style={tab === t.key
-                    ? { background: '#2c2c34', color: '#fff' }
-                    : { color: 'rgba(255,255,255,0.35)' }
-                  }
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
+        <div className="mt-6">
+          <ProfileHeader
+            profile={data.profile}
+            stats={data.stats}
+            characters={characters}
+            growthHistory={history}
+            editing={editingTitle}
+            setEditing={setEditingTitle}
+          />
+        </div>
 
-          {/* 왼쪽 사이드바 — 프로필 헤더 + HeroCard + 캐릭터 카드(PC) */}
-          <aside className="profile-layout-sidebar">
-            <ProfileHeader
-              profile={data.profile}
-              stats={data.stats}
-              characters={data.characters}
-              growthHistory={history}
-              editing={editingTitle}
-              setEditing={setEditingTitle}
-              onTierReveal={() => setTierRevealed(true)}
-            />
-            <HeroCard stats={data.stats} characters={data.characters} />
-            <SidebarCharCards characters={data.characters} />
-          </aside>
+        <div className="mt-8">
+          <Segmented options={TABS} value={tab} onChange={setTab} aria-label="프로필 탭" />
+        </div>
 
-          {/* 오른쪽 — 탭 컨텐츠 */}
-          <div className="profile-layout-main">
-            <Suspense fallback={<div className="flex justify-center py-10"><Loader2 size={24} className="animate-spin text-gray-600" /></div>}>
-              {tab === 'characters' && (
-                <div className="animate-enter">
-                  {rankedCharacters.length > 0 && (
-                    <div className="mb-4">
-                      <ZetaSpotlightCard characters={rankedCharacters} />
-                    </div>
-                  )}
-                  <SummaryTab characters={data.characters} stats={data.stats} />
-                </div>
-              )}
-              {tab === 'stats' && (
-                <div className="animate-enter">
-                  <StatsTab stats={data.stats} characters={data.characters} />
-                </div>
-              )}
-              {tab === 'achievements' && (
-                <div className="animate-enter">
-                  <AchievementsTab stats={data.stats} characters={data.characters} />
-                </div>
-              )}
-            </Suspense>
-          </div>
+        <div className="mt-4">
+          <Suspense fallback={<div className="flex justify-center py-10"><Loader2 size={24} className="animate-spin" style={{ color: 'var(--fg-3)' }} /></div>}>
+            {tab === 'characters' && (
+              <div>
+                {rankedCharacters.length > 0 && (
+                  <div className="mb-4">
+                    <ZetaSpotlightCard characters={rankedCharacters} />
+                  </div>
+                )}
+                <SummaryTab characters={characters} stats={data.stats} />
+              </div>
+            )}
+            {tab === 'stats' && (
+              <StatsTab stats={data.stats} characters={characters} />
+            )}
+            {tab === 'achievements' && (
+              <AchievementsTab stats={data.stats} characters={characters} />
+            )}
+          </Suspense>
         </div>
       </main>
 

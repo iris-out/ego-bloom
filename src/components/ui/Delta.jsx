@@ -18,7 +18,7 @@ export default function Delta({ value, format = formatNumber, className = '' }) 
 
   return (
     <span
-      className={`t-label inline-flex items-center gap-0.5 h-5 px-1.5 tabular-nums ${className}`}
+      className={`t-label self-start w-fit inline-flex items-center gap-0.5 h-5 px-1.5 tabular-nums ${className}`}
       style={{
         borderRadius: 'var(--radius-pill)',
         background: `color-mix(in srgb, var(${colorVar}) 16%, var(--bg))`,

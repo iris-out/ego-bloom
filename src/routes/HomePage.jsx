@@ -1,96 +1,49 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Database, Lock, BarChart2, Hash, Trophy, Star, History, Clapperboard, Bell, Globe, Menu, Megaphone, Download } from 'lucide-react';
+import {
+  Database, Lock, BarChart2, Hash, Trophy, Star, History, Clapperboard,
+  Bell, Globe, Menu as MenuIcon, Megaphone, Download, Search,
+} from 'lucide-react';
 import { useServerStatus } from '../hooks/useServerStatus';
 import { usePwaInstall } from '../hooks/usePwaInstall';
+import { useRankingData } from '../hooks/useRankingData';
 import { triggerInstall } from '../lib/pwaInstall';
 import ChangelogModal from '../components/ChangelogModal';
 import DataCollectionModal from '../components/DataCollectionModal';
 import SearchWarningModal from '../components/SearchWarningModal';
-import EmergencyToast from '../components/EmergencyToast';
 import ServerAlertCard from '../components/ServerAlertCard';
 import SearchPill from '../components/SearchPill';
+import ThemeToggle from '../components/ui/ThemeToggle';
+import Segmented from '../components/ui/Segmented';
+import Modal from '../components/ui/Modal';
 import TagTrendCards from '../components/home/TagTrendCards';
 import MainHall from '../components/home/MainHall';
 import PlotRankingList from '../components/home/PlotRankingList';
 import CreatorRankingList from '../components/home/CreatorRankingList';
 import FavoritesPanel from '../components/home/FavoritesPanel';
 
-function _lcg(seed) {
-  let s = seed >>> 0;
-  return () => { s = Math.imul(1664525, s) + 1013904223 >>> 0; return s / 0x100000000; };
-}
-const _r = _lcg(0xDEADBEEF);
-const STAR_DATA = Array.from({ length: 52 }, (_, i) => ({
-  id: i, x: _r() * 94 + 2, y: _r() * 90 + 2,
-  size: 0.6 + _r() * 1.3, baseOpacity: 0.06 + _r() * 0.18,
-  peakOpacity: 0.22 + _r() * 0.40, dur: 1.8 + _r() * 3.8, delay: _r() * 6.0,
-}));
-
-function StarField({ globalOpacity = 1 }) {
-  if (globalOpacity === 0) return null;
-  return (
-    <div className="absolute inset-0 overflow-hidden" style={{ opacity: globalOpacity, transition: 'opacity 1.5s ease' }}>
-      {STAR_DATA.map(s => (
-        <div key={s.id} className="absolute rounded-full bg-white star-twinkle" style={{
-          left: `${s.x}%`, top: `${s.y}%`, width: `${s.size}px`, height: `${s.size}px`,
-          '--star-base-opacity': s.baseOpacity, '--star-peak-opacity': s.peakOpacity,
-          '--star-dur': `${s.dur}s`, animationDelay: `${s.delay}s`,
-        }} />
-      ))}
-    </div>
-  );
-}
-
-function getTimeSegment() {
-  const h = new Date().getHours();
-  if (h >= 21 || h < 4) return 'night';
-  if (h >= 4 && h < 7) return 'dawn';
-  if (h >= 7 && h < 18) return 'day';
-  return 'evening';
-}
-
-const TIME_BG = {
-  night: {
-    base: 'linear-gradient(to bottom, #02050F 0%, #040C1C 22%, #071028 45%, #090E26 68%, #080A18 100%)',
-    horizon: 'radial-gradient(ellipse 130% 80% at 50% 115%, rgba(220,110,50,0.07) 0%, rgba(160,70,120,0.05) 40%, transparent 70%)',
-    topGlow: 'radial-gradient(ellipse, rgba(35,80,200,0.20) 0%, transparent 70%)', stars: 1,
-  },
-  dawn: {
-    base: 'linear-gradient(to bottom, #040C17 0%, #071026 22%, #091530 45%, #081126 68%, #040B15 100%)',
-    horizon: 'radial-gradient(ellipse 120% 70% at 50% 115%, rgba(130,190,255,0.09) 0%, rgba(80,130,220,0.05) 40%, transparent 70%)',
-    topGlow: 'radial-gradient(ellipse, rgba(20,60,180,0.15) 0%, transparent 70%)', stars: 0.3,
-  },
-  day: {
-    base: 'linear-gradient(to bottom, #050C18 0%, #071122 30%, #09142B 60%, #081121 100%)',
-    horizon: 'radial-gradient(ellipse 100% 60% at 50% 120%, rgba(100,160,255,0.06) 0%, transparent 60%)',
-    topGlow: 'radial-gradient(ellipse, rgba(20,50,150,0.12) 0%, transparent 70%)', stars: 0,
-  },
-  evening: {
-    base: 'linear-gradient(to bottom, #030712 0%, #050C1C 22%, #081027 45%, #090F22 68%, #050913 100%)',
-    horizon: 'radial-gradient(ellipse 140% 80% at 50% 110%, rgba(255,120,50,0.10) 0%, rgba(200,80,140,0.07) 35%, transparent 65%)',
-    topGlow: 'radial-gradient(ellipse, rgba(30,70,180,0.18) 0%, transparent 70%)', stars: 0.6,
-  },
-};
-
 const TABS = [
-  { label: '메인',        short: '메인',   Icon: Clapperboard },
-  { label: 'TOP 100',     short: 'TOP',    Icon: BarChart2 },
-  { label: '제작자 순위',  short: '순위',   Icon: Trophy    },
-  { label: '인기 태그',   short: '태그',   Icon: Hash      },
-  { label: '즐겨찾기',    short: '즐겨찾기', Icon: Star, pcIconOnly: true },
+  { label: '메인', short: '메인', Icon: Clapperboard },
+  { label: 'TOP 100', short: 'TOP', Icon: BarChart2 },
+  { label: '제작자 랭킹', short: '랭킹', Icon: Trophy },
+  { label: '인기 태그', short: '태그', Icon: Hash },
+  { label: '즐겨찾기', short: '즐겨찾기', Icon: Star },
 ];
 
-const FAVORITES_TAB = TABS.findIndex(t => t.label === '즐겨찾기');
-
 const SERVER_DOT = {
-  ok: '#6CD97E', warning: '#FBBF24', checking: 'rgba(255,255,255,0.3)', error: '#F87171',
+  ok: 'var(--up)', warning: 'var(--warn)', checking: 'var(--fg-3)', error: 'var(--down)',
 };
 const SERVER_LABEL = {
   ok: '제타 서버 정상', warning: '제타 서버 불안정', checking: '제타 서버 확인 중', error: '제타 서버 이상',
 };
 
-// 공지 배너 — AnnouncementTicker와 동일 소스(세션 캐시 공유)
+// titlePrimary 가 공백 문자뿐인 배너가 섞여 오는 경우가 있다(서버 데이터 이슈) -
+// 그대로 렌더하면 목록 위에 빈 줄만 차지하는 항목이 생기므로 trim 해서 걸러낸다.
+function hasBannerTitle(b) {
+  return typeof b.titlePrimary === 'string' && b.titlePrimary.trim().length > 0;
+}
+
+// 공지 배너 - AnnouncementTicker 와 동일 소스(세션 캐시 공유)
 function useBanners() {
   const [banners, setBanners] = useState([]);
   useEffect(() => {
@@ -101,7 +54,7 @@ function useBanners() {
         if (cached) {
           const { data, ts } = JSON.parse(cached);
           if (Date.now() - ts < 3600000 && Array.isArray(data)) {
-            if (alive) setBanners(data.filter(b => b.titlePrimary));
+            if (alive) setBanners(data.filter(hasBannerTitle));
             return;
           }
         }
@@ -109,9 +62,9 @@ function useBanners() {
         if (!res.ok) return;
         const json = await res.json();
         const list = json.banners || [];
-        try { sessionStorage.setItem('zeta_banners_v1', JSON.stringify({ data: list, ts: Date.now() })); } catch {}
-        if (alive) setBanners(list.filter(b => b.titlePrimary));
-      } catch {}
+        try { sessionStorage.setItem('zeta_banners_v1', JSON.stringify({ data: list, ts: Date.now() })); } catch { /* noop */ }
+        if (alive) setBanners(list.filter(hasBannerTitle));
+      } catch { /* noop */ }
     })();
     return () => { alive = false; };
   }, []);
@@ -129,24 +82,31 @@ function bannerUrl(banner) {
   return null;
 }
 
-// 헤더용 아이콘 버튼 — 동그란 글래스 버튼
-function IconButton({ Icon, label, onClick, badge, active = false }) {
-  return (
-    <button
-      type="button" onClick={onClick} title={label} aria-label={label}
-      aria-pressed={active}
-      className={[
-        'relative w-9 h-9 rounded-full flex items-center justify-center transition-colors',
-        active ? 'text-amber-300 bg-white/10' : 'text-white/75 hover:text-white hover:bg-white/10',
-      ].join(' ')}
-    >
-      <Icon size={17} fill={active ? 'currentColor' : 'none'} />
-      {badge && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full" style={{ background: '#7AA3FF' }} />}
-    </button>
-  );
+/**
+ * 검색 필드다. 검색 가이드라인에 동의하기 전에는 필드 대신 동의 버튼을 보여준다.
+ * HomePage 렌더 도중 선언하면 매 렌더마다 리마운트되므로 모듈 스코프로 뺐다.
+ * @param {object} props
+ * @param {boolean} props.hasAgreed
+ * @param {() => void} props.onRequestAgreement
+ * @param {boolean} [props.suggestionsAbove]
+ * @param {string} [props.className]
+ */
+function SearchField({ hasAgreed, onRequestAgreement, suggestionsAbove = false, className = '' }) {
+  if (!hasAgreed) {
+    return (
+      <button
+        type="button"
+        onClick={onRequestAgreement}
+        className={`eb-btn eb-btn-secondary w-full ${className}`}
+      >
+        <Lock size={14} strokeWidth={2} />
+        검색 가이드라인에 동의하기
+      </button>
+    );
+  }
+  return <SearchPill suggestionsAbove={suggestionsAbove} className={className} />;
 }
 
-// 클릭-바깥-닫힘 팝오버
 function Popover({ open, onClose, align = 'right', children }) {
   const ref = useRef(null);
   useEffect(() => {
@@ -161,43 +121,71 @@ function Popover({ open, onClose, align = 'right', children }) {
   return (
     <div
       ref={ref}
-      className={`absolute top-full mt-2 z-50 ${align === 'right' ? 'right-0' : 'left-0'} w-72 rounded-xl border border-white/12 bg-[#0b1018]/95 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.55)] overflow-hidden`}
+      className={`absolute top-full mt-2 z-50 ${align === 'right' ? 'right-0' : 'left-0'} w-72 overflow-hidden`}
+      style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--radius-m)', boxShadow: 'var(--shadow-overlay)' }}
     >
       {children}
     </div>
   );
 }
 
-function MenuRow({ Icon, label, tag, onClick }) {
+function MenuRow(props) {
+  const { Icon, label, tag, onClick } = props;
   return (
     <button
-      type="button" onClick={onClick}
-      className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left hover:bg-white/[0.06] transition-colors text-white/85"
+      type="button"
+      onClick={onClick}
+      className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left"
     >
-      <Icon size={15} className="text-white/60 shrink-0" />
-      <span className="text-[13px] font-medium">{label}</span>
-      {tag && <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: 'rgba(99,102,241,0.2)', color: 'rgba(165,180,252,0.95)' }}>{tag}</span>}
+      <Icon size={15} strokeWidth={2} className="shrink-0" style={{ color: 'var(--fg-3)' }} />
+      <span className="t-ui">{label}</span>
+      {tag && (
+        <span className="ml-auto t-label px-1.5 h-4 flex items-center" style={{ background: 'var(--accent-soft)', color: 'var(--accent-ink)', borderRadius: 'var(--radius-s)' }}>
+          {tag}
+        </span>
+      )}
     </button>
+  );
+}
+
+function BellList({ banners, onNavigate }) {
+  if (banners.length === 0) {
+    return <div className="px-3.5 py-6 text-center t-small" style={{ color: 'var(--fg-3)' }}>새 공지가 없습니다.</div>;
+  }
+  return (
+    <div className="max-h-80 overflow-y-auto py-1">
+      {banners.map((b, i) => {
+        const url = bannerUrl(b);
+        const inner = (
+          <div className="px-3.5 py-2.5">
+            <div className="t-small" style={{ color: 'var(--fg)' }}>{b.titlePrimary}</div>
+            {b.titleSecondary && <div className="t-small mt-0.5" style={{ color: 'var(--fg-3)' }}>{b.titleSecondary}</div>}
+          </div>
+        );
+        return url ? (
+          <a key={i} href={url} target="_blank" rel="noopener noreferrer" onClick={onNavigate}>{inner}</a>
+        ) : <div key={i}>{inner}</div>;
+      })}
+    </div>
   );
 }
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { status: serverStatus, message: serverMessage } = useServerStatus();
-  const [timeSegment] = useState(getTimeSegment);
   const [showChangelogModal, setShowChangelogModal] = useState(false);
   const [showDataModal, setShowDataModal] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [hasAgreedToWarning, setHasAgreedToWarning] = useState(
-    () => localStorage.getItem('ego-bloom-warning-agreed') === 'true'
+    () => localStorage.getItem('ego-bloom-warning-agreed') === 'true',
   );
   const [activeTab, setActiveTab] = useState(0);
   const [focusTag, setFocusTag] = useState(null);
-  const [rankingData, setRankingData] = useState(null);
-  const [scrolled, setScrolled] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const { canInstall: canInstallApp, installed: isInstalled } = usePwaInstall();
+  const { data: rankingData } = useRankingData();
   const banners = useBanners();
 
   const handleInstallApp = async () => {
@@ -208,247 +196,185 @@ export default function HomePage() {
     }
   };
 
-  const isMain = activeTab === 0;
-
-  // 인기 태그 카드 클릭 → 메인 탭의 해당 태그 레일로 점프
+  // 인기 태그 카드 클릭 -> 메인 탭의 해당 태그 레일로 점프
   const handleTagJump = (familyKey) => {
     setFocusTag(familyKey);
     setActiveTab(0);
   };
 
-  const bg = TIME_BG[timeSegment];
+  const openWarningModal = () => setShowWarningModal(true);
 
-  // 라우트 전환 중에도 body 배경이 유지되도록 선(先)적용 — 밝기 깜빡임 방지
-  useLayoutEffect(() => {
-    document.body.style.background = bg.base;
-    return () => { document.body.style.background = ''; };
-  }, [bg.base]);
-
-  useEffect(() => {
-    fetch('/data/ranking_latest.json')
-      .then(r => r.json())
-      .then(setRankingData)
-      .catch(() => {});
-  }, []);
-
-  // 스크롤 시 오버레이 내비가 솔리드로 — Netflix식
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  const SearchWithLock = ({ compact = false, suggestionsAbove = false }) => (
-    <div className="relative">
-      <SearchPill suggestionsAbove={suggestionsAbove} />
-      {!hasAgreedToWarning && (
-        <div
-          onClick={() => setShowWarningModal(true)}
-          className={`absolute inset-0 bg-[#0F0A1A]/60 backdrop-blur-[4px] rounded-full flex items-center justify-center cursor-pointer border border-indigo-400/30 hover:bg-[#0F0A1A]/40 transition-all`}
-        >
-          <div className={`flex items-center gap-2 text-indigo-300 font-bold ${compact ? 'text-xs' : 'text-sm'}`}>
-            <Lock size={compact ? 13 : 16} />
-            {!compact && <span>검색 가이드라인에 동의가 필요합니다</span>}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  // 공지 드롭다운 내용
-  const BellPanel = (
-    <Popover open={bellOpen} onClose={() => setBellOpen(false)} align="right">
-      <div className="flex items-center gap-2 px-3.5 py-2.5 border-b border-white/8 text-white/80">
-        <Megaphone size={14} className="text-indigo-400" />
-        <span className="text-[13px] font-bold">공지</span>
-      </div>
-      <div className="max-h-80 overflow-y-auto py-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
-        {banners.length === 0 ? (
-          <div className="px-3.5 py-6 text-center text-[12px] text-white/40">새 공지가 없습니다.</div>
-        ) : banners.map((b, i) => {
-          const url = bannerUrl(b);
-          const inner = (
-            <div className="px-3.5 py-2.5 hover:bg-white/[0.06] transition-colors">
-              <div className="text-[13px] font-medium text-white/90 leading-snug">{b.titlePrimary}</div>
-              {b.titleSecondary && <div className="text-[11px] text-white/45 mt-0.5 leading-snug">{b.titleSecondary}</div>}
-            </div>
-          );
-          return url ? (
-            <a key={i} href={url} target="_blank" rel="noopener noreferrer" onClick={() => setBellOpen(false)}>{inner}</a>
-          ) : <div key={i}>{inner}</div>;
-        })}
-      </div>
-    </Popover>
-  );
-
-  // 모바일 더보기 메뉴(부가기능)
-  const MobileMenuPanel = (
-    <Popover open={menuOpen} onClose={() => setMenuOpen(false)} align="right">
-      <div className="py-1">
-        {!isInstalled && (
-          <MenuRow Icon={Download} label="앱으로 설치" tag="앱" onClick={handleInstallApp} />
-        )}
-        <MenuRow Icon={Globe} label="오픈월드 입장" tag="베타" onClick={() => { setMenuOpen(false); navigate('/world'); }} />
-        <MenuRow Icon={History} label="업데이트 로그" onClick={() => { setMenuOpen(false); setShowChangelogModal(true); }} />
-        <MenuRow Icon={Database} label="데이터 수집 안내" onClick={() => { setMenuOpen(false); setShowDataModal(true); }} />
-        <div className="flex items-center gap-2 px-3.5 py-2.5 border-t border-white/8 text-[12px] text-white/55">
-          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: SERVER_DOT[serverStatus] }} />
-          {SERVER_LABEL[serverStatus]}
-        </div>
-      </div>
-    </Popover>
-  );
+  const closeWarningModal = () => {
+    setHasAgreedToWarning(localStorage.getItem('ego-bloom-warning-agreed') === 'true');
+    setShowWarningModal(false);
+  };
 
   return (
-    <div className="min-h-dvh relative flex flex-col" style={{ background: bg.base }}>
-      <div className="absolute inset-0 pointer-events-none" style={{ background: bg.horizon }} />
-      <div className="absolute inset-x-0 top-0 h-64 pointer-events-none" style={{ background: bg.topGlow }} />
-      <StarField globalOpacity={bg.stars} />
+    <div className="min-h-dvh flex flex-col" style={{ background: 'var(--bg)' }}>
+      {(serverStatus === 'warning' || serverStatus === 'error') && (
+        <ServerAlertCard status={serverStatus} message={serverMessage} />
+      )}
 
-      <div className="relative z-10 flex flex-col min-h-dvh">
-        {/* 서버 불안정/이상 알림 — 헤더 위 정상 흐름 */}
-        {(serverStatus === 'warning' || serverStatus === 'error') && (
-          <ServerAlertCard status={serverStatus} message={serverMessage} />
-        )}
-
-        {/* 본문 영역 — 오버레이 헤더의 포지셔닝 컨텍스트 */}
-        <div className="relative flex-1">
-          {/* ===== Cinematic Overlay 헤더 (히어로 위에 얹힘, 고정) ===== */}
-          <header
-            className="fixed inset-x-0 z-30 transition-colors duration-300"
-            style={scrolled
-              ? { top: 'var(--pwa-banner-h, 0px)', background: 'rgba(6,9,16,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }
-              : { top: 'var(--pwa-banner-h, 0px)', background: 'linear-gradient(to bottom, rgba(3,5,12,0.82) 0%, rgba(3,5,12,0.40) 55%, transparent 100%)' }
-            }
+      {/* ===== 헤더: 56 고정, sticky, 하단 1px 라인 ===== */}
+      <header
+        className="sticky z-30"
+        style={{ top: 'var(--pwa-banner-h, 0px)', height: 56, background: 'var(--bg)', borderBottom: '1px solid var(--line)' }}
+      >
+        <div className="max-w-7xl mx-auto h-full px-4 flex items-center gap-5">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="shrink-0"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, letterSpacing: '-0.02em', color: 'var(--fg)' }}
           >
-            <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-5">
-              {/* 로고 */}
-              <div className="flex items-center gap-2 cursor-pointer select-none shrink-0" onClick={() => navigate('/')}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" />
-                  <path d="M8 12 L12 8 L16 12 L12 16 Z" fill="rgba(122,163,255,0.9)" />
-                </svg>
-                <h1 className="font-bold text-[18px] tracking-[-0.02em] text-white whitespace-nowrap">EGO-BLOOM</h1>
-              </div>
+            EGO-BLOOM
+          </button>
 
-              {/* PC 인라인 탭 내비 */}
-              <nav className="hidden lg:flex items-center gap-5 ml-1">
-                {TABS.map(({ label, pcIconOnly }, i) => (
-                  pcIconOnly ? null : (
-                    <button
-                      key={label}
-                      onClick={() => setActiveTab(i)}
-                      className="text-[13.5px] font-medium transition-colors"
-                      style={{ color: activeTab === i ? '#fff' : 'rgba(255,255,255,0.58)' }}
-                    >
-                      {label}
-                    </button>
-                  )
-                ))}
-              </nav>
+          {/* 데스크톱: 필 탭 내비 */}
+          <nav className="hidden sm:block">
+            <Segmented
+              options={TABS.map((t, i) => ({ value: i, label: t.label }))}
+              value={activeTab}
+              onChange={(v) => setActiveTab(v)}
+              aria-label="메인 내비게이션"
+            />
+          </nav>
 
-              {/* 우측 클러스터 */}
-              <div className="ml-auto flex items-center gap-1.5">
-                {/* PC: 검색 + 부가 아이콘 */}
-                <div className="hidden lg:block w-56">
-                  <SearchWithLock compact />
-                </div>
-                <div className="hidden lg:flex items-center gap-0.5">
-                  <IconButton Icon={Star} label="즐겨찾기" active={activeTab === FAVORITES_TAB} onClick={() => setActiveTab(FAVORITES_TAB)} />
-                  <IconButton Icon={Globe} label="오픈월드(베타) 입장" onClick={() => navigate('/world')} />
-                  <IconButton Icon={History} label="업데이트 로그" onClick={() => setShowChangelogModal(true)} />
-                  <IconButton Icon={Database} label="데이터 수집 안내" onClick={() => setShowDataModal(true)} />
-                </div>
-                {/* 공지 벨 (전 뷰) */}
-                <div className="relative">
-                  <IconButton Icon={Bell} label="공지" onClick={() => setBellOpen(v => !v)} badge={banners.length > 0} />
-                  {BellPanel}
-                </div>
-                {/* 서버 상태 — 점 + 텍스트 항상 표시 (PC) */}
-                <span
-                  className="hidden lg:flex items-center gap-1.5 ml-1.5 mr-0.5 text-[12px] font-medium text-white/70 whitespace-nowrap"
-                  aria-label={SERVER_LABEL[serverStatus]}
-                >
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: SERVER_DOT[serverStatus] }} />
-                  {SERVER_LABEL[serverStatus]}
-                </span>
-                {/* 모바일 더보기 메뉴 */}
-                <div className="relative lg:hidden">
-                  <IconButton Icon={Menu} label="메뉴" onClick={() => setMenuOpen(v => !v)} />
-                  {MobileMenuPanel}
-                </div>
-              </div>
+          <div className="ml-auto flex items-center gap-2">
+            {/* 데스크톱: 검색 필드 220 */}
+            <div className="hidden sm:block" style={{ width: 220 }}>
+              <SearchField hasAgreed={hasAgreedToWarning} onRequestAgreement={openWarningModal} />
             </div>
-          </header>
 
-          {/* ===== 콘텐츠 ===== */}
-          <div
-            className={[
-              'flex-1 flex flex-col lg:flex-row gap-4 lg:gap-0 px-4 max-w-7xl w-full mx-auto',
-              // 모바일: 하단 플로팅 바(검색+탭) 공간 확보. 데스크탑: 일반 여백
-              'pb-[150px] lg:pb-8',
-              // 메인 탭: 히어로가 헤더 아래로 풀블리드(모바일·데스크탑 공통). 그 외: 헤더 높이만큼 패딩
-              isMain ? 'pt-0' : 'pt-14 lg:pt-[72px]',
-            ].join(' ')}
-          >
-            {/* Left column: main content */}
-            <div className="flex flex-col gap-5 flex-1 min-w-0">
-              <div className="flex flex-col flex-1">
-                {activeTab === 0 && <MainHall rankingData={rankingData} focusTag={focusTag} />}
-                {activeTab === 1 && <PlotRankingList rankingData={rankingData} />}
-                {activeTab === 2 && <CreatorRankingList />}
-                {activeTab === 3 && <TagTrendCards tagScores={rankingData?.tagScores ?? null} tagScoresDelta={rankingData?.tagScoresDelta ?? null} tagTrend={rankingData?.tagTrend ?? null} onTagClick={handleTagJump} />}
-                {activeTab === 4 && <FavoritesPanel />}
-              </div>
+            {/* 공지 벨 - 데스크톱 전용, 모바일은 메뉴 시트에 접힌다 */}
+            <div className="hidden sm:block relative">
+              <button type="button" className="eb-btn-icon relative" onClick={() => setBellOpen((v) => !v)} aria-label="공지">
+                <Bell size={17} strokeWidth={2} />
+                {banners.length > 0 && (
+                  <span className="absolute top-1.5 right-1.5 rounded-full" style={{ width: 6, height: 6, background: 'var(--accent-ink)' }} />
+                )}
+              </button>
+              <Popover open={bellOpen} onClose={() => setBellOpen(false)}>
+                <div className="flex items-center gap-2 px-3.5 py-2.5" style={{ borderBottom: '1px solid var(--line)' }}>
+                  <Megaphone size={14} strokeWidth={2} style={{ color: 'var(--accent-ink)' }} />
+                  <span className="t-ui">공지</span>
+                </div>
+                <BellList banners={banners} onNavigate={() => setBellOpen(false)} />
+              </Popover>
+            </div>
+
+            {/* 서버 상태 - 점 + 라벨, 데스크톱만 텍스트 노출 */}
+            <span className="hidden sm:flex items-center gap-1.5 t-small" style={{ color: 'var(--fg-2)' }} aria-label={SERVER_LABEL[serverStatus]}>
+              <span className="rounded-full shrink-0" style={{ width: 8, height: 8, background: SERVER_DOT[serverStatus] }} />
+              {SERVER_LABEL[serverStatus]}
+            </span>
+
+            <ThemeToggle className="hidden sm:inline-flex" />
+
+            {/* 모바일: 검색 아이콘 */}
+            <button type="button" className="eb-btn-icon sm:hidden" onClick={() => setMobileSearchOpen(true)} aria-label="검색">
+              <Search size={17} strokeWidth={2} />
+            </button>
+
+            {/* 메뉴: 데스크톱은 다이얼로그, 640 미만은 하단 시트(Modal 이 알아서 전환) */}
+            <button type="button" className="eb-btn-icon" onClick={() => setMenuOpen(true)} aria-label="메뉴">
+              <MenuIcon size={17} strokeWidth={2} />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* ===== 콘텐츠 ===== */}
+      <div className="flex-1 flex flex-col max-w-7xl w-full mx-auto px-4 py-5 pb-28 sm:pb-10">
+        {activeTab === 0 && <MainHall rankingData={rankingData} focusTag={focusTag} />}
+        {activeTab === 1 && <PlotRankingList rankingData={rankingData} />}
+        {activeTab === 2 && <CreatorRankingList />}
+        {activeTab === 3 && (
+          <TagTrendCards
+            tagScores={rankingData?.tagScores ?? null}
+            tagScoresDelta={rankingData?.tagScoresDelta ?? null}
+            tagTrend={rankingData?.tagTrend ?? null}
+            onTagClick={handleTagJump}
+          />
+        )}
+        {activeTab === 4 && <FavoritesPanel />}
+      </div>
+
+      {/* ===== 모바일 하단 내비: 64 + safe area ===== */}
+      <nav
+        className="sm:hidden fixed inset-x-0 bottom-0 z-40 flex items-stretch"
+        style={{
+          height: 64,
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          background: 'var(--surface)',
+          borderTop: '1px solid var(--line)',
+        }}
+      >
+        {TABS.map((tab, i) => {
+          const { short, Icon } = tab;
+          const active = activeTab === i;
+          return (
+            <button
+              key={short}
+              type="button"
+              onClick={() => setActiveTab(i)}
+              aria-current={active}
+              className="flex-1 flex flex-col items-center justify-center gap-1"
+            >
+              <span
+                className="flex items-center justify-center"
+                style={{ width: 44, height: 28, borderRadius: 'var(--radius-pill)', background: active ? 'var(--accent-soft)' : 'transparent' }}
+              >
+                <Icon size={22} strokeWidth={2} style={{ color: active ? 'var(--accent-ink)' : 'var(--fg-2)' }} />
+              </span>
+              <span className="t-label" style={{ fontSize: 10, color: active ? 'var(--accent-ink)' : 'var(--fg-3)' }}>{short}</span>
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* ===== 모바일 검색 시트 ===== */}
+      <Modal open={mobileSearchOpen} onClose={() => setMobileSearchOpen(false)} title="검색">
+        <SearchField
+          hasAgreed={hasAgreedToWarning}
+          onRequestAgreement={() => { setMobileSearchOpen(false); openWarningModal(); }}
+          suggestionsAbove={false}
+        />
+      </Modal>
+
+      {/* ===== 메뉴: 테마 토글 + PWA 설치 + 부가 메뉴 + 공지 ===== */}
+      <Modal open={menuOpen} onClose={() => setMenuOpen(false)} title="메뉴">
+        <div className="flex flex-col gap-4 -mt-2">
+          <div className="flex items-center justify-between">
+            <span className="t-small" style={{ color: 'var(--fg-2)' }} aria-label={SERVER_LABEL[serverStatus]}>
+              <span className="rounded-full inline-block mr-1.5" style={{ width: 8, height: 8, background: SERVER_DOT[serverStatus] }} />
+              {SERVER_LABEL[serverStatus]}
+            </span>
+            <ThemeToggle />
+          </div>
+
+          <div className="flex flex-col" style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius-m)', overflow: 'hidden' }}>
+            {!isInstalled && <MenuRow Icon={Download} label="앱으로 설치" tag="앱" onClick={handleInstallApp} />}
+            <MenuRow Icon={Globe} label="오픈월드 입장" tag="베타" onClick={() => { setMenuOpen(false); navigate('/world'); }} />
+            <MenuRow Icon={History} label="업데이트 로그" onClick={() => { setMenuOpen(false); setShowChangelogModal(true); }} />
+            <MenuRow Icon={Database} label="데이터 수집 안내" onClick={() => { setMenuOpen(false); setShowDataModal(true); }} />
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Megaphone size={14} strokeWidth={2} style={{ color: 'var(--accent-ink)' }} />
+              <span className="t-ui">공지</span>
+            </div>
+            <div style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius-m)', overflow: 'hidden' }}>
+              <BellList banners={banners} onNavigate={() => setMenuOpen(false)} />
             </div>
           </div>
         </div>
-      </div>
-
-      {/* ===== 모바일 하단 플로팅 바 — 검색(iOS 26 Safari 스타일) + 탭 ===== */}
-      <div
-        className="lg:hidden fixed inset-x-0 bottom-0 z-40 px-3 pt-10 pb-[calc(env(safe-area-inset-bottom,0px)+10px)] pointer-events-none"
-        style={{ background: 'linear-gradient(to top, rgba(4,7,14,0.95) 38%, rgba(4,7,14,0.6) 70%, transparent 100%)' }}
-      >
-        <div className="pointer-events-auto mx-auto max-w-md flex flex-col gap-2">
-          {/* 플로팅 검색 — 제안은 위로 펼침 */}
-          <SearchWithLock suggestionsAbove />
-
-          {/* 탭 바 */}
-          <nav className="flex items-stretch rounded-2xl border border-white/12 bg-[#0b1018]/85 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] px-1 py-1">
-            {TABS.map(({ short, Icon }, i) => {
-              const active = activeTab === i;
-              return (
-                <button
-                  key={short}
-                  type="button"
-                  onClick={() => setActiveTab(i)}
-                  aria-current={active}
-                  className={[
-                    'flex flex-1 flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl transition-colors',
-                    active ? 'text-indigo-300 bg-white/[0.07]' : 'text-white/45 hover:text-white/75',
-                  ].join(' ')}
-                >
-                  <Icon size={18} className="shrink-0" fill={active && i === FAVORITES_TAB ? 'currentColor' : 'none'} />
-                  <span className="text-[10px] font-semibold leading-none">{short}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-      </div>
+      </Modal>
 
       <ChangelogModal isOpen={showChangelogModal} onClose={() => setShowChangelogModal(false)} />
       <DataCollectionModal isOpen={showDataModal} onClose={() => setShowDataModal(false)} />
-      <SearchWarningModal
-        isOpen={showWarningModal}
-        onClose={() => {
-          setHasAgreedToWarning(localStorage.getItem('ego-bloom-warning-agreed') === 'true');
-          setShowWarningModal(false);
-        }}
-      />
-      <EmergencyToast />
+      <SearchWarningModal isOpen={showWarningModal} onClose={closeWarningModal} />
     </div>
   );
 }

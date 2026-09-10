@@ -116,25 +116,18 @@ export const BADGE_DESCRIPTIONS = Object.fromEntries(
   BADGE_DEFINITIONS.map(b => [b.id, b.description])
 );
 
-export const BADGE_COLOR_MAP = {
-  pink: { bg: 'bg-pink-500/15', border: 'border-pink-400/30', text: 'text-pink-300', dot: 'bg-pink-400' },
-  red: { bg: 'bg-red-500/15', border: 'border-red-400/30', text: 'text-red-300', dot: 'bg-red-400' },
-  blue: { bg: 'bg-blue-500/15', border: 'border-blue-400/30', text: 'text-blue-300', dot: 'bg-blue-400' },
-  emerald: { bg: 'bg-emerald-500/15', border: 'border-emerald-400/30', text: 'text-emerald-300', dot: 'bg-emerald-400' },
-  yellow: { bg: 'bg-yellow-500/15', border: 'border-yellow-400/30', text: 'text-yellow-300', dot: 'bg-yellow-400' },
-  amber: { bg: 'bg-amber-500/15', border: 'border-amber-400/30', text: 'text-amber-300', dot: 'bg-amber-400' },
-  cyan: { bg: 'bg-cyan-500/15', border: 'border-cyan-400/30', text: 'text-cyan-300', dot: 'bg-cyan-400' },
-  violet: { bg: 'bg-violet-500/15', border: 'border-violet-400/30', text: 'text-violet-300', dot: 'bg-violet-400' },
-  indigo: { bg: 'bg-indigo-500/15', border: 'border-indigo-400/30', text: 'text-indigo-300', dot: 'bg-indigo-400' },
-  purple: { bg: 'bg-purple-500/15', border: 'border-purple-400/30', text: 'text-purple-300', dot: 'bg-purple-400' },
-  slate: { bg: 'bg-slate-500/15', border: 'border-slate-400/30', text: 'text-slate-300', dot: 'bg-slate-400' },
-  teal: { bg: 'bg-teal-500/15', border: 'border-teal-400/30', text: 'text-teal-300', dot: 'bg-teal-400' },
-  orange: { bg: 'bg-orange-500/15', border: 'border-orange-400/30', text: 'text-orange-300', dot: 'bg-orange-400' },
-  sky: { bg: 'bg-sky-500/15', border: 'border-sky-400/30', text: 'text-sky-300', dot: 'bg-sky-400' },
-  rose: { bg: 'bg-rose-500/15', border: 'border-rose-400/30', text: 'text-rose-300', dot: 'bg-rose-400' },
-  lime: { bg: 'bg-lime-500/15', border: 'border-lime-400/30', text: 'text-lime-300', dot: 'bg-lime-400' },
-  pink_dark: { bg: 'bg-pink-500/10', border: 'border-pink-500/20', text: 'text-pink-400', dot: 'bg-pink-500' }
-};
+// 칭호 스티커는 Binder 스펙상 배지별 고유색을 쓰지 않고 --accent-ink 테두리 하나로 통일한다.
+// 배지 정의(BADGE_DEFINITIONS)는 여전히 color 키를 갖고 있으므로, 어떤 키가 와도
+// 같은 토큰 기반 스타일을 반환해 gradient 색조차 실제 그라데이션을 만들지 않게 한다.
+const STICKER_STYLE = { bg: 'var(--surface-2)', border: 'var(--accent-ink)', text: 'var(--fg)' };
+const BADGE_COLOR_KEYS = [
+  'pink', 'red', 'blue', 'emerald', 'yellow', 'amber', 'cyan', 'violet',
+  'indigo', 'purple', 'slate', 'teal', 'orange', 'sky', 'rose', 'lime',
+  'gradient', 'pink_dark',
+];
+export const BADGE_COLOR_MAP = Object.fromEntries(
+  BADGE_COLOR_KEYS.map((key) => [key, STICKER_STYLE])
+);
 
 /** 표시할 칭호 편집에서 고정(토글 불가)인 칭호 id */
 export const FIXED_BADGE_IDS = ['sunae', 'ntr'];
