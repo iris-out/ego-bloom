@@ -625,8 +625,8 @@ export default defineConfig(({ mode }) => {
           name: 'EgoBloom',
           short_name: 'EgoBloom',
           description: '제타 AI 제작자 통계 대시보드',
-          theme_color: '#0a0a0f',
-          background_color: '#0a0a0f',
+          theme_color: '#1B1535',
+          background_color: '#1B1535',
           display: 'standalone',
           start_url: '/',
           icons: [

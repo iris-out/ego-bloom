@@ -8,6 +8,10 @@ const TierPage = lazyWithRetry(() => import('./routes/TierPage'), 'TierPage');
 const WorldPage = lazyWithRetry(() => import('./routes/WorldPage'), 'WorldPage');
 const AdminPage = lazyWithRetry(() => import('./routes/AdminPage'), 'AdminPage');
 const TierPreviewPage = lazyWithRetry(() => import('./routes/TierPreviewPage'), 'TierPreviewPage');
+// 개발 전용 디자인 시스템 갤러리다. import.meta.env.DEV 로 감싸 프로덕션 번들에서 제외한다.
+const DesignSandbox = import.meta.env.DEV
+  ? lazyWithRetry(() => import('./routes/DesignSandbox'), 'DesignSandbox')
+  : null;
 
 // Redirect old /?creator=X to /profile?creator=X
 function LegacyRedirect() {
@@ -31,6 +35,7 @@ export default function App() {
         <Route path="/world" element={<WorldPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/tier-preview" element={<TierPreviewPage />} />
+        {import.meta.env.DEV && <Route path="/dev/design" element={<DesignSandbox />} />}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>
