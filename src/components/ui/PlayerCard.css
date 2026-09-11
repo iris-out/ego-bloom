@@ -1,0 +1,10 @@
+/* 티어 이름은 다크에서 --tier-color 그대로, 라이트에서는 흰 배경 대비를 위해 어둡게 섞는다. */
+:root[data-theme="light"] .pc-tier-name {
+  color: color-mix(in srgb, var(--tier-color) 62%, black);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) .pc-tier-name {
+    color: color-mix(in srgb, var(--tier-color) 62%, black);
+  }
+}

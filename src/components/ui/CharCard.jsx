@@ -30,6 +30,9 @@ const MEDAL_VAR = { 1: '--t-gold', 2: '--t-silver', 3: '--t-bronze' };
  * @param {number} [props.count] 대화 수 등 대표 수치.
  * @param {string} [props.countLabel] count 뒤에 붙는 단위(예: "대화"). 생략하면 formatNumber 결과의 단위를 그대로 쓴다.
  * @param {string} [props.creator] 제작자 이름.
+ * @param {boolean} [props.showRarity] false 면 좌상단 희귀도 탭(SR, R 등 텍스트)을 그리지 않는다. 프레임 색과 X 등급 foil 은 유지된다.
+ * @param {boolean} [props.hideInfo] true 면 하단 이름판(이름/수치/제작자)을 그리지 않는다. 이미지가 카드 전체를 채운다.
+ * @param {React.ReactNode} [props.overlay] 이미지 하단 위에 얹을 콘텐츠(비네팅, 태그 pill 등). 랭크 배지보다 아래 레이어에 그려진다.
  * @param {'rail'|'grid'|'hero'|'mini'} [props.size]
  * @param {number} [props.width] px. 있으면 size 의 기본 너비를 대체한다(hero 는 비율 유지해 높이도 함께 유도).
  * @param {string} [props.href] 있으면 <a>, 없으면 <button>. interactive=false 면 무시.
@@ -49,6 +52,9 @@ export default function CharCard({
   count,
   countLabel,
   creator,
+  showRarity = true,
+  hideInfo = false,
+  overlay,
   size = 'rail',
   width,
   href,
@@ -117,7 +123,9 @@ export default function CharCard({
               </div>
             )}
 
-            {!isMini && meta && (
+            {overlay}
+
+            {!isMini && meta && showRarity && (
               <RarityTab tier={rarity} className="absolute left-0 top-0" style={{ borderRadius: '0 0 var(--radius-s) 0' }} />
             )}
 
@@ -139,7 +147,7 @@ export default function CharCard({
             )}
           </div>
 
-          {!isMini && (
+          {!isMini && !hideInfo && (
             <div className={`min-w-0 flex flex-col justify-center gap-0.5 px-2.5 py-1.5 ${isHero ? 'shrink-0' : ''}`}>
               <p className="t-card-name truncate">{name}</p>
               {count != null && (

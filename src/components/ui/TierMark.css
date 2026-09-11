@@ -1,0 +1,25 @@
+/* TierMark 반짝임(twinkle) 애니메이션이다. 불투명도와 scale 만 건드린다. */
+@keyframes tm-twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.tm-sparkle-twinkle {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: tm-twinkle 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tm-sparkle-twinkle {
+    animation: none;
+    opacity: 0.85;
+  }
+}

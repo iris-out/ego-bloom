@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { AlertCircle, Loader2, RefreshCw, Archive, ChevronLeft, Link2, Check, IdCard, Tag } from 'lucide-react';
-import { computeEarnedTitles } from '../data/badges';
+import { AlertCircle, Loader2, RefreshCw, Archive, ChevronLeft, Link2, Check, IdCard } from 'lucide-react';
 import ProfileHeader from '../components/ProfileHeader';
 import SummaryTab from '../components/SummaryTab';
 import ZetaSpotlightCard from '../components/ZetaSpotlightCard';
@@ -82,7 +81,7 @@ const TABS = [
   { value: 'characters',   label: '캐릭터' },
 ];
 
-function ProfilePageHeader({ onBack, hasEarnedTitles, onEditTitle }) {
+function ProfilePageHeader({ onBack }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = useCallback(() => {
@@ -117,16 +116,6 @@ function ProfilePageHeader({ onBack, hasEarnedTitles, onEditTitle }) {
         >
           CARD
         </button>
-        {hasEarnedTitles && (
-          <>
-            <button type="button" onClick={onEditTitle} className="eb-btn-icon sm:hidden" aria-label="칭호 변경">
-              <Tag size={16} strokeWidth={2} />
-            </button>
-            <button type="button" onClick={onEditTitle} className="hidden sm:inline-flex eb-btn eb-btn-secondary">
-              칭호 변경
-            </button>
-          </>
-        )}
       </div>
     </header>
   );
@@ -182,11 +171,6 @@ export default function ProfilePage() {
       .filter(c => c.globalRank != null)
       .sort((a, b) => a.globalRank - b.globalRank);
   }, [characters]);
-
-  const hasEarnedTitles = useMemo(() => {
-    if (!data) return false;
-    return computeEarnedTitles({ characters, stats: data.stats }).some(t => t.earned);
-  }, [data, characters]);
 
   useEffect(() => {
     if (!initialCreator) { navigate('/', { replace: true }); }
@@ -369,8 +353,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-[100dvh]" style={{ background: 'var(--bg)' }}>
-        <ProfilePageHeader onBack={onBack} hasEarnedTitles={hasEarnedTitles} onEditTitle={() => setEditingTitle(true)} />
+      <div className="min-h-[100dvh]">
+        <ProfilePageHeader onBack={onBack} />
         <main className="max-w-[1200px] mx-auto px-4 py-4 lg:px-8"><SkeletonUI /></main>
       </div>
     );
@@ -378,8 +362,8 @@ export default function ProfilePage() {
 
   if (error) {
     return (
-      <div className="min-h-[100dvh]" style={{ background: 'var(--bg)' }}>
-        <ProfilePageHeader onBack={onBack} hasEarnedTitles={hasEarnedTitles} onEditTitle={() => setEditingTitle(true)} />
+      <div className="min-h-[100dvh]">
+        <ProfilePageHeader onBack={onBack} />
         <main className="max-w-[1200px] mx-auto px-4 py-8 flex flex-col items-center gap-4 lg:px-8">
           <div className="flex items-center gap-2 t-body eb-panel px-4 py-3" style={{ color: 'var(--down)' }}>
             <AlertCircle size={16} strokeWidth={2} /><span>{error}</span>
@@ -395,8 +379,8 @@ export default function ProfilePage() {
   if (!data) return null;
 
   return (
-    <div className="min-h-[100dvh]" style={{ background: 'var(--bg)' }}>
-      <ProfilePageHeader onBack={onBack} hasEarnedTitles={hasEarnedTitles} onEditTitle={() => setEditingTitle(true)} />
+    <div className="min-h-[100dvh]">
+      <ProfilePageHeader onBack={onBack} />
 
       <main className="max-w-[1200px] mx-auto px-4 pb-20 lg:px-8">
         {cacheInfo && cacheRemaining !== null && (

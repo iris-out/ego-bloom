@@ -1,0 +1,187 @@
+/* 배타 업적(사랑 파괴자 vs 순애보/오직 순애만) 카드가 두 조각으로 박살난 것처럼 보이게 하는 효과.
+   crack-poly-left/right 는 AchievementsTab.jsx 의 CRACK_POINTS 좌표와 정확히 맞물려야 한다. */
+
+.eb-shatter-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.eb-shatter-half {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-l);
+  border: 2px dashed var(--line);
+  background: transparent;
+  transform: translate(0, 0) rotate(0deg);
+  will-change: transform;
+}
+
+.eb-shatter-half--left {
+  clip-path: var(--eb-clip-left);
+}
+
+.eb-shatter-half--right {
+  clip-path: var(--eb-clip-right);
+}
+
+.eb-shatter-card[data-broken='true'] .eb-shatter-half--left {
+  transform: translate(-7px, 3px) rotate(-3.5deg);
+  transform-origin: 20% 50%;
+}
+
+.eb-shatter-card[data-broken='true'] .eb-shatter-half--right {
+  transform: translate(6px, -2px) rotate(3deg);
+  transform-origin: 80% 50%;
+}
+
+.eb-shatter-card[data-animate='true'] .eb-shatter-half {
+  animation: eb-shatter-break 420ms cubic-bezier(.2, 1.4, .4, 1) both;
+}
+
+.eb-shatter-card[data-animate='true'] .eb-shatter-half--right {
+  animation-name: eb-shatter-break-right;
+}
+
+.eb-shatter-card[data-animate='true'] .eb-shatter-shards {
+  animation: eb-shatter-shards-in 420ms cubic-bezier(.2, 1.4, .4, 1) both;
+}
+
+@keyframes eb-shatter-break {
+  from { transform: translate(0, 0) rotate(0deg); }
+  to   { transform: translate(-7px, 3px) rotate(-3.5deg); }
+}
+
+@keyframes eb-shatter-break-right {
+  from { transform: translate(0, 0) rotate(0deg); }
+  to   { transform: translate(6px, -2px) rotate(3deg); }
+}
+
+@keyframes eb-shatter-shards-in {
+  from { opacity: 0; transform: scale(.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eb-shatter-card[data-animate='true'] .eb-shatter-half,
+  .eb-shatter-card[data-animate='true'] .eb-shatter-shards {
+    animation: none;
+  }
+}
+
+.eb-shatter-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.eb-shatter-crackline {
+  fill: none;
+  stroke: rgb(255 255 255 / .35);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.eb-shatter-shard {
+  fill: var(--surface-2);
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.eb-shatter-emoji {
+  filter: grayscale(1);
+  opacity: .55;
+}
+
+.eb-shatter-half .t-h3,
+.eb-shatter-half .t-small {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* 사랑 파괴자처럼 반대쪽 배타 업적이 이미 달성된 카드에 붙는 호버 조롱 오버레이.
+   카드 자체는 평소 상태 그대로이고, 오버레이만 :hover / :focus-visible / 탭 토글로 드러난다. */
+.eb-taunt-card {
+  position: relative;
+  border-radius: var(--radius-l);
+}
+
+.eb-taunt-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  border-radius: var(--radius-l);
+  overflow: hidden;
+  background: rgb(122 16 28 / .94);
+  color: #fff;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+.eb-taunt-icon {
+  color: #fff;
+}
+
+.eb-taunt-text {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.4;
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+@media (hover: hover) {
+  .eb-taunt-card:hover .eb-taunt-overlay,
+  .eb-taunt-card:focus-visible .eb-taunt-overlay {
+    opacity: 1;
+  }
+}
+
+@media (hover: none) {
+  .eb-taunt-card--active .eb-taunt-overlay {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eb-taunt-overlay {
+    transition: none;
+  }
+}
+
+.eb-shatter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  color: var(--down);
+  background: color-mix(in srgb, var(--down) 14%, transparent);
+  width: fit-content;
+}
+
+.eb-achievement-card .t-h3,
+.eb-achievement-card .t-small {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}

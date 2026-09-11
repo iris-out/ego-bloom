@@ -180,7 +180,7 @@ export default function AdminPage() {
 
   if (!supabase) {
     return (
-      <div className="min-h-[100dvh] bg-bg flex items-center justify-center px-6">
+      <div className="min-h-[100dvh] flex items-center justify-center px-6">
         <p className="t-body" style={{ color: 'var(--down)' }}>
           VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY 환경변수가 설정되지 않았습니다.
         </p>
@@ -190,7 +190,7 @@ export default function AdminPage() {
 
   if (!session) {
     return (
-      <div className="min-h-[100dvh] bg-bg flex items-center justify-center px-6">
+      <div className="min-h-[100dvh] flex items-center justify-center px-6">
         <div className="eb-panel p-8 w-full max-w-[340px]">
           <h1 className="t-h1 text-fg mb-6">관리자 로그인</h1>
           <form onSubmit={handleLogin} className="flex flex-col gap-3">
@@ -221,7 +221,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-bg text-fg px-6 py-8 max-w-[960px] mx-auto">
+    <div className="min-h-[100dvh] text-fg px-6 py-8 max-w-[960px] mx-auto">
       <div className="flex items-center gap-4 mb-6 border-b border-line pb-4">
         <span className="t-h1 flex-1">관리자 패널</span>
         <span className="t-small text-fg-2">{session.user.email}</span>

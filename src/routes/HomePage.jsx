@@ -28,6 +28,7 @@ const TABS = [
   { label: '제작자 랭킹', short: '랭킹', Icon: Trophy },
   { label: '인기 태그', short: '태그', Icon: Hash },
   { label: '즐겨찾기', short: '즐겨찾기', Icon: Star },
+  { label: '오픈월드', short: '월드', Icon: Globe, href: '/world' },
 ];
 
 const SERVER_DOT = {
@@ -210,7 +211,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-dvh flex flex-col" style={{ background: 'var(--bg)' }}>
+    <div className="min-h-dvh flex flex-col">
       {(serverStatus === 'warning' || serverStatus === 'error') && (
         <ServerAlertCard status={serverStatus} message={serverMessage} />
       )}
@@ -231,18 +232,18 @@ export default function HomePage() {
           </button>
 
           {/* 데스크톱: 필 탭 내비 */}
-          <nav className="hidden sm:block">
+          <nav className="hidden sm:block min-w-0 overflow-x-auto shrink">
             <Segmented
               options={TABS.map((t, i) => ({ value: i, label: t.label }))}
               value={activeTab}
-              onChange={(v) => setActiveTab(v)}
+              onChange={(v) => TABS[v].href ? navigate(TABS[v].href) : setActiveTab(v)}
               aria-label="메인 내비게이션"
             />
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
             {/* 데스크톱: 검색 필드 220 */}
-            <div className="hidden sm:block" style={{ width: 220 }}>
+            <div className="hidden xl:block" style={{ width: 220 }}>
               <SearchField hasAgreed={hasAgreedToWarning} onRequestAgreement={openWarningModal} />
             </div>
 
@@ -317,7 +318,7 @@ export default function HomePage() {
             <button
               key={short}
               type="button"
-              onClick={() => setActiveTab(i)}
+              onClick={() => tab.href ? navigate(tab.href) : setActiveTab(i)}
               aria-current={active}
               className="flex-1 flex flex-col items-center justify-center gap-1"
             >

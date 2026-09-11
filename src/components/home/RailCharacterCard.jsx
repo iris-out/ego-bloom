@@ -23,6 +23,7 @@ export default function RailCharacterCard({ rank, character }) {
       count={character.interactionCount}
       countLabel="대화"
       creator={character.creatorNickname}
+      showRarity={false}
       size="rail"
       href={characterZetaUrl(character.id)}
       target="_blank"

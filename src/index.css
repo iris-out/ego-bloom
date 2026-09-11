@@ -76,6 +76,11 @@
 
   --font-display: "TheJamsil", "Pretendard Variable", Pretendard, system-ui, sans-serif;
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+
+  --bg-glow-1: rgba(197, 140, 255, .16);
+  --bg-glow-2: rgba(255, 216, 77, .07);
+  --star: #FFFFFF;
+  --star-opacity: .55;
 }
 
 :root[data-theme="light"] {
@@ -103,6 +108,11 @@
   --shadow: 0 3px 0 #D2C7EA;
   --shadow-overlay: 0 16px 40px rgb(27 21 53 / .18);
   --scrim: rgb(27 21 53 / .42);
+
+  --bg-glow-1: rgba(91, 63, 196, .10);
+  --bg-glow-2: rgba(255, 216, 77, .18);
+  --star: #5B3FC4;
+  --star-opacity: .18;
 }
 
 @media (prefers-color-scheme: light) {
@@ -124,6 +134,11 @@
     --shadow: 0 3px 0 #D2C7EA;
     --shadow-overlay: 0 16px 40px rgb(27 21 53 / .18);
     --scrim: rgb(27 21 53 / .42);
+
+    --bg-glow-1: rgba(91, 63, 196, .10);
+    --bg-glow-2: rgba(255, 216, 77, .18);
+    --star: #5B3FC4;
+    --star-opacity: .18;
   }
 }
 
@@ -216,7 +231,9 @@
 
   body {
     font-family: var(--font-sans);
-    background: var(--bg);
+    /* 배경은 html 이 칠하고 body 는 투명하게 둔다 — body::before/::after 의 고정
+       별/그라데이션 레이어가 body 자체 배경에 가려지지 않게 하기 위해서다. */
+    background: transparent;
     color: var(--fg);
     line-height: 1.4;
     min-height: 100vh;
@@ -234,6 +251,49 @@
   a { color: inherit; text-decoration: none; }
   button { font-family: inherit; cursor: pointer; border: none; background: none; }
   img { display: block; }
+}
+
+/* --------------------------------------------------------------------
+   배경 — 별 필드 + 그라데이션 글로우
+   JS/스크롤 리스너 없이 body 뒤 고정 레이어 두 장으로만 그린다.
+   before: 좌상단/우상단 라디얼 글로우. after: 반복 별 타일(마스크로 --star 색을 입힘).
+   -------------------------------------------------------------------- */
+
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+body::before {
+  background:
+    radial-gradient(720px 480px at 6% -8%, var(--bg-glow-1), transparent 60%),
+    radial-gradient(680px 460px at 98% -6%, var(--bg-glow-2), transparent 60%);
+}
+
+body::after {
+  background-color: var(--star);
+  opacity: var(--star-opacity);
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+  -webkit-mask-size: 360px 360px;
+  mask-size: 360px 360px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Ccircle cx='255.5' cy='311.8' r='0.8' fill='white' fill-opacity='0.83'/%3E%3Ccircle cx='220.1' cy='331.9' r='1.58' fill='white' fill-opacity='0.67'/%3E%3Ccircle cx='130.1' cy='356.5' r='0.65' fill='white' fill-opacity='0.85'/%3E%3Ccircle cx='250.1' cy='107.6' r='1.25' fill='white' fill-opacity='0.68'/%3E%3Ccircle cx='184.3' cy='106.2' r='1.39' fill='white' fill-opacity='0.79'/%3E%3Ccircle cx='155.8' cy='282.9' r='0.95' fill='white' fill-opacity='0.39'/%3E%3Ccircle cx='64.7' cy='100.9' r='1.03' fill='white' fill-opacity='0.75'/%3E%3Ccircle cx='36.2' cy='109.5' r='0.65' fill='white' fill-opacity='0.41'/%3E%3Ccircle cx='124.4' cy='355.6' r='0.72' fill='white' fill-opacity='0.79'/%3E%3Ccircle cx='161.3' cy='252.3' r='1.31' fill='white' fill-opacity='0.59'/%3E%3Ccircle cx='104.0' cy='270.2' r='1.39' fill='white' fill-opacity='0.55'/%3E%3Ccircle cx='101.1' cy='60.2' r='1.29' fill='white' fill-opacity='0.55'/%3E%3Ccircle cx='140.1' cy='19.5' r='1.3' fill='white' fill-opacity='0.93'/%3E%3Ccircle cx='332.8' cy='225.1' r='0.94' fill='white' fill-opacity='0.77'/%3E%3Ccircle cx='214.1' cy='153.7' r='1.57' fill='white' fill-opacity='0.88'/%3E%3Ccircle cx='221.7' cy='298.8' r='1.0' fill='white' fill-opacity='0.63'/%3E%3Ccircle cx='260.4' cy='174.6' r='1.5' fill='white' fill-opacity='0.57'/%3E%3Ccircle cx='21.3' cy='244.1' r='0.95' fill='white' fill-opacity='0.54'/%3E%3Ccircle cx='277.3' cy='118.6' r='0.81' fill='white' fill-opacity='0.33'/%3E%3Ccircle cx='242.0' cy='210.7' r='0.93' fill='white' fill-opacity='0.32'/%3E%3Ccircle cx='15.3' cy='122.3' r='0.99' fill='white' fill-opacity='0.41'/%3E%3Ccircle cx='277.0' cy='286.1' r='1.27' fill='white' fill-opacity='0.35'/%3E%3Ccircle cx='27.5' cy='155.6' r='1.59' fill='white' fill-opacity='0.35'/%3E%3Ccircle cx='239.5' cy='163.1' r='0.6' fill='white' fill-opacity='0.55'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Ccircle cx='255.5' cy='311.8' r='0.8' fill='white' fill-opacity='0.83'/%3E%3Ccircle cx='220.1' cy='331.9' r='1.58' fill='white' fill-opacity='0.67'/%3E%3Ccircle cx='130.1' cy='356.5' r='0.65' fill='white' fill-opacity='0.85'/%3E%3Ccircle cx='250.1' cy='107.6' r='1.25' fill='white' fill-opacity='0.68'/%3E%3Ccircle cx='184.3' cy='106.2' r='1.39' fill='white' fill-opacity='0.79'/%3E%3Ccircle cx='155.8' cy='282.9' r='0.95' fill='white' fill-opacity='0.39'/%3E%3Ccircle cx='64.7' cy='100.9' r='1.03' fill='white' fill-opacity='0.75'/%3E%3Ccircle cx='36.2' cy='109.5' r='0.65' fill='white' fill-opacity='0.41'/%3E%3Ccircle cx='124.4' cy='355.6' r='0.72' fill='white' fill-opacity='0.79'/%3E%3Ccircle cx='161.3' cy='252.3' r='1.31' fill='white' fill-opacity='0.59'/%3E%3Ccircle cx='104.0' cy='270.2' r='1.39' fill='white' fill-opacity='0.55'/%3E%3Ccircle cx='101.1' cy='60.2' r='1.29' fill='white' fill-opacity='0.55'/%3E%3Ccircle cx='140.1' cy='19.5' r='1.3' fill='white' fill-opacity='0.93'/%3E%3Ccircle cx='332.8' cy='225.1' r='0.94' fill='white' fill-opacity='0.77'/%3E%3Ccircle cx='214.1' cy='153.7' r='1.57' fill='white' fill-opacity='0.88'/%3E%3Ccircle cx='221.7' cy='298.8' r='1.0' fill='white' fill-opacity='0.63'/%3E%3Ccircle cx='260.4' cy='174.6' r='1.5' fill='white' fill-opacity='0.57'/%3E%3Ccircle cx='21.3' cy='244.1' r='0.95' fill='white' fill-opacity='0.54'/%3E%3Ccircle cx='277.3' cy='118.6' r='0.81' fill='white' fill-opacity='0.33'/%3E%3Ccircle cx='242.0' cy='210.7' r='0.93' fill='white' fill-opacity='0.32'/%3E%3Ccircle cx='15.3' cy='122.3' r='0.99' fill='white' fill-opacity='0.41'/%3E%3Ccircle cx='277.0' cy='286.1' r='1.27' fill='white' fill-opacity='0.35'/%3E%3Ccircle cx='27.5' cy='155.6' r='1.59' fill='white' fill-opacity='0.35'/%3E%3Ccircle cx='239.5' cy='163.1' r='0.6' fill='white' fill-opacity='0.55'/%3E%3C/svg%3E");
+  animation: eb-star-twinkle 6s ease-in-out infinite alternate;
+}
+
+@keyframes eb-star-twinkle {
+  from { opacity: calc(var(--star-opacity) * 0.75); }
+  to { opacity: var(--star-opacity); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after { animation: none; }
 }
 
 /* --------------------------------------------------------------------
@@ -429,6 +489,13 @@
   to   { opacity: 1; }
 }
 .eb-crossfade { animation: eb-crossfade-in 200ms ease-out; }
+
+/* 스포트라이트 캐러셀 활성 점의 차오르는 fill이다. transform만 건드리는 컴포지터 전용 애니메이션이라
+   activeIndex로 key를 건 요소를 다시 마운트하면 처음부터 재생된다. */
+@keyframes eb-spotlight-fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

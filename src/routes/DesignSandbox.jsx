@@ -88,16 +88,29 @@ function SandboxContent() {
       </Section>
 
       <Section title="TierMark (제작자 티어)">
-        <div className="flex flex-wrap items-end gap-5">
-          <TierMark tier={null} size={40} showPips aria-label="언랭크" />
-          {CREATOR_TIERS.map((t) => (
-            <TierMark key={t.key} tier={t.key} division={2} size={40} showPips />
-          ))}
-        </div>
+        {['bg', 'surface'].map((ground) => (
+          <div
+            key={ground}
+            className="flex flex-col gap-4 p-4 rounded-[var(--radius-l)]"
+            style={{ background: `var(--${ground})`, border: '1px solid var(--line)' }}
+          >
+            <span className="t-label" style={{ color: 'var(--fg-3)' }}>{`--${ground}`}</span>
+            {[24, 40, 64, 120].map((size) => (
+              <div key={size} className="flex flex-wrap items-end gap-5">
+                <TierMark tier={null} size={size} showPips />
+                {CREATOR_TIERS.map((t) => (
+                  <TierMark key={t.key} tier={t.key} division={2} size={size} showPips />
+                ))}
+              </div>
+            ))}
+          </div>
+        ))}
+
         <div className="flex items-end gap-3">
-          <TierMark tier="gold" division={3} size={24} />
-          <TierMark tier="gold" division={3} size={40} />
-          <TierMark tier="gold" division={3} size={64} showPips />
+          <span className="t-small" style={{ color: 'var(--fg-2)' }}>골드 division IV..I</span>
+          {[4, 3, 2, 1].map((division) => (
+            <TierMark key={division} tier="gold" division={division} size={40} showPips />
+          ))}
         </div>
       </Section>
 

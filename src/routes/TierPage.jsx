@@ -83,7 +83,7 @@ export default function TierPage() {
     : null;
 
   return (
-    <div className="bg-bg min-h-[100dvh]">
+    <div className="min-h-[100dvh]">
       <header className="flex items-center gap-3 px-5 py-4 border-b border-line max-w-[680px] mx-auto lg:max-w-[900px] lg:px-10">
         <button
           onClick={() => navigate('/')}
