@@ -62,3 +62,5 @@ live-design/
 tests/*
 !tests/world/
 !tests/world.spec.js
+# 로컬 도구 상태. 로컬 경로가 들어 있어 커밋하지 않는다.
+.omc/
