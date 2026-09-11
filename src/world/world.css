@@ -1,0 +1,153 @@
+.world-page { position: relative; width: 100%; height: 100dvh; min-height: 480px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: var(--font-sans, Pretendard, sans-serif); }
+.world-page button, .world-page a, .world-page input, .world-page select { touch-action: manipulation; }
+.world-page button:focus-visible, .world-page a:focus-visible, .world-page input:focus-visible, .world-page select:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 3px; }
+.world-page .eb-btn-icon { flex-shrink: 0; width: 38px; height: 38px; }
+.world-header { position: absolute; inset: 0 0 auto; min-height: 78px; padding: 14px 24px; display: flex; align-items: center; gap: 16px; background: var(--surface); border-bottom: 1px solid var(--line); z-index: 30; }
+.world-brand h1 { font-family: var(--font-display, 'TheJamsil', sans-serif); font-size: 19px; font-weight: 700; margin: 3px 0 0; line-height: 1.4; }
+.world-brand h1 span { font: 10px Pretendard, sans-serif; color: var(--fg-3); margin-left: 6px; }
+.world-eyebrow { font-size: 9px; letter-spacing: .14em; font-weight: 700; color: var(--fg-3); }
+.world-population { font-size: 12px; color: var(--fg-2); border-left: 1px solid var(--line); padding-left: 18px; }
+.world-tools { display: flex; gap: 6px; margin-left: auto; }
+.world-tools button[aria-pressed=true] { background: var(--accent-soft); border-color: var(--accent-ink); }
+.world-stage { position: absolute; inset: 78px 0 0; }
+.world-canvas { width: 100%; height: 100%; touch-action: none; }
+.world-scene-message { position: absolute; inset: 0 0 0 328px; display: flex; flex-direction: column; gap: 16px; align-items: center; justify-content: center; text-align: center; padding: 28px; }
+.world-scene-message h2 { font-size: 24px; font-family: var(--font-display); font-weight: 700; }
+.world-scene-message p { max-width: 360px; color: var(--fg-2); font-size: 14px; line-height: 1.8; }
+.world-render-status { position: absolute; top: 20px; left: 50%; padding: 8px 14px; border-radius: 8px; background: var(--surface); font-size: 12px; pointer-events: none; }
+.world-explorer { position: absolute; top: 98px; left: 20px; bottom: 72px; width: 294px; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; z-index: 20; overflow: hidden; box-shadow: var(--shadow-hard); }
+.world-explorer-title { padding: 19px 18px 15px; display: flex; align-items: center; justify-content: space-between; }
+.world-explorer h2 { font-size: 19px; font-family: var(--font-display); font-weight: 700; margin-top: 5px; }
+.world-page .world-explorer-toggle { display: none; }
+.world-search { margin: 0 14px 14px; padding: 10px 11px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; color: var(--fg-3); }
+.world-search input { min-width: 0; width: 100%; border: 0; outline: none; background: transparent; color: var(--fg); font-size: 12px; }
+.world-search button { display: flex; cursor: pointer; }
+.world-explorer-body { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.world-filter { display: flex; align-items: center; gap: 10px; padding: 0 18px; font-size: 11px; }
+.world-filter label { color: var(--fg-3); }
+.world-filter select { padding: 4px; min-width: 115px; border: 0; background: var(--surface); color: var(--fg); }
+.world-filter > span { margin-left: auto; color: var(--fg-3); }
+.world-list-intro { font-size: 10px; color: var(--fg-3); margin: 10px 18px; }
+.world-results { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.world-results > p, .world-results > div[role=alert] { margin: 18px; font-size: 13px; line-height: 1.7; color: var(--fg-2); }
+.world-result { width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--line); text-align: left; cursor: pointer; }
+.world-result:hover { background: var(--surface-2); }
+.world-result[aria-pressed=true] { background: var(--accent-soft); }
+.world-rank { font-family: var(--font-display); color: var(--fg-3); font-size: 11px; min-width: 22px; }
+.world-tier-mark { width: 30px; height: 34px; flex-shrink: 0; border: 1px solid var(--tier-color); border-bottom: 4px solid var(--tier-color); color: var(--fg); display: flex; align-items: center; justify-content: center; border-radius: 5px; font-family: var(--font-display); font-size: 11px; }
+.world-result-name { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.world-result-name strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 600; }
+.world-result-name small { font-size: 10px; color: var(--fg-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.world-result > svg { color: var(--fg-3); flex-shrink: 0; }
+.world-more { margin: 14px; }
+.world-legend { border-top: 1px solid var(--line); padding: 13px 16px; }
+.world-legend > span { color: var(--fg-3); font-size: 10px; }
+.world-legend > div { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 8px; }
+.world-legend button { display: flex; align-items: center; gap: 4px; font-size: 9px; color: var(--fg-2); cursor: pointer; }
+.world-legend i, .world-tier-dot { display: inline-block; width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
+.world-map { position: absolute; bottom: 74px; right: 20px; width: 180px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 10px; z-index: 15; }
+.world-map-heading { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 8px; color: var(--fg-2); }
+.world-map svg { display: block; width: 100%; border-radius: 4px; cursor: crosshair; }
+.world-map-caption { display: block; font-size: 8px; color: var(--fg-3); padding-top: 7px; text-align: center; }
+.world-selection { position: absolute; bottom: 78px; left: 338px; width: 290px; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); z-index: 21; box-shadow: var(--shadow-hard); }
+.world-selection-close { position: absolute; top: 8px; right: 8px; }
+.world-selection h2 { font-size: 19px; font-family: var(--font-display); margin: 12px 20px 8px 0; word-break: break-word; }
+.world-selection p { display: flex; align-items: center; gap: 6px; color: var(--fg-2); font-size: 11px; }
+.world-selection-actions { display: flex; gap: 8px; margin-top: 17px; }
+.world-selection-actions .eb-btn { flex: 1; min-height: 36px; padding: 8px; font-size: 11px; }
+.world-settings { position: absolute; top: 94px; right: 20px; width: 260px; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); z-index: 35; box-shadow: var(--shadow-hard); max-height: calc(100dvh - 115px); overflow: auto; }
+.world-settings-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.world-settings h2 { font-family: var(--font-display); font-size: 17px; }
+.world-settings label { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; font-size: 12px; color: var(--fg-2); }
+.world-settings select { padding: 9px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; color: var(--fg); }
+.world-settings p { font-size: 10px; line-height: 1.7; color: var(--fg-3); margin-top: 16px; }
+.world-help { position: absolute; bottom: 18px; left: 338px; right: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; padding: 10px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; z-index: 16; pointer-events: none; }
+.world-help span { color: var(--fg-2); font-size: 10px; }
+.world-help span:last-child { color: var(--fg-3); }
+.world-mobile-help, .world-touch-controls { display: none; }
+@media (max-width: 1000px) { .world-population { display: none; } .world-selection { bottom: 78px; left: 330px; width: 250px; } .world-map { width: 148px; } }
+@media (max-width: 760px) {
+  .world-page { min-height: 360px; }
+  .world-header { padding: 10px 12px; min-height: 66px; gap: 8px; }
+  .world-brand h1 { font-size: 14px; }
+  .world-brand h1 span { display: none; }
+  .world-brand .world-eyebrow { font-size: 7px; letter-spacing: .05em; }
+  .world-tools { gap: 3px; }
+  .world-page .eb-btn-icon { width: 32px; height: 32px; }
+  .world-tools svg { width: 16px; }
+  .world-stage { inset: 66px 0 0; }
+  .world-scene-message { inset: 0 0 120px; padding: 24px; }
+  .world-scene-message h2 { font-size: 20px; }
+  .world-explorer { top: auto; left: 10px; right: 10px; bottom: max(10px, env(safe-area-inset-bottom)); width: auto; max-height: 46dvh; border-radius: 12px; }
+  .world-explorer-title { padding: 10px 13px 6px; }
+  .world-explorer-title .world-eyebrow { display: none; }
+  .world-explorer h2 { margin: 0; font-size: 14px; }
+  .world-page .world-explorer-toggle { display: flex; }
+  .world-search { margin: 0 10px 10px; padding: 9px; }
+  .world-explorer-body { display: none; }
+  .world-explorer-open .world-explorer-body { display: flex; }
+  .world-explorer-open .world-explorer { height: 46dvh; }
+  .world-legend { display: none; }
+  .world-filter { padding: 0 13px; }
+  .world-list-intro { margin: 6px 13px; }
+  .world-result { padding: 9px 12px; }
+  .world-map { top: 78px; bottom: auto; right: 10px; width: 112px; padding: 7px; }
+  .world-map-caption { display: none; }
+  .world-map-heading { font-size: 8px; margin-bottom: 5px; }
+  .world-selection { left: 10px; bottom: 208px; width: min(280px, calc(100vw - 20px)); padding: 15px; }
+  .world-selection h2 { font-size: 16px; margin-top: 7px; }
+  .world-selection-actions { margin-top: 10px; }
+  .world-explorer-open .world-selection { display: none; }
+  .world-settings { top: 76px; right: 10px; width: min(260px, calc(100vw - 20px)); }
+  .world-help { top: 80px; left: 10px; right: auto; bottom: auto; max-width: calc(100vw - 144px); padding: 8px; display: block; }
+  .world-help .world-desktop-help, .world-help span:last-child { display: none; }
+  .world-help .world-mobile-help { display: inline; font-size: 8px; line-height: 1.6; }
+  .world-touch-controls { display: flex; position: absolute; bottom: 115px; left: 15px; right: 15px; justify-content: space-between; align-items: end; pointer-events: none; z-index: 17; }
+  .world-stick-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .world-stick-wrap > span { background: var(--surface); color: var(--fg-2); padding: 2px 6px; border-radius: 4px; font-size: 9px; }
+  .world-stick { width: 72px; height: 72px; background: var(--surface); border: 1px solid var(--line); border-radius: 50%; display: flex; align-items: center; justify-content: center; touch-action: none; pointer-events: auto; }
+  .world-stick > div { width: 26px; height: 26px; border-radius: 50%; background: var(--fg-2); pointer-events: none; }
+  .world-height-controls { display: flex; gap: 8px; padding-bottom: 8px; }
+  .world-height-controls button { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); pointer-events: auto; touch-action: none; }
+  .world-explorer-open .world-touch-controls { display: none; }
+}
+@media (max-width: 380px) { .world-brand .world-eyebrow { display: none; } .world-brand h1 { font-size: 12px; } .world-header { gap: 5px; padding-inline: 8px; } .world-tools { gap: 1px; } }
+@media (max-height: 560px) and (max-width: 760px) { .world-map { width: 84px; } .world-selection { bottom: 112px; left: 100px; padding: 10px; width: 230px; } .world-selection h2 { font-size: 13px; } .world-selection .world-eyebrow { display: none; } .world-touch-controls { bottom: 108px; } }
+/* The creator explorer starts collapsed on every screen size. */
+@media (min-width: 761px) {
+  .world-page .world-explorer-toggle { display: flex; }
+  .world-page:not(.world-explorer-open) .world-explorer { bottom: auto; }
+  .world-page:not(.world-explorer-open) .world-explorer-body { display: none; }
+  .world-page:not(.world-explorer-open) .world-selection { left: 20px; }
+  .world-page:not(.world-explorer-open) .world-help { left: 20px; }
+}
+.world-building-label { display: flex; align-items: center; gap: 7px; width: 162px; min-height: 42px; padding: 5px 8px; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-bottom: 3px solid var(--accent-ink); border-radius: 6px; font-family: var(--font-sans); cursor: pointer; box-shadow: var(--shadow-hard); }
+.world-building-avatar { width: 30px; height: 30px; flex-shrink: 0; object-fit: cover; border-radius: 4px; background: var(--surface-2); }
+.world-building-name { font-weight: 600; font-size: 12px; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.world-npc-label { color: var(--fg); background: var(--surface); padding: 3px 7px; font: 600 11px var(--font-sans); border: 1px solid var(--line); border-radius: 4px; white-space: nowrap; pointer-events: none; }
+.world-flight-panel { position: absolute; top: 100px; left: 20px; width: 284px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; z-index: 23; }
+.world-flight-heading { display: flex; align-items: center; justify-content: space-between; }
+.world-flight-heading h2 { margin-top: 5px; font: 700 19px var(--font-display); }
+.world-flight-instruments { display: flex; justify-content: space-between; gap: 10px; padding: 18px 0; }
+.world-flight-instruments span { display: flex; flex-direction: column; gap: 4px; font-size: 10px; color: var(--fg-3); }
+.world-flight-instruments b { font: 600 22px var(--font-display); color: var(--fg); }
+.world-flight-panel label { font-size: 12px; display: flex; align-items: center; gap: 14px; }
+.world-flight-panel input { flex: 1; min-width: 0; accent-color: var(--accent-ink); }
+.world-flight-panel p { font-size: 11px; line-height: 1.7; color: var(--fg-2); margin: 14px 0; }
+.world-flight-panel .eb-btn { width: 100%; font-size: 12px; }
+.world-flight-active .world-explorer { display: none; }
+@media (max-width: 760px) {
+  .world-brand .world-eyebrow { display: none; }
+  .world-header { gap: 5px; }
+  .world-brand h1 { font-size: 13px; }
+  .world-tools { gap: 2px; }
+  .world-flight-panel { top: auto; bottom: max(10px,env(safe-area-inset-bottom)); left: 10px; right: 10px; width: auto; padding: 12px; }
+  .world-flight-heading h2 { font-size: 14px; }
+  .world-flight-instruments { padding: 10px 0; }
+  .world-flight-instruments b { font-size: 17px; }
+  .world-flight-panel p { margin: 7px 0; font-size: 10px; }
+  .world-flight-panel .eb-btn { min-height: 30px; padding: 5px; }
+  .world-flight-active .world-touch-controls { bottom: 246px; }
+}
+.world-stage { z-index: 0; }
+.world-building-avatar { display: flex; align-items: center; justify-content: center; }

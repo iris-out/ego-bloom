@@ -5,7 +5,7 @@ import ProfilePage from './routes/ProfilePage';
 import PwaInstallBanner from './components/PwaInstallBanner';
 import { lazyWithRetry } from './utils/lazyWithRetry';
 const TierPage = lazyWithRetry(() => import('./routes/TierPage'), 'TierPage');
-const WorldPage = lazyWithRetry(() => import('./routes/WorldPage'), 'WorldPage');
+import WorldPage from './routes/WorldPage';
 const AdminPage = lazyWithRetry(() => import('./routes/AdminPage'), 'AdminPage');
 // 개발 전용 디자인 시스템 갤러리다. import.meta.env.DEV 로 감싸 프로덕션 번들에서 제외한다.
 const DesignSandbox = import.meta.env.DEV

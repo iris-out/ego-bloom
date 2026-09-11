@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { createClient } from '@supabase/supabase-js'
 import { spawn } from 'child_process'
+import { loadWorldData } from './server/worldData.js'
 
 // Vite plugin: @handle → UUID resolver middleware
 function handleResolverPlugin() {
@@ -523,62 +524,19 @@ function supabaseApiPlugin(env) {
         }
       });
 
-      server.middlewares.use('/api/get-world-data', async (req, res, next) => {
+      server.middlewares.use('/api/get-world-data', async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        if (req.method === 'OPTIONS') { res.statusCode = 200; res.end(); return; }
+        if (req.method !== 'GET') {
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+          return;
+        }
         try {
-          if (!supabase) throw new Error('Supabase not configured');
-          const { data, error } = await supabase
-            .from('account_current')
-            .select('id, nickname, handle, elo_score, tier_name')
-            .order('elo_score', { ascending: false })
-            .limit(1000);
-
-          if (error) throw error;
-
-          const GRID_SIZE = 24;
-          const ROAD_INTERVAL = 4;
-          const slots = [];
-
-          const visitedSet = new Set();
-          const queue = [[0, 0]];
-          visitedSet.add('0,0');
-
-          while (slots.length < data.length && queue.length > 0) {
-            const [x, z] = queue.shift();
-            const isRoadX = x % ROAD_INTERVAL === 0;
-            const isRoadZ = z % ROAD_INTERVAL === 0;
-            const isRiver = z >= 12 && z <= 20;
-            if (!isRoadX && !isRoadZ && !isRiver) slots.push({ gx: x, gz: z });
-            for (const [dx, dz] of [[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]]) {
-              const nx = x + dx, nz = z + dz;
-              const key = `${nx},${nz}`;
-              if (!visitedSet.has(key)) { visitedSet.add(key); queue.push([nx, nz]); }
-            }
-          }
-
-          for (let i = slots.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [slots[i], slots[j]] = [slots[j], slots[i]];
-          }
-
-          const worldData = data.map((creator, index) => {
-            const slot = slots[index] || { gx: index, gz: index };
-            const jitterX = (Math.random() - 0.5) * 8.0;
-            const jitterZ = (Math.random() - 0.5) * 8.0;
-            return {
-              ...creator,
-              x: slot.gx * GRID_SIZE + jitterX,
-              z: slot.gz * GRID_SIZE + jitterZ,
-              height: Math.max(13, (Math.log10(Math.max(1, creator.elo_score)) - 2) * 12)
-            };
-          });
-
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ buildings: worldData }));
-        } catch (err) {
-          console.error('Get World Data Error:', err);
-          res.statusCode = 500;
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ error: err.message }));
+          res.end(JSON.stringify(await loadWorldData(supabase, env.RANK_BLACKLIST)));
+        } catch {
+          res.statusCode = 503;
+          res.end(JSON.stringify({ error: 'World data is temporarily unavailable' }));
         }
       });
     }

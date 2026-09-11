@@ -57,3 +57,8 @@ scan_pii.sh
 
 live-design/
 .agent/
+# Keep the world regression suite in version control.
+!tests/
+tests/*
+!tests/world/
+!tests/world.spec.js
