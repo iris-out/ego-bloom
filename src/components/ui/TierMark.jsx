@@ -156,8 +156,8 @@ export default function TierMark({ tier, division, size = 40, showPips = false, 
   const hasRibbon = meta && tierAtLeast(key, 'master');
   const hasRays = key === 'champion';
   const hasGem = key === 'champion';
-  const sparkleCount = key === 'champion' ? 4 : key === 'master' ? 3 : key === 'diamond' ? 2 : 0;
-  const glowOpacity = key === 'champion' ? 0.55 : key === 'master' ? 0.42 : key === 'diamond' ? 0.32 : key === 'platinum' ? 0.22 : 0;
+  const sparkleCount = key === 'champion' || key === 'grandmaster' ? 4 : key === 'master' ? 3 : key === 'diamond' ? 2 : 0;
+  const glowOpacity = key === 'champion' ? 0.55 : key === 'grandmaster' ? 0.48 : key === 'master' ? 0.42 : key === 'diamond' ? 0.32 : key === 'platinum' ? 0.22 : 0;
 
   // 사이즈 구간별 디테일: 32px 미만은 glow/rays/sparkle 을 뺀다. 56px 이상만 반짝임이 twinkle 한다.
   const showGlow = hasGlow && size >= 32;

@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "label": "off2-shadow,air,airport",
+    "seconds": 5,
+    "quality": "medium",
+    "viewport": "1440x900",
+    "at": "2026-09-19T16:58:06.112Z"
+  },
+  "boot": {
+    "readyMs": 5972,
+    "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (radeonsi phoenix ACO), OpenGL ES 3.2)",
+    "longTasks": [
+      63,
+      93,
+      1414,
+      485,
+      69,
+      81,
+      62,
+      79
+    ],
+    "links": 18
+  },
+  "walk_idle": {
+    "fps": 87.2,
+    "dtP50": 5.7,
+    "dtP95": 39.2,
+    "dtP99": 87,
+    "dtMax": 307.5,
+    "jank": 28,
+    "rafBusyMs": 7.99,
+    "draw": 221,
+    "triK": 2632,
+    "links": 0,
+    "longTasks": 21,
+    "commits": {
+      "react-dom": 193,
+      "@react-three/fiber": 88
+    },
+    "scriptPct": 85.8,
+    "stylePct": 2.1,
+    "heapMB": 87,
+    "top": [
+      " 18.8% (program) ",
+      " 17.0% vertexAttribPointer ",
+      "  8.4% bindBuffer ",
+      "  3.8% trafficPose WorldScene.js:17445",
+      "  3.2% updateMatrixWorld vendor-three.js:9918",
+      "  2.9% drawElementsInstanced ",
+      "  2.3% WebGLRenderer.renderBufferDirect vendor-three.js:49644",
+      "  2.3% hitsBuilding index.js:20036",
+      "  2.2% bindVertexArray ",
+      "  1.9% projectObject vendor-three.js:49922",
+      "  1.6% uniformMatrix4fv ",
+      "  1.4% updateProperties vendor-react.js:8417",
+      "  1.4% pointOnRoute index.js:14672",
+      "  1.3% setProgram vendor-three.js:50152",
+      "  1.1% (garbage collector) ",
+      "  1.0% bufferSubData ",
+      "  0.8% (anon) WorldScene.js:27997",
+      "  0.8% multiplyMatrices vendor-three.js:8218"
+    ]
+  }
+}

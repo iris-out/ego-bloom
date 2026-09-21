@@ -1,3 +1,8 @@
+/** Civic visual source. Coordinates share reserved plots with buildWorld.
+ * Moving the bank/police also requires updating FlightMode obstacle bounds and
+ * WorldScene signage. The collision boxes are approximations, not mesh bounds.
+ * See README.md for the cross-module change checklist.
+ */
 // The two central blocks are reserved by shared/worldLayout.js.
 export function addCivicScenery(add, quality) {
   const box = (material, x, y, z, w, h, d, color) => add(material, [x, y, z], [w, h, d], null, 'box', 0, color);

@@ -4,8 +4,10 @@ export function altitudeInput(keys) {
   return Number(['KeyE', 'Space', 'ShiftLeft', 'ShiftRight'].some((key) => keys.has(key)))
     - Number(['KeyQ', 'ControlLeft', 'ControlRight'].some((key) => keys.has(key)));
 }
+/** 카메라가 도시 밖으로 나갈 수 있는 여유다. 공항이 extent+110 에 있고 활주로 너머 진입등까지 따라간다. */
+export const CAMERA_REACH = 190;
 export function boundedTarget(target, extent) {
-  const limit = Number.isFinite(extent) && extent > 0 ? extent : 180;
+  const limit = (Number.isFinite(extent) && extent > 0 ? extent : 180) + CAMERA_REACH;
   const x = Number.isFinite(target?.x) ? target.x : 0;
   const y = Number.isFinite(target?.y) ? target.y : 4;
   const z = Number.isFinite(target?.z) ? target.z : 0;
@@ -18,7 +20,7 @@ export function boundedTarget(target, extent) {
 
 export function focusPose(focus, extent) {
   const target = boundedTarget({ x: focus.x, y: focus.y ?? 4, z: focus.z }, extent);
-  if (target.x === 0 && target.z === 0 && !focus.height) return { target, position: { x: 150, y: 155, z: 185 } };
+  if (target.x === 0 && target.z === 0 && !focus.height) return { target, position: { x: 220, y: 260, z: 300 } };
   const height = Number.isFinite(focus.height) ? Math.max(12, Math.min(220, focus.height)) : 40;
   const distance = Math.max(130, height * 2.5);
   return { target, position: { x: target.x + distance * 0.65, y: target.y + distance * 0.66, z: target.z + distance * 0.85 } };

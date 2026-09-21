@@ -1,3 +1,4 @@
+@import './ui/world-ui.css';
 .world-page { position: relative; width: 100%; height: 100dvh; min-height: 480px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: var(--font-sans, Pretendard, sans-serif); }
 .world-page button, .world-page a, .world-page input, .world-page select { touch-action: manipulation; }
 .world-page button:focus-visible, .world-page a:focus-visible, .world-page input:focus-visible, .world-page select:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 3px; }
@@ -121,9 +122,11 @@
   .world-page:not(.world-explorer-open) .world-selection { left: 20px; }
   .world-page:not(.world-explorer-open) .world-help { left: 20px; }
 }
-.world-building-label { display: flex; align-items: center; gap: 7px; width: 162px; min-height: 42px; padding: 5px 8px; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-bottom: 3px solid var(--accent-ink); border-radius: 6px; font-family: var(--font-sans); cursor: pointer; box-shadow: var(--shadow-hard); }
-.world-building-avatar { width: 30px; height: 30px; flex-shrink: 0; object-fit: cover; border-radius: 4px; background: var(--surface-2); }
-.world-building-name { font-weight: 600; font-size: 12px; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.world-building-label { display: flex; align-items: center; gap: 18px; width: 380px; min-height: 122px; padding: 16px 20px; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-bottom: 6px solid var(--accent-ink); border-radius: 14px; font-family: var(--font-sans); cursor: pointer; box-shadow: var(--shadow-hard); }
+.world-building-avatar { width: 92px; height: 92px; flex-shrink: 0; object-fit: cover; border-radius: 12px; background: var(--surface-2); font: 700 36px var(--font-display); }
+.world-building-text { display: flex; flex-direction: column; gap: 8px; min-width: 0; text-align: left; }
+.world-building-name { font: 700 28px var(--font-display); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.world-building-tier { font-size: 18px; font-weight: 700; }
 .world-npc-label { color: var(--fg); background: var(--surface); padding: 3px 7px; font: 600 11px var(--font-sans); border: 1px solid var(--line); border-radius: 4px; white-space: nowrap; pointer-events: none; }
 .world-flight-panel { position: absolute; top: 100px; left: 20px; width: 284px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; z-index: 23; }
 .world-flight-heading { display: flex; align-items: center; justify-content: space-between; }
@@ -151,3 +154,226 @@
 }
 .world-stage { z-index: 0; }
 .world-building-avatar { display: flex; align-items: center; justify-content: center; }
+.world-cockpit { position: absolute; bottom: 64px; right: 20px; width: 310px; padding: 15px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); z-index: 23; }
+.world-cockpit > header { display: flex; justify-content: space-between; align-items: center; }
+.world-cockpit h2 { font: 700 16px var(--font-display); margin-top: 4px; }
+.world-cockpit-controls { display: flex; gap: 14px; margin: 12px 0; }
+.world-instruments { flex: 1; min-width: 0; }
+.world-gauges { display: flex; gap: 8px; }
+.world-gauge { flex: 1; min-width: 0; text-align: center; }
+.world-gauge svg { width: 100%; }
+.world-gauge > span { font-size: 9px; color: var(--fg-3); }
+.world-attitude { display: flex; gap: 6px; margin-top: 13px; }
+.world-attitude span { flex: 1; font-size: 7px; color: var(--fg-3); }
+.world-attitude b { display: block; font: 600 12px var(--font-display); color: var(--fg); margin-top: 4px; }
+.world-instruments > p { font-size: 10px; color: var(--fg-2); line-height: 1.7; min-height: 34px; margin-top: 12px; }
+.world-throttle { display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 40px; background: var(--surface-2); padding: 6px 4px; border: 1px solid var(--line); border-radius: 7px; gap: 5px; }
+.world-throttle > span { font-size: 8px; color: var(--fg-3); }
+.world-throttle > b { font: 600 11px var(--font-display); }
+.world-throttle input { writing-mode: vertical-lr; direction: rtl; appearance: none; width: 24px; height: 125px; background: transparent; cursor: ns-resize; accent-color: var(--accent-ink); }
+.world-throttle input::-webkit-slider-runnable-track { width: 5px; background: var(--line); border-radius: 2px; }
+.world-throttle input::-webkit-slider-thumb { appearance: none; width: 26px; height: 12px; border: 2px solid var(--fg-2); border-radius: 3px; background: var(--accent); margin-left: -10px; }
+.world-throttle input::-moz-range-track { width: 5px; background: var(--line); }
+.world-throttle input::-moz-range-thumb { width: 26px; height: 10px; border: 2px solid var(--fg-2); border-radius: 3px; background: var(--accent); }
+.world-cockpit > .eb-btn { width: 100%; font-size: 11px; }
+.world-flight-active .world-map { top: 98px; bottom: auto; }
+.world-help-tooltip { position: fixed; bottom: 18px; right: 20px; z-index: 38; }
+/* HUD 상단 줄 안에 들어갈 때는 줄을 따라 놓이고 설명이 아래로 열린다. */
+.wui-hud-top .world-help-tooltip { position: relative; bottom: auto; right: auto; }
+.wui-hud-top .world-help-tooltip > div { top: 38px; bottom: auto; }
+/* 줄 안에서는 다른 탭과 같은 칩으로 읽혀야 한다. 흰 바탕에 흰 원이면 보이지 않는다. */
+.wui-hud-top .world-help-tooltip summary {
+  width: 34px; height: 34px; color: var(--fg-2); font-size: 14px;
+  background: var(--surface-2); border-color: var(--line);
+}
+.world-help-tooltip summary { list-style: none; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: var(--surface); border: 1px solid var(--line); border-radius: 50%; cursor: help; font-weight: 700; font-size: 13px; }
+.world-help-tooltip summary::-webkit-details-marker { display: none; }
+.world-help-tooltip > div { position: absolute; right: 0; bottom: 38px; width: 225px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font-size: 11px; line-height: 1.8; }
+.world-help-tooltip p { color: var(--fg-2); margin-top: 6px; }
+.world-help-tooltip:not([open]) > div { display: none; }
+.world-help-tooltip:hover > div, .world-help-tooltip:focus-within > div { display: block; }
+@media (max-width:760px) {
+  .world-cockpit { width: 258px; bottom: 10px; right: 10px; padding: 11px; }
+  .world-instruments-panel { left: 10px; bottom: max(10px, env(safe-area-inset-bottom)); width: 176px; padding: 9px; }
+  .world-instruments-panel > p { display: none; }
+  .world-controls-panel { right: 10px; top: auto; bottom: max(10px, env(safe-area-inset-bottom)); width: 150px; padding: 9px; }
+  .world-controls-panel > header h2 { font-size: 12px; }
+  .world-control-row { gap: 8px; margin: 8px 0; }
+  .world-control-stack .eb-btn { min-height: 28px; font-size: 10px; }
+  .world-gauges { gap: 4px; }
+  .world-cockpit-controls { gap: 10px; margin: 8px 0; }
+  .world-cockpit h2 { font-size: 13px; }
+  .world-instruments > p { font-size: 9px; margin-top: 8px; }
+  .world-cockpit > .eb-btn { min-height: 30px; padding: 5px; }
+  .world-throttle input { height: 105px; }
+  .world-flight-active .world-touch-controls { bottom: 24px; left: 13px; right: auto; width: 72px; flex-direction: column; gap: 16px; }
+  .world-flight-active .world-height-controls { display: none; }
+  .world-flight-active .world-map { top: 78px; }
+  .world-help-tooltip { bottom: 214px; right: 12px; }
+  .world-flight-active .world-help-tooltip { bottom: 350px; }
+  .world-help-tooltip .world-desktop-help { display: none; }
+  .world-help-tooltip .world-mobile-help { display: block; }
+}
+@media (max-width:370px) { .world-cockpit { width: 225px; } .world-flight-active .world-touch-controls { left: 8px; width: 62px; } .world-flight-active .world-stick { width: 62px; height: 62px; } }
+
+.world-online { position: absolute; top: 84px; left: 50%; transform: translateX(-50%); z-index: 25; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); font-size: 11px; white-space: nowrap; }
+.world-online i { width: 6px; height: 6px; border-radius: 50%; background: var(--fg-3); }
+.world-online[data-connection="connected"] i { background: #40966a; }
+.world-pilot-label { display: block; white-space: nowrap; padding: 2px 5px; border-radius: 4px; background: #284b62dd; color: white; font-size: 10px; font-weight: 700; }
+.world-pilot-label[data-self] { background: #7a4f1ddd; }
+/* 상대 차체 게이지. 이름표 바로 아래에 붙고 무장한 상대에게만 나온다. */
+.world-peer-hull { display: block; width: 44px; height: 3px; margin: 2px auto 0; overflow: hidden; border-radius: 2px; background: #1b232acc; }
+.world-peer-hull i { display: block; width: 100%; height: 100%; background: var(--up); }
+@media (max-width:760px) { .world-online { top: 78px; left: 12px; transform: none; font-size: 10px; } }
+
+.world-roster { position: absolute; top: 98px; right: 20px; width: 172px; max-height: 252px; overflow: auto; scrollbar-width: thin; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); z-index: 24; }
+.world-roster h2 { display: flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 700; letter-spacing: .1em; color: var(--fg-3); }
+.world-roster ul { display: flex; flex-direction: column; gap: 5px; margin-top: 9px; }
+.world-roster li { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 11px; color: var(--fg-2); }
+.world-roster li[data-self] { color: var(--fg); font-weight: 700; }
+.world-roster li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.world-roster i { flex-shrink: 0; width: 27px; padding: 2px 0; border-radius: 3px; background: var(--surface-2); color: var(--fg-3); font: 700 8px var(--font-display); font-style: normal; text-align: center; }
+.world-roster i[data-plane="bomber"] { color: var(--up); }
+.world-roster i[data-plane="prop"] { color: var(--accent-ink); }
+.world-roster i[data-plane="fighter"] { color: var(--fg); }
+.world-roster i[data-plane="helicopter"] { color: var(--accent-ink); }
+.world-roster p { margin-top: 8px; font-size: 9px; color: var(--fg-3); }
+/* 비행 중에는 미니맵이 우상단으로 올라오므로 명단을 그 왼쪽으로 민다. */
+.world-flight-active .world-roster { right: 216px; }
+@media (max-width: 1000px) { .world-flight-active .world-roster { right: 184px; } }
+
+.world-pilot-settings { position: absolute; top: 98px; left: 20px; width: 300px; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); z-index: 36; box-shadow: var(--shadow-hard); max-height: calc(100dvh - 120px); overflow: auto; }
+.world-pilot-settings label { display: flex; flex-direction: column; gap: 7px; font-size: 12px; color: var(--fg-2); }
+.world-pilot-settings > label input { padding: 9px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); color: var(--fg); font-size: 13px; }
+.world-pilot-preview { margin-top: 9px; font-size: 10px; color: var(--fg-3); }
+.world-pilot-preview b { color: var(--fg); font-family: var(--font-display); font-size: 12px; }
+.world-plane-picker { display: flex; flex-direction: column; gap: 7px; margin-top: 16px; border: 0; }
+.world-plane-picker legend { font-size: 12px; color: var(--fg-2); margin-bottom: 7px; }
+.world-plane-picker label { flex-direction: row; align-items: center; gap: 10px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.world-plane-picker label[data-checked] { border-color: var(--accent-ink); background: var(--accent-soft); }
+.world-plane-picker input { position: absolute; opacity: 0; pointer-events: none; }
+.world-plane-picker b { width: 30px; flex-shrink: 0; text-align: center; font: 700 10px var(--font-display); color: var(--fg-3); }
+.world-plane-picker label[data-checked] b { color: var(--accent-ink); }
+.world-plane-picker span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.world-plane-picker strong { font-size: 12px; color: var(--fg); }
+.world-plane-picker small { font-size: 10px; color: var(--fg-3); }
+.world-pilot-settings .eb-btn { width: 100%; margin-top: 16px; font-size: 12px; }
+.world-pilot-note { margin-top: 12px; font-size: 10px; line-height: 1.7; color: var(--fg-3); }
+/* 버튼 글자가 길어 좁은 조종석에서는 헤더가 두 줄로 접힌다. */
+.world-cockpit > header { flex-wrap: wrap; gap: 8px; }
+/* 계기는 좌하단, 조작은 우측이다. 두 패널 모두 .world-cockpit 판 스타일을 공유한다. */
+.world-instruments-panel { left: 20px; right: auto; bottom: 18px; width: 322px; }
+.world-instruments-panel .world-attitude { margin-top: 14px; }
+.world-instruments-panel > p { min-height: 32px; margin-top: 12px; font-size: 11px; line-height: 1.7; color: var(--fg-2); }
+.world-controls-panel { right: 20px; bottom: auto; top: 108px; width: 242px; }
+.world-controls-panel > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.world-control-row { display: flex; gap: 12px; margin: 12px 0; }
+.world-control-stack { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.world-control-stack .eb-btn { width: 100%; min-height: 34px; padding: 0 8px; font-size: 11px; }
+.world-control-stack .world-brake { margin-bottom: 0; }
+.world-cockpit-actions { display: flex; align-items: center; gap: 5px; margin-left: auto; }
+.world-cockpit-actions .world-auto-button { display: flex; align-items: center; gap: 5px; width: auto; min-height: 32px; padding: 0 10px; font-size: 11px; white-space: nowrap; }
+.world-cockpit-actions .world-auto-button[aria-pressed="true"] { border-color: var(--accent-ink); background: var(--accent-soft); color: var(--fg); }
+.world-cockpit-actions .world-plane-button { display: flex; align-items: center; gap: 5px; width: auto; min-height: 32px; padding: 0 10px; font-size: 11px; white-space: nowrap; }
+.world-cockpit-pilot { display: block; margin-top: 3px; font-size: 10px; color: var(--fg-3); }
+@media (max-width: 760px) {
+  .world-cockpit-actions .world-plane-button { min-height: 28px; padding: 0 7px; gap: 4px; font-size: 10px; }
+  .world-roster { top: 78px; right: 132px; width: 128px; max-height: 148px; padding: 8px 9px; }
+  .world-roster li { font-size: 10px; gap: 4px; }
+  .world-roster i { width: 22px; }
+  .world-flight-active .world-roster { right: 132px; }
+  .world-pilot-settings { top: auto; left: 10px; right: 10px; bottom: max(10px, env(safe-area-inset-bottom)); width: auto; padding: 13px; max-height: 74dvh; }
+}
+
+.world-wall-creator { display: flex; align-items: center; gap: 18px; width: 380px; padding: 18px 22px; border: 1px solid var(--line); border-left: 8px solid var(--accent-ink); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-hard); pointer-events: none; transition: opacity 120ms linear; }
+.world-wall-creator img, .world-wall-creator .world-flight-avatar { width: 96px; height: 96px; flex-shrink: 0; object-fit: cover; border-radius: 12px; background: var(--surface-2); font: 700 36px var(--font-display); }
+.world-wall-creator > div { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.world-wall-creator strong { font: 700 30px var(--font-display); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.world-wall-creator span { font-size: 18px; font-weight: 700; }
+.world-wall-creator small { color: var(--fg-3); font-size: 14px; font-weight: 700; }
+/* 도보 사격에 맞았지만 아직 안 부서진 차 위의 체력 막대다. 색은 도보 HUD 체력 칸과 같은 등급을 쓴다. */
+.world-vehicle-hp { width: 64px; height: 8px; padding: 1px; border: 1px solid var(--line); border-radius: 4px; background: color-mix(in srgb, var(--bg) 70%, transparent); pointer-events: none; }
+.world-vehicle-hp i { display: block; height: 100%; border-radius: 2px; background: var(--up); transition: width 90ms linear; }
+.world-vehicle-hp i[data-level="warn"] { background: var(--warn); }
+.world-vehicle-hp i[data-level="critical"] { background: var(--down); }
+
+.world-flight-creator { display:flex; gap:10px; width:210px; padding:11px 13px; border:1px solid var(--line); border-radius:10px; background:var(--surface); box-shadow:var(--shadow-hard); pointer-events:none; }
+.world-flight-creator img,.world-flight-avatar { width:40px; height:40px; object-fit:cover; border-radius:8px; background:var(--surface-2); flex-shrink:0; }
+.world-flight-avatar { display:grid; place-items:center; }
+.world-flight-creator>div { min-width:0; display:flex; flex-direction:column; gap:3px; }
+.world-flight-creator strong { font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.world-flight-creator span,.world-flight-creator small { font-size:10px; }
+
+.world-brake { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; margin-bottom: 8px; font-size: 11px; }
+.world-brake kbd { padding: 1px 5px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); color: var(--fg-3); font: 700 8px var(--font-display); }
+.world-brake:active { border-color: var(--accent-ink); background: var(--accent-soft); }
+/* 비행과 주행 중에는 상단 바가 얇게 올라가고 우측 정보가 세로로 쌓인다. 서로 겹치지 않게 한다. */
+.world-header { transition: min-height 180ms ease, padding 180ms ease; }
+.world-stage { transition: inset 180ms ease; }
+.world-flight-active .world-header { min-height: 52px; padding: 5px 16px; }
+.world-flight-active .world-brand h1 { font-size: 14px; margin-top: 0; }
+.world-flight-active .world-brand .world-eyebrow, .world-flight-active .world-population { display: none; }
+.world-flight-active .world-stage { inset: 52px 0 0; }
+.world-flight-active .world-online { top: 60px; }
+.world-flight-active .world-map { top: 62px; right: 20px; bottom: auto; width: 164px; }
+.world-flight-active .world-roster { top: 252px; right: 20px; width: 164px; max-height: 168px; padding: 9px 10px; }
+.world-instruments-panel { width: 288px; padding: 12px; }
+.world-instruments-panel .world-gauges { gap: 6px; }
+.world-controls-panel { top: auto; bottom: 18px; width: 228px; padding: 12px; }
+.world-flight-active .world-help-tooltip { right: auto; left: 50%; }
+.world-drive-readout { display: flex; flex-direction: column; justify-content: center; gap: 7px; flex: 1; min-width: 0; font-size: 10px; color: var(--fg-3); }
+.world-drive-readout b { display: block; margin-top: 3px; font: 600 14px var(--font-display); color: var(--fg); }
+.world-hold-button { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.world-hold-button kbd { padding: 1px 4px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); color: var(--fg-3); font: 700 8px var(--font-display); }
+.world-drive-note { display: flex; align-items: center; gap: 5px; margin: 10px 0; font-size: 9px; color: var(--fg-3); }
+@media (max-width: 760px) {
+  .world-flight-active .world-header { min-height: 46px; padding: 4px 10px; }
+  .world-flight-active .world-stage { inset: 46px 0 0; }
+  .world-flight-active .world-map { top: 52px; width: 96px; }
+  .world-flight-active .world-roster { top: 146px; right: 10px; width: 112px; max-height: 116px; }
+  .world-flight-active .world-online { top: 52px; }
+  .world-instruments-panel { width: 168px; }
+  .world-controls-panel { width: 146px; }
+  .world-flight-active .world-help-tooltip { left: auto; right: 12px; }
+}
+
+/* 도보 모드. 크로스헤어는 반동에 따라 네 조각이 벌어진다. */
+.world-crosshair { position: absolute; left: 50%; top: 50%; width: 2px; height: 2px; transform: translate(-50%, -50%); z-index: 22; pointer-events: none; }
+.world-crosshair i { position: absolute; display: block; background: var(--fg); box-shadow: 0 0 0 1px #0006; }
+.world-crosshair i:nth-child(1) { width: 2px; height: 9px; left: 0; top: calc(-1 * var(--spread) - 9px); }
+.world-crosshair i:nth-child(2) { width: 2px; height: 9px; left: 0; top: var(--spread); }
+.world-crosshair i:nth-child(3) { width: 9px; height: 2px; top: 0; left: calc(-1 * var(--spread) - 9px); }
+.world-crosshair i:nth-child(4) { width: 9px; height: 2px; top: 0; left: var(--spread); }
+.world-walk-ammo { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.world-walk-ammo strong { font: 700 17px var(--font-display); }
+.world-walk-ammo span { font-size: 12px; color: var(--fg-3); }
+.world-walk-ammo b { font: 700 24px var(--font-display); color: var(--fg); }
+.world-weapon-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+.world-weapon-pick { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); font-size: 11px; cursor: pointer; }
+.world-weapon-pick[aria-pressed="true"] { border-color: var(--accent-ink); background: var(--accent-soft); }
+.world-weapon-pick kbd, .world-control-stack kbd { padding: 1px 5px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); color: var(--fg-3); font: 700 8px var(--font-display); }
+.world-control-stack .eb-btn kbd { margin-left: 6px; }
+
+.world-armament { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.world-weapon { flex: 1; min-width: 0; display: flex; align-items: center; gap: 7px; padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); cursor: pointer; }
+.world-weapon:disabled { opacity: .45; cursor: not-allowed; }
+.world-weapon:active:not(:disabled) { border-color: var(--accent-ink); background: var(--accent-soft); }
+.world-weapon > svg { flex-shrink: 0; color: var(--accent-ink); }
+.world-weapon span { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; font-size: 10px; color: var(--fg-2); white-space: nowrap; }
+.world-weapon kbd { padding: 1px 4px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); color: var(--fg-3); font: 700 8px var(--font-display); }
+.world-weapon i { flex: 1; min-width: 14px; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.world-weapon em { display: block; height: 100%; background: var(--accent-ink); transform-origin: left; }
+.world-weapon b { font: 700 11px var(--font-display); color: var(--fg); }
+.world-armament > p { flex-basis: 100%; margin: 0; font-size: 9px; color: var(--fg-3); }
+@media (max-width: 760px) {
+  .world-armament { gap: 5px; margin-bottom: 7px; }
+  .world-weapon { padding: 5px 6px; gap: 5px; }
+  .world-weapon span { font-size: 9px; }
+  .world-armament > p { display: none; }
+}
+.world-flight-creator small { color:var(--fg-2); }
+.world-season { padding:8px; border-radius:6px; background:var(--surface-2); }
+.world-vehicle-crosshair{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff3bd;font:700 28px/1 monospace;text-shadow:0 1px 4px #000;opacity:.9}
+/* 설정의 켜고 끄는 항목이다. 글자와 체크박스를 한 줄에 둔다. */
+.world-setting-check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.world-setting-check input { width: 15px; height: 15px; accent-color: var(--accent-ink); }

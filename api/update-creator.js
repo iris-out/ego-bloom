@@ -1,22 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
+import { getCreatorTierName } from '../shared/creatorTiers.js';
+import { createZetaSource } from '../shared/zetaSource.js';
+
+export { getCreatorTierName } from '../shared/creatorTiers.js';
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-let supabase = null;
-if (supabaseUrl && supabaseServiceKey) {
-  supabase = createClient(supabaseUrl, supabaseServiceKey);
-}
-
-function toKST() {
-  const now = new Date();
-  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+function toKST(now) {
+  const date = new Date(now);
+  const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
   return new Date(utc + (9 * 60 * 60 * 1000));
 }
 
-// 서버사이드 ELO 계산 — src/utils/tierCalculator.js V4.2와 동일한 공식
-// 클라이언트가 전송한 eloScore를 신뢰하지 않고 raw stats에서 직접 계산
-function calculateEloScore({ followerCount, plotInteractionCount, voicePlayCount, plotCount, topCharInteractions, oldestCharCreatedAt }) {
+// 서버사이드 ELO 계산 - src/utils/tierCalculator.js V4.2 와 같은 공식이다.
+// 한쪽을 고치면 다른 쪽도 고쳐야 한다.
+export function calculateEloScore({ followerCount, plotInteractionCount, voicePlayCount, plotCount, topCharInteractions, oldestCharCreatedAt }, now = Date.now()) {
   const totalInteractions = plotInteractionCount || 0;
   const followers = followerCount || 0;
   const voicePlays = voicePlayCount || 0;
@@ -35,7 +34,7 @@ function calculateEloScore({ followerCount, plotInteractionCount, voicePlayCount
   if (oldestCharCreatedAt) {
     const oldest = new Date(oldestCharCreatedAt);
     if (!isNaN(oldest.getTime())) {
-      activityDays = Math.max(1, (toKST().getTime() - oldest.getTime()) / (1000 * 60 * 60 * 24));
+      activityDays = Math.max(1, (toKST(now).getTime() - oldest.getTime()) / (1000 * 60 * 60 * 24));
     }
   }
 
@@ -55,16 +54,21 @@ function calculateEloScore({ followerCount, plotInteractionCount, voicePlayCount
 }
 
 const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-const HANDLE_RE = /^[a-zA-Z0-9\uAC00-\uD7A3._-]{1,50}$/;
+const HANDLE_RE = /^[a-zA-Z0-9가-힣._-]{1,50}$/;
 
-function isAllowedOrigin(origin) {
+/** 같은 제작자를 다시 읽기까지 기다리는 시간이다. 프로필을 새로고침할 때마다 제타에
+ * 캐릭터 목록을 다시 요청하면 상류에 부담이 가고 응답도 느리다. 이 창 안의 요청은
+ * 저장을 건너뛰고 바로 성공으로 답한다. */
+export const MIN_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
+
+export function isAllowedOrigin(origin, env = process.env) {
   if (!origin) return false;
-  const allowed = (process.env.ALLOWED_ORIGINS || 'https://ego-bloom.vercel.app,http://localhost:5173')
+  const allowed = (env.ALLOWED_ORIGINS || 'https://ego-bloom.vercel.app,http://localhost:5173')
     .split(',').map(s => s.trim()).filter(Boolean);
   return allowed.includes(origin);
 }
 
-function sanitizeProfileImageUrl(url) {
+export function sanitizeProfileImageUrl(url) {
   if (typeof url !== 'string' || url.length === 0 || url.length > 500) return null;
   if (url.startsWith('/zeta-image/') || url.startsWith('/zeta-s3/')) return url;
   if (url.startsWith('https://image.zeta-ai.io/') ||
@@ -72,138 +76,113 @@ function sanitizeProfileImageUrl(url) {
   return null;
 }
 
-const CREATOR_TIERS = [
-  { name: 'BRONZE', min: 0 },
-  { name: 'SILVER', min: 12000 },
-  { name: 'GOLD', min: 85000 },
-  { name: 'PLATINUM', min: 868500 },
-  { name: 'DIAMOND', min: 3908250 },
-  { name: 'MASTER', min: 17370000 },
-  { name: 'CHAMPION', min: 78165000 },
-];
+/** 핸들러를 의존성 주입 형태로 만든다. dev mock(vite.config.js) 과 단위 테스트가
+ * 같은 구현을 쓰고, 두 경로가 서로 다르게 동작하는 일이 없다. */
+export function createUpdateCreatorHandler({
+  supabase,
+  fetchSnapshot,
+  now = () => Date.now(),
+  env = process.env,
+  minIntervalMs = MIN_UPDATE_INTERVAL_MS,
+} = {}) {
+  return async function handler(req, res) {
+    if (req.method === 'OPTIONS') {
+      res.status(200).end();
+      return;
+    }
 
-function getCreatorTierName(score) {
-  let tier = CREATOR_TIERS[0];
-  for (let i = CREATOR_TIERS.length - 1; i >= 0; i--) {
-    if (score >= CREATOR_TIERS[i].min) { tier = CREATOR_TIERS[i]; break; }
-  }
-  return tier.name;
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method Not Allowed' });
+    }
+
+    // Origin 검사는 CSRF 성격의 방어일 뿐이다. 브라우저 밖에서는 임의로 넣을 수 있으므로
+    // 이것만으로 쓰기를 지키지 않는다. 지표는 아래에서 서버가 직접 읽는다.
+    if (!isAllowedOrigin(req.headers?.origin, env)) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    if (!supabase) {
+      console.error('Supabase credentials are not set in environment variables.');
+      return res.status(500).json({ error: 'Database connection not configured' });
+    }
+
+    try {
+      const id = (req.body || {}).id;
+      if (!id || typeof id !== 'string' || !UUID_RE.test(id)) {
+        return res.status(400).json({ error: 'Invalid creator ID' });
+      }
+
+      const blacklist = (env.RANK_BLACKLIST || '')
+        .split(',').map(s => s.trim()).filter(s => UUID_RE.test(s));
+      if (blacklist.includes(id)) {
+        return res.status(200).json({ success: true, message: 'Creator is blacklisted, skipping update' });
+      }
+
+      const { data: existing, error: readError } = await supabase
+        .from('account_current')
+        .select('updated_at')
+        .eq('id', id)
+        .maybeSingle();
+      if (readError) throw readError;
+
+      const stamp = now();
+      const lastUpdate = existing?.updated_at ? Date.parse(existing.updated_at) : NaN;
+      if (Number.isFinite(lastUpdate) && stamp - lastUpdate < minIntervalMs) {
+        return res.status(200).json({ success: true, message: 'Recently updated, skipping' });
+      }
+
+      // 클라이언트가 보낸 수치는 쓰지 않는다. 제타 공개 API 에서 다시 읽는다.
+      const snapshot = await fetchSnapshot(id);
+      if (!snapshot) {
+        return res.status(404).json({ error: 'Creator not found upstream' });
+      }
+
+      const safeHandle = (typeof snapshot.handle === 'string' && HANDLE_RE.test(snapshot.handle.replace(/^@/, '')))
+        ? snapshot.handle.replace(/^@/, '').slice(0, 50)
+        : null;
+
+      const eloScore = calculateEloScore(snapshot, stamp);
+      const tierName = getCreatorTierName(eloScore);
+
+      const { error: currentError } = await supabase
+        .from('account_current')
+        .upsert({
+          id,
+          handle: safeHandle,
+          nickname: String(snapshot.nickname || 'Unknown').slice(0, 100),
+          profile_image_url: sanitizeProfileImageUrl(snapshot.profileImageUrl),
+          follower_count:         snapshot.followerCount,
+          plot_interaction_count: snapshot.plotInteractionCount,
+          voice_play_count:       snapshot.voicePlayCount,
+          elo_score:  eloScore,
+          tier_name:  tierName,
+          updated_at: new Date(stamp).toISOString()
+        }, { onConflict: 'id' });
+
+      if (currentError) throw currentError;
+
+      // account_history 는 scripts/snapshot_history.js 한 곳만 쓴다.
+
+      return res.status(200).json({ success: true, message: 'Creator ranking updated' });
+    } catch (error) {
+      console.error('API Error:', error);
+      return res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    }
+  };
 }
 
+let defaultHandler = null;
+
 export default async function handler(req, res) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
-
-  // 출처 검증 — 브라우저가 보내는 Origin 헤더가 허용 목록에 있어야 함
-  if (!isAllowedOrigin(req.headers.origin)) {
-    return res.status(403).json({ error: 'Forbidden' });
-  }
-
-  if (!supabase) {
-    console.error('Supabase credentials are not set in environment variables.');
-    return res.status(500).json({ error: 'Database connection not configured' });
-  }
-
-  try {
-    const {
-      id,
-      handle,
-      nickname,
-      profileImageUrl,
-      followerCount,
-      plotInteractionCount,
-      voicePlayCount,
-      plotCount,
-      topCharInteractions,
-      oldestCharCreatedAt,
-    } = req.body || {};
-
-    // 입력값 검증
-    if (!id || typeof id !== 'string' || !UUID_RE.test(id)) {
-      return res.status(400).json({ error: 'Invalid creator ID' });
-    }
-    if (!nickname || typeof nickname !== 'string') {
-      return res.status(400).json({ error: 'Missing required field: nickname' });
-    }
-
-    // handle: 제공 시 정규식 통과해야 저장
-    const safeHandle = (typeof handle === 'string' && HANDLE_RE.test(handle.replace(/^@/, '')))
-      ? handle.replace(/^@/, '').slice(0, 50)
+  if (!defaultHandler) {
+    const supabase = (supabaseUrl && supabaseServiceKey)
+      ? createClient(supabaseUrl, supabaseServiceKey)
       : null;
-
-    // profileImageUrl: 허용된 프록시 경로 또는 zeta CDN만 저장
-    const safeProfileImage = sanitizeProfileImageUrl(profileImageUrl);
-
-    const safeFollower     = Math.max(0, Math.floor(Number(followerCount)        || 0));
-    const safeInteraction  = Math.max(0, Math.floor(Number(plotInteractionCount) || 0));
-    const safeVoice        = Math.max(0, Math.floor(Number(voicePlayCount)       || 0));
-    const safePlotCount    = Math.max(0, Math.floor(Number(plotCount)            || 0));
-    const safeTopChars     = Array.isArray(topCharInteractions)
-      ? topCharInteractions.slice(0, 20).map(n => Math.max(0, Math.floor(Number(n) || 0)))
-      : [];
-
-    const blacklist = (process.env.RANK_BLACKLIST || '')
-      .split(',').map(s => s.trim()).filter(s => UUID_RE.test(s));
-    if (blacklist.includes(id)) {
-      return res.status(200).json({ success: true, message: 'Creator is blacklisted, skipping update' });
-    }
-
-    // 서버에서 ELO/티어 재계산 (클라이언트 제공값 무시)
-    const eloScore = calculateEloScore({
-      followerCount:        safeFollower,
-      plotInteractionCount: safeInteraction,
-      voicePlayCount:       safeVoice,
-      plotCount:            safePlotCount,
-      topCharInteractions:  safeTopChars,
-      oldestCharCreatedAt:  oldestCharCreatedAt || null,
+    const source = supabase ? createZetaSource() : null;
+    defaultHandler = createUpdateCreatorHandler({
+      supabase,
+      fetchSnapshot: (id) => source.creatorSnapshot(id),
     });
-    const tierName = getCreatorTierName(eloScore);
-
-    const kst = toKST();
-    const recordDate = kst.toISOString().split('T')[0];
-
-    const { error: currentError } = await supabase
-      .from('account_current')
-      .upsert({
-        id,
-        handle: safeHandle,
-        nickname: String(nickname).slice(0, 100),
-        profile_image_url: safeProfileImage,
-        follower_count:         safeFollower,
-        plot_interaction_count: safeInteraction,
-        voice_play_count:       safeVoice,
-        elo_score:  eloScore,
-        tier_name:  tierName,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'id' });
-
-    if (currentError) throw currentError;
-
-    // [비활성화] account_history 쓰기 중단 — 시즌/성장 랭킹 기능 미사용 중
-    // const { error: historyError } = await supabase
-    //   .from('account_history')
-    //   .upsert({
-    //     id,
-    //     record_date: recordDate,
-    //     handle: handle || null,
-    //     nickname: String(nickname).slice(0, 100),
-    //     follower_count:         safeFollower,
-    //     plot_interaction_count: safeInteraction,
-    //     voice_play_count:       safeVoice,
-    //     elo_score: eloScore,
-    //     tier_name: tierName,
-    //   }, { onConflict: 'id, record_date' });
-    // if (historyError) throw historyError;
-
-    return res.status(200).json({ success: true, message: 'Creator ranking updated' });
-  } catch (error) {
-    console.error('API Error:', error);
-    return res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
+  return defaultHandler(req, res);
 }

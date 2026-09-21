@@ -292,29 +292,11 @@ export default function ProfilePage() {
       if (profile.profileImageUrl) profile.profileImageUrl = proxyImageUrl(profile.profileImageUrl);
 
       // --- 백그라운드 랭킹 데이터 수집 시작 ---
-      // eloScore/tierName은 서버에서 raw stats로 재계산하므로 전송하지 않음
-      const sortedByInteraction = [...allPlots].sort((a, b) => (b.interactionCount || 0) - (a.interactionCount || 0));
-      const oldestCharDate = allPlots.reduce((oldest, c) => {
-        const d = c.createdAt || c.createdDate;
-        if (!d) return oldest;
-        return !oldest || d < oldest ? d : oldest;
-      }, null);
-
+      // 지표는 서버가 제타 API 에서 다시 읽는다. 브라우저는 누구의 것인지만 알려 준다.
       fetch('/api/update-creator', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id,
-          handle: profile.username || null,
-          nickname: profile.nickname || 'Unknown',
-          profileImageUrl: profile.profileImageUrl,
-          followerCount: stats.followerCount || 0,
-          plotInteractionCount: stats.plotInteractionCount || 0,
-          voicePlayCount: stats.voicePlayCount || 0,
-          plotCount: allPlots.length,
-          topCharInteractions: sortedByInteraction.slice(0, 20).map(c => c.interactionCount || 0),
-          oldestCharCreatedAt: oldestCharDate,
-        })
+        body: JSON.stringify({ id })
       }).catch(err => console.error('[Ranking Update Error]:', err));
       // --- 백그라운드 랭킹 데이터 수집 끝 ---
 

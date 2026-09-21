@@ -18,12 +18,12 @@ function Stick({label,onMove}) {
   </div></div>;
 }
 
-export default function TouchControls({onMove,onRotate,onVertical}) {
+export default function TouchControls({onMove,onRotate,onVertical,flight=false}) {
   return <div className="world-touch-controls">
-    <Stick label="이동" onMove={onMove} />
+    <Stick label={flight?"기수 · 기울기":"이동"} onMove={onMove} />
     <div className="world-height-controls">{[1,-1].map(value=><button key={value} aria-label={value===1?'카메라 높이 올리기':'카메라 높이 내리기'}
       onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);onVertical(value);}}
       onPointerUp={()=>{onVertical(0);}} onPointerCancel={()=>{onVertical(0);}} onLostPointerCapture={()=>{onVertical(0);}}>{value===1?'↑':'↓'}</button>)}</div>
-    <Stick label="회전" onMove={onRotate} />
+    <Stick label={flight?"카메라":"회전"} onMove={onRotate} />
   </div>;
 }

@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "label": "off-airport",
+    "seconds": 4,
+    "quality": "medium",
+    "viewport": "1440x900",
+    "at": "2026-09-19T16:52:18.860Z"
+  },
+  "boot": {
+    "readyMs": 10068,
+    "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (radeonsi phoenix ACO), OpenGL ES 3.2)",
+    "longTasks": [
+      62,
+      139,
+      81,
+      254,
+      129,
+      209,
+      3166,
+      1809,
+      100,
+      82,
+      104,
+      89,
+      87
+    ],
+    "links": 19
+  },
+  "walk_idle": {
+    "fps": 8.6,
+    "dtP50": 46.7,
+    "dtP95": 514.9,
+    "dtP99": 1086.9,
+    "dtMax": 1086.9,
+    "jank": 37,
+    "rafBusyMs": 71.63,
+    "draw": 375,
+    "triK": 4229,
+    "links": 0,
+    "longTasks": 15,
+    "commits": {
+      "react-dom": 68,
+      "@react-three/fiber": 26
+    },
+    "scriptPct": 90.2,
+    "stylePct": 2,
+    "heapMB": 97,
+    "top": [
+      " 31.5% uniformMatrix4fv ",
+      " 31.0% (program) ",
+      "  4.4% uniform3f ",
+      "  3.7% uniform1iv ",
+      "  1.4% updateMatrixWorld vendor-three.js:9918",
+      "  1.1% (garbage collector) ",
+      "  1.0% updateProperties vendor-react.js:8417",
+      "  1.0% WebGLRenderer.renderBufferDirect vendor-three.js:49644",
+      "  0.8% hitsBuilding index.js:20036",
+      "  0.8% projectObject vendor-three.js:49922",
+      "  0.7% trafficPose WorldScene.js:17445",
+      "  0.7% (anon) index.js:15631",
+      "  0.6% bufferSubData ",
+      "  0.6% setProgram vendor-three.js:50152",
+      "  0.6% (anon) WorldScene.js:11868",
+      "  0.6% upload vendor-three.js:43527",
+      "  0.5% hs vendor-three.js:55076",
+      "  0.5% bindVertexArray "
+    ]
+  }
+}

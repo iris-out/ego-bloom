@@ -5,6 +5,9 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { createClient } from '@supabase/supabase-js'
 import { spawn } from 'child_process'
 import { loadWorldData } from './server/worldData.js'
+import { getCreatorTierName } from './shared/creatorTiers.js'
+import { createUpdateCreatorHandler } from './api/update-creator.js'
+import { createZetaSource } from './shared/zetaSource.js'
 
 // Vite plugin: @handle → UUID resolver middleware
 function handleResolverPlugin() {
@@ -62,56 +65,57 @@ function handleResolverPlugin() {
   }
 }
 
+/** Vercel serverless 핸들러가 기대하는 res.status().json() 모양을 Connect 응답에 씌운다.
+ * dev 와 배포가 같은 api/*.js 를 쓰게 하는 어댑터다. */
+function connectResponse(res) {
+  return {
+    status(code) { res.statusCode = code; return this; },
+    json(payload) {
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify(payload));
+      return this;
+    },
+    end() { res.end(); return this; },
+  };
+}
+
 // Vite plugin: Supabase local testing middleware
 function supabaseApiPlugin(env) {
   const supabaseUrl = env.SUPABASE_URL;
   const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;
   const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
+  // dev 서버는 포트가 비어 있으면 5174, 5175 로 옮겨 가므로 Origin 을 하나로 못 박지 못한다.
+  // loopback http 출처면 그 요청에 한해 허용 목록에 넣는다. 배포에는 이 분기가 없다.
+  const LOOPBACK_RE = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+  const devEnv = (origin) => ({
+    ...env,
+    ALLOWED_ORIGINS: [env.ALLOWED_ORIGINS, LOOPBACK_RE.test(origin || '') ? origin : null]
+      .filter(Boolean).join(','),
+  });
+  const updateCreator = (req, res) => createUpdateCreatorHandler({
+    supabase,
+    env: devEnv(req.headers?.origin),
+    fetchSnapshot: (id) => createZetaSource().creatorSnapshot(id),
+  })(req, res);
+
   return {
     name: 'supabase-api-mock',
     configureServer(server) {
-      // Body parser for POST requests
+      // update-creator 는 프로덕션과 같은 구현을 쓴다. dev mock 을 따로 두면 두 경로가
+      // 갈라져서, 예전에는 dev 만 클라이언트가 보낸 elo_score 를 그대로 DB 에 넣었다.
       server.middlewares.use(async (req, res, next) => {
-        if (req.method === 'POST' && req.url === '/api/update-creator') {
-          let body = '';
-          req.on('data', chunk => { body += chunk.toString(); });
-          req.on('end', async () => {
-            try {
-              if (!supabase) throw new Error('Supabase not configured');
-              const data = JSON.parse(body);
-              
-              const now = new Date();
-              const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-              const kst = new Date(utc + (9 * 60 * 60 * 1000));
-              const recordDate = kst.toISOString().split('T')[0];
-
-              await supabase.from('account_current').upsert({
-                id: data.id, handle: data.handle, nickname: data.nickname,
-                profile_image_url: data.profileImageUrl, follower_count: data.followerCount,
-                plot_interaction_count: data.plotInteractionCount, voice_play_count: data.voicePlayCount,
-                elo_score: data.eloScore, tier_name: data.tierName, updated_at: new Date().toISOString()
-              }, { onConflict: 'id' });
-
-              // [비활성화] account_history 쓰기 중단 — 시즌/성장 랭킹 기능 미사용 중
-              // await supabase.from('account_history').upsert({
-              //   id: data.id, record_date: recordDate, handle: data.handle, nickname: data.nickname,
-              //   follower_count: data.followerCount, plot_interaction_count: data.plotInteractionCount,
-              //   voice_play_count: data.voicePlayCount, elo_score: data.eloScore, tier_name: data.tierName
-              // }, { onConflict: 'id, record_date' });
-
-              res.setHeader('Content-Type', 'application/json');
-              res.end(JSON.stringify({ success: true }));
-            } catch (err) {
-              console.error('Update Creator Error:', err);
-              res.statusCode = 500;
-              res.setHeader('Content-Type', 'application/json');
-              res.end(JSON.stringify({ error: err.message }));
-            }
-          });
-          return;
-        }
-        next();
+        if (req.method !== 'POST' || req.url !== '/api/update-creator') return next();
+        let body = '';
+        req.on('data', chunk => { body += chunk.toString(); });
+        req.on('end', async () => {
+          try {
+            req.body = body ? JSON.parse(body) : {};
+          } catch {
+            req.body = {};
+          }
+          await updateCreator(req, connectResponse(res));
+        });
       });
 
       server.middlewares.use('/api/get-rankings', async (req, res, next) => {
@@ -127,7 +131,8 @@ function supabaseApiPlugin(env) {
 
           if (error) throw error;
           res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ rankings: data }));
+          const rankings = data.map((row) => ({ ...row, tier_name: getCreatorTierName(Number(row.elo_score) || 0) }));
+          res.end(JSON.stringify({ rankings }));
         } catch (err) {
           console.error('Get Rankings Error:', err);
           res.statusCode = 500;
@@ -348,6 +353,14 @@ function supabaseApiPlugin(env) {
           res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify({ error: err.message }));
         }
+      });
+
+      // Dev 전용: /api/session-origin. dev 서버는 로컬 접속뿐이라 고정 키를 준다.
+      // 한 대에서 탭 제한을 시험할 수 있어야 하므로 null 이 아닌 값을 돌려준다.
+      server.middlewares.use('/api/session-origin', (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'no-store');
+        res.end(JSON.stringify({ origin: 'dev-localhost' }));
       });
 
       // Dev 전용: /api/server-status → emergency.zeta-ai.io 프록시
@@ -634,7 +647,19 @@ export default defineConfig(({ mode }) => {
       rolldownOptions: {
         output: {
           manualChunks(id) {
-            if (id.includes('three') || id.includes('@react-three')) return 'vendor-three';
+            // 경로 기준으로 좁혀 매칭한다. 'three' 문자열 포함 검사로는
+            // three-mesh-bvh 처럼 이름만 겹치는 패키지나 react-dom 같은
+            // 무관한 패키지까지 vendor-three 청크에 섞여 들어간다.
+            if (id.includes('/node_modules/three/') || id.includes('/node_modules/@react-three/')) {
+              return 'vendor-three';
+            }
+            if (
+              id.includes('/node_modules/react/') ||
+              id.includes('/node_modules/react-dom/') ||
+              id.includes('/node_modules/scheduler/')
+            ) {
+              return 'vendor-react';
+            }
           },
         },
       },

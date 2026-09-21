@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "label": "off-tiles",
+    "seconds": 4,
+    "quality": "medium",
+    "viewport": "1440x900",
+    "at": "2026-09-19T16:48:40.398Z"
+  },
+  "boot": {
+    "readyMs": 9514,
+    "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (radeonsi phoenix ACO), OpenGL ES 3.2)",
+    "longTasks": [
+      111,
+      187,
+      72,
+      289,
+      171,
+      150,
+      3206,
+      1200,
+      61
+    ],
+    "links": 18
+  },
+  "walk_idle": {
+    "fps": 7.4,
+    "dtP50": 50.2,
+    "dtP95": 773.2,
+    "dtP99": 1157.9,
+    "dtMax": 1157.9,
+    "jank": 35,
+    "rafBusyMs": 83.07,
+    "draw": 459,
+    "triK": 2492,
+    "links": 0,
+    "longTasks": 16,
+    "commits": {
+      "react-dom": 65,
+      "@react-three/fiber": 25
+    },
+    "scriptPct": 93.9,
+    "stylePct": 1.9,
+    "heapMB": 92,
+    "top": [
+      " 30.8% (program) ",
+      " 17.5% vertexAttribPointer ",
+      "  7.6% bindVertexArray ",
+      "  7.0% uniformMatrix4fv ",
+      "  6.0% drawElementsInstanced ",
+      "  1.2% updateMatrixWorld vendor-three.js:9918",
+      "  1.1% WebGLRenderer.renderBufferDirect vendor-three.js:49644",
+      "  1.0% setProgram vendor-three.js:50152",
+      "  0.9% updateProperties vendor-react.js:8417",
+      "  0.7% (garbage collector) ",
+      "  0.7% projectObject vendor-three.js:49922",
+      "  0.7% upload vendor-three.js:43527",
+      "  0.7% intersectsObject vendor-three.js:18316",
+      "  0.6% hs vendor-three.js:55076",
+      "  0.6% bufferSubData ",
+      "  0.6% hitsBuilding index.js:20036",
+      "  0.6% renderObject vendor-three.js:45391",
+      "  0.6% diffProps vendor-three.js:51245"
+    ]
+  }
+}

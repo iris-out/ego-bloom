@@ -15,6 +15,7 @@ export const CREATOR_TIERS = [
   { key: 'platinum', ko: '플래티넘', code: 'P', cssVar: '--t-platinum' },
   { key: 'diamond', ko: '다이아몬드', code: 'D', cssVar: '--t-diamond' },
   { key: 'master', ko: '마스터', code: 'M', cssVar: '--t-master' },
+  { key: 'grandmaster', ko: '그랜드마스터', code: 'GM', cssVar: '--t-grandmaster' },
   { key: 'champion', ko: '챔피언', code: 'C', cssVar: '--t-champion' },
 ];
 

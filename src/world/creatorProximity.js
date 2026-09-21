@@ -1,0 +1,34 @@
+/** Distance to an approximate building volume, not just its rooftop point. */
+export function creatorDistance(position,building) {
+ if(!position)return Infinity;
+ const dx=Math.max(0,Math.abs(position.x-building.x)-10),dz=Math.max(0,Math.abs(position.z-building.z)-10);
+ const dy=Math.max(0,position.y-building.height,-position.y);
+ return Math.hypot(dx,dy,dz);
+}
+/** 비행 중에는 두 배 멀리서도 보인다. 시속 300 으로 지나가면 185 는 순식간이다. */
+export const CARD_REACH={ ground:{ full:185, fade:135 }, flight:{ full:370, fade:270 } };
+
+export function creatorCardOpacity(distance, mode='ground') {
+ const reach=CARD_REACH[mode]||CARD_REACH.ground;
+ const t=Math.max(0,Math.min(1,(reach.full-distance)/reach.fade));
+ return t*t*(3-2*t);
+}
+
+/** 제작자 라벨을 후보로 잡는 최대 거리다. 높은 건물은 멀리서도 보이므로 높이에 비례해 늘린다.
+ * 주행은 도로를 빠르게 지나므로 탐색보다 멀리 잡는다. 260 이면 시속 100 에서 9초 만에 지나간다.
+ * 비행은 높이를 더하지 않는다. 위에서 내려다보면 높이가 거리를 벌어 주지 않는다. */
+export const LABEL_REACH = Object.freeze({
+ explore: Object.freeze({ base: 260, perHeight: 4.2 }),
+ drive: Object.freeze({ base: 360, perHeight: 5.2 }),
+ flight: Object.freeze({ base: 400, perHeight: 0 }),
+});
+
+export function labelReach(mode = 'explore', height = 0) {
+ const spec = LABEL_REACH[mode] || LABEL_REACH.explore;
+ const tall = Number.isFinite(Number(height)) ? Number(height) : 0;
+ return Math.max(spec.base, tall * spec.perHeight);
+}
+
+/** 라벨 카드의 크기 기준이다. drei 의 Html distanceFactor 라 값이 클수록 멀리서도 크게 보인다.
+ * 주행은 먼 카드를 읽어야 하므로 탐색보다 크게 둔다. */
+export const LABEL_SCALE = Object.freeze({ explore: 55, drive: 70 });

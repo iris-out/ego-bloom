@@ -1,4 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
+import { getCreatorTierName } from '../shared/creatorTiers.js';
+
+export function tierNameForRanking(row) {
+  return row?.elo_score == null ? row?.tier_name : getCreatorTierName(Number(row.elo_score) || 0);
+}
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -45,9 +50,10 @@ export default async function handler(req, res) {
       query = query.not('id', 'in', `(${blacklist.join(',')})`);
     }
 
-    const { data, error } = await query.limit(100);
+    const { data: storedData, error } = await query.limit(100);
 
     if (error) throw error;
+    const data = storedData.map((row) => ({ ...row, tier_name: tierNameForRanking(row) }));
 
     // Yesterday's elo for rank change calculation
     const yesterday = getYesterdayKST();

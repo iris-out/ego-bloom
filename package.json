@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "playwright test",
-    "test:ui": "playwright test --ui"
+    "test:ui": "playwright test --ui",
+    "test:world:unit": "node --test tests/world/*.test.mjs",
+    "test:api": "node --test tests/api/*.test.mjs",
+    "test:world": "playwright test --config=playwright.world.config.js"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

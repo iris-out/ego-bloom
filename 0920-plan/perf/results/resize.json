@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "label": "resize",
+    "seconds": 20,
+    "quality": "medium",
+    "time": "kst",
+    "viewport": "1440x900",
+    "at": "2026-09-20T01:54:38.839Z"
+  },
+  "boot": {
+    "readyMs": 7231,
+    "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (radeonsi phoenix ACO), OpenGL ES 3.2)",
+    "longTasks": [
+      97,
+      134,
+      103,
+      81,
+      2384,
+      724,
+      109,
+      188,
+      83,
+      233
+    ],
+    "links": 18
+  },
+  "car3_drive": {
+    "fps": 27.2,
+    "dtP50": 20,
+    "dtP95": 148.9,
+    "dtP99": 173,
+    "dtMax": 1058.7,
+    "jank": 108,
+    "rafBusyMs": 23.53,
+    "draw": 305,
+    "triK": 2286,
+    "links": 0,
+    "longTasks": 73,
+    "commits": {
+      "react-dom": 108,
+      "@react-three/fiber": 2
+    },
+    "resizes": 4,
+    "scriptPct": 66.2,
+    "stylePct": 1.9,
+    "heapMB": 73,
+    "foreignGpuPct": 0,
+    "top": [
+      " 35.3% (program) ",
+      " 24.6% uniformMatrix4fv ",
+      "  2.6% uniform1iv ",
+      "  2.6% vertexAttribPointer ",
+      "  2.5% bindBuffer ",
+      "  2.3% drawElements ",
+      "  2.2% updateMatrixWorld vendor-three.js:9918",
+      "  1.7% bindVertexArray ",
+      "  1.7% uniform3f ",
+      "  1.4% WebGLRenderer.renderBufferDirect vendor-three.js:49644",
+      "  1.2% projectObject vendor-three.js:49922",
+      "  1.1% solve WorldScene.js:18841",
+      "  0.8% setProgram vendor-three.js:50152",
+      "  0.8% useProgram ",
+      "  0.7% intersectsObject vendor-three.js:18316",
+      "  0.7% upload vendor-three.js:43527",
+      "  0.7% drawElementsInstanced ",
+      "  0.6% WebGLRenderer.setSize vendor-three.js:49327"
+    ]
+  },
+  "car1_drive": {
+    "fps": 32,
+    "dtP50": 19.2,
+    "dtP95": 132.2,
+    "dtP99": 180.1,
+    "dtMax": 744.7,
+    "jank": 113,
+    "rafBusyMs": 21.34,
+    "draw": 309,
+    "triK": 2738,
+    "links": 0,
+    "longTasks": 74,
+    "commits": {
+      "react-dom": 113,
+      "@react-three/fiber": 2
+    },
+    "resizes": 8,
+    "scriptPct": 70.2,
+    "stylePct": 1.6,
+    "heapMB": 81,
+    "foreignGpuPct": 0,
+    "top": [
+      " 31.2% (program) ",
+      " 15.2% vertexAttribPointer ",
+      "  8.4% uniformMatrix4fv ",
+      "  6.4% bindBuffer ",
+      "  3.0% WebGLRenderer.setSize vendor-three.js:49327",
+      "  2.9% uniform1iv ",
+      "  1.8% updateMatrixWorld vendor-three.js:9918",
+      "  1.7% WebGLRenderer.renderBufferDirect vendor-three.js:49644",
+      "  1.6% bindVertexArray ",
+      "  1.4% projectObject vendor-three.js:49922",
+      "  1.3% drawElementsInstanced ",
+      "  1.1% locate WorldScene.js:18825",
+      "  1.0% setProgram vendor-three.js:50152",
+      "  0.9% intersectsObject vendor-three.js:18316",
+      "  0.8% upload vendor-three.js:43527",
+      "  0.8% uniform3f ",
+      "  0.7% getProgram vendor-three.js:50065",
+      "  0.7% multiplyMatrices vendor-three.js:8218"
+    ]
+  }
+}

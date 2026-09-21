@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import CharCard from '../ui/CharCard';
 import Delta from '../ui/Delta';
@@ -7,7 +8,7 @@ import { formatNumber, getCharacterTier } from '../../utils/tierCalculator';
 import { characterZetaUrl } from '../../utils/tagCharacters';
 
 const ROTATE_MS = 8000;
-const PILL_HEIGHT = 24; // px — 태그 pill 한 줄 높이. 오버레이 max-height = PILL_HEIGHT*2 + gap(6) 로 2줄까지만 보인다
+const MAX_TAGS = 10; // 정보 패널 태그 pill 최대 개수. 한 줄 5개라 두 줄까지만 나온다
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -89,49 +90,62 @@ function SpotlightDots({ count, activeIndex, onSelect, paused, className = '', s
 }
 
 /**
- * 히어로 카드 이미지 하단 비네팅 + 매칭 태그 pill 오버레이.
- * 텍스트가 라이트 테마에서도 읽히도록 스크림을 항상 어둡게 깐다(테마 무관 고정값).
+ * 히어로 카드 이미지 하단 비네팅. 태그 pill 은 정보 패널로 옮겨 이미지 위에는 스크림만 남긴다.
  */
-function HeroImageOverlay({ tags }) {
+function HeroImageOverlay() {
   return (
     <>
       <div
         aria-hidden="true"
         className="absolute inset-0"
-        style={{ background: 'linear-gradient(to bottom, transparent 45%, rgb(0 0 0 / .72) 100%)' }}
+        style={{ background: 'linear-gradient(to bottom, transparent 55%, rgb(0 0 0 / .6) 100%)' }}
       />
       <div
         aria-hidden="true"
         className="absolute inset-0"
         style={{ background: 'radial-gradient(120% 90% at 50% 100%, transparent 42%, rgb(0 0 0 / .22) 100%)' }}
       />
-      {tags.length > 0 && (
-        <div
-          className="absolute flex flex-wrap content-end overflow-hidden"
-          style={{ left: 12, right: 12, bottom: 12, gap: 6, maxHeight: PILL_HEIGHT * 2 + 6 }}
-        >
-          {tags.map((tag) => (
-            <span
-              key={tag}
-              className="shrink-0 whitespace-nowrap"
-              style={{
-                height: PILL_HEIGHT,
-                lineHeight: `${PILL_HEIGHT}px`,
-                padding: '0 9px',
-                borderRadius: 'var(--radius-pill)',
-                background: 'rgb(255 255 255 / .16)',
-                border: '1px solid rgb(255 255 255 / .28)',
-                color: '#fff',
-                fontSize: 12,
-                fontWeight: 600,
-              }}
-            >
-              #{tag}
-            </span>
-          ))}
-        </div>
-      )}
     </>
+  );
+}
+
+/**
+ * 히어로 제작자 줄 — 제작자 핸들이 있으면 우리 프로필 페이지로 가는 내부 링크가 된다.
+ * 핸들이 없는 캐릭터는 링크 없이 이름만 보여준다.
+ */
+function CreatorLine({ nickname, imageUrl, href, onClick }) {
+  const body = (
+    <>
+      <span className="w-6 h-6 rounded-full overflow-hidden shrink-0" style={{ background: 'var(--surface-2)' }}>
+        {imageUrl ? (
+          <img
+            src={proxyThumbnailUrl(imageUrl, 48)}
+            alt=""
+            width={24}
+            height={24}
+            loading="lazy"
+            className="w-full h-full object-cover"
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
+        ) : null}
+      </span>
+      <h3 className="t-h3 truncate">{nickname}</h3>
+    </>
+  );
+
+  if (!href) {
+    return <div className="flex items-center gap-2 min-w-0">{body}</div>;
+  }
+
+  return (
+    <Link
+      to={href}
+      onClick={onClick}
+      className="flex items-center gap-2 min-w-0 w-fit transition-opacity duration-[120ms] hover:opacity-80"
+    >
+      {body}
+      <ChevronRight size={16} className="shrink-0" style={{ color: 'var(--fg-3)' }} />
+    </Link>
   );
 }
 
@@ -211,7 +225,10 @@ export default function SpotlightHero({ spotlights }) {
   const poster = active.imageUrl ? proxyThumbnailUrl(active.imageUrl, 560) : null;
   const rarity = getCharacterTier(active.interactionCount ?? 0).key;
   const kicker = active.hashtags?.[0] || active.tagKey || null;
-  const overlayTags = (active.hashtags ?? []).filter(Boolean).slice(0, 6);
+  const tags = (active.hashtags ?? []).filter(Boolean).slice(0, MAX_TAGS);
+  const creatorHref = active.creatorHandle
+    ? `/profile?creator=${encodeURIComponent(active.creatorHandle)}`
+    : null;
 
   return (
     <div
@@ -233,7 +250,7 @@ export default function SpotlightHero({ spotlights }) {
           sm:grid-cols-[auto_1fr] sm:grid-rows-[auto_1fr] sm:gap-y-4
           sm:[grid-template-areas:'card_info'_'card_dots']`}
       >
-        {/* 히어로 카드 — CharCard 의 size="hero" 가 자체 반응형 치수(모바일 200x280, sm 280x392)를 갖는다.
+        {/* 히어로 카드 — CharCard 의 size="hero-sm" 이 자체 반응형 치수(모바일 168x235, sm 212x297)를 갖는다.
             key 를 safeIndex 에 걸어 카드가 바뀔 때마다 리마운트시키고, eb-crossfade 애니메이션으로
             200ms 페이드인한다. from/to 애니메이션이라 대기 상태는 항상 opacity: 1 로 안착한다. */}
         <div
@@ -248,8 +265,8 @@ export default function SpotlightHero({ spotlights }) {
             rank={safeIndex + 1}
             showRarity={false}
             hideInfo
-            overlay={<HeroImageOverlay tags={overlayTags} />}
-            size="hero"
+            overlay={<HeroImageOverlay />}
+            size="hero-sm"
             href={href}
             target="_blank"
             rel="noopener noreferrer"
@@ -269,25 +286,15 @@ export default function SpotlightHero({ spotlights }) {
           <h2 className="t-display truncate">{active.name}</h2>
 
           {active.creatorNickname && (
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="w-6 h-6 rounded-full overflow-hidden shrink-0" style={{ background: 'var(--surface-2)' }}>
-                {active.creatorImageUrl ? (
-                  <img
-                    src={proxyThumbnailUrl(active.creatorImageUrl, 48)}
-                    alt=""
-                    width={24}
-                    height={24}
-                    loading="lazy"
-                    className="w-full h-full object-cover"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
-                ) : null}
-              </span>
-              <h3 className="t-h3 truncate">{active.creatorNickname}</h3>
-            </div>
+            <CreatorLine
+              nickname={active.creatorNickname}
+              imageUrl={active.creatorImageUrl}
+              href={creatorHref}
+              onClick={handleClick}
+            />
           )}
 
-          <div className="grid grid-cols-2 gap-2 sm:max-w-md">
+          <div className="grid grid-cols-2 gap-2 sm:max-w-lg">
             <StatPanel label="누적 대화">
               {formatNumber(active.interactionCount ?? 0)}
             </StatPanel>
@@ -295,6 +302,17 @@ export default function SpotlightHero({ spotlights }) {
               {active.rankChange ? <Delta value={active.rankChange} format={(n) => `${n}위`} /> : <span style={{ color: 'var(--fg-3)' }}>-</span>}
             </StatPanel>
           </div>
+
+          {/* 태그 pill — CTA 바로 위에서 한 줄에 다섯 개씩, 정보 패널의 가로 폭을 끝까지 쓴다 */}
+          {tags.length > 0 && (
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+              {tags.map((tag) => (
+                <span key={tag} className="eb-chip justify-center truncate" title={`#${tag}`}>
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
 
           {href && (
             <a

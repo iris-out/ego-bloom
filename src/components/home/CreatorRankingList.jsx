@@ -15,6 +15,7 @@ const TOTAL_PAGES = 5;
 function getTierKey(tierName = '') {
   const t = tierName.toUpperCase();
   if (t.startsWith('CHAMPION')) return 'champion';
+  if (t.startsWith('GRANDMASTER')) return 'grandmaster';
   if (t.startsWith('MASTER')) return 'master';
   if (t.startsWith('DIAMOND')) return 'diamond';
   if (t.startsWith('PLATINUM')) return 'platinum';

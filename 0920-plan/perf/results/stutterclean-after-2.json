@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "label": "stutterclean-after-2",
+    "seconds": 20,
+    "quality": "medium",
+    "time": "kst",
+    "viewport": "1440x900",
+    "at": "2026-09-20T02:19:44.599Z"
+  },
+  "boot": {
+    "readyMs": 7658,
+    "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (radeonsi phoenix ACO), OpenGL ES 3.2)",
+    "longTasks": [
+      100,
+      155,
+      119,
+      87,
+      2481,
+      937,
+      61,
+      144,
+      203,
+      81
+    ],
+    "links": 18
+  },
+  "car3_drive": {
+    "fps": 17.7,
+    "dtP50": 28.2,
+    "dtP95": 203.3,
+    "dtP99": 469.1,
+    "dtMax": 1043.5,
+    "jank": 161,
+    "rafBusyMs": 33.08,
+    "draw": 302,
+    "triK": 2287,
+    "links": 0,
+    "longTasks": 96,
+    "commits": {
+      "react-dom": 96,
+      "@react-three/fiber": 2
+    },
+    "resizes": 3,
+    "scriptPct": 64.4,
+    "stylePct": 2.3,
+    "heapMB": 68,
+    "foreignGpuPct": 0,
+    "top": [
+      " 38.3% (program) ",
+      " 17.5% uniformMatrix4fv ",
+      "  4.3% vertexAttribPointer ",
+      "  3.5% bindBuffer ",
+      "  3.4% Vh.setSize vendor-three.js:4011",
+      "  2.9% uniform1iv ",
+      "  2.0% bindVertexArray ",
+      "  1.9% uniformMatrix3fv ",
+      "  1.8% updateMatrixWorld vendor-three.js:1",
+      "  1.6% uniform3f ",
+      "  1.3% ym WorldScene.js:1",
+      "  1.2% mt vendor-three.js:4011",
+      "  1.1% Vh.renderBufferDirect vendor-three.js:4011",
+      "  0.9% bufferSubData ",
+      "  0.9% drawElements ",
+      "  0.8% drawArraysInstanced ",
+      "  0.7% uniform1f ",
+      "  0.7% intersectsObject vendor-three.js:40"
+    ]
+  },
+  "car1_drive": {
+    "fps": 17.6,
+    "dtP50": 19.9,
+    "dtP95": 325.1,
+    "dtP99": 369.3,
+    "dtMax": 1837.6,
+    "jank": 131,
+    "rafBusyMs": 46.95,
+    "draw": 312,
+    "triK": 2542,
+    "links": 0,
+    "longTasks": 81,
+    "commits": {
+      "react-dom": 80
+    },
+    "resizes": 3,
+    "scriptPct": 85.4,
+    "stylePct": 2,
+    "heapMB": 71,
+    "foreignGpuPct": 0,
+    "top": [
+      " 27.0% vertexAttribPointer ",
+      " 16.6% (program) ",
+      " 11.8% uniformMatrix4fv ",
+      "  5.5% bindBuffer ",
+      "  3.6% drawElementsInstanced ",
+      "  3.4% uniform1iv ",
+      "  2.2% bindVertexArray ",
+      "  2.0% uniform3f ",
+      "  1.6% updateMatrixWorld vendor-three.js:1",
+      "  1.4% Vh.renderBufferDirect vendor-three.js:4011",
+      "  1.3% mt vendor-three.js:4011",
+      "  1.0% St vendor-three.js:4011",
+      "  1.0% _m WorldScene.js:1",
+      "  0.9% uniformMatrix3fv ",
+      "  0.9% drawArrays ",
+      "  0.8% intersectsObject vendor-three.js:40",
+      "  0.7% Gm index.js:18",
+      "  0.7% setValue vendor-three.js:3909"
+    ]
+  }
+}

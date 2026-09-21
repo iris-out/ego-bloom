@@ -52,6 +52,7 @@
   --t-platinum: #6FD3C8;
   --t-diamond: #6AA8FF;
   --t-master: #C58CFF;
+  --t-grandmaster: #F472B6;
   --t-champion: #FF6B5B;
 
   --c-b: #9AA3AE;
@@ -175,6 +176,7 @@
   --color-t-platinum: var(--t-platinum);
   --color-t-diamond: var(--t-diamond);
   --color-t-master: var(--t-master);
+  --color-t-grandmaster: var(--t-grandmaster);
   --color-t-champion: var(--t-champion);
 
   --color-c-b: var(--c-b);

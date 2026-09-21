@@ -1,3 +1,5 @@
+import { CREATOR_TIER_THRESHOLDS } from '../../shared/creatorTiers.js';
+
 // ===== CHARACTER TIER SYSTEM (per-character interaction count) =====
 export const CHARACTER_TIERS = [
   { name: 'B', key: 'b', min: 0 },
@@ -38,7 +40,7 @@ export function getCharacterTier(interactionCount) {
   return { ...tier, progress, nextTier, index: idx };
 }
 
-const CHAMPION_VIRTUAL_MAX = 300_000_000;
+const CHAMPION_VIRTUAL_MAX = 500_000_000;
 
 function calcSubdivision(ratio) {
   if (ratio < 0.25) return { subdivision: 4, subProgress: (ratio / 0.25) * 100 };
@@ -50,13 +52,7 @@ function calcSubdivision(ratio) {
 // ===== 크리에이터 티어 시스템 (ELO 점수 기준) =====
 export const CREATOR_TIERS = [
   { key: 'unranked', name: 'Unranked', min: -1 },
-  { key: 'bronze', name: 'Bronze', min: 0 },
-  { key: 'silver', name: 'Silver', min: 12000 },
-  { key: 'gold', name: 'Gold', min: 85000 },
-  { key: 'platinum', name: 'Platinum', min: 868500 },
-  { key: 'diamond', name: 'Diamond', min: 3908250 },
-  { key: 'master', name: 'Master', min: 17370000 },
-  { key: 'champion', name: 'Champion', min: 78165000 },
+  ...CREATOR_TIER_THRESHOLDS,
 ];
 
 // 새로운 ELO V4.1 점수 산정 방식이다. (팔로워 x300, 음성 x100, 기준 완화)
@@ -190,7 +186,7 @@ export function getCreatorTier(score) {
 
 export function getTierAbbreviation(tierData) {
   if (!tierData || tierData.key === 'unranked') return 'U';
-  const initial = tierData.name.charAt(0).toUpperCase();
+  const initial = tierData.key === 'grandmaster' ? 'GM' : tierData.name.charAt(0).toUpperCase();
   const sub = tierData.subdivision !== null ? tierData.subdivision : '';
   return `${initial}${sub}`;
 }
