@@ -72,3 +72,4 @@ tests/*
 *.tmp.js
 playwright.*.tmp.config.js
 dist-perf*
+.vercel
