@@ -38,6 +38,17 @@ test('가속하면 최고 속도에 수렴하고 오토바이가 세단보다 �
   assert.equal(sedan.y, CAR_GROUND);
 });
 
+test('포뮬러는 300km/h로 제한되고 같은 시간에 기존 도로 차량보다 빠르게 가속한다', () => {
+  const away = dryRoad(CITY);
+  const formula = drive(away, { throttle: 1 }, 300, [], 'formula', [], CITY);
+  const convertible = drive(away, { throttle: 1 }, 300, [], 'convertible', [], CITY);
+  assert.equal(VEHICLES.formula.top, 300 / 3.6, '물리 최고속도가 정확히 300km/h다');
+  assert.ok(formula.speed > convertible.speed, `포뮬러 ${formula.speed} 오픈카 ${convertible.speed}`);
+  assert.ok(formula.speed <= 300 / 3.6, `포뮬러가 ${formula.speed * 3.6}km/h로 제한을 넘었다`);
+  const capped = drive({ ...away, speed: 300 / 3.6 }, { throttle: 1 }, 120, [], 'formula', [], CITY);
+  assert.ok(carStatus(capped, 'formula').speed <= 300, `표시 속도 ${carStatus(capped, 'formula').speed}`);
+});
+
 test('브레이크는 차를 완전히 세우고 후진은 기어 R 로 보인다', () => {
   const rolling = drive(createCarState(300), { throttle: 1 }, 240);
   const stopped = drive(rolling, { brake: true }, 240);
@@ -50,7 +61,7 @@ test('브레이크는 차를 완전히 세우고 후진은 기어 R 로 보인�
 });
 
 test('모든 차량은 실제 단수와 RPM으로 자동 변속한다', () => {
-  const expectedGears = { sedan: 6, motorcycle: 6, suv: 6, convertible: 6, truck: 6, tank: 5, howitzer: 5, armored: 6 };
+  const expectedGears = { sedan: 6, motorcycle: 6, suv: 6, convertible: 6, formula: 8, truck: 6, tank: 5, howitzer: 5, armored: 6 };
   for (const [kind, gears] of Object.entries(expectedGears)) {
     const spec = vehicleSpec(kind);
     let state = { ...createCarState(CITY), heading: Math.PI, speed: spec.top * 0.88, gear: 1, rpm: 6200 };
@@ -83,6 +94,19 @@ test('핸드브레이크는 덜 세우는 대신 뒤를 흘려 더 많이 돌린
   assert.equal(drifting.drift, true);
   const braked = drive(rolling, { steer: 0, brake: true }, 45);
   assert.ok(braked.speed < drive(rolling, { steer: 0, handbrake: true }, 45).speed + 0.001, '풋브레이크가 더 잘 선다');
+});
+
+test('포뮬러 핸드브레이크는 달리며 조향할 때만 드리프트하고 놓으면 회복한다', () => {
+  const away = { ...dryRoad(CITY), speed: 24, heading: Math.PI / 2 };
+  const sliding = drive(away, { throttle: 0.4, steer: 1, handbrake: true }, 45, [], 'formula', [], CITY);
+  assert.equal(sliding.drift, true);
+  assert.ok(Math.abs(sliding.heading - away.heading) > 0.15, `선회량 ${sliding.heading - away.heading}`);
+  const recovered = drive(sliding, { throttle: 0.4, steer: 0, handbrake: false }, 90, [], 'formula', [], CITY);
+  assert.equal(recovered.drift, false);
+  const parked = drive(dryRoad(CITY), { steer: 1, handbrake: true }, 20, [], 'formula', [], CITY);
+  assert.equal(parked.drift, false, '정차 중에는 드리프트가 아니다');
+  const straight = drive(away, { steer: 0, handbrake: true }, 20, [], 'formula', [], CITY);
+  assert.equal(straight.drift, false, '조향하지 않으면 드리프트가 아니다');
 });
 
 test('빠를수록 조향이 둔해지고 오토바이가 세단보다 민첩하다', () => {

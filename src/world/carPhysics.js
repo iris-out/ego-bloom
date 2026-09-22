@@ -31,6 +31,15 @@ export const VEHICLES = {
   motorcycle: { accel: 19, reverse: 4, top: 74, brake: 22, grip: 0.82, steerRate: 1.9, lean: 0.7, width: 1, depth: 2.2, gears: [0.18, 0.32, 0.48, 0.65, 0.82, 1], ko: '오토바이' },
   suv: { accel: 12, reverse: 5, top: 58, brake: 24, grip: 0.97, steerRate: 1.35, lean: 0, width: 2.3, depth: 4.9, gears: [0.17, 0.3, 0.45, 0.62, 0.8, 1], ko: 'SUV' },
   convertible: { accel: 16, reverse: 5, top: 70, brake: 27, grip: 0.95, steerRate: 1.6, lean: 0, width: 2.1, depth: 4.4, gears: [0.16, 0.28, 0.42, 0.59, 0.78, 1], ko: '오픈카' },
+  // 현대식 포뮬러 머신이다. top 은 300km/h 를 m/s 로 바꾼 값이다. 고속 조향 손실을
+  // 크게 두어 최고속도에서 키 한 번으로 차체가 돌아서지 않고, 핸드브레이크를 잡았을 때만
+  // 낮은 속도 영역에서 뒷축이 적극적으로 흐른다.
+  formula: {
+    accel: 31, reverse: 4, top: 300 / 3.6, brake: 34, grip: 1.06, steerRate: 1.65, lean: 0,
+    width: 2.0, depth: 5.55, gears: [0.12, 0.22, 0.33, 0.45, 0.58, 0.72, 0.86, 1], ko: '포뮬러',
+    handbrakeBrake: 0.34, driftYaw: 2.15, driftMinSpeed: 10, driftSteerMin: 0.18,
+    highSpeedSteerLoss: 0.78,
+  },
   truck: { accel: 7, reverse: 3.5, top: 44, brake: 18, grip: 1, steerRate: 0.85, lean: 0, width: 2.5, depth: 7.6, gears: [0.14, 0.25, 0.38, 0.54, 0.74, 1], ko: '트럭' },
   tank: { accel: 7, reverse: 3, top: 22, brake: 16, grip: 1, steerRate: 0.9, lean: 0, width: 3.6, depth: 7.2, gears: [0.19, 0.36, 0.57, 0.78, 1], ko: '전차', combat: true },
   howitzer: { accel: 6, reverse: 3, top: 19, brake: 14, grip: 1, steerRate: 0.8, lean: 0, width: 3.4, depth: 7.6, gears: [0.20, 0.39, 0.61, 0.81, 1], ko: '자주포', combat: true },
@@ -190,7 +199,7 @@ export function stepCar(previous, input = {}, delta = 0, extent = 180, buildings
   const push = gas * spec.accel - back * spec.reverse;
   state.speed += (push - Math.sign(state.speed) * drag) * dt;
   if (braking) {
-    const stop = spec.brake * (hand && !input.brake ? 0.45 : 1) * dt;
+    const stop = spec.brake * (hand && !input.brake ? finite(spec.handbrakeBrake, 0.45) : 1) * dt;
     state.speed = Math.abs(state.speed) <= stop ? 0 : state.speed - Math.sign(state.speed) * stop;
   }
   if (!gas && !back && !braking && Math.abs(state.speed) < 0.6) state.speed = 0;
@@ -201,10 +210,15 @@ export function stepCar(previous, input = {}, delta = 0, extent = 180, buildings
   // 조향은 앞바퀴다. 멈춰 있으면 돌지 않고 빠를수록 조향각이 줄어든다.
   const wheel = clamp(input.steer, -1, 1);
   state.steer += (wheel - finite(state.steer)) * (1 - Math.exp(-dt * 9));
-  const bite = Math.min(1, Math.abs(state.speed) / 7) * (1 - Math.min(0.6, Math.abs(state.speed) / (spec.top * 1.6)));
-  const turn = state.steer * spec.steerRate * bite * Math.sign(state.speed || 1) * spec.grip * (hand ? 1.7 : 1);
+  const highSpeedLoss = clamp(spec.highSpeedSteerLoss, 0, 0.9) || 0.6;
+  const bite = Math.min(1, Math.abs(state.speed) / 7)
+    * (1 - Math.min(highSpeedLoss, Math.abs(state.speed) / (spec.top * 1.6)));
+  const turn = state.steer * spec.steerRate * bite * Math.sign(state.speed || 1) * spec.grip
+    * (hand ? finite(spec.driftYaw, 1.7) : 1);
   state.heading -= turn * dt;
-  state.drift = hand && Math.abs(state.speed) > 8 && Math.abs(state.steer) > 0.25;
+  state.drift = hand
+    && Math.abs(state.speed) > finite(spec.driftMinSpeed, 8)
+    && Math.abs(state.steer) > finite(spec.driftSteerMin, 0.25);
   state.lean = finite(state.lean) + (-state.steer * spec.lean * Math.min(1, Math.abs(state.speed) / 22) - finite(state.lean)) * (1 - Math.exp(-dt * 6));
 
   const from = { x: state.x, y: finite(state.y,CAR_GROUND), z: state.z };

@@ -38,3 +38,15 @@ test('앞바퀴 방향과 차체가 도는 방향의 부호가 같다', () => {
   assert.ok(body.x > 0, '차체가 +X 로 기울어야 한다');
   assert.ok(wheelForward(steerAngle(state.steer)).x > 0, '앞바퀴도 +X 여야 한다');
 });
+
+test('포뮬러는 최고속도에서 저속보다 조향 반응이 완만하다', () => {
+  const extent = 1857;
+  const turn = (speed) => {
+    let state = { ...createCarState(extent), x: 0, z: 1000, speed, heading: 0 };
+    for (let frame = 0; frame < 30; frame += 1) {
+      state = stepCar(state, { steer: 1, throttle: 0.3 }, 1 / 60, extent, [], 'formula');
+    }
+    return Math.abs(state.heading);
+  };
+  assert.ok(turn(24) > turn(78), '고속 조향은 저속보다 둔해야 한다');
+});
