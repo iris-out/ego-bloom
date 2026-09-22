@@ -1,8 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { roadSurface } from '../../src/world/roadSurface.js';
-import { createUrbanPlan, cityExtentForCount } from '../../shared/urbanPlan.js';
+import { createUrbanPlan, cityExtentForCount, ROAD_WIDTH } from '../../shared/urbanPlan.js';
+import { roadRibbon } from '../../shared/roadRibbon.js';
 import { CAR_GROUND, createCarState, stepCar } from '../../src/world/carPhysics.js';
+
+const EPS=1e-7;
 
 const plan={highwayDeck:14,roads:[{x1:-100,z1:0,x2:100,z2:0,kind:'highway',elevated:true,deckY:14}],ramps:[{from:{x:0,z:100,y:-.27},to:{x:0,z:0,y:14},width:10}]};
 test('램프 높이가 연속적으로 오르며 고가 노면에 이어진다',()=>{
@@ -12,6 +15,60 @@ test('램프 높이가 연속적으로 오르며 고가 노면에 이어진다',
 });
 test('고가 아래 지상 차량은 상판으로 순간 이동하지 않는다',()=>{
   assert.equal(roadSurface(plan,50,0,.33).top,.33);
+});
+
+test('ramp physics uses the exact rendered ribbon triangles and plane gradients',()=>{
+  const points=[[0,0,2,10],[0,20,6,8],[15,20,9,4]],ribbon=roadRibbon(points,{offsetY:.6});
+  const rampPlan={roads:[],ramps:[{points,width:10}]};
+  for(const triangle of ribbon.triangles){
+    const [a,b,c]=triangle;
+    const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2];
+    const vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2];
+    const nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;
+    const gx=-nx/ny,gz=-nz/ny;
+    const samples=[a,b,c,[(a[0]+b[0]+c[0])/3,(a[1]+b[1]+c[1])/3,(a[2]+b[2]+c[2])/3]];
+    for(const [sampleIndex,[x,y,z]] of samples.entries()){
+      const surface=roadSurface(rampPlan,x,z,y);
+      assert.ok(Math.abs(surface.top-y)<EPS,`ribbon top ${x},${z}: ${surface.top} != ${y}`);
+      if(sampleIndex===3){
+        assert.ok(Math.abs(surface.slope*surface.dx-gx)<EPS,`ribbon dx gradient at ${x},${z}`);
+        assert.ok(Math.abs(surface.slope*surface.dz-gz)<EPS,`ribbon dz gradient at ${x},${z}`);
+      }
+    }
+  }
+});
+
+test('all generated highway merges have physical support across their shared transverse boundary',()=>{
+  const deckTop=14.6,halfHighway=ROAD_WIDTH.highway/2;
+  for(const extent of [1000,1600,2164,3600]){
+    const city=createUrbanPlan(extent),roads=city.roads.filter(road=>road.elevated);
+    for(const node of city.interchanges.filter(item=>item.kind==='IC'))for(const [rampIndex,ramp] of node.ramps.entries()){
+      const s=rampIndex%2===0?-1:1,outward=node.axis==='ns'?[0,s]:[s,0];
+      const ribbon=roadRibbon(ramp.points,{offsetY:.6});
+      const topIndex=ramp.points.findIndex(point=>Math.hypot(point[0]-ramp.to.x,point[1]-ramp.to.z)<EPS);
+      const rampPlan={roads,ramps:[ramp],highwayDeck:city.highwayDeck};
+      for(let index=topIndex+1;index<ribbon.sections.length;index++){
+        const previous=ribbon.sections[index-1],next=ribbon.sections[index];
+        const inner=(section)=>[section.left,section.right].sort((a,b)=>
+          (a[0]-node.x)*outward[0]+(a[2]-node.z)*outward[1]
+          -((b[0]-node.x)*outward[0]+(b[2]-node.z)*outward[1]))[0];
+        const a=inner(previous),b=inner(next);
+        assert.ok(Math.abs((a[0]-node.x)*outward[0]+(a[2]-node.z)*outward[1]-halfHighway)<EPS);
+        for(const station of [0,.25,.5,.75,1]){
+          const visibleWidth=previous.width+(next.width-previous.width)*station;
+          const outerEdge=Math.min(1,visibleWidth),offsets=[];
+          for(let offset=-1;offset<outerEdge-EPS;offset+=.1)offsets.push(offset);
+          offsets.push(outerEdge);
+          for(const offset of offsets){
+            const x=a[0]+(b[0]-a[0])*station+outward[0]*offset;
+            const z=a[2]+(b[2]-a[2])*station+outward[1]*offset;
+            assert.ok(Math.abs(roadSurface(rampPlan,x,z,deckTop).top-deckTop)<EPS,
+              `extent ${extent}: ${node.ko} ramp ${rampIndex} station ${station} offset ${offset.toFixed(1)} has no deck`);
+          }
+        }
+      }
+    }
+  }
 });
 
 test('실제 도시 IC의 지상 진입부터 본선 합류까지 노면이 연결된다',()=>{

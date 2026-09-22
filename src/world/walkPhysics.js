@@ -26,6 +26,8 @@ export const CAR_DPS = 260;
  * 아니라 한 번의 충돌이라 지속 피해만으로는 스쳐도 안 아프다. 최대 체력의 절반 가까이
  * 깎아 한 번 치이면 반드시 위험해지게 한다. */
 export const CAR_IMPACT = 85;
+/** 보행자 충돌 상자는 발바닥부터 눈 위 머리까지다. */
+const WALK_RADIUS = 0.42, WALK_HEADROOM = 0.22, LEGACY_CAR_HEIGHT = 2;
 /** 쓰러진 뒤 출발 지점으로 돌아가기까지의 시간이다. 익사와 같다. */
 export const DOWN_TIME = 3;
 
@@ -173,10 +175,16 @@ function insideAnyBuilding(point, buildings) {
 
 /** 차에 깔렸는지 본다. 사람은 상자 하나로 본다. */
 function runOver(state, threats) {
+  const feet = finite(state.y, EYE_HEIGHT) - EYE_HEIGHT;
+  const head = finite(state.y, EYE_HEIGHT) + WALK_HEADROOM;
   for (const box of threats) {
     if (!box || !Number.isFinite(box.x) || !Number.isFinite(box.z)) continue;
-    if (Math.abs(box.x - state.x) > (finite(box.width, 2.2) / 2 + 0.42)) continue;
-    if (Math.abs(box.z - state.z) > (finite(box.depth, 4.3) / 2 + 0.42)) continue;
+    if (Math.abs(box.x - state.x) > (finite(box.width, 2.2) / 2 + WALK_RADIUS)) continue;
+    if (Math.abs(box.z - state.z) > (finite(box.depth, 4.3) / 2 + WALK_RADIUS)) continue;
+    // traffic 상자의 y는 바닥이다. 높이가 없던 예전 호출부는 지상 차량으로 다룬다.
+    const bottom = finite(box.y);
+    const top = bottom + Math.max(0, finite(box.height, LEGACY_CAR_HEIGHT));
+    if (top < feet || bottom > head) continue;
     return box;
   }
   return null;
@@ -372,7 +380,11 @@ export function fireWeapon(previous, { targets = [], buildings = [], seed = 0 } 
       if (distance > spec.range) continue;
       if (!best || distance < best.distance) best = { ...target, distance };
     }
-    if (best && hitsAnyBuilding(muzzle, { x: best.x, y: 1, z: best.z }, buildings)) best = null;
+    // 고가 차량을 지상 목표점으로 연결하면 다리 아래의 낮은 구조물이 총선을 가린 것으로 오판한다.
+    const targetY = best && Number.isFinite(best.height)
+      ? finite(best.y) + Math.max(0, best.height) / 2
+      : 1;
+    if (best && hitsAnyBuilding(muzzle, { x: best.x, y: targetY, z: best.z }, buildings)) best = null;
     if (best) hits.push(best);
   }
   return { state, hit: hits[0] ?? null, hits };

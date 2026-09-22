@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { getWorldBounds } from '../../shared/worldLayout.js';
 import { createUrbanPlan } from '../../shared/urbanPlan.js';
+import { bridgeSegment } from '../../shared/bridgeGeometry.js';
 import { beachStrips } from '../../shared/coast.js';
 import { mapPoint } from './data';
 import { CREATOR_TIERS } from '../design/tiers';
@@ -75,6 +76,16 @@ export default function WorldMap({buildings, selected, cameraRef, onFocus, onSel
       districts: plan.districts.map(d=>{const p=mapPoint(d,bounds),edge=mapPoint({x:d.x+d.rx,z:d.z+d.rz},bounds);return {id:d.id,cx:p.x,cy:p.y,rx:Math.abs(edge.x-p.x),ry:Math.abs(edge.y-p.y),color:d.color};}),
       roads: plan.roads.filter(road=>road.kind!=='highway').map(road=>({a:mapPoint({x:road.x1,z:road.z1},bounds),b:mapPoint({x:road.x2,z:road.z2},bounds),kind:road.kind})),
       highways: plan.roads.filter(road=>road.kind==='highway').map(road=>({a:mapPoint({x:road.x1,z:road.z1},bounds),b:mapPoint({x:road.x2,z:road.z2},bounds),tunnel:!!road.tunnel})),
+      ramps: (plan.ramps||[]).map(ramp=>{
+        const points=Array.isArray(ramp.points)&&ramp.points.length>=2
+          ? ramp.points
+          : [[ramp.from.x,ramp.from.z],[ramp.to.x,ramp.to.z],...(ramp.merge?[[ramp.merge.x,ramp.merge.z]]:[])];
+        return {d:pathFromPoints(points,bounds),kind:ramp.kind};
+      }),
+      bridges: (plan.bridges||[]).map(bridge=>{
+        const segment=bridgeSegment(bridge);
+        return {a:mapPoint({x:segment.x1,z:segment.z1},bounds),b:mapPoint({x:segment.x2,z:segment.z2},bounds),big:!!bridge.big};
+      }),
       subway: plan.subway.lines.map(line=>({id:line.id,color:line.color,d:pathFromPoints(line.points,bounds)})),
       beaches: beachStrips(extent).map(strip=>beachPolygon(strip,bounds)),
       parks: plan.parks.map(park=>mapPoint(park,bounds)),
@@ -113,6 +124,8 @@ export default function WorldMap({buildings, selected, cameraRef, onFocus, onSel
       {staticLayers.ponds.map((p,index)=><ellipse key={index} cx={p.cx} cy={p.cy} rx={p.rx} ry={p.ry} fill="var(--t-platinum)" opacity=".35"/>)}
       {staticLayers.roads.map((road,index)=><path key={index} d={`M${road.a.x} ${road.a.y}L${road.b.x} ${road.b.y}`} stroke="var(--fg-3)" strokeWidth={road.kind==='arterial'?'.75':road.kind==='collector'?'.45':'.22'} opacity={road.kind==='alley'?'.28':'.48'}/>)}
       {staticLayers.highways.map((road,index)=><path key={index} d={`M${road.a.x} ${road.a.y}L${road.b.x} ${road.b.y}`} stroke="var(--warn)" strokeWidth="1.1" opacity=".6" strokeDasharray={road.tunnel?'1.6 1.1':undefined}/>)}
+      {staticLayers.ramps.map((ramp,index)=><path key={`ramp-${index}`} d={ramp.d} fill="none" stroke="var(--warn)" strokeWidth={ramp.kind==='portal'?'.8':'.55'} opacity=".72"/>)}
+      {staticLayers.bridges.map((bridge,index)=><path key={`bridge-${index}`} d={`M${bridge.a.x} ${bridge.a.y}L${bridge.b.x} ${bridge.b.y}`} fill="none" stroke="var(--fg-2)" strokeWidth={bridge.big?'1.35':'.9'} opacity=".9"/>)}
       {staticLayers.subway.map(line=><path key={line.id} d={line.d} fill="none" stroke={line.color} strokeWidth=".55" opacity=".85"/>)}
       {staticLayers.parks.map((p,index)=><circle key={index} cx={p.x} cy={p.y} r="1.8" fill="#789f70" opacity=".75"/>)}
       {staticLayers.landmarks.map((p,index)=><rect key={index} x={p.x-.7} y={p.y-.7} width="1.4" height="1.4" rx=".3" fill="var(--fg-2)"/>)}

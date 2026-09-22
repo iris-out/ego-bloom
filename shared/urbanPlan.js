@@ -12,6 +12,7 @@ import { LANDMARK_SIZE } from './landmarks.js';
 import { NATURE_ARC_RADIUS, NATURE_CORNER, inNature, natureCorners, naturePonds } from './nature.js';
 import { riverZoneAt } from './riverZones.js';
 import { LOOP_HALF_RATIO, highwayLoop, highwayRadials, highwayStraightHalf, interchanges as buildInterchanges, subwayNetwork } from './transit.js';
+import { buildRoadNetwork, surfaceConnectors, surfaceEdgeSeams } from './roadNetwork.js';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const segment=(a,b,kind='lane',extra={})=>({x1:a[0],z1:a[1],x2:b[0],z2:b[1],kind,
@@ -30,10 +31,12 @@ const path=(points,kind,extra={})=>{
 const hashText=(text)=>{let value=2166136261;for(const char of String(text))value=Math.imul(value^char.charCodeAt(0),16777619);value^=value>>>16;value=Math.imul(value,0x7feb352d);value^=value>>>15;return value>>>0;};
 /** 새로 넣는 이면도로·골목이 강이나 강변 공원을 지르는지 본다. 짧은 선분이라
  * 양 끝과 중점 표본이면 충분하다. 걸리면 그 구간은 통째로 뺀다. */
-const crossesWater=(e,x1,z1,x2,z2)=>{
+const crossesWater=(e,x1,z1,x2,z2,width=0)=>{
+  const dx=x2-x1,dz=z2-z1,run=Math.hypot(dx,dz)||1,nx=-dz/run,nz=dx/run,half=width/2;
   for(let i=0;i<=10;i++){
     const t=i/10,x=x1+(x2-x1)*t,z=z1+(z2-z1)*t;
-    if(inWaterBody(e,x,z)||inRiverPark(e,x,z))return true;
+    for(const offset of half?[0,-half,half]:[0])
+      if(inWaterBody(e,x+nx*offset,z+nz*offset)||inRiverPark(e,x+nx*offset,z+nz*offset))return true;
   }
   return false;
 };
@@ -115,7 +118,8 @@ function rampHeight(along,length,rise,base,ease){
   return base+grade*(along-e/2);
 }
 
-/** 램프 하나의 3차원 폴리라인이다. 점은 [x, z, y, width] 이고 메시, 노면 표본,
+/** 램프 하나의 3차원 폴리라인이다. 점은 [x, z, y, width, transverse?] 이고 선택적
+ * transverse 는 roadRibbon 이 쓸 수평 [x,z] 단면 방향이다. 메시, 노면 표본,
  * 가드레일, 교각, 건물 제외 색인이 모두 이 한 배열을 읽는다.
  * d 는 고속도로 방향(±1), s 는 고속도로 어느 쪽에서 오르는지(±1), room 은 나들목에서
  * 순환로 직선 구간 끝까지 d 방향으로 남은 거리다. */
@@ -145,10 +149,14 @@ export function rampAlignment(node,d,s,room,deckY=HIGHWAY_DECK){
   }
   // 가감속 테이퍼다. 안쪽선을 상판 가장자리에 붙인 채 폭만 줄여 본선에 스며든다.
   const deckHalf=ROAD_WIDTH.highway/2;
+  const highwayTransverse=node.axis==='ns'?[0,d]:[-d,0];
+  // 곡선의 마지막 단면부터 본선 법선에 고정해야 폭이 줄어도 안쪽선이 상판 경계를
+  // 정확히 공유한다. 그 전 곡선 단면은 roadRibbon 의 miter 를 그대로 쓴다.
+  points[points.length-1][4]=highwayTransverse;
   for(let i=1;i<=RAMP.mergeSteps;i++){
     const t=i/RAMP.mergeSteps,width=RAMP.width+(RAMP.tipWidth-RAMP.width)*t;
     const [x,z]=along(reach+RAMP.merge*t,deckHalf+width/2);
-    points.push([x,z,deckY,width]);
+    points.push([x,z,deckY,width,highwayTransverse]);
   }
   const top=points[curve.length-1],end=points[points.length-1];
   // 테이퍼에서 본선 쪽을 가리키는 단위 벡터다. 렌더가 그쪽 난간을 비워 차가 합류한다.
@@ -388,6 +396,7 @@ export function clipRoad(road,holes,minLength=6){
   return keep.filter(([t0,t1])=>(t1-t0)*road.length>=minLength).map(([t0,t1],index)=>{
     const {deadEnd,...rest}=road;
     return {...rest,...(deadEnd&&t1===1?{deadEnd}:{}),id:index?`${road.id}-${index}`:road.id,
+      ...(t0>0?{deadEndIn:'constraint'}:{}),...(t1<1?{deadEndOut:'constraint'}:{}),
       x1:road.x1+dx*t0,z1:road.z1+dz*t0,x2:road.x1+dx*t1,z2:road.z1+dz*t1,length:road.length*(t1-t0)};
   });
 }
@@ -437,7 +446,9 @@ function buildUrbanPlan(extent){
 
   const roads=[];
   const addPath=(points,kind,id,extra={})=>{const segs=path(points,kind,{id,...extra});roads.push(...segs);return segs;};
-  const border=e*.96,HX=e*LOOP_HALF_RATIO;
+  // 작은 도시에서는 동쪽 공항의 레이더·연료 시설이 e*.96 안쪽까지 들어온다.
+  // 순환로를 최소 70 안쪽에 두되 큰 도시의 기존 비율은 그대로 유지한다.
+  const border=Math.min(e*.96,e-70),HX=e*LOOP_HALF_RATIO;
   // 강변도로 띠(river.js 의 RIVER_ROAD) 한가운데를 지나는 강변 집산로의 z 다.
   const riverRoadZ=(x,side)=>riverCenter(e,x)+side*(riverHalf(e,x)+riverParkWidth(e,x,side)
     +e*(side<0?RIVER_ROAD.north:RIVER_ROAD.south)/2);
@@ -476,13 +487,13 @@ function buildUrbanPlan(extent){
   // 잘라 교차로를 만들고, 동서 하나는 남북 간선과 고속도로에서 자른다.
   const arterialStops=[];
   for(const [index,x] of [C[1],C[2]].entries()){
-    // 양 끝은 순환로 중심선 3 앞에서 멈춘다. 끝 캡이 해변 띠에 닿지 않게 하는 여유다.
-    const zs=[-(border-3),-HX,R[1],riverRoadZ(x,-1),riverRoadZ(x,1),HX,border-3].sort((a,b)=>a-b);
+    // 순환로와 같은 중심선 점에서 끝내 실제 교차로 노드를 공유한다.
+    const zs=[-border,-HX,R[1],riverRoadZ(x,-1),riverRoadZ(x,1),HX,border].sort((a,b)=>a-b);
     addPath(zs.map(z=>[x,z]),'arterial',`art-ns-${index}`);
     arterialStops.push(...zs.slice(1,-1).map(z=>[x,z]));
   }
   {
-    const xs=[-(border-3),-HX,C[1],C[2],HX,border-3];
+    const xs=[-border,-HX,C[1],C[2],HX,border];
     addPath(xs.map(x=>[x,R[1]]),'arterial','art-ew-0');
     arterialStops.push(...xs.slice(1,-1).map(x=>[x,R[1]]));
   }
@@ -512,13 +523,26 @@ function buildUrbanPlan(extent){
 
   for(const d of districts){
     const grid=grids.get(d.id);
+    const safeLaneX=(raw,z0,z1)=>{
+      let x=raw;
+      for(const stream of streams){
+        if(Math.max(z0,z1)<Math.min(stream.z1,stream.z2)||Math.min(z0,z1)>Math.max(stream.z1,stream.z2))continue;
+        const clearance=stream.width/2+ROAD_WIDTH.lane/2+.1,distance=x-stream.x;
+        if(Math.abs(distance)>=clearance)continue;
+        const shifted=stream.x+(distance<=0?-clearance:clearance);
+        const room=(LANE_GAP-ROAD_WIDTH.lane)/2;
+        x=clamp(shifted,raw-room,raw+room);
+      }
+      return x;
+    };
+    const laneXs=grid.bays.map((bay,index)=>index?safeLaneX(bay.x0-LANE_GAP/2,grid.bottom-(EDGE+7),grid.top+(EDGE+7)):null);
     // 베이 사이 지선이다. 양 끝을 EDGE 만큼 더 늘려 여백 간선 가장자리나 순환로에 닿게 한다.
     // 자연지대나 물에 들어가는 쪽 끝은 그 경계에서 자른다.
     for(let bay=1;bay<grid.bayCount;bay++){
       if(!grid.bays[bay].lane)continue;
-      const x=grid.bays[bay].x0-LANE_GAP/2;
+      const x=laneXs[bay];
       let z0=grid.bottom-(EDGE+7),z1=grid.top+(EDGE+7);
-      const wet=(z)=>inWaterBody(e,x,z)||inNature(e,x,z);
+      const wet=(z)=>inWaterBody(e,x-ROAD_WIDTH.lane/2,z)||inWaterBody(e,x+ROAD_WIDTH.lane/2,z)||inNature(e,x,z);
       while(z0<z1&&wet(z0))z0+=8;
       while(z1>z0&&wet(z1))z1-=8;
       if(z1-z0<40)continue;
@@ -527,21 +551,27 @@ function buildUrbanPlan(extent){
       clipRoad(lane,hillHoles(ROAD_WIDTH.lane),40).forEach((piece,index)=>
         addPath([[piece.x1,piece.z1],[piece.x2,piece.z2]],'lane',`${d.id}-lane-${bay}${index?`-${index}`:''}`,{district:d.id}));
     }
-    for(const band of grid.bands){
-      // 띠 경계 골목이다. 블록 열마다 끊어 물이나 자연지대에 걸리는 조각만 뺀다.
-      if(band.index)for(let bay=0;bay<grid.bayCount;bay++){
+    // 띠 경계 골목은 베이의 남는 폭과 지선 통로의 중심까지 이어진다. 필지에서 4 떨어진
+    // 예전 끝점은 골목 반폭 3 과 1 만큼 벌어져 보였고 그래프도 끊겼다.
+    const addAlleyRow=(band,z,suffix=band.index)=>{
+      for(let bay=0;bay<grid.bayCount;bay++){
         const slot=band.bays[bay];
         for(let column=0;column<slot.columns;column++){
-          const x0=slot.start+band.pitch*column,x1=x0+band.pitch;
-          if(crossesWater(e,x0,band.z0,x1,band.z0)||inNature(e,(x0+x1)/2,band.z0))continue;
-          roads.push(segment([x0,band.z0],[x1,band.z0],'alley',{district:d.id,id:`${d.id}-alley-${band.index}-${bay}-${column}`}));
+          const x0=column?slot.start+band.pitch*column:(bay?laneXs[bay]:slot.x0);
+          const x1=column===slot.columns-1?(bay<grid.bayCount-1?laneXs[bay+1]:slot.x0+grid.bays[bay].width)
+            : slot.start+band.pitch*(column+1);
+          if(crossesWater(e,x0,z,x1,z,ROAD_WIDTH.alley)||inNature(e,(x0+x1)/2,z))continue;
+          roads.push(segment([x0,z],[x1,z],'alley',{district:d.id,id:`${d.id}-alley-${suffix}-${bay}-${column}`}));
         }
       }
+    };
+    for(const band of grid.bands){
+      addAlleyRow(band,band.z0);
       // 블록 열 사이 세로 샛길이다. 띠마다 블록 간격이 달라 한 띠 안에서만 긋는다.
       for(let bay=0;bay<grid.bayCount;bay++){
         const slot=band.bays[bay];
         for(let column=1;column<slot.columns;column++){
-          const x=slot.start+band.pitch*column,z0=band.z0+ALLEY/2;
+          const x=slot.start+band.pitch*column,z0=band.z0;
           // 강 대역이 골목 성격을 가른다. 구시가지·재래 상가는 막다른 길 없이 촘촘히 뚫고
           // 아파트 단지는 막다른 길을 늘려 단지 내부 도로처럼 성기게 남긴다.
           const zone=riverZoneAt(e,x,band.z0+band.pitch/2);
@@ -550,33 +580,72 @@ function buildUrbanPlan(extent){
           const rawDead=(band.index*3+bay*2+column)%5===2;
           const dead=dense?false:sparse?(rawDead||(band.index+column)%2===0):rawDead;
           const z1=band.z0+band.pitch*(dead?.55:1);
-          if(crossesWater(e,x,z0,x,z1)||inNature(e,x,(z0+z1)/2))continue;
+          if(crossesWater(e,x,z0,x,z1,ROAD_WIDTH.alley)||inNature(e,x,(z0+z1)/2))continue;
           roads.push(segment([x,z0],[x,z1],'alley',
             {district:d.id,id:`${d.id}-cross-${band.index}-${bay}-${column}`,...(dead?{deadEnd:true}:{})}));
         }
       }
     }
+    const lastBand=grid.bands[grid.bands.length-1];
+    if(lastBand)addAlleyRow(lastBand,lastBand.z0+lastBand.pitch,'top');
     // 2x2 로 묶인 블록은 안에 필지 네 개가 붙어 있다. 그 사이를 실제 골목으로 갈라야
     // 위에서 봤을 때 건물 덩어리 사이가 빈 포장으로 뭉개지지 않는다. 챔피언 블록은
     // 필지가 하나뿐이라 대상이 아니다. 아파트 단지 대역은 세로 진입로 하나만 남긴다.
     for(const block of grid.blocks){
       if(block.empty||lotsPerBlock(block.lot)<2)continue;
-      const half=block.pitch/2-ALLEY/2;
+      const half=block.pitch/2;
       if(half<=0)continue;
       const zone=riverZoneAt(e,block.x,block.z),apt=zone&&zone.key==='apt';
-      if(!crossesWater(e,block.x,block.z-half,block.x,block.z+half))
+      if(!crossesWater(e,block.x,block.z-half,block.x,block.z+half,ROAD_WIDTH.alley))
         roads.push(segment([block.x,block.z-half],[block.x,block.z+half],'alley',
-          {district:d.id,id:`${d.id}-inner-v-${block.band}-${block.bay}-${block.column}`}));
-      if(!apt&&!crossesWater(e,block.x-half,block.z,block.x+half,block.z))
+          {district:d.id,id:`${d.id}-inner-v-${block.band}-${block.bay}-${block.column}`,
+            deadEndIn:'courtyard-access',deadEndOut:'courtyard-access'}));
+      if(!apt&&!crossesWater(e,block.x-half,block.z,block.x+half,block.z,ROAD_WIDTH.alley))
         roads.push(segment([block.x-half,block.z],[block.x+half,block.z],'alley',
-          {district:d.id,id:`${d.id}-inner-h-${block.band}-${block.bay}-${block.column}`}));
+          {district:d.id,id:`${d.id}-inner-h-${block.band}-${block.bay}-${block.column}`,
+            deadEndIn:'courtyard-access',deadEndOut:'courtyard-access'}));
+    }
+    // 블록 격자 양옆의 예약 여백을 지구 진입 지선으로 쓴다. 모든 띠 경계 골목이 이
+    // 중심선에 실제로 닿으므로 작은 도시에서도 lane 등급이 사라지지 않는다.
+    const rowStops=[...new Set(grid.bands.flatMap(band=>[band.z0,band.z0+band.pitch]))].sort((a,b)=>a-b);
+    for(const [side,x] of [['west',grid.left],['east',grid.right]])for(let index=1;index<rowStops.length;index++){
+      const z0=rowStops[index-1],z1=rowStops[index],mid=(z0+z1)/2;
+      if(crossesWater(e,x,z0,x,z1,ROAD_WIDTH.lane)||inNature(e,x,z0)||inNature(e,x,mid)||inNature(e,x,z1))continue;
+      const lane=segment([x,z0],[x,z1],'lane',{district:d.id,id:`${d.id}-boundary-${side}-${index-1}`});
+      const duplicates=roads.some(road=>{
+        if(road.elevated||road.tunnel||road.kind==='alley')return false;
+        const turn=Math.abs(wrapAngle(lane.angle-road.angle));
+        if(Math.min(turn,Math.abs(Math.PI-turn))>.05)return false;
+        const dx=road.x2-road.x1,dz=road.z2-road.z1,len=dx*dx+dz*dz||1;
+        const distance=([px,pz])=>{
+          const t=clamp(((px-road.x1)*dx+(pz-road.z1)*dz)/len,0,1);
+          return Math.hypot(px-(road.x1+dx*t),pz-(road.z1+dz*t));
+        };
+        return Math.max(distance([lane.x1,lane.z1]),distance([lane.x2,lane.z2]))
+          <(ROAD_WIDTH.lane+(ROAD_WIDTH[road.kind]||8))/2;
+      });
+      if(duplicates)continue;
+      clipRoad(lane,hillHoles(ROAD_WIDTH.lane),20).forEach((piece,pieceIndex)=>roads.push({
+        ...piece,id:pieceIndex?`${lane.id}-${pieceIndex}`:lane.id,path:pieceIndex?`${lane.id}-${pieceIndex}`:lane.id,
+      }));
     }
   }
 
   // 고속도로는 도시를 한 바퀴 도는 고가 순환로다. path 를 주지 않아 AI 차량 경로에서 빠진다.
   const loopPoints=highwayLoop(e);
-  for(let i=1;i<loopPoints.length;i++)roads.push(segment(loopPoints[i-1],loopPoints[i],'highway',
-    {elevated:true,deckY:HIGHWAY_DECK,id:`highway-${i}`}));
+  const highwayRoutes=[{id:'highway-loop',kind:'highway',elevated:true,deckY:HIGHWAY_DECK,
+    points:loopPoints.map(point=>[point[0],point[1]])}];
+  const highwayLoopRoads=[];
+  for(let i=1;i<loopPoints.length;i++){
+    const road=segment(loopPoints[i-1],loopPoints[i],'highway',{elevated:true,deckY:HIGHWAY_DECK,id:`highway-${i}`});
+    highwayLoopRoads.push(road);roads.push(road);
+  }
+  for(let index=0;index<highwayLoopRoads.length;index++){
+    const previous=highwayLoopRoads[(index-1+highwayLoopRoads.length)%highwayLoopRoads.length];
+    const road=highwayLoopRoads[index],next=highwayLoopRoads[(index+1)%highwayLoopRoads.length];
+    road.capStart=ROAD_WIDTH.highway/2*Math.tan(Math.abs(wrapAngle(road.angle-previous.angle))/2);
+    road.capEnd=ROAD_WIDTH.highway/2*Math.tan(Math.abs(wrapAngle(next.angle-road.angle))/2);
+  }
   // 남북 방사선 하나다. 실제 굴착 지형이 없으므로 도심과 강도 한 단 높은 고가로
   // 연속해서 지난다. 지상에 복개 상자를 얹어 터널처럼 보이게 하지 않는다.
   const radialDeck=HIGHWAY_DECK;
@@ -586,7 +655,8 @@ function buildUrbanPlan(extent){
   for(const radial of highwayRadials(e)){
     const [,,south]=radial.points,minDeck=e*LOOP_HALF_RATIO+PORTAL_CLEAR;
     const tip=Math.abs(south[1]),deckEnd=Math.max(minDeck,tip-PORTAL_RAMP);
-    roads.push(segment([0,-deckEnd],[0,deckEnd],'highway',{elevated:true,deckY:radialDeck,id:radial.id}));
+    roads.push(segment([0,-deckEnd],[0,deckEnd],'highway',
+      {elevated:true,deckY:radialDeck,id:radial.id,capStart:0,capEnd:0}));
     for(const side of [-1,1])ramps.push(portalAlignment(0,side,deckEnd,tip,radialDeck));
   }
 
@@ -656,50 +726,68 @@ function buildUrbanPlan(extent){
     const wet=length*(last-first+1)/CROSS_STEPS;
     const mid=(first+last)/2/CROSS_STEPS;
     const mx=road.x1+(road.x2-road.x1)*mid;
-    return wet>riverHalf(span,mx)*4?null:mx;
+    const mz=road.z1+(road.z2-road.z1)*mid;
+    return wet>riverHalf(span,mx)*4?null:{x:mx,z:mz};
   };
   for(const road of roads){
     if(road.elevated||road.tunnel||road.kind==='alley')continue;
-    let x=null;
+    let crossing=null;
     let previous=road.z1-riverCenter(e,road.x1);
     for(let step=1;step<=CROSS_STEPS;step++){
       const t=step/CROSS_STEPS;
       const sx=road.x1+(road.x2-road.x1)*t, sz=road.z1+(road.z2-road.z1)*t;
       const current=sz-riverCenter(e,sx);
       if(previous===0||previous*current<0){
-        const back=(step-(previous===0?1:0.5))/CROSS_STEPS;
-        x=road.x1+(road.x2-road.x1)*back;
+        let lo=(step-1)/CROSS_STEPS,hi=t;
+        for(let iteration=0;iteration<32;iteration++){
+          const mid=(lo+hi)/2,mx=road.x1+(road.x2-road.x1)*mid,mz=road.z1+(road.z2-road.z1)*mid;
+          const value=mz-riverCenter(e,mx);
+          if(previous*value<=0)hi=mid;else lo=mid;
+        }
+        const at=(lo+hi)/2;
+        crossing={x:road.x1+(road.x2-road.x1)*at,z:road.z1+(road.z2-road.z1)*at};
         break;
       }
       previous=current;
     }
     // 중심선을 넘지 않고 강폭 안으로만 들어왔다 나가는 도로도 물 위를 지난다.
     // 젖은 구간이 지천 폭 정도로 짧으면 지천교가 맡으므로 강 교량은 세우지 않는다.
-    if(x===null){
-      const wetX=wetCrossing(e,road);
-      if(wetX!==null&&inRiverPark(e,wetX,riverCenter(e,wetX)+riverHalf(e,wetX)+1)&&!streams.some(s=>Math.abs(s.x-wetX)<s.width))x=wetX;
+    if(crossing===null){
+      const wetPoint=wetCrossing(e,road);
+      if(wetPoint!==null&&inRiverPark(e,wetPoint.x,riverCenter(e,wetPoint.x)+riverHalf(e,wetPoint.x)+1)
+        &&!streams.some(s=>Math.abs(s.x-wetPoint.x)<s.width))crossing=wetPoint;
     }
-    if(x===null||!Number.isFinite(x)||Math.abs(x)>e)continue;
-    const near=crossingsAtRiver.find(entry=>Math.abs(entry.x-x)<BRIDGE_MERGE);
+    if(crossing===null||!Number.isFinite(crossing.x)||Math.abs(crossing.x)>e)continue;
+    const near=crossingsAtRiver.find(entry=>Math.abs(entry.x-crossing.x)<BRIDGE_MERGE);
     if(near){
       // 가까운 두 도로를 한 다리로 합칠 때는 두 자리를 모두 덮도록 상판을 넓힌다.
-      near.min=Math.min(near.min,x);near.max=Math.max(near.max,x);
-      near.width=Math.max(near.width,ROAD_WIDTH[road.kind]||8);
-      near.x=(near.min+near.max)/2;
+      near.min=Math.min(near.min,crossing.x);near.max=Math.max(near.max,crossing.x);
+      const width=ROAD_WIDTH[road.kind]||8;
+      if(width>near.width){near.width=width;near.x=crossing.x;near.z=crossing.z;near.road=road;}
       continue;
     }
-    crossingsAtRiver.push({x,min:x,max:x,width:ROAD_WIDTH[road.kind]||8,kind:road.kind});
+    crossingsAtRiver.push({x:crossing.x,z:crossing.z,min:crossing.x,max:crossing.x,
+      width:ROAD_WIDTH[road.kind]||8,kind:road.kind,road});
   }
   crossingsAtRiver.sort((a,b)=>a.x-b.x);
   // 간선 교량 두 곳을 사장교로 세운다. 나머지는 거더교다.
   const widest=[...crossingsAtRiver].sort((a,b)=>b.width-a.width||a.x-b.x).slice(0,2);
-  const bridges=crossingsAtRiver.map((entry,index)=>({
-    x:entry.x,z:riverCenter(e,entry.x),axis:'z',
-    width:Math.max(26,entry.width+10,entry.max-entry.min+entry.width+10),
-    // 상판 길이는 그 자리의 강폭에 양안 접속부를 더한 값이다.
-    length:riverHalf(e,entry.x)*2+70,
-    big:widest.includes(entry),ko:`${index+1}번 교량`,
-  }));
+  const bridgeFromRoad=(road,x,z,length,extra={})=>{
+    const dx=road.x2-road.x1,dz=road.z2-road.z1,run=Math.hypot(dx,dz)||1;
+    const ux=dx/run,uz=dz/run;
+    return {x,z,x1:x-ux*length/2,z1:z-uz*length/2,x2:x+ux*length/2,z2:z+uz*length/2,
+      axis:Math.abs(ux)>=Math.abs(uz)?'x':'z',length,...extra};
+  };
+  const bridges=crossingsAtRiver.map((entry,index)=>{
+    const run=Math.hypot(entry.road.x2-entry.road.x1,entry.road.z2-entry.road.z1)||1;
+    const alongZ=Math.max(.2,Math.abs(entry.road.z2-entry.road.z1)/run);
+    const length=(riverHalf(e,entry.x)*2+70)/alongZ;
+    return bridgeFromRoad(entry.road,entry.x,entry.z,length,{axis:'z',
+      width:Math.max(26,entry.width+10,entry.max-entry.min+entry.width+10),
+      big:widest.includes(entry),ko:`${index+1}번 교량`,sourceRoad:entry.road.id||entry.road.path,
+      _sourceRoad:entry.road,
+    });
+  });
   // 지천교다. 지천을 가로지르는 지상 도로마다 지천 폭에 맞춘 짧은 거더교를 놓는다.
   // 상판이 x 방향으로 뻗으므로 axis 가 'x' 다.
   for(const stream of streams){
@@ -707,13 +795,22 @@ function buildUrbanPlan(extent){
     for(const road of roads){
       if(road.elevated||road.tunnel||road.kind==='alley')continue;
       const lo=Math.min(road.x1,road.x2),hi=Math.max(road.x1,road.x2);
-      if(lo>=stream.x||hi<=stream.x||hi-lo<stream.width)continue;
+      // 지천 x 가 두 도로 조각의 공유 꼭짓점과 같아도 하나의 실제 횡단이다.
+      if(lo>stream.x+1e-6||hi<stream.x-1e-6||hi-lo<stream.width)continue;
       const t=(stream.x-road.x1)/(road.x2-road.x1),z=road.z1+(road.z2-road.z1)*t;
       if(z<zLo||z>zHi||inRiver(e,stream.x,z))continue;
       if(bridges.some(b=>b.axis==='x'&&Math.abs(b.x-stream.x)<1&&Math.abs(b.z-z)<(ROAD_WIDTH[road.kind]||8)))continue;
-      bridges.push({x:stream.x,z,axis:'x',width:(ROAD_WIDTH[road.kind]||8)+6,length:stream.width+40,big:false,ko:`${stream.id} 지천교`});
+      bridges.push(bridgeFromRoad(road,stream.x,z,stream.width+40,{axis:'x',width:(ROAD_WIDTH[road.kind]||8)+6,
+        big:false,ko:`${stream.id} 지천교`,sourceRoad:road.id||road.path,_sourceRoad:road}));
     }
   }
+
+  // 램프 중심선은 렌더·노면·교각·필지 예약이 함께 쓰는 단일 폴리라인이다.
+  const rampSegments=ramps.flatMap(ramp=>{
+    const kind=ramp.kind==='portal'?'highway':'collector';
+    const line=ramp.points||[[ramp.from.x,ramp.from.z],[ramp.to.x,ramp.to.z]];
+    return line.slice(1).map((point,index)=>({...segment([line[index][0],line[index][1]],[point[0],point[1]],kind),id:'ramp'}));
+  });
 
   const holes=[];
   for(const d of districts)for(const block of grids.get(d.id).blocks)if(block.empty)holes.push({...block,district:d.id});
@@ -728,7 +825,8 @@ function buildUrbanPlan(extent){
   const inner=(block)=>block.pitch/2-ALLEY/2;
   // 랜드마크는 제 크기만큼 도로에서 물러나야 한다. 고가도 교각과 상판이 건물을 뚫으므로 넣는다.
   // 골목은 자리를 정한 뒤 평면 안쪽만 잘라 낸다. 그 자리에서 가장 가까운 도로 가장자리까지의 거리다.
-  const roadRoom=(block)=>roads.reduce((room,road)=>{
+  const reservationRoads=[...roads,...rampSegments];
+  const roadRoom=(block)=>reservationRoads.reduce((room,road)=>{
     if(road.kind==='alley')return room;
     const dx=road.x2-road.x1,dz=road.z2-road.z1,len=dx*dx+dz*dz;
     const t=len?Math.max(0,Math.min(1,((block.x-road.x1)*dx+(block.z-road.z1)*dz)/len)):0;
@@ -737,7 +835,7 @@ function buildUrbanPlan(extent){
   // 랜드마크는 돌리지 않고 세우므로 평면 사각형 그대로 도로와 겹치는지 본다.
   const clearOfSurface=(block,key)=>{
     const [width,depth]=LANDMARK_SIZE[key]||[148,148];
-    return !roads.some(road=>{
+    return !reservationRoads.some(road=>{
       if(road.kind==='alley')return false;
       const pad=(ROAD_WIDTH[road.kind]||8)/2;
       return holeSpan(road,{x:block.x,z:block.z,hx:width/2+pad,hz:depth/2+pad})!==null;
@@ -770,8 +868,67 @@ function buildUrbanPlan(extent){
     const [width,depth]=LANDMARK_SIZE[mark.key]||[148,148];
     return {x:mark.x,z:mark.z,hx:width/2+5,hz:depth/2+5};
   })];
-  const clipped=roads.flatMap(road=>road.kind==='alley'?clipRoad(road,alleyHoles):[road]);
+  const removedAlleyEnds=[];
+  const clipped=roads.flatMap(road=>{
+    if(road.kind!=='alley')return [road];
+    const pieces=clipRoad(road,alleyHoles);
+    if(!pieces.length)removedAlleyEnds.push([road.x1,road.z1],[road.x2,road.z2]);
+    return pieces;
+  });
+  // 한 골목 조각이 공공 부지 안에 완전히 들어가 사라지면 clipRoad 가 남길 조각이 없어
+  // 이웃 조각에 잘린 이유를 옮길 수 없다. 공유 끝점에 명시적으로 제약 사유를 넘긴다.
+  for(const road of clipped){
+    if(road.kind!=='alley')continue;
+    if(removedAlleyEnds.some(([x,z])=>Math.hypot(road.x1-x,road.z1-z)<1e-5))road.deadEndIn='constraint';
+    if(removedAlleyEnds.some(([x,z])=>Math.hypot(road.x2-x,road.z2-z)<1e-5))road.deadEndOut='constraint';
+  }
   roads.splice(0,roads.length,...clipped);
+  // 자연·물·공공 부지를 피하면서 끊긴 지구 격자를 가장 큰 지상망에 붙인다. 후보는
+  // roadNetwork 가 실제 컴포넌트 끝점에서 만들고, 이곳은 도시 제약만 판정한다.
+  const connectorClear=(candidate)=>{
+    const dx=candidate.x2-candidate.x1,dz=candidate.z2-candidate.z1,run=Math.hypot(dx,dz)||1;
+    const nx=-dz/run,nz=dx/run;
+    for(let step=0;step<=24;step++){
+      const t=step/24,x=candidate.x1+(candidate.x2-candidate.x1)*t,z=candidate.z1+(candidate.z2-candidate.z1)*t;
+      for(const offset of [0,-ROAD_WIDTH.lane/2,ROAD_WIDTH.lane/2]){
+        const sx=x+nx*offset,sz=z+nz*offset;
+        if(inWaterBody(e,sx,sz)||inRiverPark(e,sx,sz)||inNature(e,sx,sz))return false;
+        if(hills.some(hill=>Math.hypot(sx-hill.x,sz-hill.z)<hill.r+2))return false;
+        if(landmarks.some(mark=>{
+          const [width,depth]=LANDMARK_SIZE[mark.key]||[148,148];
+          return Math.abs(sx-mark.x)<width/2&&Math.abs(sz-mark.z)<depth/2;
+        }))return false;
+      }
+    }
+    return true;
+  };
+  const surfaceRoads=roads.filter(road=>!road.elevated&&!road.tunnel);
+  const surfaceTopology=buildRoadNetwork({roads:surfaceRoads});
+  const surfaceLinkById=new Map(surfaceTopology.links.map(link=>[link.id,link]));
+  // 포장은 맞닿지만 중심선이 끝난 기존 경계는 짧은 실제 연결 조각으로 메운다. 폭 합보다
+  // 먼 끝은 여기서 연결됐다고 간주하지 않는다.
+  const seamAdditions=surfaceEdgeSeams(surfaceRoads,{graph:surfaceTopology,canConnect:connectorClear});
+  for(const [index,seam] of seamAdditions.entries()){
+    const id=`surface-seam-${index}`;
+    roads.push(segment([seam.x1,seam.z1],[seam.x2,seam.z2],'lane',{id,path:id,access:true}));
+  }
+  const additions=surfaceConnectors(surfaceRoads,{graph:surfaceTopology,canConnect:connectorClear,maxDistance:260});
+  for(const [index,connector] of additions.entries()){
+    const id=`access-${index}`;
+    roads.push(segment([connector.x1,connector.z1],[connector.x2,connector.z2],'lane',{id,path:id,access:true}));
+  }
+  // 행/교차 골목의 남은 끝은 생성 시 물·자연·공공 부지 때문에 해당 예약 통로가
+  // 생략된 곳이다. 내부 courtyard 도로는 생성할 때부터 별도 사유를 갖는다.
+  for(const end of surfaceTopology.openEnds){
+    if(end.kind!=='alley'||end.intentional)continue;
+    const link=surfaceLinkById.get(end.link),road=surfaceRoads[link?.sourceIndex];
+    if(!road)continue;
+    if(seamAdditions.some(seam=>Math.hypot(end.x-seam.x1,end.z-seam.z1)<1e-5))continue;
+    const atIn=Math.hypot(end.x-road.x1,end.z-road.z1)<1e-5;
+    const reason=road.deadEndIn||road.deadEndOut||'constraint-corridor';
+    if(atIn)road.deadEndIn=reason;else road.deadEndOut=reason;
+  }
+  for(const bridge of bridges){bridge.sourceRoadIndex=roads.indexOf(bridge._sourceRoad);delete bridge._sourceRoad;}
   const parks=shareHoles(wide,4,used).map((block,index)=>({x:block.x,z:block.z,rx:inner(block),rz:inner(block),
     kind:['central','oldtown','garden','arts'][index]||'central'}));
   const plazas=shareHoles(wide,3,used).map(block=>({x:block.x,z:block.z,r:Math.min(44,inner(block))}));
@@ -802,18 +959,16 @@ function buildUrbanPlan(extent){
   // 골목은 격자가 스스로 비운 자리라 근접 색인에서 뺀다. worldLayout 의 nearRoad 와 같은 규칙이다.
   // 램프는 도로가 아니지만 그 밑에 건물이 서면 안 되므로 색인에만 지상 도로로 넣는다.
   // 곡선이므로 그린 폴리라인을 그대로 조각내야 안쪽 곡선에 건물이 파고들지 않는다.
-  const rampSegments=ramps.flatMap(ramp=>{
-    const kind=ramp.kind==='portal'?'highway':'collector';
-    const line=ramp.points||[[ramp.from.x,ramp.from.z],[ramp.to.x,ramp.to.z]];
-    return line.slice(1).map((point,index)=>({...segment([line[index][0],line[index][1]],[point[0],point[1]],kind),id:'ramp'}));
-  });
   const roadIndex=createSegmentIndex([...roads.filter(r=>r.kind!=='alley'),...rampSegments],LOT_CHAMPION+ALLEY);
   const subway=subwayNetwork(e);
-  return {extent,riverZ:riverCenter(e,0),districts,roads,bridges,parks,plazas,waterfront,landmarks,routes,
+  const plan={extent,riverZ:riverCenter(e,0),districts,roads,bridges,parks,plazas,waterfront,landmarks,routes,highwayRoutes,
     ramps,roundabouts,tunnels,overpasses,highwayDeck:HIGHWAY_DECK,
     nodes,hills,nature,ponds,airportRoads:[{side:1,points:[[border,AIRPORT_ROAD_Z],[e+AIRPORT_OFFSET+AIRPORT_ROAD_END,AIRPORT_ROAD_Z]]}],
     subway,interchanges,roadIndex,riverLine,
     islands:riverIslands(e),streams};
+  let network;
+  Object.defineProperty(plan,'network',{enumerable:true,get:()=>network??=(buildRoadNetwork({roads,ramps}))});
+  return plan;
 }
 
 /** 경로 길이는 경로마다 고정이다. 차량 한 대마다 매 프레임 다시 재지 않는다. */

@@ -8,10 +8,11 @@ import {
   addOverpass,
   addRoadFurniture,
 } from '../../src/world/models/roadStructures.js';
+import { hitsBuilding } from '../../src/world/solidIndex.js';
 
 // WorldScene.useResources() 가 실제로 등록한 shape/material 전부다. 새 키를 추가하면 렌더가 터진다.
 const ALLOWED_SHAPES = ['gable', 'box', 'pane', 'octagon', 'spire', 'tree', 'trunk', 'hill', 'cylinder', 'cone', 'pyramid', 'dome'];
-const ALLOWED_MATERIALS = ['stone', 'brick', 'sand', 'violet', 'roof', 'dark', 'pavement', 'road', 'marking', 'water', 'bank', 'ground', 'green', 'leaf', 'wood', 'accent', 'glass', 'blueglass', 'lamp', 'car', 'pick', 'tint', 'steel'];
+const ALLOWED_MATERIALS = ['stone', 'brick', 'sand', 'violet', 'roof', 'dark', 'pavement', 'road', 'marking', 'centerline', 'water', 'bank', 'ground', 'green', 'leaf', 'wood', 'accent', 'glass', 'blueglass', 'lamp', 'car', 'pick', 'tint', 'steel'];
 const RADIAL = ['cylinder', 'cone', 'octagon', 'spire', 'trunk', 'tree', 'dome', 'hill'];
 
 function collect(run) {
@@ -132,6 +133,20 @@ test('고가도로 상판은 지정한 높이에 있고 교각은 지면부터 �
     const top = pier.position[1] + pier.scale[1] / 2;
     assert.ok(bottom <= 0.2, `pier bottom ${bottom} should reach ground`);
     assert.ok(top >= height * 0.6, `pier top ${top} should reach near deck ${height}`);
+  }
+});
+
+test('고가 교각 충돌 상자는 자기 상판 위 차량을 막지 않는다', () => {
+  const piers = [];
+  const height = ROAD_STRUCTURE_DEFAULTS.deckHeight;
+  collect((add) => addElevatedRoad(add, arterial, {
+    quality: 'medium', height, onPier: (pier) => piers.push(pier),
+  }));
+  assert.ok(piers.length > 0);
+  for (const pier of piers) {
+    assert.equal(pier.roofMargin, 0, '교각에 건물용 지붕 여유를 더하면 안 된다');
+    const onDeck = { x: pier.x, y: height + 1.48, z: pier.z };
+    assert.equal(hitsBuilding(onDeck, onDeck, pier), false, '교각이 상판 위 차량까지 막는다');
   }
 });
 

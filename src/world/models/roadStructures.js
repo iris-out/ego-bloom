@@ -2,8 +2,11 @@
  * 네트워크에 의존하지 않는다. 좌표계는 X/Z 평면에 위쪽 +Y, 기본 지면은 Y=0이다.
  * segment 는 shared/urbanPlan.js 모양({x1,z1,x2,z2,...})을 그대로 받는다. 배선은
  * cityModels.js 의 createBatches().add(material, position, scale, owner, shape,
- * rotation, color) 콜백을 그대로 넘기면 된다. owner 는 항상 null 이다.
+ * rotation, color) 콜백을 그대로 넘기면 된다. owner 는 항상 null 이다. 폴리라인
+ * 램프 상판은 인스턴스 파트가 아니므로 options.addRoadTriangle 콜백도 반드시 넘긴다.
  */
+import { roadClearance } from '../../../shared/roadClearance.js';
+import { roadRibbon } from '../../../shared/roadRibbon.js';
 
 export const ROAD_STRUCTURE_DEFAULTS = Object.freeze({
   width: 22,
@@ -54,6 +57,24 @@ function pointAt(segment, geo, t) {
   return { x: segment.x1 + geo.ux * geo.length * t, z: segment.z1 + geo.uz * geo.length * t };
 }
 
+// 교각 콜백의 축 정렬 충돌 상자는 기본 margin 3 이 더해진다. 사각형 전체를
+// 감싸는 반경으로 비워야 사선 도로의 바깥 차선도 교각에 막히지 않는다.
+const pierClearanceRadius = () => Math.SQRT2 * (ROAD_STRUCTURE_DEFAULTS.pierRadius * 0.7 + 3);
+
+function clearanceOf(options) {
+  return options.clearance && typeof options.clearance.clearSpans === 'function'
+    ? options.clearance : (options.plan ? roadClearance(options.plan) : null);
+}
+
+function intersectSpans(left, right) {
+  const out = [];
+  for (const [a0, a1] of left) for (const [b0, b1] of right) {
+    const from = Math.max(a0, b0), to = Math.min(a1, b1);
+    if (to - from > 1e-6) out.push([from, to]);
+  }
+  return out;
+}
+
 /** 교각 한 짝이 설 자리를 고른다. 원래 자리가 지상 도로 위면 경간 절반까지 앞뒤로
  * 옮겨 보고, 그래도 비는 자리가 없으면 null 을 줘 그 경간을 건너뛴다.
  * 옮기는 폭을 경간 절반으로 묶어야 이웃 교각과 자리가 뒤집히지 않는다. */
@@ -86,17 +107,25 @@ export function addElevatedRoad(add, segment, options = {}) {
   const geo = segmentGeometry(segment);
   const beamY = deckY - deckThickness / 2 - 0.55;
   const railHalf = width / 2 - 0.4;
-
-  add('road', [geo.cx, deckY, geo.cz], [width, deckThickness, geo.length], null, 'box', geo.rotation, color);
-  add('marking', [geo.cx, deckY + deckThickness / 2 + 0.02, geo.cz], [0.34, 0.05, geo.length], null, 'box', geo.rotation);
-  add('steel', [geo.cx, beamY, geo.cz], [width * 0.86, 1.1, geo.length], null, 'box', geo.rotation);
+  const clearance = clearanceOf(options);
+  const levelSegment = { ...segment, y: deckY, deckY, sourceRoad: options.sourceRoad };
+  const capStart = Math.max(0, segment.capStart || 0), capEnd = Math.max(0, segment.capEnd || 0);
+  const deckLength = geo.length + capStart + capEnd, shift = (capEnd - capStart) / 2;
+  const deckX = geo.cx + geo.ux * shift, deckZ = geo.cz + geo.uz * shift;
+  add('road', [deckX, deckY, deckZ], [width, deckThickness, deckLength], null, 'box', geo.rotation, color);
+  for (const mark of roadMarkings(levelSegment, { width, quality, clearance,
+    y: deckY + deckThickness / 2 + 0.02 })) {
+    add(mark.material, mark.position, mark.scale, null, 'box', mark.rotation, mark.color);
+  }
+  add('steel', [deckX, beamY, deckZ], [width * 0.86, 1.1, deckLength], null, 'box', geo.rotation);
   for (const side of [-1, 1]) {
     const blocked=(options.railOpenings??segment.railOpenings??[]).filter(item=>item.side===side)
       .map(item=>[Math.max(0,item.from),Math.min(1,item.to)]).filter(([from,to])=>to>from).sort((a,b)=>a[0]-b[0]);
     const spans=[];let cursor=0;
     for(const [from,to] of blocked){if(from>cursor)spans.push([cursor,from]);cursor=Math.max(cursor,to);}
     if(cursor<1)spans.push([cursor,1]);
-    for(const [from,to] of spans){
+    const clear = clearance ? clearance.clearSpans(levelSegment, railHalf * side, 0.09) : [[0, 1]];
+    for(const [from,to] of intersectSpans(spans, clear)){
       const t=(from+to)/2,{x,z}=pointAt(segment,geo,t),spanLength=geo.length*(to-from);
       const rx = x + geo.px * railHalf * side, rz = z + geo.pz * railHalf * side;
       add('steel', [rx, deckY + deckThickness / 2 + D.guardHeight / 2, rz], [0.18, D.guardHeight, spanLength], null, 'box', geo.rotation);
@@ -111,7 +140,8 @@ export function addElevatedRoad(add, segment, options = {}) {
   const lampSpacing = D.lampSpacing[quality];
   const lampEvery = lampSpacing ? Math.max(1, Math.round(lampSpacing / spacing)) : 0;
   // 교각이 설 수 있는 자리를 호출자가 정한다. 주지 않으면 예전처럼 등간격으로 세운다.
-  const clearAt = typeof options.pierClear === 'function' ? options.pierClear : null;
+  const clearAt = typeof options.pierClear === 'function' ? options.pierClear
+    : clearance ? (x, z) => clearance.pointClear(x, z, pierClearanceRadius(), 0) : null;
 
   for (let i = 0; i < stations; i += 1) {
     const sides = twinPiers ? [-1, 1] : [0];
@@ -124,11 +154,14 @@ export function addElevatedRoad(add, segment, options = {}) {
       add('stone', [px, pierHeight / 2, pz], [D.pierRadius, pierHeight, D.pierRadius], null, 'cylinder');
       add('dark', [px, D.pierBaseHeight / 2, pz], [D.pierRadius * 1.4, D.pierBaseHeight, D.pierRadius * 1.4], null, 'cylinder');
       // 교각은 차가 부딪히면 멈추는 구조물이다. 자리를 여기서만 정하므로 여기서 알린다.
-      options.onPier?.({ x: px, z: pz, width: D.pierRadius * 1.4, depth: D.pierRadius * 1.4, height: pierHeight });
+      options.onPier?.({ x: px, z: pz, width: D.pierRadius * 1.4, depth: D.pierRadius * 1.4,
+        height: pierHeight, roofMargin: 0 });
     }
     if (lampEvery && i % lampEvery === 0) {
       for (const side of [-1, 1]) {
         const lx = sx + geo.px * railHalf * side, lz = sz + geo.pz * railHalf * side;
+        if (clearance && !clearance.columnClear(lx, lz, 0.1,
+          deckY + deckThickness / 2, deckY + deckThickness / 2 + 5.5, levelSegment)) continue;
         add('dark', [lx, deckY + deckThickness / 2 + 2.6, lz], [0.16, 5.2, 0.16], null, 'box', geo.rotation);
         add('lamp', [lx, deckY + deckThickness / 2 + 5.3, lz], [0.7, 0.32, 0.7], null, 'octagon');
       }
@@ -188,108 +221,108 @@ export function addTunnel(add, segment, options = {}) {
   }
 }
 
-/** 폴리라인을 품질에 맞게 솎는다. 양 끝 점과 폭이 바뀌는 점(합류 테이퍼)은 반드시
- * 남긴다. 테이퍼를 솎으면 낮은 품질에서 상판 가장자리와의 사이가 벌어진다. */
-function decimate(points, limit) {
-  const spans = points.length - 1;
-  if (spans <= limit) return points;
-  const stride = Math.ceil(spans / limit), out = [];
-  for (let i = 0; i < points.length; i += 1) {
-    const last = i === points.length - 1;
-    const shaped = (i > 0 && points[i][3] !== points[i - 1][3]) || (!last && points[i][3] !== points[i + 1][3]);
-    if (i % stride === 0 || shaped || last) out.push(points[i]);
-  }
-  return out;
-}
-
-/** 폴리라인 램프다. 점은 [x, z, y, width] 이고 조각마다 상판 한 장을 눕힌다.
- * 꺾이는 자리에서는 조각을 바깥쪽 결각만큼 겹쳐 늘려 V 자 틈을 메운다. 마지막
- * 조각은 폭이 tip 까지 좁아져 본선에 스며들므로 잘린 단면이 남지 않는다. */
+/** 폴리라인 램프다. 점은 [x, z, y, width, optionalLeftTransverse] 이다.
+ * 공통 리본의 마이터 횡단면과 테이퍼 삼각형을 그대로 그리고 난간도 같은 모서리를 따른다. */
 function addRampRibbon(add, points, options) {
   const quality = normalizeQuality(options.quality);
   const D = ROAD_STRUCTURE_DEFAULTS;
   const color = options.color;
   const thickness = options.deckThickness ?? D.deckThickness;
-  const line = decimate(points, D.rampSteps[quality]);
-  const spans = line.map((point, index) => {
-    if (!index) return null;
-    const a = line[index - 1], b = point;
-    const dx = b[0] - a[0], dz = b[1] - a[1], dy = b[2] - a[2];
-    const run = Math.hypot(dx, dz) || 1e-6;
-    return {
-      a, b, run, ux: dx / run, uz: dz / run,
-      rotation: Math.atan2(dx, dz), pitch: -Math.atan2(dy, run),
-      slope: Math.hypot(run, dy), width: (a[3] + b[3]) / 2,
+  // 노면과 물리가 같은 canonical points 를 쓴다. 품질별 솎기는 장식에만 허용한다.
+  const width = options.width ?? D.width * 0.7;
+  const deck = roadRibbon(points, { width, offsetY: thickness / 2 });
+  const underside = roadRibbon(points, { width, offsetY: -thickness / 2 });
+  const railRibbon = roadRibbon(points, { width, inset: 0.3 });
+  const clearance = clearanceOf(options);
+  if (!deck.spans.length) return;
+
+  const emit = options.addRoadTriangle;
+  if (typeof emit === 'function') {
+    for (const triangle of deck.triangles) emit(triangle, { face: 'top', color });
+    for (const triangle of underside.triangles) emit([triangle[0], triangle[2], triangle[1]],
+      { face: 'bottom', color });
+    const wall = (a, b, c, d) => {
+      const group = {};
+      emit([a, b, c], { face: 'wall', group, color });
+      emit([c, b, d], { face: 'wall', group, color });
     };
-  }).slice(1);
-  if (!spans.length) return;
-
-  const bend = (left, right) => {
-    if (!left || !right) return 0;
-    let diff = (right.rotation - left.rotation) % (Math.PI * 2);
-    if (diff > Math.PI) diff -= Math.PI * 2;
-    if (diff < -Math.PI) diff += Math.PI * 2;
-    return Math.abs(diff);
-  };
-  // 이음매 겹침이다. 바깥쪽 결각 깊이는 반폭 * tan(꺾임/2) 이라 그만큼 늘려 덮는다.
-  const overlapAt = (left, right) => {
-    const angle = bend(left, right);
-    if (angle < 1e-4) return 0;
-    const half = Math.max(left ? left.width : 0, right ? right.width : 0) / 2;
-    return Math.min(half * Math.tan(Math.min(angle, 1.2) / 2), 6);
-  };
-
-  // 난간은 조각 몇 개에 한 줄이다. 한 줄이 곧은 상자라 꺾임이 큰 low 에서 더 자주 끊는다.
-  const railStride = quality === 'low' ? 3 : quality === 'medium' ? 3 : 2;
+    for (let i = 0; i < deck.spans.length; i += 1) {
+      const top = deck.spans[i], bottom = underside.spans[i];
+      wall(top.leftA, bottom.leftA, top.leftB, bottom.leftB);
+      wall(top.rightA, top.rightB, bottom.rightA, bottom.rightB);
+    }
+    const topStart = deck.sections[0], bottomStart = underside.sections[0];
+    wall(topStart.left, topStart.right, bottomStart.left, bottomStart.right);
+    const topEnd = deck.sections.at(-1), bottomEnd = underside.sections.at(-1);
+    wall(topEnd.left, bottomEnd.left, topEnd.right, bottomEnd.right);
+  }
   const openMerge = options.openMerge !== false;
-  for (let i = 0; i < spans.length; i += 1) {
-    const span = spans[i];
-    const back = overlapAt(spans[i - 1], span), front = overlapAt(span, spans[i + 1]);
-    const length = span.slope + back + front, shift = (front - back) / 2;
-    const cx = (span.a[0] + span.b[0]) / 2 + span.ux * shift;
-    const cz = (span.a[1] + span.b[1]) / 2 + span.uz * shift;
-    const cy = (span.a[2] + span.b[2]) / 2;
-    const rotation = [span.pitch, span.rotation, 0];
-    add('road', [cx, cy, cz], [span.width, thickness, length], null, 'box', rotation, color);
-    // 난간은 몇 조각에 한 줄이다. 폭이 좁아지는 테이퍼와 본선 쪽은 비워 차가 합류한다.
-    // 노면 높이로 달리는 밑동 구간에도 세우지 않는다. 지상 도로 노면을 가로지른다.
-    if (i % railStride || span.width < D.width * 0.4 || span.a[2] < D.rampRailMin) continue;
-    const rail = spans.slice(i, i + railStride);
-    const last = rail[rail.length - 1];
-    const railLength = rail.reduce((sum, item) => sum + item.slope, 0);
-    const rx = (span.a[0] + last.b[0]) / 2, rz = (span.a[1] + last.b[1]) / 2;
-    const ry = (span.a[2] + last.b[2]) / 2 + thickness / 2 + D.guardHeight / 2;
-    const px = -span.uz, pz = span.ux;
-    const inward = options.inward;
-    for (const side of [-1, 1]) {
-      // 마지막 조각에서 본선 쪽 난간을 비운다. inward 는 상판을 가리키는 단위 벡터다.
-      if (openMerge && inward && i + railStride >= spans.length && (px * inward[0] + pz * inward[1]) * side > 0) continue;
-      add('steel', [rx + px * (span.width / 2 - 0.3) * side, ry, rz + pz * (span.width / 2 - 0.3) * side],
-        [0.14, D.guardHeight, railLength], null, 'box', [span.pitch, span.rotation, 0]);
+  const sourcePoint = (center) => points.find((point) =>
+    Math.abs(point[0] - center[0]) < 1e-7 && Math.abs(point[1] - center[2]) < 1e-7
+    && Math.abs(point[2] - center[1]) < 1e-7);
+  for (let i = 0; i < railRibbon.spans.length; i += 1) {
+    const span = railRibbon.spans[i];
+    const dx = span.b[0] - span.a[0], dz = span.b[2] - span.a[2];
+    const run = Math.hypot(dx, dz) || 1e-6, px = -dz / run, pz = dx / run;
+    const pointA = sourcePoint(span.a), pointB = sourcePoint(span.b);
+    const widthA = Number.isFinite(pointA?.[3]) ? pointA[3] : width;
+    const widthB = Number.isFinite(pointB?.[3]) ? pointB[3] : width;
+    // 난간은 inset 리본의 실제 3D 모서리를 모든 조각에서 잇는다. 낮은 밑동에는 세우지 않는다.
+    if ((widthA + widthB) / 2 < D.width * 0.4 || span.a[1] < D.rampRailMin) continue;
+    const flatMerge = Math.abs(span.b[1] - span.a[1]) < 1e-7
+      && (widthB < widthA - 1e-7 || Array.isArray(pointA?.[4]) || Array.isArray(pointB?.[4]));
+    const edges = [
+      { side: -1, a: span.rightA, b: span.rightB },
+      { side: 1, a: span.leftA, b: span.leftB },
+    ];
+    for (const edge of edges) {
+      // 평평한 합류 테이퍼는 안쪽 전체를 열고 바깥 난간만 남긴다.
+      const inward = options.inward && (px * options.inward[0] + pz * options.inward[1]) * edge.side > 0;
+      if (openMerge && inward && (flatMerge || i === railRibbon.spans.length - 1)) continue;
+      const railSource = { x1: edge.a[0], y1: edge.a[1], z1: edge.a[2],
+        x2: edge.b[0], y2: edge.b[1], z2: edge.b[2], sourceRoad: options.sourceRoad };
+      const clear = clearance ? clearance.clearSpans(railSource, 0, 0.07) : [[0, 1]];
+      for (const [from, to] of clear) {
+        const ax = edge.a[0] + (edge.b[0] - edge.a[0]) * from;
+        const ay = edge.a[1] + (edge.b[1] - edge.a[1]) * from;
+        const az = edge.a[2] + (edge.b[2] - edge.a[2]) * from;
+        const bx = edge.a[0] + (edge.b[0] - edge.a[0]) * to;
+        const by = edge.a[1] + (edge.b[1] - edge.a[1]) * to;
+        const bz = edge.a[2] + (edge.b[2] - edge.a[2]) * to;
+        const railDx = bx - ax, railDy = by - ay, railDz = bz - az;
+        const railRun = Math.hypot(railDx, railDz), length = Math.hypot(railRun, railDy);
+        if (length <= 1e-6) continue;
+        add('steel', [(ax + bx) / 2, (ay + by) / 2 + thickness / 2 + D.guardHeight / 2, (az + bz) / 2],
+          [0.14, D.guardHeight, length], null, 'box',
+          [-Math.atan2(railDy, railRun), Math.atan2(railDx, railDz), 0]);
+      }
     }
   }
 
   // 교각이다. 상판이 지면에서 충분히 뜬 자리에만 세운다. 지상 도로 위는 건너뛴다.
   if (quality === 'low') return;
-  const clearAt = typeof options.pierClear === 'function' ? options.pierClear : null;
+  const clearAt = typeof options.pierClear === 'function' ? options.pierClear
+    : clearance ? (x, z) => clearance.pointClear(x, z, pierClearanceRadius(), 0) : null;
   const spacing = options.pierSpacing ?? D.pierSpacing[quality] * 1.6;
   let since = spacing;
-  for (const span of spans) {
-    since += span.run;
+  for (const span of railRibbon.spans) {
+    since += Math.hypot(span.b[0] - span.a[0], span.b[2] - span.a[2]);
     if (since < spacing) continue;
-    const y = span.b[2], height = y - thickness / 2;
+    const y = span.b[1], height = y - thickness / 2;
     if (height < D.rampPierMin) continue;
-    if (clearAt && !clearAt(span.b[0], span.b[1])) continue;
+    if (clearAt && !clearAt(span.b[0], span.b[2])) continue;
     since = 0;
-    add('stone', [span.b[0], height / 2, span.b[1]], [D.pierRadius, height, D.pierRadius], null, 'cylinder');
-    add('dark', [span.b[0], D.pierBaseHeight / 2, span.b[1]], [D.pierRadius * 1.4, D.pierBaseHeight, D.pierRadius * 1.4], null, 'cylinder');
+    add('stone', [span.b[0], height / 2, span.b[2]], [D.pierRadius, height, D.pierRadius], null, 'cylinder');
+    add('dark', [span.b[0], D.pierBaseHeight / 2, span.b[2]], [D.pierRadius * 1.4, D.pierBaseHeight, D.pierRadius * 1.4], null, 'cylinder');
     // 충돌 상자 모양은 addElevatedRoad 의 교각과 같은 키를 쓴다. solidIndex 가 같은 판정을 한다.
-    options.onPier?.({ x: span.b[0], z: span.b[1], width: D.pierRadius * 1.4, depth: D.pierRadius * 1.4, height });
+    options.onPier?.({ x: span.b[0], z: span.b[2], width: D.pierRadius * 1.4, depth: D.pierRadius * 1.4,
+      height, roofMargin: 0 });
   }
 }
 
-/** 진입로다. options.points 가 있으면 그 폴리라인을 리본으로 잇고, 없으면 예전처럼
- * from 과 to 를 한 장의 기울어진 상판으로 잇는다(고속도로 포탈 경사로). */
+/** 진입로다. options.points 가 있으면 그 폴리라인을 리본으로 잇고, 상판 삼각형은
+ * options.addRoadTriangle 에 보낸다. 없으면 예전처럼 from 과 to 를 한 장의 기울어진
+ * 상판으로 잇는다(고속도로 포탈 경사로). */
 export function addRamp(add, from, to, options = {}) {
   if (Array.isArray(options.points) && options.points.length >= 2) {
     addRampRibbon(add, options.points, options);
@@ -307,14 +340,23 @@ export function addRamp(add, from, to, options = {}) {
   const slopeLength = Math.hypot(length, rise), pitch = -Math.atan2(rise, length);
   const cx = (from.x + to.x) / 2, cz = (from.z + to.z) / 2, y = (from.y + to.y) / 2;
   const slopeRotation = [pitch, rotation, 0];
+  const clearance = clearanceOf(options);
   add('road', [cx, y, cz], [width, thickness, slopeLength], null, 'box', slopeRotation, color);
   for (const side of [-1, 1]) {
-    const rx = cx + px * (width / 2 - 0.3) * side, rz = cz + pz * (width / 2 - 0.3) * side;
-    add('steel', [rx, y + thickness / 2 + D.guardHeight / 2, rz], [0.14, D.guardHeight, slopeLength], null, 'box', slopeRotation);
+    const offset = (width / 2 - 0.3) * side;
+    const source = { x1: from.x, z1: from.z, y1: from.y, x2: to.x, z2: to.z, y2: to.y,
+      sourceRoad: options.sourceRoad };
+    const clear = clearance ? clearance.clearSpans(source, offset, 0.07) : [[0, 1]];
+    for (const [begin, end] of clear) {
+      const t = (begin + end) / 2;
+      const rx = from.x + dx * t + px * offset, rz = from.z + dz * t + pz * offset;
+      const ry = from.y + rise * t + thickness / 2 + D.guardHeight / 2;
+      add('steel', [rx, ry, rz], [0.14, D.guardHeight, slopeLength * (end - begin)], null, 'box', slopeRotation);
+    }
   }
-  if (quality !== 'low') {
-    const midY = from.y + (to.y - from.y) * 0.5;
-    const mx = from.x + ux * length * 0.5, mz = from.z + uz * length * 0.5;
+  const midY = from.y + (to.y - from.y) * 0.5;
+  const mx = from.x + ux * length * 0.5, mz = from.z + uz * length * 0.5;
+  if (quality !== 'low' && (!clearance || clearance.pointClear(mx, mz, pierClearanceRadius(), 0))) {
     add('stone', [mx, midY / 2, mz], [D.pierRadius, Math.max(1.5, midY), D.pierRadius], null, 'cylinder');
   }
 
@@ -338,26 +380,41 @@ export function addOverpass(add, segment, options = {}) {
   const D = ROAD_STRUCTURE_DEFAULTS;
   const width = options.width ?? D.width;
   const thickness = options.deckThickness ?? D.deckThickness;
-  const clearance = options.clearance ?? D.overpassClearance;
+  const clearance = Number.isFinite(options.clearance)
+    ? options.clearance : (options.overpassClearance ?? D.overpassClearance);
   const abutmentDepth = D.overpassAbutmentDepth;
   const color = options.color;
   const geo = segmentGeometry(segment);
   const deckY = clearance + thickness / 2;
+  const roadSpace = clearanceOf(options);
+  const levelSegment = { ...segment, y: deckY, deckY, sourceRoad: options.sourceRoad };
 
   add('road', [geo.cx, deckY, geo.cz], [width, thickness, geo.length], null, 'box', geo.rotation, color);
-  add('marking', [geo.cx, deckY + thickness / 2 + 0.02, geo.cz], [0.34, 0.05, geo.length], null, 'box', geo.rotation);
+  for (const mark of roadMarkings(levelSegment, { width, quality, clearance: roadSpace,
+    y: deckY + thickness / 2 + 0.02 })) {
+    add(mark.material, mark.position, mark.scale, null, 'box', mark.rotation, mark.color);
+  }
   for (const side of [-1, 1]) {
-    const rx = geo.cx + geo.px * (width / 2 - 0.4) * side, rz = geo.cz + geo.pz * (width / 2 - 0.4) * side;
-    add('steel', [rx, deckY + thickness / 2 + D.guardHeight / 2, rz], [0.18, D.guardHeight, geo.length], null, 'box', geo.rotation);
+    const offset = (width / 2 - 0.4) * side;
+    const clear = roadSpace ? roadSpace.clearSpans(levelSegment, offset, 0.09) : [[0, 1]];
+    for (const [from, to] of clear) {
+      const point = pointAt(segment, geo, (from + to) / 2);
+      const rx = point.x + geo.px * offset, rz = point.z + geo.pz * offset;
+      add('steel', [rx, deckY + thickness / 2 + D.guardHeight / 2, rz],
+        [0.18, D.guardHeight, geo.length * (to - from)], null, 'box', geo.rotation);
+    }
   }
   for (const end of [0, 1]) {
     const ex = end ? segment.x2 : segment.x1, ez = end ? segment.z2 : segment.z1;
     const inward = end ? -1 : 1;
     const ax = ex + geo.ux * abutmentDepth * 0.5 * inward, az = ez + geo.uz * abutmentDepth * 0.5 * inward;
-    add('stone', [ax, deckY / 2, az], [width * 0.94, deckY, abutmentDepth], null, 'box', geo.rotation, color);
-    add('dark', [ax, deckY - 0.3, az], [width, 0.6, abutmentDepth], null, 'box', geo.rotation);
+    if (!roadSpace || roadSpace.pointClear(ax, az, Math.min(width, abutmentDepth) / 2, 0)) {
+      add('stone', [ax, deckY / 2, az], [width * 0.94, deckY, abutmentDepth], null, 'box', geo.rotation, color);
+      add('dark', [ax, deckY - 0.3, az], [width, 0.6, abutmentDepth], null, 'box', geo.rotation);
+    }
   }
-  if (quality !== 'low' && geo.length > D.pierSpacing[quality]) {
+  if (quality !== 'low' && geo.length > D.pierSpacing[quality]
+    && (!roadSpace || roadSpace.pointClear(geo.cx, geo.cz, D.pierRadius * 0.7, 0))) {
     add('stone', [geo.cx, (deckY - thickness / 2) / 2, geo.cz], [D.pierRadius, deckY - thickness / 2, D.pierRadius], null, 'cylinder');
   }
 }
@@ -368,15 +425,25 @@ export function addRoadFurniture(add, segment, options = {}) {
   const D = ROAD_STRUCTURE_DEFAULTS;
   const width = options.width ?? D.width;
   const geo = segmentGeometry(segment);
+  const clearance = clearanceOf(options);
 
   if (options.median) {
-    add('marking', [geo.cx, 0.3, geo.cz], [1.1, 0.5, geo.length], null, 'box', geo.rotation);
-    if (quality !== 'low') add('green', [geo.cx, 0.55, geo.cz], [0.8, 0.5, geo.length * 0.94], null, 'box', geo.rotation);
+    const spans = clearance ? clearance.clearSpans(segment, 0, 0.55) : [[0, 1]];
+    for (const [from, to] of spans) {
+      const point = pointAt(segment, geo, (from + to) / 2), length = geo.length * (to - from);
+      add('marking', [point.x, 0.3, point.z], [1.1, 0.5, length], null, 'box', geo.rotation);
+      if (quality !== 'low') add('green', [point.x, 0.55, point.z], [0.8, 0.5, length * 0.94], null, 'box', geo.rotation);
+    }
   }
   if (options.soundWall) {
     for (const side of [-1, 1]) {
-      const wx = geo.cx + geo.px * (width / 2 + 1.2) * side, wz = geo.cz + geo.pz * (width / 2 + 1.2) * side;
-      add('violet', [wx, D.wallHeight / 2, wz], [0.4, D.wallHeight, geo.length], null, 'box', geo.rotation);
+      const offset = (width / 2 + 1.2) * side;
+      const spans = clearance ? clearance.clearSpans(segment, offset, 0.2) : [[0, 1]];
+      for (const [from, to] of spans) {
+        const point = pointAt(segment, geo, (from + to) / 2);
+        const wx = point.x + geo.px * offset, wz = point.z + geo.pz * offset;
+        add('violet', [wx, D.wallHeight / 2, wz], [0.4, D.wallHeight, geo.length * (to - from)], null, 'box', geo.rotation);
+      }
     }
   }
 
@@ -387,6 +454,7 @@ export function addRoadFurniture(add, segment, options = {}) {
     const { x, z } = pointAt(segment, geo, (i + 0.5) / count);
     const side = i % 2 === 0 ? -1 : 1;
     const px = x + geo.px * (width / 2 + 0.3) * side, pz = z + geo.pz * (width / 2 + 0.3) * side;
+    if (clearance && !clearance.pointClear(px, pz, 0.08, 0)) continue;
     add('dark', [px, 0.9, pz], [0.14, 1.8, 0.14], null, 'box', geo.rotation);
     add('steel', [px, 1.85, pz], [0.9, 0.08, 0.9], null, 'box', geo.rotation);
     if (quality === 'high' && i % 3 === 0) {
@@ -422,14 +490,14 @@ function markingClear(join, width) {
 }
 
 function linePieces(segment, geo, options) {
-  const { offset, from, to, material, dash, lineWidth } = options;
+  const { offset, from, to, material, dash, lineWidth, y } = options;
   const span = to - from;
   if (span <= 1) return [];
   const center = (from + to) / 2;
   const place = (along, length) => {
     const x = segment.x1 + geo.ux * along + geo.px * offset;
     const z = segment.z1 + geo.uz * along + geo.pz * offset;
-    return { material, position: [x, MARKING.y, z], scale: [lineWidth, MARKING.thickness, length],
+    return { material, position: [x, y, z], scale: [lineWidth, MARKING.thickness, length],
       rotation: geo.rotation, color: undefined };
   };
   if (!dash) return [place(center, span)];
@@ -451,8 +519,16 @@ export function roadMarkings(segment, options = {}) {
   const to = geo.length - markingClear(segment.joinOut, width);
   if (to - from <= 1) return [];
   const dash = MARKING.dash[quality];
-  const line = (offset, material, dashed) => linePieces(segment, geo, {
-    offset, from, to, material, lineWidth: MARKING.lineWidth, dash: dashed ? dash : null });
+  const clearance = clearanceOf(options);
+  const y = options.y ?? MARKING.y;
+  const line = (offset, material, dashed) => {
+    const allowed = clearance ? clearance.clearSpans(segment, offset, MARKING.lineWidth / 2) : [[0, 1]];
+    const bounds = [from / geo.length, to / geo.length];
+    return intersectSpans(allowed, [bounds]).flatMap(([start, end]) => linePieces(segment, geo, {
+      offset, from: start * geo.length, to: end * geo.length, material, y,
+      lineWidth: MARKING.lineWidth, dash: dashed ? dash : null,
+    }));
+  };
 
   const parts = [];
   const centers = plan.center === 1 ? [0] : [-MARKING.centerGap / 2, MARKING.centerGap / 2];

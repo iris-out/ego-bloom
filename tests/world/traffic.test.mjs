@@ -48,7 +48,8 @@ test('모든 포즈가 유한하고 비정상 extent 와 시각을 견딘다', (
 
 test('우측통행이다. 직선 구간의 차는 진행 방향 오른쪽 차선에 있고 양방향이 모두 달린다', () => {
   for (const extent of [EXTENT, CITY]) {
-    const plan = createUrbanPlan(extent), routes = new Map(plan.routes.map((route) => [route.id, route]));
+    const plan = createUrbanPlan(extent);
+    const routes = new Map([...plan.routes, ...(plan.highwayRoutes || [])].map((route) => [route.id, route]));
     let forward = 0, backward = 0, checked = 0;
     for (let index = 0; index < 300; index += 1) {
       for (const time of [0, 7.3, 41.9]) {

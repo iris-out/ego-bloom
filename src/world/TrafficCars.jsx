@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { QUALITY } from './cityModels.js';
-import { trafficFrame } from './traffic.js';
+import { TRAFFIC_BODY, trafficFrame } from './traffic.js';
 
 /** AI 차량 한 대의 조각 배치다. 로컬 +Z 가 진행 방향이고 도로 상판 윗면이 y 0.31 이다.
  * 차체 색은 인스턴스 색으로 실리므로 여기서는 크기와 자리만 정한다. */
@@ -136,38 +136,39 @@ export default function TrafficCars({ resources, extent, quality, hiddenRef, nig
         if (dx * dx + dz * dz > reach) continue;
         const slot = live++;
         const angle = frame.angle[i], sin = Math.sin(angle), cos = Math.cos(angle);
+        const lift = frame.y[i] - TRAFFIC_BODY.base;
         const truck = frame.truck[i] === 1, spec = truck ? CAR_PARTS.truck : CAR_PARTS.car;
         // 로컬 +Z 가 진행 방향이다. 로컬 (lx, lz) 는 월드 (x + cos*lx + sin*lz, z - sin*lx + cos*lz) 로 간다.
         const paint = colors[i % colors.length];
         for (let p = 0; p < 2; p++) {
           const part = spec.hull[p], at = slot * 2 + p;
-          place(hullAt, at, x + sin * part.z, part.y, z + cos * part.z, sin, cos, part.s[0], part.s[1], part.s[2]);
+          place(hullAt, at, x + sin * part.z, part.y + lift, z + cos * part.z, sin, cos, part.s[0], part.s[1], part.s[2]);
           // 슬롯이 매 프레임 바뀌므로 차체 색도 여기서 같이 쓴다.
           paintAt[at * 3] = paint.r; paintAt[at * 3 + 1] = paint.g; paintAt[at * 3 + 2] = paint.b;
         }
         const tilts = truck ? GLASS_TILT.truck : GLASS_TILT.car;
         for (let p = 0; p < 3; p++) {
           const part = spec.glass[p];
-          place(glassAt, slot * 3 + p, x + sin * part.z, part.y, z + cos * part.z, sin, cos, part.s[0], part.s[1], part.s[2], tilts[p][0], tilts[p][1]);
+          place(glassAt, slot * 3 + p, x + sin * part.z, part.y + lift, z + cos * part.z, sin, cos, part.s[0], part.s[1], part.s[2], tilts[p][0], tilts[p][1]);
         }
         const boot = spec.cargo;
-        if (boot) place(cargoAt, boxes++, x + sin * boot.z, boot.y, z + cos * boot.z, sin, cos, boot.s[0], boot.s[1], boot.s[2]);
+        if (boot) place(cargoAt, boxes++, x + sin * boot.z, boot.y + lift, z + cos * boot.z, sin, cos, boot.s[0], boot.s[1], boot.s[2]);
         // 브레이크등은 밟으면 커지고 밝아진다. 인스턴스 색은 확산색만 바꾸므로 크기도 함께 키운다.
         const braking = frame.braking[i], lit = 0.45 + braking * 0.55, grow = 1 + braking * 0.35;
         for (let p = 0; p < 2; p++) {
           const part = spec.tail[p], at = slot * 2 + p;
-          place(tailAt, at, x + cos * part.x + sin * part.z, part.y, z - sin * part.x + cos * part.z, sin, cos, part.s[0] * grow, part.s[1] * grow, part.s[2]);
+          place(tailAt, at, x + cos * part.x + sin * part.z, part.y + lift, z - sin * part.x + cos * part.z, sin, cos, part.s[0] * grow, part.s[1] * grow, part.s[2]);
           litAt[at * 3] = lit; litAt[at * 3 + 1] = lit; litAt[at * 3 + 2] = lit;
         }
         if (!wheelAt || !headAt) continue;
         const radiusOf = spec.wheelSize[0], widthOf = spec.wheelSize[1];
         for (let p = 0; p < 4; p++) {
           const lx = spec.wheel[p][0], lz = spec.wheel[p][1];
-          placeWheel(wheelAt, slot * 4 + p, x + cos * lx + sin * lz, 0.31 + radiusOf, z - sin * lx + cos * lz, sin, cos, radiusOf, widthOf);
+          placeWheel(wheelAt, slot * 4 + p, x + cos * lx + sin * lz, TRAFFIC_BODY.base + lift + radiusOf, z - sin * lx + cos * lz, sin, cos, radiusOf, widthOf);
         }
         for (let p = 0; p < 2; p++) {
           const part = spec.head[p];
-          place(headAt, slot * 2 + p, x + cos * part.x + sin * part.z, part.y, z - sin * part.x + cos * part.z, sin, cos, part.s[0], part.s[1], part.s[2]);
+          place(headAt, slot * 2 + p, x + cos * part.x + sin * part.z, part.y + lift, z - sin * part.x + cos * part.z, sin, cos, part.s[0], part.s[1], part.s[2]);
         }
       }
     }

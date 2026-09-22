@@ -10,6 +10,7 @@ import { cityExtentForCount, createUrbanPlan } from '../../shared/urbanPlan.js';
 import { riverCenter } from '../../shared/river.js';
 import { airportBoxes, walkSpawn } from '../../src/world/models/airportLayout.js';
 import { hitsAnyBuilding } from '../../src/world/solidIndex.js';
+import { trafficPose } from '../../src/world/traffic.js';
 
 const EXTENT = 300;
 /** 강 판정은 실제 도시 크기에서만 맞다. 살아 있는 규격에서 끌어온다. */
@@ -206,6 +207,31 @@ test('차에 치이면 체력이 깎이고 쓰러지면 출발 지점으로 돌�
   assert.equal(down.phase, 'walk');
   assert.equal(down.hp, MAX_HP);
   assert.equal(down.z, home.z);
+});
+
+test('고가 AI 차량은 지상 보행자를 치지 않고 세로 범위가 겹칠 때만 친다', () => {
+  // 실제 highway-loop 포즈다. 동일한 X/Z 바닥을 걸어도 상판 위 차와는 신체가 겹치지 않는다.
+  const extent = 1600, elevated = trafficPose(2, 37.25, extent);
+  assert.ok(elevated.y > 10, `고가 차량 높이 ${elevated.y}`);
+  const ground = { ...createWalkState(extent), x: elevated.x, z: elevated.z };
+  const separated = stepWalk(ground, { threats: [elevated] }, 1 / 60, extent);
+  assert.equal(separated.hp, MAX_HP, '다리 아래에서 고가 차량에 치였다');
+  assert.equal(separated.struck, false);
+
+  // 수평 위치는 같은 채 차체를 보행자 높이로 내리면 기존 충돌은 그대로 발생한다.
+  const overlapping = stepWalk(ground, { threats: [{ ...elevated, y: 0.31 }] }, 1 / 60, extent);
+  assert.ok(overlapping.hp < MAX_HP, '세로로 겹친 차량은 보행자를 친다');
+  assert.equal(overlapping.struck, true);
+});
+
+test('고가 차량을 쏠 때 건물 가림은 차량의 실제 높이로 판정한다', () => {
+  const base = createWalkState(EXTENT);
+  const target = { index: 77, x: 0, y: 14.6, z: -10, width: 4.3, depth: 2.2, height: 1.6 };
+  const targetY = target.y + target.height / 2;
+  const home = { ...base, x: 0, z: 20, heading: 0, pitch: Math.atan2(targetY - (base.y - 0.12), 30) };
+  // 탄도는 지상의 낮은 벽 위를 지나지만, 기존의 y=1 가림선은 벽을 관통한다.
+  const lowWall = { x: 0, z: 10, height: 2, width: 10, depth: 2, margin: 0, roofMargin: 0 };
+  assert.equal(fireWeapon(home, { targets: [target], buildings: [lowWall], seed: 0 }).hit?.index, target.index);
 });
 
 test('출발 지점은 공항 터미널 앞 뭍이다', () => {

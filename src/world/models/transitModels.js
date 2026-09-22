@@ -6,6 +6,7 @@
  */
 import { LEVELS } from '../../../shared/elevation.js';
 import { ROAD_WIDTH } from '../../../shared/urbanPlan.js';
+import { bridgeSegment } from '../../../shared/bridgeGeometry.js';
 import { addRamp, MARKING } from './roadStructures.js';
 
 export const TRANSIT_MODEL_DEFAULTS = Object.freeze({
@@ -120,6 +121,7 @@ function addDiamond(add, node, q, options = {}) {
       points: ramp.points, width: ramp.width ?? ROAD_WIDTH.arterial * 0.7, quality: q,
       accelLane: true, mergeTo: ramp.merge, inward: ramp.inward,
       pierClear: options.pierClear, onPier: options.onPier,
+      clearance: options.clearance, sourceRoad: ramp, addRoadTriangle: options.addRoadTriangle,
     });
   }
   if (q === 'high') {
@@ -146,24 +148,32 @@ export function addInterchange(add, node, quality, options = {}) {
 export function addBridge(add, bridge, quality, options = {}) {
   const q = normalizeQuality(quality);
   const D = TRANSIT_MODEL_DEFAULTS;
-  // 상판 길이는 그 자리의 강폭에서 나온다. 예전에는 80 으로 고정이라 폭 142~278 인
-  // 강에서 상판이 물 한가운데 짧게 떠 있고 도로가 양쪽에서 끊겨 보였다.
-  const span = Number.isFinite(bridge.length) && bridge.length > 0 ? bridge.length : D.bridgeSpan;
-  const half = span / 2;
+  // endpoint 교량과 예전 axis 교량 모두 같은 정규화된 선분을 사용한다. 렌더, 수면
+  // 제외와 지도에서 이 방향을 다시 추측하면 비스듬한 횡단부가 서로 어긋난다.
+  const segment = bridgeSegment({ length: D.bridgeSpan, ...bridge });
+  const span = segment.length, half = span / 2;
   const deckThickness = D.bridgeDeckThickness;
   // 상판 윗면을 도로 포장 윗면에 맞춘다. 어긋나면 다리 진입에서 턱이 진다.
   const deckY = LEVELS.ROAD_TOP - deckThickness / 2;
-  // axis 'x' 는 지천교다. 상판이 x 방향으로 뻗어 세로로 흐르는 지천을 건넌다.
-  const across = bridge.axis === 'x';
-  const rotation = across ? Math.PI / 2 : 0;
-  const along = (offset) => across ? [bridge.x + offset, bridge.z] : [bridge.x, bridge.z + offset];
-  const beside = (offset) => across ? [bridge.x, bridge.z + offset] : [bridge.x + offset, bridge.z];
+  const { cx, cz, rotation, ux, uz, px, pz } = segment;
+  const along = (offset) => [cx + ux * offset, cz + uz * offset];
 
-  add('road', [bridge.x, deckY, bridge.z], [bridge.width, deckThickness, span], null, 'box', rotation);
-  add('marking', [bridge.x, deckY + deckThickness / 2 + 0.02, bridge.z], [0.34, 0.05, span], null, 'box', rotation);
+  add('road', [cx, deckY, cz], [segment.width, deckThickness, span], null, 'box', rotation);
+  add('marking', [cx, deckY + deckThickness / 2 + 0.02, cz], [0.34, 0.05, span], null, 'box', rotation);
+  const railOffset = segment.width / 2 - 0.4;
   for (const side of [-1, 1]) {
-    const [rx, rz] = beside((bridge.width / 2 - 0.4) * side);
-    add('steel', [rx, deckY + deckThickness / 2 + 0.55, rz], [0.16, 1.1, span], null, 'box', rotation);
+    const offset = railOffset * side;
+    const ranges = options.clearance?.clearSpans?.(segment, offset, 0.08) ?? [[0, 1]];
+    for (const range of ranges) {
+      const from = Math.max(0, Math.min(1, Number(range?.[0])));
+      const to = Math.max(from, Math.min(1, Number(range?.[1])));
+      const length = (to - from) * span;
+      if (!(length > 1e-6)) continue;
+      const middle = (from + to) / 2;
+      const rx = segment.x1 + (segment.x2 - segment.x1) * middle + px * offset;
+      const rz = segment.z1 + (segment.z2 - segment.z1) * middle + pz * offset;
+      add('steel', [rx, deckY + deckThickness / 2 + 0.55, rz], [0.16, 1.1, length], null, 'box', rotation);
+    }
   }
 
   const stations = D.bridgePierStations[q];
@@ -180,20 +190,32 @@ export function addBridge(add, bridge, quality, options = {}) {
   const pylonHeight = D.bridgePylonHeight;
   const pylonBase = deckY + deckThickness / 2;
   const cableCount = D.bridgeCableCount[q];
-  for (const t of D.bridgePylonPosition) {
+  for (const station of D.bridgePylonPosition) {
+    // 접속 도로가 주탑 아래를 통과하면 양쪽 탑을 함께 이웃 경간으로 옮긴다.
+    // 충돌 상자 여유까지 포함하고, 케이블도 옮긴 탑 자리에서 다시 파생한다.
+    const t = [0,-.04,.04,-.08,.08,-.12,.12].map(shift=>station+shift)
+      .filter(candidate=>candidate>.05&&candidate<.95)
+      .find(candidate=>!options.clearance?.columnClear || [-1,1].every(side=>{
+        const [x,z]=along(-half+span*candidate);
+        return options.clearance.columnClear(x+px*(segment.width/2+.8)*side,
+          z+pz*(segment.width/2+.8)*side,Math.SQRT2*(.8+3),pylonBase,pylonBase+pylonHeight,bridge);
+      }));
+    if(t===undefined)continue;
     const offset=-half+span*t;
     for(const side of [-1,1]){
-      const [alongX,alongZ]=along(offset),[pylonX,pylonZ]=across?[alongX,alongZ+(bridge.width/2+.8)*side]:[alongX+(bridge.width/2+.8)*side,alongZ];
+      const [alongX,alongZ]=along(offset);
+      const pylonX=alongX+px*(segment.width/2+.8)*side,pylonZ=alongZ+pz*(segment.width/2+.8)*side;
       add('steel', [pylonX, pylonBase + pylonHeight / 2, pylonZ], [1.6, pylonHeight, 1.6], null, 'box');
       // 주탑은 차도 바깥 난간 뒤에 선다.
-      options.onPylon?.({ x: pylonX, z: pylonZ, width: 1.6, depth: 1.6, height: pylonBase + pylonHeight });
+      options.onPylon?.({ x: pylonX, z: pylonZ, width: 1.6, depth: 1.6,
+        height: pylonBase + pylonHeight, roofMargin: 0 });
       for (let i = 1; i <= cableCount; i += 1) {
         const reach = (span * Math.min(t, 1 - t)) * (i / (cableCount + 1));
         const towardCenter = t < 0.5 ? 1 : -1;
         const [cableX,cableZ]=along(offset+reach*towardCenter);
         const topY = pylonBase + pylonHeight * (.94 - i * .025);
         const footY = pylonBase + .08;
-        const footX = across ? cableX : pylonX, footZ = across ? pylonZ : cableZ;
+        const footX = cableX+px*(segment.width/2+.8)*side, footZ = cableZ+pz*(segment.width/2+.8)*side;
         const dx = pylonX - footX, dz = pylonZ - footZ, dy = topY - footY;
         const length = Math.hypot(dx,dy,dz);
         // Cylinder's +Y axis must meet the tower, not hang vertically in free space.

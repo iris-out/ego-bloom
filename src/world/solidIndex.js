@@ -14,6 +14,7 @@ const LINEAR_BELOW = 24;
 const MARGIN = 3;
 
 const marginOf = (building) => (Number.isFinite(building.margin) ? building.margin : MARGIN);
+const roofMarginOf = (building) => (Number.isFinite(building.roofMargin) ? Math.max(0, building.roofMargin) : 4);
 
 /** 건물 몸통의 반폭이다. buildWorld 는 width, depth 를 주지 않고 lot 만 준다.
  * 화면에 그려지는 몸통이 lot * MASS_LOT_RATIO 이므로 그 값을 쓴다.
@@ -47,7 +48,9 @@ function slab(from, to, min, max, span) {
 
 const SPAN = [0, 1];
 
-/** 선분 from-to 가 건물 상자를 지나는지 본다. 상자는 바닥 -2 부터 지붕 위 4 까지다.
+/** 선분 from-to 가 건물 상자를 지나는지 본다. 상자는 바닥 -2 부터 지붕 위 여유까지다.
+ * 기본 지붕 여유는 4 이고, 상판 바로 아래 교각처럼 보이는 높이가 정확한 구조물은
+ * roofMargin:0 을 명시해 차가 상판 위에서 보이지 않는 충돌에 걸리지 않게 한다.
  * 점이 아니라 선분으로 보므로 빠르게 움직여도 벽을 뚫고 지나가지 않는다.
  * rotation 이 있으면 선분을 상자의 축으로 돌려서 본다. 돌아간 가드레일을 감싸는
  * 축 정렬 상자로 보면 호 안쪽 차선까지 막힌다. */
@@ -64,7 +67,7 @@ export function hitsBuilding(from, to, building) {
   }
   SPAN[0] = 0; SPAN[1] = 1;
   return slab(fromX, toX, -halfX, halfX, SPAN) !== null
-    && slab(from.y, to.y, -2, building.height + 4, SPAN) !== null
+    && slab(from.y, to.y, -2, building.height + roofMarginOf(building), SPAN) !== null
     && slab(fromZ, toZ, -halfZ, halfZ, SPAN) !== null;
 }
 

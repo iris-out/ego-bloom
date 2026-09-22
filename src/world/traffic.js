@@ -52,13 +52,17 @@ function shapeOf(plan, route) {
   for (let i = 1; i < count; i += 1) offsets[i] = offsets[i - 1] + Math.hypot(points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1]);
   const total = offsets[count - 1] || 1;
   const road = plan.roads.find((segment) => segment.path === route.id);
-  const half = (ROAD_WIDTH[road?.kind] || ROAD_WIDTH.lane) / 2, lanes = half >= 10 ? 2 : 1;
+  const kind = route.kind || road?.kind || 'lane';
+  const half = (route.width || ROAD_WIDTH[kind] || ROAD_WIDTH.lane) / 2, lanes = half >= 10 ? 2 : 1;
+  // route.y is the tyre contact surface. Elevated road boxes are centred at deckY and
+  // have the canonical 1.2 thickness, while ground routes keep the existing baseline.
+  const y = route.elevated ? (route.deckY ?? plan.highwayDeck ?? 14) + 0.6 : ROAD_TOP;
   const [fx, fz] = points[0], [lx, lz] = points[count - 1];
   const first = Math.atan2(points[1][0] - fx, points[1][1] - fz);
   const last = Math.atan2(lx - points[count - 2][0], lz - points[count - 2][1]);
   return {
     route, offsets, total, half, lanes, laneWidth: half / lanes,
-    speed: TRAFFIC_SPEED[road?.kind] || TRAFFIC_SPEED.lane,
+    kind, y, speed: TRAFFIC_SPEED[kind] || TRAFFIC_SPEED.lane,
     closed: count > 3 && Math.hypot(fx - lx, fz - lz) < 1,
     first, last, joint: last + wrapAngle(first - last) / 2,
     headReach: Math.min(BLEND_REACH, offsets[1] / 2), tailReach: Math.min(BLEND_REACH, (total - offsets[count - 2]) / 2),
@@ -92,6 +96,8 @@ function crossingsOf(shapes, own) {
   const out = [];
   for (const other of shapes) {
     if (other === own) continue;
+    // A ground street visually crossing an elevated deck is not an intersection.
+    if (Math.abs(other.y - own.y) > 2.5) continue;
     own.route.points.forEach(([x, z], i) => { if (nearestOn(other, x, z).gap <= other.half + 2) out.push(own.offsets[i]); });
     if (other.closed) continue;
     for (const [x, z] of [other.route.points[0], other.route.points[other.route.points.length - 1]]) {
@@ -215,7 +221,7 @@ function profileBand(raw, shape, crossings, v0) {
 }
 
 function buildTables(plan) {
-  const shapes = plan.routes.map((route) => shapeOf(plan, route));
+  const shapes = [...(plan.routes || []), ...(plan.highwayRoutes || [])].map((route) => shapeOf(plan, route));
   const bands = [];
   for (const shape of shapes) {
     const crossings = crossingsOf(shapes, shape);
@@ -227,7 +233,8 @@ function buildTables(plan) {
         if (band.n < 2 || !(band.lap > 0)) continue;
         // 슬롯 시간 간격이 TRAFFIC_GAP / vmin 이상이면 가장 느린 곳에서도 앞차와 그만큼 떨어진다.
         const slots = Math.max(1, Math.floor(band.lap * band.vmin / TRAFFIC_GAP));
-        bands.push({ ...band, key, route: shape.route.id, lane, lanes: shape.lanes, outer, v0, slots, phase: hash01(`${key}:phase`) });
+        bands.push({ ...band, key, route: shape.route.id, kind: shape.kind, y: shape.y,
+          lane, lanes: shape.lanes, outer, v0, slots, phase: hash01(`${key}:phase`) });
       }
     });
   }
@@ -309,6 +316,7 @@ function solve(tables, id, time, out, slot) {
   const u = t - band.T[k], v = band.V[k], acc = band.ACC[k], ds = band.DS[k];
   const f = ds > 1e-9 ? Math.max(0, Math.min(1, (v * u + 0.5 * acc * u * u) / ds)) : 0;
   out.x[slot] = band.X[k] + (band.X[k + 1] - band.X[k]) * f;
+  out.y[slot] = band.y;
   out.z[slot] = band.Z[k] + (band.Z[k + 1] - band.Z[k]) * f;
   out.angle[slot] = band.A[k] + (band.A[k + 1] - band.A[k]) * f;
   out.speed[slot] = Math.max(0, v + acc * u);
@@ -328,16 +336,16 @@ function poseInto(box, index, out, slot) {
   const angle = out.angle[slot], truck = out.truck[slot] === 1;
   const long = truck ? 7.4 : 4.3, wide = truck ? 2.7 : 2.2;
   const sideways = Math.abs(Math.sin(angle)) > 0.7;
-  box.index = index; box.x = out.x[slot]; box.z = out.z[slot]; box.angle = angle;
+  box.index = index; box.x = out.x[slot]; box.y = out.y[slot]; box.z = out.z[slot]; box.angle = angle;
   box.truck = truck; box.braking = out.braking[slot]; box.speed = out.speed[slot];
   box.width = sideways ? long : wide; box.depth = sideways ? wide : long;
-  box.y = TRAFFIC_BODY.base; box.height = truck ? TRAFFIC_BODY.truck : TRAFFIC_BODY.car;
+  box.height = truck ? TRAFFIC_BODY.truck : TRAFFIC_BODY.car;
   return box;
 }
 
 const poseOf = (index, out, slot) => poseInto({}, index, out, slot);
 
-const single = { x: new Float64Array(1), z: new Float64Array(1), angle: new Float64Array(1), braking: new Float64Array(1),
+const single = { x: new Float64Array(1), y: new Float64Array(1), z: new Float64Array(1), angle: new Float64Array(1), braking: new Float64Array(1),
   speed: new Float64Array(1), truck: new Uint8Array(1) };
 
 export function trafficPose(index, time, extent) {
@@ -385,8 +393,12 @@ export function updateTrafficYield(player, dt) {
     // 멀리 있는 차는 볼 필요가 없다. 늦춰 둔 차는 풀어 줘야 하므로 계속 본다.
     if (!lag && Math.abs(frame.x[i] - player.x) > YIELD_REACH && Math.abs(frame.z[i] - player.z) > YIELD_REACH) continue;
     const pose = poseInto(yieldBox, i, frame, i);
-    const next = nextYieldLag(lag, pose, player, dt);
-    brakes[i] = yieldBrake(pose, player);
+    // player.y is the driven vehicle origin while pose.y is the AI tyre-contact plane.
+    // If their vertical slabs do not overlap, the apparent X/Z crossing is grade-separated.
+    const sameLevel = !Number.isFinite(player.y)
+      || (player.y + 1 >= pose.y && player.y - 1 <= pose.y + pose.height);
+    const next = nextYieldLag(lag, pose, sameLevel ? player : null, dt);
+    brakes[i] = sameLevel ? yieldBrake(pose, player) : 0;
     if (next !== lag) { lags[i] = next; lagsMoved = true; }
   }
 }
@@ -400,7 +412,7 @@ export function clearTrafficYield() {
 
 const yieldBox = {};
 
-const frame = { count: 0, time: NaN, x: new Float64Array(0), z: new Float64Array(0), angle: new Float64Array(0),
+const frame = { count: 0, time: NaN, x: new Float64Array(0), y: new Float64Array(0), z: new Float64Array(0), angle: new Float64Array(0),
   braking: new Float64Array(0), speed: new Float64Array(0), truck: new Uint8Array(0) };
 let frameTables = null, frameReady = 0, lagsMoved = false;
 
@@ -409,7 +421,7 @@ export function trafficFrame(count, time, extent) {
   if (tables !== frameTables || t !== frame.time || lagsMoved) { frameTables = tables; frame.time = t; frameReady = 0; lagsMoved = false; }
   if (n > frame.x.length) {
     const size = Math.max(n, frame.x.length * 2);
-    for (const key of ['x', 'z', 'angle', 'braking', 'speed', 'truck']) frame[key] = grow(frame[key], size);
+    for (const key of ['x', 'y', 'z', 'angle', 'braking', 'speed', 'truck']) frame[key] = grow(frame[key], size);
   }
   if (n > frameReady) {
     assignCars(tables, n);
@@ -470,6 +482,7 @@ export function trafficTrack(index, time, extent) {
   const band = tables.bands[tables.band[id]], t = localTime(tables, id, finite(time)), k = locate(band, t);
   const u = t - band.T[k], ds = band.DS[k];
   const f = ds > 1e-9 ? Math.max(0, Math.min(1, (band.V[k] * u + 0.5 * band.ACC[k] * u * u) / ds)) : 0;
-  return { band: band.key, route: band.route, lane: band.lane, lanes: band.lanes, outer: band.outer, slot: tables.slot[id],
+  return { band: band.key, route: band.route, kind: band.kind, y: band.y,
+    lane: band.lane, lanes: band.lanes, outer: band.outer, slot: tables.slot[id],
     along: band.S[k] + ds * f, length: band.length, turning: band.TURN[k] === 1, v0: band.v0 };
 }

@@ -8,7 +8,7 @@ import { LOT_SIZES } from '../../shared/lots.js';
 import { inRiverPark, inStream, inWaterBody, onIsland, riverCenter, riverClearance } from '../../shared/river.js';
 import { LANDMARK_SIZE } from '../../shared/landmarks.js';
 import { CIVIC_BUILDINGS } from '../../src/world/models/civicBuildings.js';
-import { onAirportLand } from '../../src/world/models/airportLayout.js';
+import { airportBoxes, onAirportLand } from '../../src/world/models/airportLayout.js';
 
 /** 시드 고정 PRNG 다. tests/world/curves.test.mjs 와 같은 방식이라 결과가 매 실행 같다. */
 function mulberry32(seed){
@@ -220,8 +220,15 @@ test('모든 램프가 끊기지 않고 경사와 꺾임 한계를 지킨다',()
     for(const [index,ramp] of plan.ramps.entries()){
       const line=ramp.points;
       assert.ok(Array.isArray(line)&&line.length>=3,`램프 ${index} 에 폴리라인이 없다`);
-      // 점마다 [x, z, y, width] 가 유한하고 폭은 양수다.
-      for(const point of line){assert.equal(point.length,4);assert.ok(point.every(Number.isFinite)&&point[3]>0);}
+      // 점마다 [x, z, y, width, transverse?] 의 필수값이 유한하고 폭은 양수다.
+      for(const point of line){
+        assert.ok(point.length===4||point.length===5);
+        assert.ok(point.slice(0,4).every(Number.isFinite)&&point[3]>0);
+        if(point.length===5){
+          assert.ok(Array.isArray(point[4])&&point[4].length===2&&point[4].every(Number.isFinite));
+          assert.ok(Math.abs(Math.hypot(...point[4])-1)<1e-9);
+        }
+      }
       let grade=0,kink=0;
       for(let i=1;i<line.length;i++){
         const run=Math.hypot(line[i][0]-line[i-1][0],line[i][1]-line[i-1][1]);
@@ -483,6 +490,57 @@ test('랜드마크 평면 위로는 골목, 고가를 포함해 어떤 도로도
         assert.ok(gap>=-0.5,`extent ${extent} 의 ${mark.key} 를 ${road.kind}${road.elevated?'(고가)':''} 가 지난다 (${gap.toFixed(1)})`);
       }
     }
+  }
+});
+
+test('낮은 램프의 주행 폭 안에는 랜드마크가 서지 않는다',()=>{
+  // extent 1594 의 civic 공공건물이 ramp 4 저고도 구간을 막았던 회귀다. 도로만
+  // 예약하고 같은 폴리라인에서 파생한 램프를 랜드마크 후보 검사에서 빠뜨리면 재현된다.
+  const plan=createUrbanPlan(1594);
+  for(const ramp of plan.ramps)for(let index=1;index<ramp.points.length;index++){
+    const a=ramp.points[index-1],b=ramp.points[index];
+    if(Math.min(a[2],b[2])>12)continue;
+    const road={x1:a[0],z1:a[1],x2:b[0],z2:b[1]};
+    const half=Math.max(a[3],b[3])/2;
+    for(const mark of plan.landmarks){
+      const [width,depth]=LANDMARK_SIZE[mark.key];
+      const gap=segmentToRect(road,mark.x,mark.z,width/2,depth/2)-half;
+      assert.ok(gap>=0,`${mark.key} 가 ramp ${plan.ramps.indexOf(ramp)} 저고도 구간을 막는다 (${gap.toFixed(1)})`);
+    }
+  }
+});
+
+test('지천과 나란한 지선은 차도 가장자리까지 물에서 벗어난다',()=>{
+  // extent 1594 harbor-lane-3 의 중심은 뭍이지만 동쪽 차로 3.8 만큼이 안양천에 잠겼다.
+  const plan=createUrbanPlan(1594),road=plan.roads.find(item=>item.id==='harbor-lane-3');
+  assert.ok(road,'회귀 지선이 없다');
+  const dx=road.x2-road.x1,dz=road.z2-road.z1,run=Math.hypot(dx,dz),nx=-dz/run,nz=dx/run;
+  for(let along=0;along<=1;along+=.01)for(const side of [-1,1]){
+    const x=road.x1+dx*along+nx*side*(ROAD_WIDTH.lane/2-.1);
+    const z=road.z1+dz*along+nz*side*(ROAD_WIDTH.lane/2-.1);
+    assert.equal(inWaterBody(plan.extent,x,z),false,`lane edge submerged at ${x.toFixed(1)}, ${z.toFixed(1)}`);
+  }
+});
+
+test('지천이 강변도로 꼭짓점을 지나도 짧은 교량이 생긴다',()=>{
+  // 1750/3600 에서는 river-south 표본 꼭짓점 x 가 tan 지천 x 와 정확히 같다.
+  for(const extent of [1750,3600]){
+    const plan=createUrbanPlan(extent),stream=plan.streams.find(item=>item.id==='tan');
+    const crossing=plan.roads.find(road=>road.path==='river-south'
+      &&([[road.x1,road.z1],[road.x2,road.z2]].some(([x,z])=>Math.abs(x-stream.x)<1e-6
+        &&z>=Math.min(stream.z1,stream.z2)&&z<=Math.max(stream.z1,stream.z2))));
+    assert.ok(crossing,`extent ${extent}: 꼭짓점 교차 도로가 없다`);
+    const vertex=[[crossing.x1,crossing.z1],[crossing.x2,crossing.z2]].find(([x])=>Math.abs(x-stream.x)<1e-6);
+    assert.ok(plan.bridges.some(bridge=>bridge.axis==='x'&&Math.hypot(bridge.x-vertex[0],bridge.z-vertex[1])<1),
+      `extent ${extent}: 꼭짓점 지천교가 없다`);
+  }
+});
+
+test('작은 도시 외곽 순환로는 공항 시설 평면을 침범하지 않는다',()=>{
+  const extent=1000,plan=createUrbanPlan(extent),boxes=airportBoxes(extent);
+  for(const road of plan.roads.filter(item=>item.path==='ring'))for(const box of boxes){
+    const gap=segmentToRect(road,box.x,box.z,box.width/2+3,box.depth/2+3)-ROAD_WIDTH.collector/2;
+    assert.ok(gap>=0,`ring 이 공항 시설 ${box.x.toFixed(0)}, ${box.z.toFixed(0)} 을 침범한다 (${gap.toFixed(1)})`);
   }
 });
 

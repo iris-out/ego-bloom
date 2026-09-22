@@ -1,6 +1,7 @@
 import { hitsAnyBuilding } from './solidIndex.js';
 import { WORLD } from '../../shared/worldLayout.js';
 import { createUrbanPlan } from '../../shared/urbanPlan.js';
+import { onBridge } from '../../shared/bridgeGeometry.js';
 import { roadSurface } from './roadSurface.js';
 import { inWaterBody, riverCenter, riverClearance } from '../../shared/river.js';
 import { inPond } from '../../shared/nature.js';
@@ -73,10 +74,8 @@ export function inWater(x, z, extent = 180) {
   const plan = createUrbanPlan(span);
   if (inPond(plan, x, z)) return true;
   if (!inWaterBody(span, x, z)) return false;
-  // 교량 상판 위는 뭍이다. 강 교량은 x 로, 지천교는 z 로 자리를 본다.
-  return !plan.bridges.some(bridge => bridge.axis === 'x'
-    ? Math.abs(z - bridge.z) < bridge.width / 2 + 4 && Math.abs(x - bridge.x) < bridge.length / 2
-    : Math.abs(x - bridge.x) < bridge.width / 2 + 4 && Math.abs(z - bridge.z) < bridge.length / 2);
+  // 렌더와 같은 방향성 상판 안은 뭍이다. 진입부까지 차 폭만큼 여유를 둔다.
+  return !plan.bridges.some(bridge => onBridge(bridge, x, z, 4));
 }
 
 /** 출발 지점의 z 다. 강이 굽으면서 예전 고정값 240 이 물속이 됐다. 남안 강변도로
