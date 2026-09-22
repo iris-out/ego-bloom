@@ -264,6 +264,8 @@ Expected: PASS for exterior contracts and budgets.
 
 Add `formula` to `ROAD_KEYS` or the all-ground list as appropriate. Assert its halo central opening remains outside the central forward cone, wheel and display are beyond `NEAR_COCKPIT`, gauges fit the FOV, and the steering/display envelopes do not overlap. Extend all-ground tests to require clearance metadata for every vehicle key.
 
+Add a convertible-specific regression asserting the instrument hood has a shallow thickness, sits behind the instrument faces, connects to the dash top without a visible vertical gap, and does not overlap the steering rim projection. This catches the floating oversized slab visible in the supplied first-person screenshot.
+
 - [ ] **Step 2: Add failing detail and budget assertions**
 
 Require formula primary display, shift-light row, compact yoke, halo, three mirrors, and quality-ordered optional detail. Require civilian cabins to retain two vents and three switches, motorcycle primary instruments, and combat primary optics/screens.
@@ -281,6 +283,8 @@ Build cockpit rim, halo, padded sides, compact rectangular yoke with hands, inte
 - [ ] **Step 5: Refine civilian, motorcycle, and combat interiors**
 
 Adjust the layout data first, then consume it in renderers. Add only detail that improves silhouette or readability: recessed binnacles, layered dash faces, door-card seams, distinct console shapes, structural ribs, optic bezels, and restrained indicator lamps. Move occluding pieces instead of hiding essential controls.
+
+For the convertible, replace the single thick floating hood slab with a thin dashboard cap plus a recessed instrument binnacle. Lower and move the cap forward enough to join the red dash top, keep the three instrument surfaces readable, and leave the wheel/hands below their lower edge.
 
 - [ ] **Step 6: Run cockpit and mirror tests**
 
