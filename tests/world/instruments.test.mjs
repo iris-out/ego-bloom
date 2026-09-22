@@ -32,14 +32,19 @@ test('HUD horizon moves down when pitching up and banks with the outside horizon
 // and verifies the displayed text against hand-selected telemetry.
 function canvasRecorder() {
   const text = [];
+  const drawnText = [];
+  const calls = new Map();
   const ctx = new Proxy({}, { get: (_, key) => key === 'fillText'
-    ? value => text.push(String(value))
-    : (...args) => { for (const value of args) if (typeof value === 'number') assert.ok(Number.isFinite(value), `${String(key)} received ${value}`); }, set: () => true });
-  return { ctx, text };
+    ? (...args) => { text.push(String(args[0])); drawnText.push(args); }
+    : (...args) => {
+      calls.set(key, (calls.get(key) || 0) + 1);
+      for (const value of args) if (typeof value === 'number') assert.ok(Number.isFinite(value), `${String(key)} received ${value}`);
+    }, set: () => true });
+  return { ctx, text, drawnText, calls };
 }
 
 test('all instrument layouts draw named readings and remain finite with missing data', () => {
-  for (const mode of ['sixpack', 'flight', 'nav', 'stores', 'car', 'bike', 'ground', 'cluster', 'mfd', 'fcs', 'bay']) {
+  for (const mode of ['sixpack', 'flight', 'nav', 'stores', 'car', 'bike', 'ground', 'cluster', 'executiveCluster', 'mfd', 'fcs', 'bay']) {
     const { ctx, text } = canvasRecorder();
     drawInstrument(ctx, mode, { speed: 42, altitude: 350, heading: 90, gear: 'R', cannonAmmo: 0 }, '#83eda0');
     assert.ok(text.length >= 3, mode);
@@ -100,6 +105,85 @@ test('승용차 계기판은 실제 속도, 기어, 회전수만 적고 주행 �
   assert.ok(text.includes('GEAR') && text.includes('3'));
   assert.ok(text.includes('RPM') && text.includes('4200'));
   assert.ok(!text.includes('ODO'));
+});
+
+test('세단 executive cluster 는 실제 주행값만 대형 chevron 화면에 적는다', () => {
+  const { ctx, text, drawnText, calls } = canvasRecorder();
+  drawInstrument(ctx, 'executiveCluster', { speed: 98, gear: 'D', rpm: 4200, heading: 271, top: 220 }, '#72d5eb');
+  for (const value of ['98', 'D', '4200', '271', 'KM/H', 'RPM', 'HDG']) assert.ok(text.includes(value), value);
+  assert.ok((calls.get('lineTo') || 0) >= 12, 'opposing chevron tracks were not drawn');
+  assert.ok((calls.get('stroke') || 0) >= 4, 'silver/cyan chevron outlines were not drawn');
+  for (const invented of ['ePower', 'BATTERY', 'MUSIC', 'RANGE', 'ODO']) assert.ok(!text.includes(invented), invented);
+  for (const [value, minX, maxWidth] of [['98', 104, 76], ['D', 360, 64], ['4200', 200, 68], ['271', 200, 64]]) {
+    const draw = drawnText.find(args => String(args[0]) === value);
+    assert.ok(draw && draw[1] >= minX && draw[3] <= maxWidth,
+      `${value} is not kept inside the cropped driver screen (${minX}.., ${maxWidth}px)`);
+  }
+});
+
+test('세단 executive cluster 는 누락값을 0으로 만들지 않고 큰 값도 유한하게 그린다', () => {
+  for (const status of [
+    {},
+    { speed: null, gear: '', rpm: undefined, heading: '' },
+    { speed: 'broken', gear: null, rpm: Infinity, heading: NaN, top: 0 },
+    { speed: 1e20, gear: 'REVERSE-LONG', rpm: 1e20, heading: -721, top: 1 },
+  ]) {
+    const { ctx, text } = canvasRecorder();
+    drawInstrument(ctx, 'executiveCluster', status, '#72d5eb');
+    assert.ok(!text.some(value => /NaN|undefined|Infinity/.test(value)));
+    if (!Number.isFinite(Number(status.speed))) assert.ok(text.includes('—'));
+  }
+  const missing = canvasRecorder();
+  drawInstrument(missing.ctx, 'executiveCluster', { speed: '', gear: '', rpm: '', heading: '' }, '#72d5eb');
+  assert.ok(missing.text.filter(value => value === '—').length >= 4);
+  assert.ok(!missing.text.includes('0'));
+
+  const huge = canvasRecorder();
+  drawInstrument(huge.ctx, 'executiveCluster', {
+    speed: 1e20, gear: 'REVERSE-LONG', rpm: 1e20, heading: -721, top: 1,
+  }, '#72d5eb');
+  assert.equal(huge.text.filter(value => value === '1e20').length, 2, 'huge finite readings stay legible');
+  assert.ok(huge.text.includes('—'), 'malformed long gear is shown as unknown');
+  assert.ok(!huge.text.includes('REVERSE-LONG'));
+});
+
+test('executive cluster 추가는 기존 cluster 와 road navigation 배치를 바꾸지 않는다', () => {
+  assert.deepEqual(displaySize('executiveCluster'), { width: 512, height: 256 });
+  const executive = canvasRecorder();
+  drawInstrument(executive.ctx, 'executiveCluster', { speed: 80, gear: 4, rpm: 3600, heading: 90 }, '#72d5eb');
+  assert.ok(!executive.text.includes('GEAR'));
+  const cluster = canvasRecorder();
+  drawInstrument(cluster.ctx, 'cluster', { speed: 80, gear: 4, rpm: 3600 }, '#83eda0');
+  assert.ok(cluster.text.includes('GEAR'));
+  const roadnav = canvasRecorder();
+  drawInstrument(roadnav.ctx, 'roadnav', { x: 12, z: -8, heading: 90, speed: 40, extent: 300 }, '#72c8e8');
+  assert.ok(roadnav.text.includes('NAV'));
+});
+
+test('road navigation display draws a road map and heading instead of duplicate speed telemetry', () => {
+  const { ctx, text, calls } = canvasRecorder();
+  drawInstrument(ctx, 'roadnav', { x: 12, z: -8, heading: 73, speed: 42, extent: 300 }, '#72c8e8');
+  assert.ok(text.includes('NAV') && text.includes('HDG') && text.includes('073'));
+  assert.ok((calls.get('lineTo') || 0) >= 8, 'navigation page has no road network');
+  assert.ok(!text.includes('KM/H') && !text.includes('GEAR'));
+});
+
+test('road navigation does not fabricate a pose and clips roads to its map viewport', () => {
+  for (const status of [
+    { x: null, z: -8, heading: 73, speed: 42, extent: 300 },
+    { x: '', z: -8, heading: 73, speed: 42, extent: 300 },
+    { x: 12, z: undefined, heading: 73, speed: 42, extent: 300 },
+  ]) {
+    const { ctx, text, calls } = canvasRecorder();
+    drawInstrument(ctx, 'roadnav', status, '#72c8e8');
+    assert.ok(text.includes('NAV') && text.includes('—'));
+    assert.equal(calls.get('clip') || 0, 0, 'missing pose must not draw a road map');
+  }
+  const { ctx, calls } = canvasRecorder();
+  drawInstrument(ctx, 'roadnav', { x: 12, z: -8, heading: 73, speed: 42, extent: 300 }, '#72c8e8');
+  assert.equal(calls.get('clip'), 1, 'road network must stay inside the navigation viewport');
+  assert.equal(calls.get('save'), 1);
+  assert.equal(calls.get('restore'), 1);
 });
 
 test('MFD 는 정사각이고 제목이 페이지를 고른다', () => {

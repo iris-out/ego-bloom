@@ -6,6 +6,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import VehicleModel from './models/VehicleModel';
+import { flatPolygonGeometry, quadGeometry } from './models/carGeometry.js';
 import Blast, { BlastField } from './models/Blast';
 import Tracers from './models/Tracers';
 import { carStatus, createCarState, stepCar, vehicleBox } from './carPhysics.js';
@@ -20,6 +21,10 @@ import { projectAim } from './aimScreen.js';
 import { clearAimScreen, setAimScreen } from './aimScreenStore.js';
 import { playBoom, playTankShot , playTick } from './sound.js';
 import { createEngineVoice } from './engineSound.js';
+import {
+  SEDAN_FRONT_LIGHTS, SEDAN_REAR_LIGHTS, SUV_FRONT_LIGHTS, SUV_REAR_LIGHTS,
+  beamCone, defaultBeam, isBeamOn, nextBeam, rearLampIntensity, reverseLampIntensity,
+} from './headlights.js';
 import { IDLE_RPM } from './carGauges.js';
 import AimMarker from './models/AimMarker';
 import Cockpit from './cockpits';
@@ -77,6 +82,7 @@ const LAMP_REACH = Object.freeze({
   motorcycle: { wide: 0, nose: 1.35, tail: 1.35, lift: 0 },
   suv: { wide: 0.78, nose: 2.42, tail: 2.42, lift: 0.22 },
   convertible: { wide: 0.68, nose: 2.2, tail: 2.2, lift: 0.1 },
+  formula: { wide: 0.54, nose: 2.72, tail: 2.62, lift: -0.16 },
   truck: { wide: 0.82, nose: 3.78, tail: 3.76, lift: 0.15 },
 });
 const LAMP_DEFAULT = Object.freeze({ wide: 0.78, nose: 2.45, tail: 2.45, lift: 0 });
@@ -85,33 +91,113 @@ const LAMP_DEFAULT = Object.freeze({ wide: 0.78, nose: 2.45, tail: 2.45, lift: 0
  * 램프 상자가 비쳐 보였다(bodyHidden 으로 램프만 따로 숨겼다). 지금은 VehicleModel 을 항상
  * 마운트하고 firstPerson 이 캐빈만 숨기므로 보닛이 램프를 앞에서 가린다. 이 램프는 그래서
  * 항상 그린다(bodyHidden 없이). 실제로 가려지는지는 화면에서 확인이 필요하다. */
-function Lights({ vehicle, night, lamps }) {
+function Lights({ vehicle, night, beam, lamps }) {
   const front = useRef(), rearLeft = useRef(), rearRight = useRef(), reverse = useRef();
+  const sedanFront = useRef([]), sedanRear = useRef([]), sedanReverse = useRef([]);
+  const suvFront = useRef([]), suvRear = useRef([]), suvReverse = useRef([]);
   const reach = LAMP_REACH[vehicle] || LAMP_DEFAULT;
   const { wide, lift } = reach, nose = -reach.nose, tail = reach.tail;
+  const cone = beamCone(beam);
+  const sedanRearGeometry = useMemo(() => ({
+    rows: SEDAN_REAR_LIGHTS.rows.map(row => flatPolygonGeometry(row.rear, SEDAN_REAR_LIGHTS.rowZ + 0.008)),
+    wraps: SEDAN_REAR_LIGHTS.rows.map(row => quadGeometry(row.wrap.map(([x, y, z]) => [x + row.side * 0.006, y, z]))),
+  }), []);
+  useEffect(() => () => [...sedanRearGeometry.rows, ...sedanRearGeometry.wraps].forEach(geometry => geometry.dispose()), [sedanRearGeometry]);
+  const suvGeometry = useMemo(() => ({
+    frontRows: SUV_FRONT_LIGHTS.rows.map(row => flatPolygonGeometry(row.rear, 0)),
+    rearRows: SUV_REAR_LIGHTS.rows.map(row => flatPolygonGeometry(row.rear, 0)),
+  }), []);
+  useEffect(() => () => [...suvGeometry.frontRows, ...suvGeometry.rearRows].forEach(geometry => geometry.dispose()), [suvGeometry]);
+  // 스폿의 target 은 장면에 들어 있어야 matrixWorld 가 갱신된다. 떼어 두면 three 가
+  // 원점을 겨눈 것으로 읽어 빛이 차 앞이 아니라 도시 한가운데를 비춘다.
+  // WalkMode 의 손전등과 같은 방식이다.
+  const aimPoint = useMemo(() => new THREE.Object3D(), []);
   useFrame(() => {
     const { braking, reversing } = lamps.current;
-    const head = night ? 2.6 : 0.25;
-    if (front.current) front.current.material.emissiveIntensity = head;
-    for (const lamp of [rearLeft.current, rearRight.current]) {
-      if (lamp) lamp.material.emissiveIntensity = braking ? 3.4 : night ? 1.1 : 0.1;
+    const frontLamps = vehicle === 'sedan' ? sedanFront.current : vehicle === 'suv' ? suvFront.current : [front.current];
+    for (const lamp of frontLamps) {
+      if (lamp) lamp.material.emissiveIntensity = cone.lamp;
     }
-    if (reverse.current) reverse.current.material.emissiveIntensity = reversing ? 2.8 : 0;
+    const rearLamps = vehicle === 'sedan' ? sedanRear.current : vehicle === 'suv' ? suvRear.current : [rearLeft.current, rearRight.current];
+    for (const lamp of rearLamps) {
+      if (lamp) lamp.material.emissiveIntensity = rearLampIntensity(braking, night);
+    }
+    const reverseLamps = vehicle === 'sedan' ? sedanReverse.current : vehicle === 'suv' ? suvReverse.current : [reverse.current];
+    for (const lamp of reverseLamps) {
+      if (lamp) lamp.material.emissiveIntensity = reverseLampIntensity(reversing);
+    }
   });
   return <group>
-    <mesh ref={front} position={[0, -0.1 + lift, nose]} dispose={null}>
+    {vehicle === 'sedan' ? <>
+      {SEDAN_FRONT_LIGHTS.projectors.map((projector, index) => <mesh key={`p${index}`}
+        ref={(node) => { sedanFront.current[index] = node; }}
+        position={[projector.position[0], projector.position[1], projector.position[2] - 0.008]}
+        dispose={null} userData={{ dynamic: true, part: 'headlight-projector' }}>
+        <circleGeometry args={[projector.radius, 20]} />
+        <meshStandardMaterial color="#e8f5ff" emissive="#e8f5ff" emissiveIntensity={0.18}
+          toneMapped={false} side={THREE.DoubleSide} />
+      </mesh>)}
+      {SEDAN_FRONT_LIGHTS.drlSegments.map((segment, index) => <mesh key={`d${index}`}
+        ref={(node) => { sedanFront.current[index + SEDAN_FRONT_LIGHTS.projectors.length] = node; }}
+        position={[segment.position[0], segment.position[1], segment.position[2] - 0.008]}
+        scale={segment.scale} dispose={null}
+        userData={{ dynamic: true, part: 'headlight-drl' }}>
+        <boxGeometry />
+        <meshStandardMaterial color="#e8f5ff" emissive="#e8f5ff" emissiveIntensity={0.18} toneMapped={false} />
+      </mesh>)}
+    </> : vehicle === 'suv' ? <>
+      {SUV_FRONT_LIGHTS.rows.map((row, index) => <mesh key={index}
+        ref={(node) => { suvFront.current[index] = node; }} geometry={suvGeometry.frontRows[index]}
+        position={[0, 0, SUV_FRONT_LIGHTS.runtimeRowZ]} dispose={null}
+        userData={{ dynamic: true, part: 'suv-headlight-row' }}>
+        <meshStandardMaterial color="#e8f5ff" emissive="#e8f5ff" emissiveIntensity={0.18}
+          toneMapped={false} side={THREE.DoubleSide} />
+      </mesh>)}
+    </> : <mesh ref={front} position={[0, -0.1 + lift, nose]} dispose={null} userData={{ part: 'generic-headlight' }}>
       <boxGeometry args={[wide ? 1.9 : 0.34, 0.16, 0.08]} />
       <meshStandardMaterial color="#fff3d5" emissive="#fff3d5" emissiveIntensity={0.25} toneMapped={false} />
-    </mesh>
-    {[-1, 1].map((side) => <mesh key={side} ref={side < 0 ? rearLeft : rearRight} position={[side * wide, -0.05 + lift, tail]} dispose={null}>
+    </mesh>}
+    {vehicle === 'sedan' ? SEDAN_REAR_LIGHTS.rows.map((row, index) => <mesh key={index}
+      ref={(node) => { sedanRear.current[index] = node; }}
+      geometry={sedanRearGeometry.rows[index]} dispose={null} userData={{ dynamic: true, part: 'brake-lamp-row' }}>
+      <meshStandardMaterial color="#ef3348" emissive="#ef3348" emissiveIntensity={0.1}
+        toneMapped={false} side={THREE.DoubleSide} />
+    </mesh>) : vehicle === 'suv' ? SUV_REAR_LIGHTS.rows.map((row, index) => <mesh key={index}
+      ref={(node) => { suvRear.current[index] = node; }} geometry={suvGeometry.rearRows[index]}
+      position={[0, 0, SUV_REAR_LIGHTS.runtimeRowZ]} dispose={null}
+      userData={{ dynamic: true, part: 'suv-brake-lamp-row' }}>
+      <meshStandardMaterial color="#ef3348" emissive="#ef3348" emissiveIntensity={0.1}
+        toneMapped={false} side={THREE.DoubleSide} />
+    </mesh>) : [-1, 1].map((side) => <mesh key={side} ref={side < 0 ? rearLeft : rearRight} position={[side * wide, -0.05 + lift, tail]} dispose={null}>
       <boxGeometry args={[wide ? 0.5 : 0.26, 0.14, 0.07]} />
       <meshStandardMaterial color="#d94f3d" emissive="#d94f3d" emissiveIntensity={0.1} toneMapped={false} />
     </mesh>)}
-    <mesh ref={reverse} position={[0, -0.16 + lift, tail]} dispose={null}>
+    {vehicle === 'sedan' && SEDAN_REAR_LIGHTS.rows.map((row, index) => <mesh key={index}
+      ref={(node) => { sedanRear.current[index + SEDAN_REAR_LIGHTS.rows.length] = node; }}
+      geometry={sedanRearGeometry.wraps[index]} dispose={null} userData={{ dynamic: true, part: 'brake-lamp-wrap' }}>
+      <meshStandardMaterial color="#ef3348" emissive="#ef3348" emissiveIntensity={0.1}
+        toneMapped={false} side={THREE.DoubleSide} />
+    </mesh>)}
+    {vehicle === 'sedan' ? SEDAN_REAR_LIGHTS.reverse.map((lamp, index) => <mesh key={index}
+      ref={(node) => { sedanReverse.current[index] = node; }} position={lamp.position} scale={lamp.scale}
+      dispose={null} userData={{ dynamic: true, part: 'reverse-lamp' }}>
+      <boxGeometry />
+      <meshStandardMaterial color="#e8e3d6" emissive="#e8e3d6" emissiveIntensity={0} toneMapped={false} />
+    </mesh>) : vehicle === 'suv' ? SUV_REAR_LIGHTS.reverse.map((lamp, index) => <mesh key={index}
+      ref={(node) => { suvReverse.current[index] = node; }} position={lamp.position} scale={lamp.scale}
+      dispose={null} userData={{ dynamic: true, part: 'suv-reverse-lamp' }}>
+      <boxGeometry />
+      <meshStandardMaterial color="#e8e3d6" emissive="#e8e3d6" emissiveIntensity={0} toneMapped={false} />
+    </mesh>) : <mesh ref={reverse} position={[0, -0.16 + lift, tail]} dispose={null}>
       <boxGeometry args={[wide ? 0.42 : 0.18, 0.1, 0.07]} />
       <meshStandardMaterial color="#e8e3d6" emissive="#e8e3d6" emissiveIntensity={0} toneMapped={false} />
-    </mesh>
-    {night && <spotLight position={[0, 0.3 + lift, nose]} target-position={[0, -0.6, nose - 24]} angle={0.5} penumbra={0.6} distance={70} intensity={22} color="#fff3d5" castShadow={false} />}
+    </mesh>}
+    <primitive object={aimPoint} position={[0, 0.3 + lift - cone.drop, nose - cone.reach]} />
+    {/* 광원은 하나뿐이다. 상태마다 각도, 사거리, 세기, 겨누는 자리만 바꾼다. 끄면 visible 로
+        내려 광원 개수를 지금까지와 같게 둔다(ShaderPrewarm 이 미리 만들어 둔 조합이다). */}
+    <spotLight visible={isBeamOn(beam)} position={[0, 0.3 + lift, nose]} target={aimPoint}
+      angle={cone.angle} penumbra={cone.penumbra} distance={cone.distance} decay={cone.decay}
+      intensity={cone.intensity} color="#fff3d5" castShadow={false} />
   </group>;
 }
 
@@ -161,6 +247,10 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
   // 조준경 카메라로 옮겨 가는 정도다(0 평소, 1 조준경). 한 프레임에 끊으면 화면이 튄다.
   const scopeBlend = useRef(0);
   const lamps = useRef({ braking: false, reversing: false });
+  // 전조등이다. H 로 꺼짐, 하향등, 상향등, 둘 다를 돈다. 밤이 되거나 차를 바꾸면
+  // 기본값으로 돌아간다(밤이면 하향등).
+  const [beam, setBeam] = useState(() => defaultBeam(night));
+  useEffect(() => { setBeam(defaultBeam(night)); }, [night, vehicle]);
   // 엔진 소리다. 차종마다 하나를 만들어 두고 매 프레임 회전수만 옮긴다.
   const engine = useRef(null);
   // 변속 끊김이다. 단수가 바뀐 프레임에 1 로 올리고 지수로 푼다.
@@ -220,6 +310,8 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
       // V 는 배율 조준경 단계다. 누를 때마다 한 단계 올라가고 끝에서 처음으로 돈다.
       // 키를 누르고 있는 동안 계속 도는 것을 막으려 repeat 를 거른다.
       if (event.code === 'KeyV' && !event.repeat && steps) setScope((current) => nextScope(vehicle, current));
+      // H 는 전조등이다. 누르고 있는 동안 계속 도는 것을 막으려 repeat 를 거른다.
+      if (event.code === 'KeyH' && !event.repeat) setBeam(nextBeam);
     };
     const up = (event) => keys.current.delete(event.code);
     const clear = () => {
@@ -595,8 +687,8 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
     if (clock.elapsedTime - lastReport.current > 0.15) {
       lastReport.current = clock.elapsedTime;
       onCameraChange?.({ x: next.x, z: next.z });
-      const report = { ...carStatus(next, vehicle), hull: hullRatio(health.current),
-        kills: kills.current, killLabel: lastKill.current, airHits: airHits.current };
+      const report = { ...carStatus(next, vehicle), extent, hull: hullRatio(health.current),
+        kills: kills.current, killLabel: lastKill.current, airHits: airHits.current, beam };
       // DOM 조준선이 이 값으로 각도를 픽셀로 바꾼다. 필드 이름을 바꾸면 조준선이 어긋난다.
       if (combat) {
         const hit = solution.current;
@@ -637,7 +729,7 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
           <Cockpit rideKey={vehicle} statusRef={cockpitStatusRef} aimRef={aim} night={night} quality={quality} weather={weather} />
         </group>
         : view === 'first' && <Cockpit rideKey={vehicle} statusRef={cockpitStatusRef} aimRef={aim} night={night} quality={quality} weather={weather} />}
-      <Lights vehicle={vehicle} night={night} lamps={lamps} />
+      <Lights vehicle={vehicle} night={night} beam={beam} lamps={lamps} />
       {pilotName && view !== 'first' && <Html position={[0, 2.2, 0]} center zIndexRange={[14, 1]} distanceFactor={14} style={{ pointerEvents: 'none' }}>
         <span className="world-pilot-label" data-self="">{pilotName}</span>
       </Html>}

@@ -88,11 +88,12 @@ export default function Interceptor({ firstPerson = false }) {
       <Block position={[0, -0.66, -0.6]} scale={[1.0, 0.2, 6.4]} color={BELLY} />
       <PanelSeam position={[0, 0.48, 0.25]} scale={[0.5, 0.018, 3.4]} color={SKIN_DARK} />
 
-      {/* 기수 기관포 네 문 */}
-      {[[-0.3, 0.1], [0.3, 0.1], [-0.3, -0.28], [0.3, -0.28]].map(([x, y]) => <mesh key={`${x}${y}`}
-        position={[x, y, -4.75]} rotation={[HALF_PI, 0, 0]}>
-        <cylinderGeometry args={[0.09, 0.09, 0.7, 8]} /><meshStandardMaterial color={GUN} metalness={0.5} roughness={0.4} />
-      </mesh>)}
+      {/* 기수 2연장 기관포. 두 포신은 100m 앞 중심선을 향해 안쪽으로 튼다. */}
+      {[-1, 1].map((side) => <group key={side} position={[side * 0.3, 0.1, -4.75]} rotation={[0, side * Math.atan2(0.3, 100 - 4.75), 0]}>
+        <mesh rotation={[HALF_PI, 0, 0]}>
+          <cylinderGeometry args={[0.09, 0.09, 0.7, 8]} /><meshStandardMaterial color={GUN} metalness={0.5} roughness={0.4} />
+        </mesh>
+      </group>)}
 
 
       {/* 주익과 엔진 나셀. 나셀은 날개 밑에 매달리고 앞쪽에 흡입구가 열려 있다. */}

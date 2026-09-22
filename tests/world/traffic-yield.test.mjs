@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { nextYieldLag, yieldBrake, YIELD_BRAKE_ZONE, YIELD_CATCHUP, YIELD_GAP, YIELD_LANE, YIELD_MAX } from '../../src/world/trafficYield.js';
+import { nextYieldLag, yieldBrake, YIELD_BRAKE_ZONE, YIELD_CATCHUP, YIELD_GAP, YIELD_LANE, YIELD_MAX, YIELD_REACH } from '../../src/world/trafficYield.js';
 import { clearTrafficYield, trafficFrame, trafficPose, updateTrafficYield } from '../../src/world/traffic.js';
 
 const EXTENT = 900, COUNT = 200;
@@ -57,4 +57,21 @@ test('내 차가 서 있으면 뒤차가 뒤에 서고 떠나면 다시 달린�
   clearTrafficYield();
   const freed = trafficPose(3, time, EXTENT);
   assert.ok(freed.speed > 1, '늦춤을 풀면 다시 달린다');
+});
+
+test('한 축만 멀어도 판정을 건너뛴다', () => {
+  clearTrafficYield();
+  let time = 30;
+  trafficFrame(COUNT, time, EXTENT);
+  const car = trafficPose(3, time, EXTENT);
+  // 같은 줄에 있지만 한 축으로 반경 밖이다. 도로가 축에 나란한 도시에서 가장 흔한 자리다.
+  const far = { x: car.x, z: car.z + YIELD_REACH * 3, width: 2.2, depth: 4.6 };
+  for (let i = 0; i < 120; i += 1) {
+    updateTrafficYield(far, 1 / 60);
+    time += 1 / 60;
+    trafficFrame(COUNT, time, EXTENT);
+  }
+  const free = trafficPose(3, time, EXTENT);
+  assert.ok(free.speed > 1, `멀리 있는 차는 늦추지 않는다 (속도 ${free.speed.toFixed(2)})`);
+  clearTrafficYield();
 });

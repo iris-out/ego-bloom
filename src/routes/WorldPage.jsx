@@ -175,7 +175,7 @@ export default function WorldPage() {
   // 계기나 스로틀 레버와 겹친다.
   const helpTip = <details className="world-help-tooltip"><summary aria-label="조작 도움말">?</summary><div role="note">
     <strong>{flightMode?'비행 조작':carMode?'차량 조작':walkMode?'도보 조작':'도시 조작'}</strong>
-    <p className="world-desktop-help">{flightMode?(ride?.key==='interceptor'?'W/S 기수 · A/D 기울기 · Q/E 방향 · +/- 스로틀 · Shift 부스트 · Space 기관총':'W/S 기수 · A/D 기울기와 지상 조향 · Q/E 방향 · +/- 또는 ↑/↓ 스로틀 · 지상에서 Space 브레이크'):carMode?(['tank','howitzer','armored'].includes(ride?.key)?'W/S 이동 · A/D 조향 · 방향키 포탑 조준 · Space 또는 좌클릭 발사 · 3인칭 드래그 시점, 휠 확대':'W/S 가속·후진 · A/D 조향 · Space 브레이크 · 3인칭 드래그 시점, 휠 확대'):walkMode?`WASD 이동 · Shift 달리기 · Space 점프 · 좌클릭 사격 · 우클릭 정조준 · Q/C 피킹 · E 손전등 · R 재장전 · 1~${WEAPON_KEYS.length} 무기`:'WASD / 방향키 이동 · 드래그 회전 · 휠 확대 · Space 드라이브 시작'}</p>
+    <p className="world-desktop-help">{flightMode?(ride?.key==='fighter'?'W/S 기수 · A/D 기울기 · Q/E 방향 · +/- 스로틀 · Space 기관총 · V 미사일(적기를 2초 담으면 락온)':ride?.key==='interceptor'?'W/S 기수 · A/D 기울기 · Q/E 방향 · +/- 스로틀 · Shift 부스트 · Space 기관총':'W/S 기수 · A/D 기울기와 지상 조향 · Q/E 방향 · +/- 또는 ↑/↓ 스로틀 · 지상에서 Space 브레이크'):carMode?(['tank','howitzer','armored'].includes(ride?.key)?'W/S 이동 · A/D 조향 · 방향키 포탑 조준 · Space 또는 좌클릭 발사 · H 전조등 · 3인칭 드래그 시점, 휠 확대':'W/S 가속·후진 · A/D 조향 · Space 브레이크 · H 전조등 · 3인칭 드래그 시점, 휠 확대'):walkMode?`WASD 이동 · Shift 달리기 · Space 점프 · 좌클릭 사격 · 우클릭 정조준 · Q/C 피킹 · E 손전등 · R 재장전 · 1~${WEAPON_KEYS.length} 무기`:'WASD / 방향키 이동 · 드래그 회전 · 휠 확대 · Space 드라이브 시작'}</p>
     <p className="world-mobile-help">{flightMode?'왼쪽 기수·기울기 · 오른쪽 시점 · 세로 스로틀 가속':'왼쪽 이동 · 오른쪽 회전 · 두 손가락 확대'}</p>
     <p>{flightMode?'활주로 착륙 가능 · 충돌 시 3초 후 복귀':driving?'ESC 로 도시 탐색으로 돌아간다':'건물 또는 목록을 눌러 제작자 만나기'}</p>
     {flightMode && ride?.key==='fighter' && <p>Space 기관총 · V 미사일 · 모바일은 무장 버튼</p>}
@@ -315,7 +315,8 @@ export default function WorldPage() {
       onReset={resetRide}
       onExit={exitRide}
       help={helpTip}
-      minimap={buildings.length>0?<WorldMap buildings={buildings} selected={selected} cameraRef={cameraRef} onFocus={focus} onSelect={select} compact/>:null}/>}
+      minimap={buildings.length>0?<WorldMap buildings={buildings} selected={selected} cameraRef={cameraRef} onFocus={focus} onSelect={select} compact
+        mode={rideKind==='car'?'navigation':'overview'}/>:null}/>}
 
     {!driving && tab==='map' && buildings.length>0 && <WorldMap buildings={buildings} selected={selected} cameraRef={cameraRef} onFocus={focus} onSelect={select} onAirport={openPicker}/>}
 

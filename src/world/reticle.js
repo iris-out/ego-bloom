@@ -60,8 +60,8 @@ export function groundImpact(pose, aim, vehicle = 'tank', buildings = []) {
   return { ...probeShell(mouth, velocity, { buildings, gravity: shellGravity(vehicle) }), weapon: vehicle };
 }
 
-/** 전투기의 탄착점이다. 기관포는 중력이 없고(weapons.js 가 미사일에만 중력을 준다)
- * 미사일은 중력과 가속을 함께 받는다. 기체 속도가 탄속에 더해지는 것도 같게 맞춘다. */
+/** 전투기의 탄착점이다. 기관포는 기종별 낙차를 쓰고 미사일은 중력과 가속을
+ * 함께 받는다. 기체 속도가 탄속에 더해지는 것도 같게 맞춘다. */
 export function airImpact(pose, weapon = 'cannon', buildings = []) {
   const key = pose?.key || 'fighter';
   const mounts = armamentOf(key);
@@ -79,7 +79,7 @@ export function airImpact(pose, weapon = 'cannon', buildings = []) {
   return {
     ...probeShell(start, velocity, {
       buildings, floor: 0, life: spec.life,
-      gravity: bomb ? BOMB.gravity : missile ? MISSILE.gravity : 0,
+      gravity: bomb ? BOMB.gravity : missile ? MISSILE.gravity : finite(spec.gravity),
       accel: missile ? MISSILE.accel : 0,
     }),
     weapon,
@@ -111,6 +111,7 @@ export function angleToScreen(angle, fovDegrees = 62, heightPixels = 900) {
 export const RETICLE = Object.freeze({
   // 요격기다. 기수에 모은 기관포라 산포가 좁다.
   interceptor: { type: 'pipper', ladder: [], ring: 0.032, lead: true, label: '요격' },
+  shotgun: { type: 'pipper', ladder: [], ring: 0.075, lead: true, label: '산탄' },
   // 프로펠러 전투기다. 기관총만 달았고 탄속이 낮아 유효 사거리 원이 더 좁다.
   prop: { type: 'pipper', ladder: [], ring: 0.05, lead: true, label: '기총' },
   // 폭격기다. 조준선이 아니라 투하 표식이다. 탄착점은 AimMarker 가 땅에 그린다.
@@ -121,7 +122,7 @@ export const RETICLE = Object.freeze({
   howitzer: { type: 'ladder', ladder: [200, 400, 600, 800, 1000], ring: 0, lead: false, label: '곡사' },
   // 기관포다. 연사가 빨라 이동 목표를 잡으므로 편차 표식을 쓴다.
   armored: { type: 'autocannon', ladder: [200, 400, 600], ring: 0.052, lead: true, label: '기관포' },
-  // 전투기다. 기관포는 중력이 없어 눈금이 필요 없고 유효 사거리 원과 미사일 표식만 둔다.
+  // 전투기다. 눈금 대신 탄도 표식이 기종별 낙차를 반영하고, 유효 사거리 원과 미사일 표식을 둔다.
   fighter: { type: 'pipper', ladder: [], ring: 0.035, lead: true, label: '항공' },
   // 대공포다. 배율 조준경으로 하늘을 본다. 눈금은 짧게 두고 편차 표식을 쓴다.
   aa: { type: 'autocannon', ladder: [300, 600], ring: 0.028, lead: true, label: '대공' },
@@ -138,7 +139,7 @@ export function effectiveRange(kind, key) {
   if (kind === 'flight') {
     if (key === 'bomber') return 0;
     const gun = gunOf(key);
-    return RETICLE[key] ? gun.speed * gun.life : 0;
+    return RETICLE[key] ? Math.min(gun.range ?? Infinity, gun.speed * gun.life) : 0;
   }
   const spec = GROUND_GUNS[key];
   if (!spec) return 0;

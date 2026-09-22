@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useId, useMemo, useRef } from 'react';
 import { getWorldBounds } from '../../shared/worldLayout.js';
 import { createUrbanPlan } from '../../shared/urbanPlan.js';
 import { bridgeSegment } from '../../shared/bridgeGeometry.js';
 import { beachStrips } from '../../shared/coast.js';
 import { mapPoint } from './data';
 import { CREATOR_TIERS } from '../design/tiers';
+import { NAV_ANCHOR, navigationRadius, stableHeading, tierMarker, toNavigationPoint, toNavigationSegment } from './navigationMap.js';
+import { useRideStatus } from './rideStatusStore.js';
 
 const CAMERA_MARKER_INTERVAL = 250; // ms. 초당 4회 정도로 현재 위치 원만 갱신한다.
 
@@ -57,7 +59,59 @@ function CameraMarker({ cameraRef = ORIGIN_REF, bounds }) {
   return <circle ref={circleRef} r="1.3" fill="var(--fg)" stroke="var(--bg)" strokeWidth=".5" />;
 }
 
-export default function WorldMap({buildings, selected, cameraRef, onFocus, onSelect, onAirport, compact=false}) {
+const tierCss = (tier) => CREATOR_TIERS.find((item) => item.key === tier)?.cssVar || '--t-bronze';
+
+function TierGlyph({ building, point, selected }) {
+  const tier = String(building.tier_name || 'bronze').toLowerCase();
+  const marker = tierMarker(tier), size = marker.size * 1.7;
+  const common = { fill: `var(${tierCss(tier)})`, stroke: 'var(--bg)', strokeWidth: '.38' };
+  let glyph;
+  if (marker.shape === 'diamond') glyph = <rect x={point.x-size} y={point.y-size} width={size*2} height={size*2} transform={`rotate(45 ${point.x} ${point.y})`} {...common}/>;
+  else if (marker.shape === 'hexagon') glyph = <polygon points={Array.from({length:6},(_,i)=>{const a=Math.PI/3*i;return `${point.x+Math.cos(a)*size},${point.y+Math.sin(a)*size}`;}).join(' ')} {...common}/>;
+  else if (marker.shape === 'ring') glyph = <circle cx={point.x} cy={point.y} r={size} fill="var(--surface-2)" stroke={`var(${tierCss(tier)})`} strokeWidth=".85"/>;
+  else if (marker.shape === 'star') glyph = <polygon points={Array.from({length:10},(_,i)=>{const a=-Math.PI/2+Math.PI/5*i,r=i%2?size*.43:size;return `${point.x+Math.cos(a)*r},${point.y+Math.sin(a)*r}`;}).join(' ')} {...common}/>;
+  else glyph = <rect x={point.x-size} y={point.y-size} width={size*2} height={size*2} rx=".35" {...common}/>;
+  return <g className="world-nav-building" data-tier={tier}>{glyph}{selected && <circle cx={point.x} cy={point.y} r={size+1.35} fill="none" stroke="var(--accent-ink)" strokeWidth=".65"/>}</g>;
+}
+
+function NavigationMap({ buildings, selected }) {
+  const status = useRideStatus();
+  const heading = stableHeading(status.heading, status.heading, status.speed);
+  const radius = navigationRadius(status.speed);
+  const pose = { x: Number(status.x) || 0, z: Number(status.z) || 0, heading };
+  const extent = useMemo(()=>Math.max(180,...buildings.map(b=>b.cityExtent||Math.max(Math.abs(b.x),Math.abs(b.z))+40)),[buildings]);
+  const plan = useMemo(()=>createUrbanPlan(extent),[extent]);
+  const clipId = `nav-clip-${useId().replaceAll(':','')}`;
+
+  const roads = plan.roads.map((road)=>({ ...road, segment: toNavigationSegment(
+    {x:road.x1,z:road.z1},{x:road.x2,z:road.z2},pose,radius,
+  )})).filter((road)=>road.segment.visible);
+  const nearby = buildings.map((building)=>({building,point:toNavigationPoint(building,pose,radius)})).filter(({point})=>point.visible);
+  const scale = Math.round(radius);
+
+  return <section className="world-map world-map-compact world-map-navigation" aria-label="주행 내비게이션">
+    <div className="world-map-heading"><span>주행 내비</span><span className="world-nav-heading">HDG {String(Math.round(heading)).padStart(3,'0')}</span></div>
+    <svg viewBox="0 0 100 100" role="img" aria-label={`차량 진행 방향이 위인 주변 지도. 반경 ${scale}미터`}>
+      <defs><clipPath id={clipId}><rect width="100" height="100" rx="5"/></clipPath></defs>
+      <g clipPath={`url(#${clipId})`}>
+        <rect width="100" height="100" fill="var(--surface-2)" />
+        <path className="world-nav-grid" d="M0 25H100M0 50H100M0 75H100M25 0V100M50 0V100M75 0V100" />
+        {roads.map((road,index)=><g key={`${road.kind}-${index}`} className="world-nav-road" data-kind={road.kind}>
+          <path d={`M${road.segment.a.x} ${road.segment.a.y}L${road.segment.b.x} ${road.segment.b.y}`} className="world-nav-road-case" />
+          <path d={`M${road.segment.a.x} ${road.segment.a.y}L${road.segment.b.x} ${road.segment.b.y}`} className="world-nav-road-line" />
+        </g>)}
+        {nearby.map(({building,point})=><TierGlyph key={building.id||`${building.x}-${building.z}`} building={building} point={point} selected={building===selected||building.id===selected?.id}/>)}
+        <g className="world-nav-player" transform={`translate(${NAV_ANCHOR.x} ${NAV_ANCHOR.y})`}>
+          <path d="M0 -5.4L4.1 4.1L0 2.1L-4.1 4.1Z" />
+          <circle r="6.5" />
+        </g>
+      </g>
+    </svg>
+    <div className="world-nav-footer"><span>▲ 진행 방향</span><span>반경 {scale}m</span></div>
+  </section>;
+}
+
+function OverviewMap({buildings, selected, cameraRef, onFocus, onSelect, onAirport, compact=false}) {
   const bounds=useMemo(()=>getWorldBounds(buildings),[buildings]);
   const extent=Math.max(180,...buildings.map(b=>b.cityExtent||Math.max(Math.abs(b.x),Math.abs(b.z))+40));
   const plan=useMemo(()=>createUrbanPlan(extent),[extent]);
@@ -139,4 +193,9 @@ export default function WorldMap({buildings, selected, cameraRef, onFocus, onSel
     </svg>
     <span className="world-map-caption">지도를 눌러 이동 · 원은 선택한 건물</span>
   </section>;
+}
+
+export default function WorldMap(props) {
+  if (props.mode === 'navigation') return <NavigationMap {...props}/>;
+  return <OverviewMap {...props}/>;
 }

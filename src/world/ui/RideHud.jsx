@@ -6,6 +6,8 @@ import { armamentOf } from '../hardpoints.js';
 import { hasOverdrive } from '../flightPhysics.js';
 import { useRideStatus } from '../rideStatusStore.js';
 import BoostStages from './BoostStages.jsx';
+import Headlights from './Headlights.jsx';
+import LockBox from './LockBox.jsx';
 import CarGauges from './CarGauges.jsx';
 import KillFeed from './KillFeed.jsx';
 import SupplyNotice from './SupplyNotice.jsx';
@@ -178,6 +180,8 @@ export default function RideHud({
     </div>
 
     <Reticle kind={kind} rideKey={rideKey} status={status} />
+    {/* 미사일을 든 기종만 포착 네모를 띄운다. 자리와 진행도는 lockStore 가 들고 있다. */}
+    <LockBox active={kind === 'flight' && rideKey === 'fighter'} />
 
     {/* 전투 차량이 AI 차량을 부수면 도보와 같은 자리에 같은 줄이 뜬다. */}
     {!fps && <KillFeed kills={status.kills || 0} weapon={rideLabel(kind, rideKey)} label={status.killLabel}
@@ -204,6 +208,7 @@ export default function RideHud({
     {kind === 'flight' && <ThrottleLever value={throttle} onChange={onThrottle} />}
 
     {!fps && <div className={kind === 'flight' ? 'wui-hud-arms wui-hud-arms-lever' : 'wui-hud-arms'}>
+      {kind === 'car' && <Headlights beam={status.beam} />}
       {staged && <BoostStages plane={rideKey} boost={!!status.boost} overdrive={!!status.overdrive} />}
       {armed && <>
         <HoldButton icon={<Crosshair size={14} />} name="기관총" hotkey="SPACE"

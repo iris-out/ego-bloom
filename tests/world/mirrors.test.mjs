@@ -1,18 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  CROP, MIRROR_DEPTH, MIRROR_LAYOUT, MIRROR_LAYOUTS, MIRROR_PASS, REAR_CAMERA, cropAspect, hasMirrors,
+  CROP, MIRROR_DEPTH, MIRROR_LAYOUT, MIRROR_LAYOUTS, MIRROR_PASS, REAR_CAMERA, SIDE_MIRROR_YAW,
+  cropAspect, hasMirrors, mirrorCameraPosition, mirrorTargetSize, mirrorYaw,
 } from '../../src/world/cockpits/mirrorLayout.js';
 import { NEAR_COCKPIT } from '../../src/world/eyePoints.js';
 import { VEHICLES } from '../../src/world/carPhysics.js';
 import { isCombatVehicle } from '../../src/world/groundWeapons.js';
 import { COCKPIT_PARTS } from '../../src/world/cockpits/triangles.js';
 
-test('거울은 전투 차량에는 없다. 승용차는 셋, 오토바이는 좌우 둘이다', () => {
+test('거울은 전투 차량에는 없다. 승용차는 셋, 오토바이와 포뮬러는 좌우 둘이다', () => {
   for (const key of Object.keys(VEHICLES)) {
     const combat = isCombatVehicle(key);
     assert.equal(hasMirrors(key), !combat, `${key} 거울 여부`);
-    const expectedCount = combat ? 0 : (key === 'motorcycle' ? 2 : 3);
+    const expectedCount = combat ? 0 : (key === 'motorcycle' || key === 'formula' ? 2 : 3);
     assert.equal(COCKPIT_PARTS[key]?.mirror || 0, expectedCount, `${key} 콕핏 예산의 거울 수`);
   }
 });
@@ -29,6 +30,13 @@ test('오토바이 거울 자리 표는 좌우뿐이고 승용차 표는 기존 
   }
 });
 
+test('포뮬러는 룸미러 대신 작은 좌우 미러만 시야 위쪽에 둔다', () => {
+  const formula = MIRROR_LAYOUTS.formula;
+  assert.deepEqual(Object.keys(formula).sort(), ['left', 'right']);
+  assert.ok(formula.left.x < 0 && formula.right.x > 0);
+  assert.ok(Object.values(formula).every((spec) => spec.height <= 0.12));
+});
+
 test('뒤 카메라는 차체 안에서 뒤쪽을 본다', () => {
   for (const [key, [x, y, z]] of Object.entries(REAR_CAMERA)) {
     const spec = VEHICLES[key];
@@ -36,6 +44,24 @@ test('뒤 카메라는 차체 안에서 뒤쪽을 본다', () => {
     assert.ok(y > 0 && y < 2.3, `${key} 뒤 카메라 높이 ${y}`);
     assert.ok(Math.abs(z) <= spec.depth / 2, `${key} 뒤 카메라가 차체 밖 ${z} 에 있다`);
   }
+});
+
+test('포뮬러는 리어윙 밖의 뒤 카메라와 거울 둘을 쓴다', () => {
+  assert.equal(hasMirrors('formula'), true);
+  assert.ok(REAR_CAMERA.formula[1] > 0.3 && REAR_CAMERA.formula[1] < 1);
+  assert.ok(REAR_CAMERA.formula[2] > 2.55, '뒤 카메라가 리어윙 안에 매립됐다');
+  assert.equal(COCKPIT_PARTS.formula.mirror, 2);
+});
+
+test('좌우 사이드미러는 정후방 crop이 아니라 각 측면 뒤 차선을 직접 본다', () => {
+  assert.ok(SIDE_MIRROR_YAW > Math.PI / 3 && SIDE_MIRROR_YAW < Math.PI / 2, '후측방 각도가 충분하지 않다');
+  assert.ok(mirrorYaw('left') < Math.PI && mirrorYaw('right') > Math.PI, '좌우 시선이 후방 축의 서로 다른 편에 있어야 한다');
+  assert.equal(mirrorYaw('rear'), Math.PI);
+  const left = mirrorCameraPosition('sedan', 'left'), right = mirrorCameraPosition('sedan', 'right');
+  assert.ok(left[0] < 0 && right[0] > 0, '카메라가 차체 중앙에 머물면 측면 차선을 놓친다');
+  assert.equal(left[1], right[1]);
+  const side = mirrorTargetSize('left', MIRROR_PASS.medium), rear = mirrorTargetSize('rear', MIRROR_PASS.medium);
+  assert.ok(side.width < rear.width && side.height > rear.height, '사이드 미러는 세로로 더 넓은 독립 렌더 타깃을 쓴다');
 });
 
 test('거울 셋은 한 텍스처의 서로 다른 영역을 자르고 좌우가 겹치지 않는다', () => {

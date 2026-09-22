@@ -13,8 +13,11 @@
 - 공항 시설과 충돌 상자는 `airportLayout.js` 한 곳에서만 바꾼다.
 - 가로 시설 간격은 `roadFurniture.js` 표만 고친다.
 - 실내, 총, 차량, 기체의 움직이지 않는 조각은 `StaticBatch` 로 묶는다. 바퀴, 포탑, 프로펠러, 로터, 폭탄창 문, 계기 바늘처럼 움직이는 가지는 `userData={{ dynamic: true }}` 로 빼 둔다.
+- `dynamic` 가지 안이 통째로 같이 움직이면 그 안에서 `StaticBatch` 를 한 번 더 쓴다. 스티어링과 쥔 손처럼 한 덩이로 도는 조각은 바깥 배치가 건너뛰므로 안에서 합치지 않으면 조각 수만큼 draw 가 나간다.
+- 거울 패스(`cockpits/Mirrors.jsx`) 는 실내를 그리지 않는다. `Cockpit` 이 뿌리에 단 `cockpitRoot` 표식을 찾아 그 패스 동안만 내린다. 뒤를 보는 카메라에 실내를 한 번 더 그리면 좁은 거울 한 장에 draw 수십 개가 더 들어간다.
 - 매 프레임 바뀌는 값은 prop 이 아니라 ref 로 넘긴다. 계기는 `get()` 콜백, 차량은 `wheelsRef`, 기체는 `glowRef`, 실내는 `statusRef` 를 읽는다. 0.1초 주기 setState 도 도시 전체를 재조정시킨다.
 - 조명을 껐다 켜지 않는다. 광원 개수는 three 의 셰이더 프로그램 캐시 키라서 그 순간 도시 재질이 통째로 다시 컴파일된다. 새 조명 조합이 필요하면 `ShaderPrewarm` 의 조합 목록에 넣어 미리 만들어 둔다.
+- 스폿의 `target` 은 장면에 들어 있는 Object3D 여야 한다. `target-position` 만 주면 three 가 그 객체의 `matrixWorld` 를 갱신하지 않아 빛이 원점을 겨눈다. `WalkMode` 의 손전등과 `CarMode` 의 전조등이 `<primitive object={target} />` 로 장면에 넣는다.
 - 본 화면 배치는 그림자를 던지지 않는다. 그림자는 `WorldScene` 의 `ShadowCasters` 가 그림자 절두체 근처 파트만 모아 던진다. 새 정적 배치를 더하면 caster 색인(`cityTiles.buildCasterIndex`) 에 들어가는지 확인한다.
 - 건물과 구조물 충돌은 `solidIndex.hitsAnyBuilding` 하나만 쓴다. 배열을 직접 `some` 으로 훑지 않는다.
 - 탄이 차량에 맞았는지는 `carPhysics.hitsVehicle` 하나만 쓴다. 상자에 바닥 `y` 와 `height` 를 반드시 채운다. 높이를 빼면 허공을 쏜 탄이 땅 위 차를 부순다.

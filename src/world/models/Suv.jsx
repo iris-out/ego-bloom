@@ -3,120 +3,200 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import Block from './ModelBlock';
 import { Wheel } from './carParts.jsx';
-import { CAR_PALETTE as P, extrudeUpright, GLASS_OPACITY, MAX_STEER, rollWheels, steerAngle } from './carGeometry.js';
-import { DetailLamp, PanelSeam, SurfaceVent } from './exteriorDetails.jsx';
+import { beamBetween, CAR_PALETTE as P, createVehicleBodyGeometries, flatPolygonGeometry, GLASS_OPACITY, loftBody, MAX_STEER, quadGeometry, rollWheels, steerAngle, VEHICLE_SHAPES } from './carGeometry.js';
+import { PanelSeam } from './exteriorDetails.jsx';
 import StaticBatch from '../StaticBatch.jsx';
+import { SUV_FRONT_LIGHTS, SUV_REAR_LIGHTS } from '../headlights.js';
 
-/** 플레이어가 모는 SUV 시각 모델이다. Sedan 과 같은 축 규약이다. 원점은 차체 중심, 앞이 -Z 다.
- * 바퀴 최하단은 -0.9, 지붕 레일 꼭대기는 1.02 다. 전장 Z ±2.45, 전폭 X ±1.15 다(VEHICLES.suv).
- * 1인칭 눈높이는 eyePoints.suv 다. 실내는 cockpits/VehicleInteriors 의 SuvInterior 가 따로 그린다.
- * firstPerson 이면 캐빈 group 을 숨긴다. */
-const BODY = '#6b4f3a';
-const BODY_DARK = '#54402f';
-const WHEEL_RADIUS = 0.48;
-const WHEEL_Y = -0.9 + WHEEL_RADIUS;
+const BODY = '#6b4f3a', BODY_DARK = '#493426', BODY_LINE = '#806047', GLASS = '#253b45';
+const WHEEL_RADIUS = 0.48, WHEEL_Y = -0.9 + WHEEL_RADIUS;
 const FRONT_Z = -1.6, REAR_Z = 1.65, TRACK_X = 1.02;
+const SHAPE = VEHICLE_SHAPES.suv;
+const GRILLE_RIGHT = Object.freeze([
+  [0.055, 0.24], [0.15, 0.30], [0.48, 0.30], [0.56, 0.23],
+  [0.53, -0.12], [0.43, -0.20], [0.16, -0.18], [0.07, -0.10],
+]);
+const FRONT_FASCIA = Object.freeze([
+  [-1.04, 0.36], [1.04, 0.36], [1.04, -0.36], [0.92, -0.45], [-0.92, -0.45], [-1.04, -0.36],
+]);
+const LOWER_INTAKE = Object.freeze([[-0.73, -0.27], [0.73, -0.27], [0.61, -0.46], [-0.61, -0.46]]);
+const REAR_FASCIA = Object.freeze([
+  [-1.04, 0.36], [1.04, 0.36], [1.04, -0.35], [0.91, -0.44], [-0.91, -0.44], [-1.04, -0.35],
+]);
+const PLATE_RECESS = Object.freeze([[-0.31, -0.02], [0.31, -0.02], [0.27, -0.23], [-0.27, -0.23]]);
+const REAR_DIFFUSER = Object.freeze([[-0.91, -0.34], [0.91, -0.34], [0.76, -0.51], [-0.76, -0.51]]);
+const mirrorOutline = points => points.map(([x, y]) => [-x, y]);
+
+const mirroredPane = points => points.map(([x, y, z]) => [-x, y, z]);
+
+function FrameBeam({ from, to, width = 0.065, depth = 0.085, color = BODY_DARK }) {
+  const beam = beamBetween(from, to);
+  return <mesh position={beam.position} quaternion={beam.quaternion} scale={[width, beam.length, depth]}>
+    <boxGeometry /><meshStandardMaterial color={color} metalness={0.24} roughness={0.46} />
+  </mesh>;
+}
 
 export default function Suv({ wheelsRef, steer = 0, speed = 0, firstPerson = false }) {
-  const wheels = useRef([]);
-  const steering = useRef([]);
-  const geometries = useMemo(() => ({
-    // 세단보다 높고 각진 캐빈이다. 뒷기둥이 굵고 창 아래선이 높다.
-    cabinSide: extrudeUpright([[-1.45, 0.1], [-1.1, 0.78], [1.55, 0.78], [1.8, 0.1]], 0.06),
-  }), []);
-  useEffect(() => () => Object.values(geometries).forEach((geometry) => geometry.dispose()), [geometries]);
+  const wheels = useRef([]), steering = useRef([]);
+  const geometries = useMemo(() => {
+    const body = createVehicleBodyGeometries('suv'), left = SHAPE.sideWindows.left;
+    return {
+      ...body, roof: loftBody(SHAPE.roofSections),
+      windshield: quadGeometry(SHAPE.windshield), rearWindow: quadGeometry(SHAPE.rearWindow),
+      frontLeft: quadGeometry(left.front), rearLeft: quadGeometry(left.rear), quarterLeft: quadGeometry(left.quarter),
+      frontRight: quadGeometry(mirroredPane(left.front)), rearRight: quadGeometry(mirroredPane(left.rear)),
+      quarterRight: quadGeometry(mirroredPane(left.quarter)),
+      frontFascia: flatPolygonGeometry(FRONT_FASCIA, -2.481),
+      frontGrilles: [flatPolygonGeometry(mirrorOutline(GRILLE_RIGHT), -2.489), flatPolygonGeometry(GRILLE_RIGHT, -2.489)],
+      frontLampHousings: SUV_FRONT_LIGHTS.housings.map(lamp => flatPolygonGeometry(lamp.rear, 0)),
+      frontLampRows: SUV_FRONT_LIGHTS.rows.map(row => flatPolygonGeometry(row.rear, 0)),
+      lowerIntake: flatPolygonGeometry(LOWER_INTAKE, -2.491),
+      rearFascia: flatPolygonGeometry(REAR_FASCIA, 2.474),
+      rearLampHousings: SUV_REAR_LIGHTS.housings.map(lamp => flatPolygonGeometry(lamp.rear, 0)),
+      rearLampRows: SUV_REAR_LIGHTS.rows.map(row => flatPolygonGeometry(row.rear, 0)),
+      plateRecess: flatPolygonGeometry(PLATE_RECESS, 2.478),
+      rearDiffuser: flatPolygonGeometry(REAR_DIFFUSER, 2.482),
+    };
+  }, []);
+  useEffect(() => () => Object.values(geometries).flat().forEach(geometry => geometry.dispose()), [geometries]);
   useEffect(() => {
     const angle = steerAngle(steer, MAX_STEER);
-    steering.current.forEach((group) => { if (group) group.rotation.y = angle; });
+    steering.current.forEach(group => { if (group) group.rotation.y = angle; });
   }, [steer]);
-  /* wheelsRef 가 있으면(CarMode 주행 중) 조향과 회전을 매 프레임 직접 읽는다. */
   useFrame((_, delta) => {
     const live = wheelsRef?.current;
     if (live) {
       const angle = steerAngle(live.steer, MAX_STEER);
-      steering.current.forEach((group) => { if (group) group.rotation.y = angle; });
+      steering.current.forEach(group => { if (group) group.rotation.y = angle; });
     }
     rollWheels(wheels.current, delta, live ? live.speed : speed);
   });
 
   return <group>
-    {/* 앞부분, 1인칭에서도 항상 보인다 */}
     <StaticBatch>
-      {/* 섀시, 보닛, 짧은 뒤 오버행 */}
-      <Block position={[0, -0.32, 0]} scale={[2.2, 0.76, 4.8]} color={BODY} />
-      <Block position={[0, 0.22, -1.75]} scale={[2.1, 0.34, 1.2]} color={BODY} />
-      <Block position={[0, 0.18, 2.05]} scale={[2.1, 0.26, 0.7]} color={BODY} />
-      {/* 보닛과 카울 사이 패널 실선. 보닛 표면 위라 앞부분에 둔다 */}
-      <PanelSeam position={[0, 0.34, -1.72]} scale={[1.62, 0.018, 0.04]} color={BODY_DARK} />
-      {/* 도어 라인, 손잡이, 사이드미러, 사이드스텝. 기둥은 캐빈 쪽에 있다 */}
-      {[-1, 1].map((side) => <group key={side}>
-        <Block position={[side * 1.1, -0.1, 0.1]} scale={[0.02, 0.8, 3.4]} color={BODY_DARK} />
-        <Block position={[side * 1.12, 0.12, -0.6]} scale={[0.06, 0.07, 0.24]} color={P.trim} />
-        <Block position={[side * 1.12, 0.12, 0.75]} scale={[0.06, 0.07, 0.24]} color={P.trim} />
-        <Block position={[side * 1.16, 0.5, -1.15]} scale={[0.18, 0.15, 0.09]} color={BODY_DARK} />
-        <Block position={[side * 1.14, -0.72, 0.1]} scale={[0.14, 0.05, 2.6]} color={P.tire} />
+      {['hood', 'tail', 'sideSkin', 'frontDeck', 'rearDeck'].map(name => <mesh key={name}
+        userData={name === 'sideSkin' ? { part: 'g01-body-shell' } : undefined} geometry={geometries[name]} dispose={null}>
+        <meshStandardMaterial color={BODY} metalness={0.30} roughness={0.42} side={THREE.DoubleSide} />
+      </mesh>)}
+      <mesh geometry={geometries.floor} dispose={null}><meshStandardMaterial color={BODY_DARK} roughness={0.54} /></mesh>
+      <PanelSeam position={[0, 0.39, -1.39]} scale={[1.58, 0.014, 0.03]} color={BODY_DARK} />
+      {[-1, 1].map(side => <group key={side}>
+        <PanelSeam position={[side * 1.065, 0.18, -0.25]} scale={[0.014, 0.50, 0.025]} color={BODY_DARK} />
+        <PanelSeam position={[side * 1.065, 0.18, 1.03]} scale={[0.014, 0.50, 0.025]} color={BODY_DARK} />
+        <Block position={[side * 1.075, 0.30, -0.48]} scale={[0.018, 0.038, 0.25]} color={BODY_DARK} />
+        <Block position={[side * 1.075, 0.30, 0.78]} scale={[0.018, 0.038, 0.25]} color={BODY_DARK} />
+        <Block position={[side * 1.08, -0.545, 0.08]} scale={[0.10, 0.035, 1.92]} color={P.tire} />
+        <group position={[side * 1.08, 0.52, -1.03]}>
+          <Block position={[-side * 0.07, -0.06, 0.05]} scale={[0.15, 0.055, 0.08]} rotation={[0, side * 0.28, 0]} color={BODY_DARK} />
+          <Block scale={[0.20, 0.13, 0.18]} rotation={[0, side * 0.12, 0]} color={BODY_DARK} />
+        </group>
       </group>)}
-      {/* 앞 범퍼, 그릴, 헤드램프, 스키드 플레이트 */}
-      <Block position={[0, -0.35, -2.42]} scale={[2.1, 0.5, 0.16]} color={P.trim} />
-      <SurfaceVent position={[0, -0.27, -2.42]} scale={[0.74, 0.018, 0.07]} />
-      <Block position={[0, -0.68, -2.4]} scale={[1.2, 0.14, 0.12]} color={P.grille} />
-      {[-0.1, 0.05, 0.2].map((y) => <Block key={y} position={[0, y, -2.4]} scale={[1.2, 0.03, 0.08]} color={P.grille} />)}
-      {[-1, 1].map((side) => <mesh key={side} position={[side * 0.78, 0.12, -2.4]}>
-        <boxGeometry args={[0.34, 0.2, 0.08]} />
-        <meshStandardMaterial color={P.headLamp} emissive={P.headLamp} emissiveIntensity={0.9} roughness={0.3} />
-      </mesh>)}
-      {[-1, 1].map((side) => <DetailLamp key={`lamp-${side}`} position={[side * 0.78, 0.12, -2.47]} color={P.headLamp} scale={0.05} />)}
-      {/* 뒤 범퍼, 세로 테일램프, 번호판, 예비 타이어 */}
-      <Block position={[0, -0.35, 2.42]} scale={[2.1, 0.5, 0.16]} color={P.trim} />
-      <Block position={[0, 0.02, 2.44]} scale={[0.5, 0.26, 0.05]} color={P.plate} />
-      {[-1, 1].map((side) => <mesh key={side} position={[side * 0.88, 0.32, 2.42]}>
-        <boxGeometry args={[0.16, 0.5, 0.06]} />
-        <meshStandardMaterial color={P.tailLamp} emissive={P.tailLamp} emissiveIntensity={0.6} roughness={0.35} />
-      </mesh>)}
-      <mesh position={[0.35, 0.42, 2.5]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.36, 0.36, 0.18, 12]} /><meshStandardMaterial color={P.tire} roughness={0.9} />
+
+      <Block position={[0, -0.045, -2.40]} scale={[1.92, 0.79, 0.16]} color={BODY} />
+      <mesh geometry={geometries.frontFascia} dispose={null}>
+        <meshStandardMaterial color={BODY} metalness={0.30} roughness={0.42} side={THREE.DoubleSide} />
       </mesh>
+      {[-1, 1].map((side, grilleIndex) => {
+        const outline = side < 0 ? mirrorOutline(GRILLE_RIGHT) : GRILLE_RIGHT;
+        return <group key={side}>
+          <mesh userData={{ part: 'suv-kidney-grille' }} geometry={geometries.frontGrilles[grilleIndex]} dispose={null}>
+            <meshStandardMaterial color="#161b1d" metalness={0.25} roughness={0.38} side={THREE.DoubleSide} />
+          </mesh>
+          {outline.map((point, index) => <FrameBeam key={index}
+            from={[...point, -2.501]} to={[...outline[(index + 1) % outline.length], -2.501]}
+            width={0.015} depth={0.014} color={P.trim} />)}
+          {[0.21, 0.13, 0.05, -0.03, -0.11].map((y, index) => <Block key={y}
+            userData={{ part: 'suv-grille-slat' }} position={[side * 0.305, y, -2.503]}
+            scale={[0.34 - index * 0.012, 0.012, 0.012]} color={BODY_LINE} />)}
+        </group>;
+      })}
+      {SUV_FRONT_LIGHTS.housings.map((lamp, index) => <mesh key={lamp.side}
+        userData={{ part: 'suv-headlamp-housing' }} geometry={geometries.frontLampHousings[index]}
+        position={[0, 0, SUV_FRONT_LIGHTS.housingZ]} dispose={null}>
+        <meshStandardMaterial color="#11181c" metalness={0.25} roughness={0.30} side={THREE.DoubleSide} />
+      </mesh>)}
+      {SUV_FRONT_LIGHTS.rows.map((row, index) => <mesh key={index}
+        userData={{ part: 'suv-headlamp-line' }} geometry={geometries.frontLampRows[index]}
+        position={[0, 0, SUV_FRONT_LIGHTS.rowZ]} dispose={null}>
+        <meshStandardMaterial color={P.headLamp} emissive={P.headLamp} emissiveIntensity={0.85}
+          roughness={0.24} toneMapped={false} side={THREE.DoubleSide} />
+      </mesh>)}
+      <mesh userData={{ part: 'suv-lower-intake' }} geometry={geometries.lowerIntake} dispose={null}>
+        <meshStandardMaterial color="#111719" roughness={0.40} side={THREE.DoubleSide} />
+      </mesh>
+      {[-0.38, -0.30, -0.22].map(y => <Block key={y} position={[0, y, -2.500]}
+        scale={[1.20 - (-0.22 - y) * 0.55, 0.012, 0.012]} color={BODY_LINE} />)}
+      {[-1, 1].map(side => <Block key={side} userData={{ part: 'suv-air-curtain' }}
+        position={[side * 0.97, -0.285, -2.494]} scale={[0.065, 0.25, 0.018]} color="#111719" />)}
+      <Block position={[0, -0.485, -2.455]} scale={[1.92, 0.05, 0.08]} color={BODY_DARK} />
+
+      <Block position={[0, -0.04, 2.40]} scale={[1.92, 0.80, 0.14]} color={BODY} />
+      <mesh userData={{ part: 'suv-rear-fascia' }} geometry={geometries.rearFascia} dispose={null}>
+        <meshStandardMaterial color={BODY} metalness={0.30} roughness={0.42} side={THREE.DoubleSide} />
+      </mesh>
+      {SUV_REAR_LIGHTS.housings.map((lamp, index) => <mesh key={lamp.side}
+        userData={{ part: 'suv-tail-housing' }} geometry={geometries.rearLampHousings[index]}
+        position={[0, 0, SUV_REAR_LIGHTS.housingZ]} dispose={null}>
+        <meshStandardMaterial color="#171719" metalness={0.22} roughness={0.32} side={THREE.DoubleSide} />
+      </mesh>)}
+      {SUV_REAR_LIGHTS.rows.map((row, index) => <mesh key={index}
+        userData={{ part: 'suv-tail-row' }} geometry={geometries.rearLampRows[index]}
+        position={[0, 0, SUV_REAR_LIGHTS.rowZ]} dispose={null}>
+        <meshStandardMaterial color="#ef3348" emissive="#ef3348" emissiveIntensity={0.72}
+          roughness={0.30} toneMapped={false} side={THREE.DoubleSide} />
+      </mesh>)}
+      <mesh geometry={geometries.plateRecess} position={[0, 0, 0]} dispose={null}>
+        <meshStandardMaterial color={BODY_DARK} roughness={0.46} side={THREE.DoubleSide} />
+      </mesh>
+      <Block position={[0, -0.13, 2.488]} scale={[0.47, 0.15, 0.012]} color={P.plate} />
+      <mesh userData={{ part: 'suv-rear-diffuser' }} geometry={geometries.rearDiffuser} dispose={null}>
+        <meshStandardMaterial color="#111719" roughness={0.42} side={THREE.DoubleSide} />
+      </mesh>
+      {[-1, 1].map(side => <group key={side}>
+        <Block position={[side * 0.965, -0.27, 2.481]} scale={[0.15, 0.34, 0.018]} color="#111719" />
+        <Block userData={{ part: 'suv-vertical-reflector' }} position={[side * 0.99, -0.255, 2.488]}
+          scale={[0.025, 0.23, 0.012]} color="#d32635" />
+      </group>)}
     </StaticBatch>
 
-    {/* 캐빈, firstPerson 이면 숨긴다(실내 모델이 대신 그린다) */}
-    <group visible={!firstPerson}>
+    <group visible={!firstPerson} userData={{ part: 'camera-intersection' }}>
       <StaticBatch>
-        {/* 캐빈 상자와 지붕, 지붕 레일 */}
-        <Block position={[0, 0.5, 0.15]} scale={[1.9, 0.8, 3.3]} color={BODY} />
-        <Block position={[0, 0.92, 0.15]} scale={[1.8, 0.08, 3.1]} color={BODY_DARK} />
-        {[-1, 1].map((side) => <Block key={side} position={[side * 0.7, 1.0, 0.15]} scale={[0.08, 0.06, 2.6]} color={P.trim} />)}
-        {/* 측면 창, 앞뒤 유리 */}
-        {[-1, 1].map((side) => <mesh key={side} geometry={geometries.cabinSide} position={[side * 0.96, 0.32, 0]} scale={[side, 1, 1]} dispose={null}>
-          <meshStandardMaterial color={P.glass} metalness={0.25} roughness={0.2} transparent opacity={GLASS_OPACITY} />
-        </mesh>)}
-        <mesh position={[0, 0.62, -1.28]} scale={[1.66, 0.62, 0.08]} rotation={[0.42, 0, 0]}>
-          <boxGeometry /><meshStandardMaterial color={P.glass} metalness={0.2} roughness={0.15} transparent opacity={GLASS_OPACITY} />
-        </mesh>
-        <mesh position={[0, 0.62, 1.78]} scale={[1.66, 0.58, 0.08]} rotation={[-0.25, 0, 0]}>
-          <boxGeometry /><meshStandardMaterial color={P.glass} metalness={0.2} roughness={0.15} transparent opacity={GLASS_OPACITY} />
-        </mesh>
-        {/* A, B, C 필러 */}
-        {[-1, 1].map((side) => <group key={side}>
-          <Block position={[side * 0.95, 0.5, -1.05]} scale={[0.07, 0.8, 0.14]} rotation={[0, 0, side * 0.05]} color={BODY_DARK} />
-          <Block position={[side * 0.95, 0.5, 0.2]} scale={[0.07, 0.8, 0.1]} color={BODY_DARK} />
-          <Block position={[side * 0.95, 0.5, 1.5]} scale={[0.07, 0.8, 0.22]} color={BODY_DARK} />
+        <mesh geometry={geometries.roof} dispose={null}><meshStandardMaterial color={BODY_DARK} metalness={0.26} roughness={0.44} /></mesh>
+        {[-1, 1].map(side => <Block key={side} position={[side * 0.68, 1.182, 0.22]} scale={[0.055, 0.016, 2.26]} color={P.trim} />)}
+        {['windshield', 'rearWindow', 'frontLeft', 'rearLeft', 'quarterLeft', 'frontRight', 'rearRight', 'quarterRight'].map(name =>
+          <mesh key={name} geometry={geometries[name]} dispose={null}>
+            <meshStandardMaterial color={GLASS} metalness={0.18} roughness={0.16} transparent opacity={Math.max(GLASS_OPACITY, 0.62)} side={THREE.DoubleSide} />
+          </mesh>)}
+        {[-1, 1].map(side => {
+          const mirror = ([x, y, z]) => [side < 0 ? x : -x, y, z];
+          const { front, rear, quarter } = SHAPE.sideWindows.left;
+          return <group key={side}>
+            <FrameBeam from={mirror(front[0])} to={mirror(front[1])} />
+            <FrameBeam from={mirror(front[3])} to={mirror(front[2])} width={0.06} />
+            <FrameBeam from={mirror(rear[3])} to={mirror(rear[2])} width={0.07} />
+            <FrameBeam from={mirror(quarter[3])} to={mirror(quarter[2])} width={0.10} depth={0.11} />
+            <FrameBeam from={mirror(front[1])} to={mirror(front[2])} width={0.05} />
+            <FrameBeam from={mirror(front[2])} to={mirror(rear[2])} width={0.05} />
+            <FrameBeam from={mirror(rear[2])} to={mirror(quarter[1])} width={0.05} />
+            <FrameBeam from={mirror(quarter[1])} to={mirror(quarter[2])} width={0.085} depth={0.10} />
+          </group>;
+        })}
+        <Block position={[0, 0.50, -1.04]} scale={[1.68, 0.08, 0.38]} color={P.cabinDark} />
+        {[-0.5, 0.5].map(x => <group key={x}>
+          <Block position={[x, 0.08, 0.20]} scale={[0.50, 0.16, 0.56]} color={P.leather} />
+          <Block position={[x, 0.43, 0.48]} scale={[0.48, 0.58, 0.14]} color={P.leather} />
         </group>)}
-        {/* 실내 최소 조각. 밖에서 유리 너머로 보이는 좌석과 대시보드다 */}
-        <Block position={[0, 0.48, -0.95]} scale={[1.7, 0.1, 0.5]} color={P.cabinDark} />
-        {[-0.5, 0.5].map((x) => <group key={x}>
-          <Block position={[x, 0.1, 0.2]} scale={[0.5, 0.18, 0.56]} color={P.leather} />
-          <Block position={[x, 0.45, 0.48]} scale={[0.48, 0.6, 0.14]} color={P.leather} />
-        </group>)}
-        <Block position={[0, 0.4, 1.35]} scale={[1.7, 0.55, 0.16]} color={P.leather} />
+        <Block position={[0, 0.38, 1.34]} scale={[1.68, 0.52, 0.14]} color={P.leather} />
       </StaticBatch>
     </group>
 
-    {/* 바퀴. 앞은 조향 group 안이다. 조향과 회전이 걸리므로 정적 병합에서 뺀다 */}
-    {[-1, 1].map((side, index) => <group key={side} ref={(el) => { steering.current[index] = el; }} position={[side * TRACK_X, WHEEL_Y, FRONT_Z]} userData={{ dynamic: true }}>
-      <group ref={(el) => { wheels.current[index] = el; }}><Wheel radius={WHEEL_RADIUS} brake /></group>
+    {[-1, 1].map((side, index) => <group key={side} ref={el => { steering.current[index] = el; }}
+      position={[side * TRACK_X, WHEEL_Y, FRONT_Z]} userData={{ dynamic: true, part: 'wheel-hub', axle: 'front' }}>
+      <group ref={el => { wheels.current[index] = el; }}><Wheel radius={WHEEL_RADIUS} brake spokes={6} /></group>
     </group>)}
-    {[-1, 1].map((side, index) => <group key={side} position={[side * TRACK_X, WHEEL_Y, REAR_Z]} userData={{ dynamic: true }}>
-      <group ref={(el) => { wheels.current[2 + index] = el; }}><Wheel radius={WHEEL_RADIUS} /></group>
+    {[-1, 1].map((side, index) => <group key={side} position={[side * TRACK_X, WHEEL_Y, REAR_Z]}
+      userData={{ dynamic: true, part: 'wheel-hub', axle: 'rear' }}>
+      <group ref={el => { wheels.current[2 + index] = el; }}><Wheel radius={WHEEL_RADIUS} spokes={6} /></group>
     </group>)}
   </group>;
 }

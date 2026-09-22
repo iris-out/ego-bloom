@@ -38,7 +38,9 @@ const GEOMETRIES = (() => {
   // 탄체 허리의 노란 띠다. 실제 항공 폭탄의 식별 밴드처럼 눈에 띈다.
   const bombBand = new THREE.CylinderGeometry(0.56, 0.56, 0.3, 10);
   bombBand.rotateX(HALF_PI);
-  return { tracer, nose, body, fin, nozzle, flame, trail, bombBody, bombBand };
+  const bombMarker = new THREE.RingGeometry(0.68, 1, 24);
+  const bombDot = new THREE.CircleGeometry(0.22, 16);
+  return { tracer, nose, body, fin, nozzle, flame, trail, bombBody, bombBand, bombMarker, bombDot };
 })();
 
 const MATERIALS = {
@@ -54,6 +56,8 @@ const MATERIALS = {
   bombTrail: new THREE.MeshBasicMaterial({ color: BOMB_TRAIL, transparent: true, opacity: 0.42, depthWrite: false, toneMapped: false }),
   bomb: new THREE.MeshStandardMaterial({ color: BOMB_BODY, roughness: 0.7 }),
   bombBand: new THREE.MeshStandardMaterial({ color: BOMB_BAND, emissive: BOMB_BAND, emissiveIntensity: 0.4, roughness: 0.5 }),
+  // 낙하 중인 폭탄을 가리는 스크린 방향 표식이다. 지형 뒤에서도 위치를 놓치지 않게 깊이 판정을 끈다.
+  bombMarker: new THREE.MeshBasicMaterial({ color: '#ffd84a', transparent: true, opacity: 0.95, depthTest: false, depthWrite: false, toneMapped: false }),
 };
 
 // 기체와 같은 YXZ 오일러다. 기수가 -Z 를 향하므로 yaw 는 atan2(-vx, -vz) 다.
@@ -165,24 +169,38 @@ function MissileField({ arsenalRef }) {
 /** 폭탄이다. 추진이 없으므로 화염도 연기도 없다. 속도 방향으로 코를 든 채 떨어진다. */
 function Bomb({ id, arsenalRef }) {
   const group = useRef();
+  const body = useRef();
+  const marker = useRef();
   const trail = useRef();
-  useFrame(() => {
+  useFrame(({ camera }) => {
     const projectile = liveProjectile(arsenalRef, id);
     if (!projectile || !group.current) return;
     group.current.position.set(projectile.x, projectile.y, projectile.z);
     const [pitch, yaw] = attitude(projectile);
-    group.current.rotation.set(pitch, yaw, 0, 'YXZ');
+    if (body.current) body.current.rotation.set(pitch, yaw, 0, 'YXZ');
+    if (marker.current) {
+      marker.current.quaternion.copy(camera.quaternion);
+      const distance = camera.position.distanceTo(group.current.position);
+      const pulse = 1 + Math.sin((projectile.age || 0) * 8) * 0.08;
+      marker.current.scale.setScalar(clamp(distance * 0.018, 1.4, 8) * pulse);
+    }
     // 낙하 궤적이 눈에 띄도록 꼬리에 밝은 줄무늬 띠를 붙인다. 멀리서도 떨어지는 것이 보인다.
     const streak = Math.min(14, 2 + (projectile.age || 0) * 9);
     if (trail.current) { trail.current.position.z = 1.6 + streak / 2; trail.current.scale.set(0.5, 0.5, streak); }
   });
   return <group ref={group}>
-    <mesh geometry={GEOMETRIES.bombBody} material={MATERIALS.bomb} dispose={null} />
-    <mesh geometry={GEOMETRIES.nose} material={MATERIALS.bomb} position={[0, 0, -1.55]} scale={[3.2, 3.2, 2.2]} dispose={null} />
-    <mesh geometry={GEOMETRIES.bombBand} material={MATERIALS.bombBand} position={[0, 0, -0.2]} dispose={null} />
-    {[0, 1].map((index) => <mesh key={index} geometry={GEOMETRIES.fin} material={MATERIALS.metal}
-      position={[0, 0, 1.3]} scale={index ? [0.12, 1.2, 0.9] : [1.2, 0.12, 0.9]} dispose={null} />)}
-    <mesh ref={trail} geometry={GEOMETRIES.trail} material={MATERIALS.bombTrail} dispose={null} />
+    <group ref={body}>
+      <mesh geometry={GEOMETRIES.bombBody} material={MATERIALS.bomb} dispose={null} />
+      <mesh geometry={GEOMETRIES.nose} material={MATERIALS.bomb} position={[0, 0, -1.55]} scale={[3.2, 3.2, 2.2]} dispose={null} />
+      <mesh geometry={GEOMETRIES.bombBand} material={MATERIALS.bombBand} position={[0, 0, -0.2]} dispose={null} />
+      {[0, 1].map((index) => <mesh key={index} geometry={GEOMETRIES.fin} material={MATERIALS.metal}
+        position={[0, 0, 1.3]} scale={index ? [0.12, 1.2, 0.9] : [1.2, 0.12, 0.9]} dispose={null} />)}
+      <mesh ref={trail} geometry={GEOMETRIES.trail} material={MATERIALS.bombTrail} dispose={null} />
+    </group>
+    <group ref={marker} position={[0, 3.4, 0]} renderOrder={20}>
+      <mesh geometry={GEOMETRIES.bombMarker} material={MATERIALS.bombMarker} dispose={null} />
+      <mesh geometry={GEOMETRIES.bombDot} material={MATERIALS.bombMarker} dispose={null} />
+    </group>
   </group>;
 }
 

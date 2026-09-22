@@ -13,6 +13,9 @@ export const STALL_AOA = 0.36;
 export const GRAVITY = 9.8;
 // 급강하에서 최고 속도를 넘길 수 있는 여유다. 수직에 가까우면 1.45 배까지 허용한다.
 const DIVE_MARGIN = 0.45;
+/** A/D 선회 입력에서 기체가 실제로 누우는 비율이다. 나머지 선회력은 러더와
+ * 날개 조종면이 보충한다고 보아, 기존 방향 전환력은 유지한다. */
+export const TURN_BANK_RATIO = 0.4;
 // 이륙 속도는 기종 실속 속도에서 파생한다. 최고 속도를 깎아도 이륙 난이도가 따라 변하지 않는다.
 const ROTATE_RATIO = 1.03;
 
@@ -53,6 +56,9 @@ export const PLANES = Object.freeze({
   // 강화 부스트는 Q 로 켜는 두 번째 단계다. 계기 1340km/h 를 그대로 적고 speedOf 가 m/s 로 바꾼다.
   // 추력은 그 속도의 항력(약 88) 보다 넉넉해야 상한에 실제로 닿는다.
   interceptor: { thrust: 30, maxSpeed: 180, pitchAuthority: 0.95, rollAuthority: 1.6, stallSpeed: 42,
+    boostSpeed: 250, boostThrust: 58, overdriveSpeed: speedOf(1340), overdriveThrust: 105 },
+  // 샷거너는 요격기와 같은 기체 성능을 쓴다. 차이는 전방 산탄 무장뿐이다.
+  shotgun: { thrust: 30, maxSpeed: 180, pitchAuthority: 0.95, rollAuthority: 1.6, stallSpeed: 42,
     boostSpeed: 250, boostThrust: 58, overdriveSpeed: speedOf(1340), overdriveThrust: 105 },
 });
 
@@ -224,7 +230,7 @@ export function stepFlight(previous, input = {}, delta = 0, extent = 180, buildi
   // 조종면은 흐르는 공기로 듣는다. 느릴수록 기수와 뱅크가 무겁다.
   const authority = ground ? 1 : clamp(state.speed / 40, 0.32, 1.15);
   state.pitch = clamp(state.pitch + (pitchInput * spec.pitchAuthority * authority - state.pitch * (pitchInput ? 0.12 : 0.35)) * dt, -1.15, 1.15);
-  state.roll += (rollInput * -spec.rollAuthority * authority - state.roll) * (1 - Math.exp(-dt * 3));
+  state.roll += (rollInput * -spec.rollAuthority * authority * TURN_BANK_RATIO - state.roll) * (1 - Math.exp(-dt * 3));
   if (ground) {
     state.y = FLIGHT_GROUND;
     state.roll=0;state.climb=0;
@@ -237,15 +243,17 @@ export function stepFlight(previous, input = {}, delta = 0, extent = 180, buildi
     if (!braking && state.speed > spec.stallSpeed * ROTATE_RATIO && state.pitch > 0.09) { state.phase = 'airborne'; state.message = ''; }
   }
   if (state.phase === 'airborne') {
-    // 선회율은 뱅크의 수평 양력 성분에서 나온다. 빠를수록 같은 뱅크로 덜 돈다.
-    state.heading += (Math.tan(clamp(state.roll, -1.2, 1.2)) * GRAVITY / Math.max(30, state.speed) * 1.9 - yawInput * 0.5) * dt;
+    // 실제 뱅크는 얕지만 러더와 날개 조종면이 부족한 선회력을 보충한다.
+    // 뱅크를 줄이기 전의 유효 각을 사용하므로 빠를수록 선회가 완만해지는 특성도 남는다.
+    const effectiveRoll = state.roll / TURN_BANK_RATIO;
+    state.heading += (Math.tan(clamp(effectiveRoll, -1.2, 1.2)) * GRAVITY / Math.max(30, state.speed) * 1.9 - yawInput * 0.5) * dt;
     if(guard.active) state.message=guard.message;
     else if(state.message?.includes('비행 구역')) state.message='';
     // 받음각은 기수각에서 실제 상승각을 뺀 값이다. 임계 받음각을 넘으면 양력이 무너진다.
     const climbAngle = Math.atan2(finite(state.climb), Math.max(8, state.speed * Math.cos(state.pitch)));
     const liftLoss = Math.min(0.85, Math.max(0, state.pitch - climbAngle - STALL_AOA) * 2.4);
     // 선회 중 양력 손실은 실제보다 절반만 반영한다. 기울일 때마다 고도가 뚝 떨어지면 조종이 답답하다.
-    const bank = Math.max(0.68, 1 - (1 - Math.cos(clamp(state.roll, -1.4, 1.4))) * 0.5);
+    const bank = Math.max(0.68, 1 - (1 - Math.cos(clamp(effectiveRoll, -1.4, 1.4))) * 0.5);
     const lift = Math.min(1, (state.speed / spec.stallSpeed) ** 2) * (1 - liftLoss) * bank;
     // 상승률은 관성 때문에 기수를 따라 곧바로 붙지 않는다. 이 지연이 받음각을 만든다.
     const target = Math.sin(state.pitch) * state.speed * lift - (1 - lift) * 15;

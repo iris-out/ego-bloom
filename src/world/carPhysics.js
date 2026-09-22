@@ -270,6 +270,8 @@ export function stepCar(previous, input = {}, delta = 0, extent = 180, buildings
 export function carStatus(state, kind = 'sedan') {
   const spec = vehicleSpec(kind);
   return {
+    x: finite(state.x),
+    z: finite(state.z),
     speed: Math.round(Math.abs(finite(state.speed)) * 3.6),
     altitude: 0,
     heading: ((Math.round(-finite(state.heading) * 180 / Math.PI) % 360) + 360) % 360,

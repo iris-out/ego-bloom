@@ -54,6 +54,15 @@ test('계기 화면과 HUD 도 삼각형 수에 들어 있다', () => {
   assert.equal(cockpitTriangles('fighter'), PART.panel * 20 + PART.dial + PART.stick + PART.lever + PART.display * 2 + PART.hud + PART.placard);
 });
 
+test('포뮬러 콕핏은 헤일로와 디지털 휠 화면과 거울 예산을 예약한다', () => {
+  const parts = COCKPIT_PARTS.formula;
+  assert.ok(parts.panel >= 12, '콕핏 욕조와 헤일로 구조가 있어야 한다');
+  assert.equal(parts.yoke, 1);
+  assert.equal(parts.display, 1);
+  assert.equal(parts.mirror, 2);
+  assert.ok(COCKPIT_TRIANGLES.formula <= BUDGET.low);
+});
+
 test('계기 눈금이 삼각형 수에 들어 있다', () => {
   assert.equal(DIAL_TICKS, 12);
   assert.equal(PART.tick, 2);

@@ -48,6 +48,13 @@ const PRESETS = {
     disc: '#ffe3b0', discOpacity: 0.72, afterburnerLength: 14,
     smokeOpacity: 0.2, smokeSpread: 1.5, blending: THREE.AdditiveBlending,
   },
+  shotgun: {
+    flame: '#ff9440', flameOpacity: 0.82, radius: 1.3, length: [0.9, 4.4],
+    core: '#dff0ff', coreOpacity: 0.95, coreRadius: 0.6, coreLength: 0.8,
+    ring: '#bfe6ff', ringOpacity: 0.75, rings: 3,
+    disc: '#ffe3b0', discOpacity: 0.72, afterburnerLength: 14,
+    smokeOpacity: 0.2, smokeSpread: 1.5, blending: THREE.AdditiveBlending,
+  },
   fighter: {
     flame: '#ff7a2e', flameOpacity: 0.78, radius: 1.35, length: [0.8, 3.8],
     core: '#c8ecff', coreOpacity: 0.92, coreRadius: 0.66, coreLength: 0.72,

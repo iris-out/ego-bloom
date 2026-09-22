@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   NAV_ANCHOR, navigationRadius, stableHeading, tierMarker, toNavigationPoint,
+  toNavigationSegment,
 } from '../../src/world/navigationMap.js';
 
 test('내비 반경은 정차 75m에서 300km/h 300m까지 단조롭게 넓어진다', () => {
@@ -51,4 +52,14 @@ test('건물 티어는 서로 다른 내비 마커 모양과 크기를 쓴다', 
   assert.equal(new Set(markers.map((marker) => marker.shape)).size, tiers.length);
   assert.deepEqual(markers.map((marker) => marker.size), [0.9, 1, 1.1, 1.25, 1.4]);
   assert.deepEqual(tierMarker('unknown'), tierMarker('bronze'));
+});
+
+test('도로 선분은 두 끝이 밖에 있어도 화면을 가로지르면 표시한다', () => {
+  const pose = { x: 0, z: 0, heading: 0 };
+  const crossing = toNavigationSegment({ x: -180, z: -30 }, { x: 180, z: -30 }, pose, 100);
+  assert.equal(crossing.visible, true);
+  assert.ok(crossing.a.x < 0 && crossing.b.x > 100);
+
+  const distant = toNavigationSegment({ x: 300, z: 300 }, { x: 400, z: 300 }, pose, 100);
+  assert.equal(distant.visible, false);
 });

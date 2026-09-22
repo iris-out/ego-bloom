@@ -7,7 +7,7 @@ import {Html} from '@react-three/drei';
 import * as THREE from 'three';
 import {proxyThumbnailUrl} from '../utils/imageUtils';
 import {getCreatorTierMeta} from '../design/tiers';
-import {creatorDistance,creatorCardOpacity,labelReach,LABEL_SCALE} from './creatorProximity';
+import {creatorDistance,creatorCardOpacity,creatorLabelAnchor,labelReach,LABEL_SCALE} from './creatorProximity';
 import {lotSizeOf,MASS_LOT_RATIO} from './cityModels';
 import {hitsAnyBuilding} from './solidIndex.js';
 import {pickLabelIds} from './labelCandidates.js';
@@ -54,6 +54,32 @@ function WallCard({building,aircraft,anonymous}) {
  </group>;
 }
 
+function GroundCard({ building, driving, selected, onSelect, avatar, name, tier, anonymous }) {
+ const group = useRef();
+ const facadeOffset = driving ? lotSizeOf(building)*MASS_LOT_RATIO/2+0.4 : 0;
+ const initial = creatorLabelAnchor(null, building, driving ? 'drive' : 'explore', facadeOffset);
+ useFrame(({camera})=>{
+  if(!group.current)return;
+  const point=creatorLabelAnchor(camera.position,building,driving?'drive':'explore',facadeOffset);
+  group.current.position.set(point.x,point.y,point.z);
+ });
+ return <group ref={group} position={[initial.x,initial.y,initial.z]}>
+  <Html transform sprite distanceFactor={driving ? LABEL_SCALE.drive : LABEL_SCALE.explore} zIndexRange={[20, 1]}>
+   <button type="button" className="world-building-label" data-selected={selected || undefined}
+    style={{borderBottomColor:tier?`var(${tier.cssVar})`:undefined}}
+    onPointerDown={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); onSelect?.(building); }}
+    aria-label={`${name} 선택`}>
+    {avatar ? <img className="world-building-avatar" src={avatar} alt="" width="144" height="144" loading="lazy" draggable="false" onError={(event) => { event.currentTarget.style.visibility = 'hidden'; }} />
+      : <span className="world-building-avatar" aria-hidden="true">{anonymous?'?':(name?.slice(0, 1)||'?')}</span>}
+    <span className="world-building-text">
+     <span className="world-building-name">{name}</span>
+     <span className="world-building-tier" style={{color:tier?`var(${tier.cssVar})`:undefined}}>{tier?.ko||building.tier_name}</span>
+    </span>
+   </button>
+  </Html>
+ </group>;
+}
+
 /** 라벨 하나는 drei Html 이라 매 프레임 DOM 에 transform 을 쓴다. 주행 중에는 그 수를 절반으로
  * 줄이고 후보도 절반 주기로만 다시 고른다. 빠르게 지나가는 동안 여섯 개는 읽히지도 않는다. */
 export default function NearbyLabels({ buildings, selectedId, onSelect, pickMesh, resources, flightMode, aircraft, driving = false, anonymous = false }) {
@@ -64,8 +90,12 @@ export default function NearbyLabels({ buildings, selectedId, onSelect, pickMesh
   useFrame(({ camera, clock }) => {
     if (clock.elapsedTime - lastUpdate.current < (driving ? 0.3 : 0.25) || !pickMesh.current) return;
     lastUpdate.current = clock.elapsedTime;
-    const anchorOf = (building) => scratch.point.set(building.x,
-      flightMode ? Math.min(building.height + 7, Math.max(8, (aircraft.current?.y || 0) + 8)) : building.height + 7, building.z);
+    const anchorOf = (building) => {
+      if(flightMode)return scratch.point.set(building.x,Math.min(building.height+7,Math.max(8,(aircraft.current?.y||0)+8)),building.z);
+      const facadeOffset=driving?lotSizeOf(building)*MASS_LOT_RATIO/2+0.4:0;
+      const point=creatorLabelAnchor(camera.position,building,driving?'drive':'explore',facadeOffset);
+      return scratch.point.set(point.x,point.y,point.z);
+    };
     const ids = pickLabelIds({
       buildings, anchorOf,
       distanceOf: (building) => flightMode ? creatorDistance(aircraft.current, building) : camera.position.distanceTo(anchorOf(building)),
@@ -84,22 +114,12 @@ export default function NearbyLabels({ buildings, selectedId, onSelect, pickMesh
     if (!building) return null;
     const avatar = !anonymous && typeof building.profile_image_url === 'string' ? proxyThumbnailUrl(building.profile_image_url, 192) : null;
     const name = anonymous ? creatorAlias(building) : (building.nickname || building.handle);
+    const tier = getCreatorTierMeta(building.tier_name);
     if(flightMode)return <WallCard key={`flight-${id}`} building={building} aircraft={aircraft} anonymous={anonymous}/>;
     return <group key={id}>
-      <mesh geometry={resources.geometries.box} material={resources.materials.dark} position={[building.x, building.height + 4.5, building.z]} scale={[0.16, 5, 0.16]} dispose={null} />
-      <Html position={[building.x, flightMode?Math.min(building.height+7,Math.max(8,(aircraft.current?.y||0)+8)):building.height+9, building.z]} transform sprite distanceFactor={driving ? LABEL_SCALE.drive : LABEL_SCALE.explore} zIndexRange={[20, 1]}>
-        <button type="button" className="world-building-label" data-selected={id === selectedId || undefined}
-          style={{borderBottomColor:getCreatorTierMeta(building.tier_name)?`var(${getCreatorTierMeta(building.tier_name).cssVar})`:undefined}}
-          onPointerDown={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); onSelect?.(building); }}
-          aria-label={`${name} 선택`}>
-          {avatar ? <img className="world-building-avatar" src={avatar} alt="" width="144" height="144" loading="lazy" draggable="false" onError={(event) => { event.currentTarget.style.visibility = 'hidden'; }} />
-            : <span className="world-building-avatar" aria-hidden="true">{anonymous ? '?' : (building.nickname || building.handle || '?').slice(0, 1)}</span>}
-          <span className="world-building-text">
-            <span className="world-building-name">{name}</span>
-            <span className="world-building-tier" style={{color:getCreatorTierMeta(building.tier_name)?`var(${getCreatorTierMeta(building.tier_name).cssVar})`:undefined}}>{getCreatorTierMeta(building.tier_name)?.ko || building.tier_name}</span>
-          </span>
-        </button>
-      </Html>
+      {!driving&&<mesh geometry={resources.geometries.box} material={resources.materials.dark} position={[building.x, building.height + 4.5, building.z]} scale={[0.16, 5, 0.16]} dispose={null} />}
+      <GroundCard building={building} driving={driving} selected={id===selectedId} onSelect={onSelect}
+        avatar={avatar} name={name} tier={tier} anonymous={anonymous}/>
     </group>;
   });
 }

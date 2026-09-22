@@ -82,7 +82,7 @@ function overlaps(a, b) {
 export function gaugeFaults(rig) {
   const faults = [];
   const vLimit = rig.fovHalf - FOV_MARGIN;
-  const hLimit = Math.atan(NARROW_ASPECT * Math.tan(rig.fovHalf / DEG)) * DEG - FOV_MARGIN;
+  const hLimit = Math.atan((rig.aspect || NARROW_ASPECT) * Math.tan(rig.fovHalf / DEG)) * DEG - FOV_MARGIN;
   for (const gauge of rig.gauges) {
     const span = gaugeSpan(gauge);
     if (span.bottom < -vLimit) faults.push(fault(gauge.id, 'fov-bottom', span.bottom, -vLimit));

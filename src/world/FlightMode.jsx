@@ -19,9 +19,11 @@ import Projectiles from './models/Projectiles';
 import Blast from './models/Blast';
 import { armamentOf } from './hardpoints.js';
 import { createHealth, hullRatio, hurt, repair } from './health.js';
-import { createArsenal, muzzleAim, stepWeapons, toWorld } from './weapons.js';
+import { BOMB, createArsenal, muzzleAim, stepWeapons, toWorld } from './weapons.js';
 import { projectAim } from './aimScreen.js';
 import { clearAimScreen, setAimScreen } from './aimScreenStore.js';
+import { createLock, lockProgress, stepLock } from './missileLock.js';
+import { clearLockScreen, setLockScreen } from './lockStore.js';
 import { airTrafficTargets, applyAirHit, collidesWith, downAirTraffic } from './airTraffic.js';
 import { scoreTimeAttack, tickTimeAttack } from './timeAttackStore.js';
 import { trafficBoxes } from './traffic.js';
@@ -88,6 +90,9 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
   const shake=useRef({pitch:0,shots:0,rockets:0,bombs:0});
   const calm=useRef(false);
   const gunHit=useRef(null), missileHit=useRef(null), bombHit=useRef(null), lastSolve=useRef(-1);
+  // 미사일 포착이다. 사거리 안 적기를 기수에 담고 있으면 진행도가 차고, 다 차면 락온이다.
+  // 락온한 채로 쏜 미사일만 유도된다. 판정은 missileLock.js 한 곳이 한다.
+  const lock = useRef(createLock());
   // 1인칭 계기 판독값이다. ref 로 두어 0.15초마다 값만 바꾼다. Cockpit 은 다시 렌더하지
   // 않고 매 프레임 이 ref 를 스스로 읽는다.
   const cockpitStatusRef=useRef({});
@@ -115,6 +120,8 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
   const { camera, gl, size } = useThree();
   // 기체에서 내리면 조준선을 비운다. 남겨 두면 다음 탑승의 첫 프레임에 지난 자리가 잠깐 보인다.
   useEffect(() => clearAimScreen, []);
+  // 기종을 바꾸거나 내리면 포착 네모를 지운다. 남겨 두면 다음 탑승 첫 프레임에 지난 자리가 보인다.
+  useEffect(() => { lock.current = createLock(); return clearLockScreen; }, [plane]);
   useEffect(() => {
     // near 0.5 는 눈에서 0.5 인 캐노피 레일과 조종간 그립을 경계에서 자른다. 1인칭에서만 내린다.
     const first = view === 'first';
@@ -272,12 +279,28 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
     const airTargets = mounts && airCombatRef
       ? airTrafficTargets(airCount, clock.elapsedTime, extent, next, AIR_TARGET_RANGE, airCombatRef.current.downed)
       : [];
-    // 지상 AI 차량이다. 저공에서만 의미가 있으므로 고도가 높으면 목록을 비운다.
-    const traffic = mounts && next.y < GROUND_STRAFE_CEILING
-      ? trafficBoxes(trafficCount, clock.elapsedTime, extent, next, GROUND_STRAFE_RANGE).filter((box) => !wrecked.current.has(box.index))
-      : [];
+    // 미사일을 든 기종만 포착한다. 목표는 지금 프레임의 airTargets 에서 고른다.
+    lock.current = mounts?.missile?.length && next.phase === 'airborne'
+      ? stepLock(lock.current, { pose: next, targets: airTargets, dt })
+      : createLock();
+    // 지상 AI 차량이다. 기관포는 저공의 기체 주변, 폭탄은 현재 낙하 위치 주변을 본다.
+    // 폭격기가 투하 후 멀리 지나가도 폭발 반경 안의 차량이 판정에서 빠지지 않는다.
+    const traffic = [], trafficSeen = new Set();
+    const trafficOrigins = [];
+    if (mounts && next.y < GROUND_STRAFE_CEILING) trafficOrigins.push([next, GROUND_STRAFE_RANGE]);
+    for (const projectile of arsenal.current.projectiles || []) {
+      if (projectile.kind === 'bomb') trafficOrigins.push([projectile, BOMB.blast + 8]);
+    }
+    for (const [origin, radius] of trafficOrigins) {
+      for (const box of trafficBoxes(trafficCount, clock.elapsedTime, extent, origin, radius)) {
+        if (wrecked.current.has(box.index) || trafficSeen.has(box.index)) continue;
+        trafficSeen.add(box.index); traffic.push(box);
+      }
+    }
     if (mounts) arsenal.current = stepWeapons(arsenal.current, {
       dt, pose: next, mounts, obstacles, airTargets, traffic, extent, plane,
+      // 락온했을 때만 목표 번호를 넘긴다. 아니면 예전처럼 곧게 나간다.
+      seek: lock.current.locked ? lock.current.index : null,
       fire: {
         cannon: input.has('Space') || !!controls.fireCannon,
         missile: input.has('KeyV') || !!controls.fireMissile,
@@ -389,6 +412,13 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
     if (mounts) {
       // 이 프레임에 옮긴 카메라 자세를 반영한다. 렌더러는 이 뒤에 맞추므로 그대로 두면 한 프레임 늦는다.
       camera.updateMatrixWorld();
+      // 포착 네모는 조준선과 달리 적기 자리에 얹는다. 목표가 없으면 store 를 비운다.
+      const marked = lock.current.target;
+      if (marked) {
+        const screen = projectAim(camera, marked, null, 0, size);
+        setLockScreen({ x: screen.x, y: screen.y, behind: screen.behind || screen.clamped,
+          progress: lockProgress(lock.current), locked: lock.current.locked, range: lock.current.range });
+      } else clearLockScreen();
       const port = mounts.cannon?.[0];
       if (port) {
         // 탄착점이 풀렸으면 그 점을 그대로 쓴다. 직선 위의 점을 쓰면 낙차만큼 위로 어긋난다.

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BOMB, CANNON, MISSILE, createArsenal, gunOf, stepWeapons } from '../../src/world/weapons.js';
+import { BOMB, CANNON, MISSILE, cannonRange, createArsenal, gunOf, muzzleAim, stepWeapons } from '../../src/world/weapons.js';
 import { armamentOf } from '../../src/world/hardpoints.js';
-import { airImpact } from '../../src/world/reticle.js';
+import { airImpact, effectiveRange } from '../../src/world/reticle.js';
 import { PLANE_KEYS } from '../../src/world/identity.js';
 import { PLANES } from '../../src/world/flightPhysics.js';
 
@@ -15,13 +15,35 @@ const run = (state, plane, fire, frames, extra = {}) => {
   return next;
 };
 
-test('기종 표가 여섯 기종을 갖고 폭격기, 프로펠러기, 요격기가 들어 있다', () => {
-  assert.deepEqual(PLANE_KEYS, ['jet', 'fighter', 'prop', 'interceptor', 'bomber', 'helicopter']);
-  assert.ok(PLANES.bomber && PLANES.prop && PLANES.interceptor, '세 기종의 비행 성능이 있다');
+test('기종 표가 샷거너를 포함한 일곱 기종을 갖는다', () => {
+  assert.deepEqual(PLANE_KEYS, ['jet', 'fighter', 'prop', 'interceptor', 'shotgun', 'bomber', 'helicopter']);
+  assert.ok(PLANES.bomber && PLANES.prop && PLANES.interceptor && PLANES.shotgun, '비행 성능이 있다');
   assert.equal(armamentOf('interceptor').bomb, undefined, '요격기는 폭탄이 없다');
   assert.equal(armamentOf('prop').missile, undefined, '프로펠러기는 미사일이 없다');
   assert.equal(armamentOf('bomber').cannon, undefined, '폭격기는 기관총이 없다');
   assert.equal(armamentOf('jet'), null, '라이트 제트는 무장이 없다');
+});
+
+test('샷거너는 한 번 누르면 산탄을 팡-팡 두 번 쏘고 0.9초 대기한다', () => {
+  const gun = gunOf('shotgun');
+  assert.equal(gun.range, 150);
+  assert.equal(gun.pellets, 8);
+  let state = createArsenal('shotgun');
+  const options = { pose: pose({ speed: 0 }), mounts: armamentOf('shotgun'), plane: 'shotgun' };
+  state = stepWeapons(state, { ...options, dt: 1 / 60, fire: { cannon: true } });
+  assert.equal(state.shots, 1);
+  assert.equal(state.projectiles.length, gun.pellets);
+  state = stepWeapons(state, { ...options, dt: 1 / 60, fire: { cannon: true } });
+  assert.equal(state.shots, 1, '첫 포신 직후에는 다시 쏘지 않는다');
+  for (let i = 0; i < 6; i += 1) state = stepWeapons(state, { ...options, dt: 1 / 60, fire: { cannon: true } });
+  assert.equal(state.shots, 2);
+  assert.equal(state.projectiles.length, gun.pellets * 2);
+  assert.equal(state.shotgunStage, 2);
+  for (let i = 0; i < 53; i += 1) state = stepWeapons(state, { ...options, dt: 1 / 60, fire: { cannon: true } });
+  assert.equal(state.shots, 2, '두 번째 포신 뒤 0.9초 동안은 잠긴다');
+  state = stepWeapons(state, { ...options, dt: 1 / 60, fire: {} });
+  state = stepWeapons(state, { ...options, dt: 1 / 60, fire: { cannon: true } });
+  assert.equal(state.shots, 3, '손을 뗐다 다시 누르면 새 더블 샷이 시작된다');
 });
 
 test('프로펠러기 기관총이 전투기보다 빠르게 나가고 탄속은 더 느리다', () => {
@@ -36,6 +58,50 @@ test('프로펠러기 기관총이 전투기보다 빠르게 나가고 탄속은
   assert.ok(propShots > fighterShots, `프로펠러 ${propShots} 발, 전투기 ${fighterShots} 발`);
   // 발사 간격은 프레임 단위로 끊기므로 이론값보다 적게 나간다. 전투기 이론값보다는 많아야 한다.
   assert.ok(propShots >= 1 / fighter.interval, `프로펠러 ${propShots} 발`);
+});
+
+test('요격기 2연장 기관포는 100m 앞 중심선으로 모인다', () => {
+  const mounts = armamentOf('interceptor');
+  assert.equal(mounts.cannon.length, 2);
+  assert.equal(mounts.converge, 100);
+  for (const port of mounts.cannon) {
+    const aim = muzzleAim(port, mounts.converge);
+    const travel = (-mounts.converge - port[2]) / aim[2];
+    assert.ok(Math.hypot(port[0] + aim[0] * travel, port[1] + aim[1] * travel) < 1e-6);
+  }
+});
+
+test('요격기 기관포는 기존보다 32% 빠른 연사력으로 10초에 약 111발을 쏜다', () => {
+  const gun = gunOf('interceptor');
+  assert.equal(gun.interval, 1 / (8.4 * 1.1 * 1.2));
+  const fired = run(createArsenal('interceptor'), 'interceptor', { cannon: true }, 600, { pose: { speed: 0 } });
+  assert.ok(fired.shots >= 110 && fired.shots <= 113, `발사 수 ${fired.shots}`);
+});
+
+test('요격기 기관포는 탄속을 20% 낮추고 낙차와 300m 사거리를 갖는다', () => {
+  const gun = gunOf('interceptor');
+  assert.equal(gun.speed, 240);
+  assert.ok(gun.gravity > 0);
+  assert.equal(gun.range, 300);
+  assert.equal(cannonRange(180, 'interceptor'), 300);
+  assert.equal(effectiveRange('flight', 'interceptor'), 300);
+  const fired = stepWeapons(createArsenal('interceptor'), {
+    dt: 1 / 60, pose: pose({ speed: 0 }), mounts: armamentOf('interceptor'), plane: 'interceptor', fire: { cannon: true },
+  });
+  const shell = fired.projectiles[0];
+  assert.ok(Math.abs(Math.hypot(shell.vx, shell.vz) - 240) < 0.1, `탄속 ${Math.hypot(shell.vx, shell.vz)}`);
+  // y=0.1 포구가 중심선으로 향하는 초기 수직 속도를 빼고, 한 프레임의 중력 가속도만 본다.
+  const convergenceVy = -0.1 / Math.hypot(0.3, 0.1, 95.4) * 240;
+  assert.ok(Math.abs((shell.vy - convergenceVy) + gun.gravity / 60) < 1e-9, `수직 속도 ${shell.vy}`);
+});
+
+test('요격기 기관포 한 번의 발사 이벤트에서 두 포신이 동시에 나간다', () => {
+  const fired = stepWeapons(createArsenal('interceptor'), {
+    dt: 1 / 60, pose: pose({ speed: 0 }), mounts: armamentOf('interceptor'), plane: 'interceptor', fire: { cannon: true },
+  });
+  assert.equal(fired.projectiles.filter((projectile) => projectile.kind === 'cannon').length, 2);
+  assert.equal(fired.shots, 1, '두 포신은 하나의 연사 이벤트로 기록한다');
+  assert.equal(fired.cannonAmmo, gunOf('interceptor').ammo - 1, '탄약은 발사 이벤트 단위로 차감한다');
 });
 
 test('폭탄창이 열려야 폭탄이 나가고 손을 떼면 닫힌다', () => {
@@ -78,6 +144,20 @@ test('폭탄은 추진 없이 떨어져 지면에서 터진다', () => {
   const blast = state.blasts.find((entry) => entry.kind === 'bomb');
   assert.equal(blast.size, BOMB.blast);
   assert.ok(BOMB.blast > MISSILE.blast, '폭탄이 미사일보다 크게 터진다');
+});
+
+test('폭탄 폭발은 18m 안의 모든 AI 차량을 격파한다', () => {
+  const traffic = [
+    { index: 1, x: 0, y: 0.31, z: 0, width: 2.2, depth: 4.3, height: 1.6 },
+    { index: 2, x: 15, y: 0.31, z: 0, width: 2.2, depth: 4.3, height: 1.6 },
+    { index: 3, x: 19, y: 0.31, z: 0, width: 2.2, depth: 4.3, height: 1.6 },
+  ];
+  let state = {
+    ...createArsenal('bomber'),
+    projectiles: [{ id: 7, kind: 'bomb', x: 0, y: 0.35, z: 0, vx: 0, vy: -8, vz: 0, age: 1, life: BOMB.life, travel: 0 }],
+  };
+  state = stepWeapons(state, { dt: 1 / 60, pose: pose(), mounts: armamentOf('bomber'), plane: 'bomber', traffic });
+  assert.deepEqual(state.hits.map((hit) => hit.index).sort(), [1, 2]);
 });
 
 test('지상에서는 투하하지 않고 활주로에 서면 재장전한다', () => {

@@ -54,6 +54,38 @@ export function toNavigationPoint(point, pose, radius) {
   return { x: finite(x, NAV_ANCHOR.x), y: finite(y, NAV_ANCHOR.y), visible };
 }
 
+const NAV_EDGE = Object.freeze({ min: -5, max: 105 });
+
+function regionCode(point) {
+  let code = 0;
+  if (point.x < NAV_EDGE.min) code |= 1;
+  else if (point.x > NAV_EDGE.max) code |= 2;
+  if (point.y < NAV_EDGE.min) code |= 4;
+  else if (point.y > NAV_EDGE.max) code |= 8;
+  return code;
+}
+
+/** 두 끝이 화면 밖이어도 지도를 가로지르는 긴 도로를 놓치지 않는다. */
+export function toNavigationSegment(start, end, pose, radius) {
+  const a = toNavigationPoint(start, pose, radius);
+  const b = toNavigationPoint(end, pose, radius);
+  let x1 = a.x, y1 = a.y, x2 = b.x, y2 = b.y;
+  let codeA = regionCode(a), codeB = regionCode(b), visible = false;
+  for (let guard = 0; guard < 8; guard += 1) {
+    if (!(codeA | codeB)) { visible = true; break; }
+    if (codeA & codeB) break;
+    const code = codeA || codeB;
+    let x = 0, y = 0;
+    if (code & 4) { x = x1 + (x2 - x1) * (NAV_EDGE.min - y1) / (y2 - y1); y = NAV_EDGE.min; }
+    else if (code & 8) { x = x1 + (x2 - x1) * (NAV_EDGE.max - y1) / (y2 - y1); y = NAV_EDGE.max; }
+    else if (code & 2) { y = y1 + (y2 - y1) * (NAV_EDGE.max - x1) / (x2 - x1); x = NAV_EDGE.max; }
+    else { y = y1 + (y2 - y1) * (NAV_EDGE.min - x1) / (x2 - x1); x = NAV_EDGE.min; }
+    if (code === codeA) { x1 = x; y1 = y; codeA = regionCode({ x, y }); }
+    else { x2 = x; y2 = y; codeB = regionCode({ x, y }); }
+  }
+  return { a, b, visible: visible && Number.isFinite(x1 + y1 + x2 + y2) };
+}
+
 const TIER_MARKERS = Object.freeze({
   bronze: Object.freeze({ shape: 'square', size: 0.9 }),
   silver: Object.freeze({ shape: 'diamond', size: 1 }),

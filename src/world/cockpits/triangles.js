@@ -101,6 +101,8 @@ export const COCKPIT_PARTS = Object.freeze({
   sedan: { panel: 19, yoke: 1, dial: 2, display: 1, mirror: 3 },
   suv: { panel: 21, yoke: 1, dial: 2, display: 1, mirror: 3 },
   convertible: { panel: 17, yoke: 1, dial: 2, display: 1, mirror: 3 },
+  // 모노코크 욕조, 어깨 패딩, 헤일로, 사각 휠과 통합 화면, 변속등 일곱이다.
+  formula: { panel: 12, yoke: 1, display: 1, mirror: 2, button: 7 },
   truck: { panel: 24, yoke: 1, dial: 3, display: 1, mirror: 3 },
   // 나셀 하나, 손(손등+손가락+엄지) 여섯, 전완 둘, 레버 둘, 스로틀 하나, 무릎 둘이 panel 14개다.
   // 계기 둘 다 numbers 와 hood 를 쓰므로 dialHood 를 따로 더한다. 거울은 좌우 둘뿐이다.
@@ -197,6 +199,10 @@ export const QUALITY_PARTS = Object.freeze({
   convertible: {
     medium: { panel: 28, glass: 2, hands: 1, dialHood: 2, knob: 7, button: 3, shade: 5, wipers: 1, pedal: 2, gearLever: 1 },
     high: { panel: 4, grabHandle: 2, knob: 2 },
+  },
+  formula: {
+    medium: { hands: 1, pedal: 2, seat: 1 },
+    high: { panel: 1 },
   },
   // 트럭은 콘솔 대신 엔진 덮개라 medium 판이 둘 적고, 마커등 토글 셋과 계기 후드 셋이 있다.
   // high 는 서류 상자, 컵홀더 둘, 옆창 손잡이 둘, 캡 뒷벽 볼트 넷이다.

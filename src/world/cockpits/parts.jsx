@@ -8,6 +8,7 @@ import {
 } from './dialScale.js';
 import { MAT, registerPanelEmissive } from './materials.js';
 import { GLASS_RAIN, GLASS_SMUDGE, refreshRain } from './glassTexture.js';
+import StaticBatch from '../StaticBatch.jsx';
 
 /** 콕핏 실내 공용 조각이다. 시각만 맡는다. 키보드, 카메라, 네트워크, 상태 전이를
  * 이곳에 넣지 않는다. material 은 모듈 스코프에서 한 번 만들어 전 기종이 공유한다.
@@ -326,9 +327,11 @@ export function Stick({ get, position = [0, 0, 0], limit = [0.3, 0.42], damping 
   return <group position={position}>
     <mesh geometry={GEO.box} material={MAT.shell} scale={[0.14, 0.05, 0.14]} dispose={null} />
     <group ref={arm} userData={{ dynamic: true }}>
-      <mesh geometry={GEO.box} material={MAT.trim} scale={[0.045, 0.34, 0.045]} position={[0, 0.17, 0]} dispose={null} />
-      <mesh geometry={GEO.box} material={MAT.grip} scale={[0.09, 0.13, 0.08]} position={[0, 0.38, 0]} dispose={null} />
-      {hand && <StickHand />}
+      <StaticBatch version={`${hand}`}>
+        <mesh geometry={GEO.box} material={MAT.trim} scale={[0.045, 0.34, 0.045]} position={[0, 0.17, 0]} dispose={null} />
+        <mesh geometry={GEO.box} material={MAT.grip} scale={[0.09, 0.13, 0.08]} position={[0, 0.38, 0]} dispose={null} />
+        {hand && <StickHand />}
+      </StaticBatch>
     </group>
   </group>;
 }
@@ -349,13 +352,17 @@ export function Yoke({ get, angle = 0, position = [0, 0, 0], radius = 0.19, tilt
   });
   return <group position={position} rotation={[tilt, 0, 0]}>
     <group ref={wheel} userData={{ dynamic: true }}>
-      <group scale={radius}>
-        <mesh geometry={GEO.rim} material={MAT.grip} dispose={null} />
-        {/* 3시, 6시, 9시 스포크다. 12시에 스포크를 두면 계기 화면 가운데를 세로로 가린다 */}
-        {[Math.PI / 2, Math.PI, Math.PI * 1.5].map((spoke) => <mesh key={spoke} geometry={GEO.box} material={MAT.grip}
-          scale={[0.14, 0.9, 0.09]} position={[Math.sin(spoke) * 0.45, Math.cos(spoke) * 0.45, 0]} rotation={[0, 0, -spoke]} />)}
-      </group>
-      {hands && <Hands radius={radius} />}
+      {/* 휠과 손은 통째로 같이 도는 한 덩이다. 바깥 StaticBatch 는 dynamic 가지를 건너뛰므로
+          여기서 다시 합친다. 림, 스포크, 손 열네 조각이 재질 세 벌로 줄어든다. */}
+      <StaticBatch version={`${radius}:${hands}`}>
+        <group scale={radius}>
+          <mesh geometry={GEO.rim} material={MAT.grip} dispose={null} />
+          {/* 3시, 6시, 9시 스포크다. 12시에 스포크를 두면 계기 화면 가운데를 세로로 가린다 */}
+          {[Math.PI / 2, Math.PI, Math.PI * 1.5].map((spoke) => <mesh key={spoke} geometry={GEO.box} material={MAT.grip}
+            scale={[0.14, 0.9, 0.09]} position={[Math.sin(spoke) * 0.45, Math.cos(spoke) * 0.45, 0]} rotation={[0, 0, -spoke]} />)}
+        </group>
+        {hands && <Hands radius={radius} />}
+      </StaticBatch>
     </group>
     <mesh geometry={GEO.box} material={MAT.trim} scale={[0.06, 0.06, 0.14]} position={[0, 0, -0.08]} dispose={null} />
   </group>;

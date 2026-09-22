@@ -6,7 +6,7 @@
 
 /** 차체 내구도다. 전차가 가장 단단하고 장갑차가 가장 약하다.
  * 전차포 세 발, 자주포 두 발이면 전차가 터지는 값이다. */
-export const HULL = Object.freeze({ tank: 1400, howitzer: 900, armored: 700, aa: 620, fighter: 500, prop: 320, bomber: 900, interceptor: 380 });
+export const HULL = Object.freeze({ tank: 1400, howitzer: 900, armored: 700, aa: 620, fighter: 500, prop: 320, bomber: 900, interceptor: 380, shotgun: 380 });
 
 /** 무기별 한 발 피해다. 키는 발사체가 들고 다니는 weapon 값과 같다. */
 export const DAMAGE = Object.freeze({ tank: 480, howitzer: 700, armored: 60, aa: 45, cannon: 16, missile: 420, bomb: 700 });
@@ -31,7 +31,7 @@ const finite = (value, fallback = 0) => Number.isFinite(value) ? value : fallbac
  * 호출자가 kind 를 넘기므로 계약을 분명히 둔다. */
 export function isArmed(kind, key) {
   // 무장한 기체만 체력을 갖는다. 라이트 제트와 헬기는 쏠 무기가 없다.
-  if (kind === 'flight') return ['fighter', 'prop', 'bomber', 'interceptor'].includes(key);
+  if (kind === 'flight') return ['fighter', 'prop', 'bomber', 'interceptor', 'shotgun'].includes(key);
   if (kind === 'car') return ['tank', 'howitzer', 'armored', 'aa'].includes(key);
   return false;
 }

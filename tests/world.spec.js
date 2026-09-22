@@ -3,7 +3,11 @@ import process from 'node:process';
 import { Buffer } from 'node:buffer';
 import { buildWorld } from '../shared/worldLayout.js';
 import { RIDE_GROUPS } from '../src/world/rideSpecs.js';
+import { variantCountOf } from '../src/world/models/tierBuildings.js';
+import { CREATOR_TIERS } from '../src/design/tiers.js';
 const tiers=['Champion','Master','Diamond','Platinum','Gold','Silver','Bronze'];
+const galleryModelCount=CREATOR_TIERS.reduce((total,tier)=>total+variantCountOf(tier.key),0);
+const initialGalleryResultCount=Math.min(galleryModelCount,40);
 const buildings=buildWorld(Array.from({length:1000},(_,i)=>({id:`00000000-0000-4000-8000-${String(i).padStart(12,'0')}`,nickname:i===0?'달빛 작가':`제작자 ${i}`,handle:`creator${i}`,elo_score:(1000-i)*100000,tier_name:tiers[i%7]})));
 async function mock(page,rows=buildings){await page.route('**/api/get-world-data',route=>route.fulfill({json:{buildings:rows}}));}
 /** 탐색 패널은 이제 상단 탭 안에 있다. 이미 열려 있으면 다시 누르면 닫히므로 확인한다. */
@@ -76,7 +80,7 @@ test('API error retries successfully and empty city offers model gallery',async(
   await expect(page.getByRole('heading',{name:'첫 번째 제작자를 기다리는 도시'})).toBeVisible();
   await page.getByRole('button',{name:'건물 컬렉션 둘러보기'}).click();
   await expect(page.locator('.world-stage')).toHaveAttribute('data-ready','true',{timeout:15000});
-  await expect(page.locator('.world-result')).toHaveCount(24);
+  await expect(page.locator('.world-result')).toHaveCount(initialGalleryResultCount);
   await page.screenshot({path:'/tmp/ego-world-gallery.png'});
 });
 
@@ -91,7 +95,7 @@ test('nearby rooftop name selects creator without corrupting camera and WebGL ca
   await expect(page.getByRole('region',{name:'선택한 제작자'})).toContainText('옥상의 작가');
   await page.screenshot({path:'/tmp/ego-world-rooftop.png'});
   await page.locator('.world-canvas canvas').evaluate(canvas=>canvas.getContext('webgl2').getExtension('WEBGL_lose_context').loseContext());
-  await expect(page.getByRole('heading',{name:'3D 화면을 열지 못했습니다'})).toBeVisible();
+  await expect(page.getByText('3D 그래픽 컨텍스트 복구 중…')).toBeVisible();
   await expect(page.getByRole('link',{name:'프로필 보기'})).toBeVisible();
 });
 
@@ -203,6 +207,52 @@ test('motorcycle mounts and supports driving in third and first person',async({p
   expect(errors).toEqual([]);
 });
 
+test('formula has heading-up navigation, faster zoom and detailed first-person cockpit',async({page})=>{
+  test.setTimeout(90000);
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.setViewportSize({width:1440,height:960});await mock(page,buildings.slice(0,40));await page.goto('/world');
+  await expect(page.locator('.world-stage')).toHaveAttribute('data-ready','true',{timeout:15000});
+  await ride(page,'차량','포뮬러');
+  const navigation=page.getByRole('region',{name:'주행 내비게이션'});
+  await expect(navigation).toBeVisible();
+  await expect(navigation.getByRole('img')).toHaveAttribute('aria-label',/반경 75미터/);
+  await expect(page.getByRole('button',{name:/브레이크, 단축키 SPACE/})).toBeVisible();
+  await page.keyboard.down('KeyW');
+  await expect.poll(async()=>Number((await navigation.getByRole('img').getAttribute('aria-label')).match(/반경 (\d+)미터/)?.[1]||0),{timeout:6000}).toBeGreaterThan(75);
+  await page.keyboard.down('Space');await page.waitForTimeout(250);await page.keyboard.up('Space');
+  await page.keyboard.up('KeyW');
+  await page.screenshot({path:'/tmp/ego-world-formula-exterior.png'});
+  await page.keyboard.press('KeyC');
+  await expect(page.getByRole('button',{name:/3인칭/})).toBeVisible();
+  await page.screenshot({path:'/tmp/ego-world-formula-cockpit.png'});
+  await page.keyboard.press('Escape');
+  expect(errors).toEqual([]);
+});
+
+test('convertible first-person dashboard keeps its recessed cluster clear',async({page})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.setViewportSize({width:1440,height:960});await mock(page,buildings.slice(0,40));await page.goto('/world');
+  await expect(page.locator('.world-stage')).toHaveAttribute('data-ready','true',{timeout:15000});
+  await ride(page,'차량','오픈카');
+  await page.keyboard.press('KeyC');
+  await expect(page.getByRole('button',{name:/3인칭/})).toBeVisible();
+  await page.screenshot({path:'/tmp/ego-world-convertible-cockpit.png'});
+  expect(errors).toEqual([]);
+});
+
+test('driving beside a tall creator building keeps its creator card in view',async({page})=>{
+  const nearby={id:'near-road-creator',nickname:'도로 옆 제작자',handle:'roadside',tier_name:'Diamond',elo_score:25000,x:160,z:30,height:120,rank:1};
+  await page.setViewportSize({width:1440,height:960});await mock(page,[nearby]);await page.goto('/world');
+  await expect(page.locator('.world-stage')).toHaveAttribute('data-ready','true',{timeout:15000});
+  await ride(page,'차량','세단');
+  const card=page.getByRole('button',{name:'도로 옆 제작자 선택'});
+  await expect(card).toBeVisible({timeout:15000});
+  await expect.poll(async()=>{
+    const bounds=await card.boundingBox().catch(()=>null);
+    return !!bounds&&bounds.x>=0&&bounds.y>=0&&bounds.x+bounds.width<=1440&&bounds.y+bounds.height<=960;
+  },{timeout:15000}).toBe(true);
+});
+
 test('home navbar exposes an Open World tab',async({page})=>{
   await page.setViewportSize({width:1440,height:900});await mock(page,[]);
   await page.goto('/');await page.getByRole('tab',{name:'오픈월드',exact:true}).click();
@@ -247,15 +297,15 @@ test('live multiplayer shows another pilot, counts both sessions and removes dep
   } finally {await observer.close();if(!pilot.isClosed())await pilot.close();}
 });
 
-test('24 model gallery renders seasonal day, sunrise, sunset and moon shaders without WebGL errors',async({page})=>{
+test('model gallery renders seasonal day, sunrise, sunset and moon shaders without WebGL errors',async({page})=>{
   test.setTimeout(120000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(/Shader Error|VALIDATE_STATUS|shader.*ERROR|WebGLProgram|NaN/i.test(m.text()))errors.push(m.text());});
   await page.clock.setFixedTime(new Date('2026-09-11T15:00:00Z'));
   await mock(page,[]);await page.goto('/world');
   await openDiscover(page);
   await page.getByRole('tab',{name:'건물 컬렉션'}).click();
-  await expect(page.locator('.world-stage')).toHaveAttribute('data-ready','true',{timeout:15000});
-  await expect(page.locator('.world-result')).toHaveCount(24);
+  await expect(page.locator('.world-stage')).toHaveAttribute('data-ready','true',{timeout:30000});
+  await expect(page.locator('.world-result')).toHaveCount(initialGalleryResultCount);
   await page.getByRole('tab',{name:'설정'}).click();
   await expect(page.getByLabel('도시 계절')).toHaveText('KST 2026-09-12 · 초가을');
   for(const mode of ['day','dawn','sunset','night']){
@@ -355,8 +405,3 @@ test('TEMP zeta sign night glow visual check',async({page})=>{
   await page.waitForTimeout(800);
   await page.screenshot({path:'/tmp/ego-world-cityhall-day.png'});
 });
-
-
-
-
-

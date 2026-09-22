@@ -123,6 +123,7 @@
 | 그림자 caster | `cityTiles.buildCasterIndex` 와 `selectCasterCells`, `WorldScene.ShadowCasters`, `SunLight` 의 절두체 기록 |
 | 미리 컴파일 대상 | `ShaderPrewarm` 의 조명 조합과 묶음 목록, 새로 추가한 실내나 무기의 재질 위치 |
 | AI 항공기 궤도와 격추 | `airTraffic.js` 의 `SPEC`, `AIR_HITS`, `QUALITY.aircraft`, `AirTraffic.jsx`, `weapons.stepWeapons` 의 `airTargets`, air-traffic 단위 테스트 |
+| 전투기 미사일 포착과 유도 | `missileLock.js`(거리, 원뿔, 2초 규칙), `lockStore.js`, `ui/LockBox.jsx`, `weapons.js` 의 `MISSILE.turn`, `MISSILE.proximity`, `steerMissile`, missile-lock 단위 테스트 |
 | 엔진 음색 | `engineSound.ENGINES` 의 harmonics/sub/airHz 와 `engineTargets`, `FlightMode`/`CarMode` 의 voice 수명, engine-sound 단위 테스트 |
 | 폭발음 겹침 | `sound.effectOut`, `soundLimits.VOICE_RULES`, `engineSound` 의 `engineOut`, sound-limits 단위 테스트 |
 | 항공 무장의 지상 판정 | `weapons.stepWeapons` 의 traffic 과 hits, `FlightMode` 의 GROUND_STRAFE_*, `carPhysics.hitsVehicle` |
@@ -132,7 +133,9 @@
 | 탄의 차량 명중 | `carPhysics.hitsVehicle`(x, y, z 3축 슬랩) 과 `VEHICLE_LIFT`, `traffic.TRAFFIC_BODY`, `weapons`/`groundWeapons` 의 traffic 판정, `remoteCombat.hitsSelf` 의 내 차 상자 |
 | 앞바퀴 조향 방향 | `models/carGeometry.steerAngle` 한 곳이 부호를 정한다. 바퀴 group 을 가진 모델 일곱과 `steering` 단위 테스트 |
 | 조준선 자리 | `aimScreen.projectAim`, `aimScreenStore`, `CarMode`/`FlightMode` 의 매 프레임 기록, `ui/Reticle` 의 rAF 루프와 `.wui-reticle` transform |
-| 제작자 라벨 거리 | `creatorProximity.labelReach` 와 `LABEL_SCALE`, `NearbyCreators` 의 reachOf 와 distanceFactor, proximity 단위 테스트 |
+| 제작자 라벨 거리·높이 | `creatorProximity.labelReach`·`creatorLabelAnchor`·`LABEL_SCALE`, `NearbyCreators` 의 reachOf·distanceFactor·주행 외벽 추적, proximity 단위 테스트 |
+| 주행 내비게이션 | `navigationMap` 의 헤딩업 투영·속도별 반경·티어 마커, `Map` 의 navigation 모드, `carStatus` 의 x/z/heading/speed, `WorldPage` 차량 HUD 연결 |
+| 포뮬러 차종 | `carPhysics.VEHICLES.formula`, `models/Formula`, `cockpits/FormulaInterior`, `eyePoints`, `engineSound`, `mirrorLayout`, `triangles`, `rideArt`, Space 핸드브레이크·드리프트 테스트 |
 | 도보 출발점과 벽 | `models/airportLayout.walkSpawn`, `walkPhysics.stepWalk` 의 축 분리 미끄러짐과 갇힘 탈출, walk 와 airport-layout 단위 테스트 |
 | 포탑 조준 입력 | `groundWeapons.aimGroundWeapon`(마우스, 터치) 와 `aimKeyboard`(방향키), `AIM_LIMITS`, `CarMode` 의 pointer 처리 |
 | 1인칭 총기 자세와 조준 | `weaponSights.js` 의 ANCHOR/SIGHT_POINT/HIP_REST, `models/WeaponView`, `ui/FpsCrosshair`, weapon-sights 단위 테스트 |
@@ -184,8 +187,8 @@ WORLD_REALTIME_TEST=1 npm run test:world
 - `season.js`: `Asia/Seoul` 날짜로 나무·지면·대기 팔레트를 매일 보간한다. 9월은 초가을로 표시하며 9월 12일 기준 팔레트는 녹색과 누런 녹색이 섞인 분위기다. 특정 연도에 고정하지 않으며 KST 자정 경계를 테스트한다. 실제 날씨/천문 관측 자료는 아니다.
 - `shaders/atmosphere.js`: 태양 원반·주변 산란·수평선 노을·달 표면을 그린다. 일출은 +X(동쪽), 노을은 -X(서쪽), 도시 directionalLight와 같은 광원 방향을 사용한다.
 - `shaders/surfaces.js`: 기존 MeshStandardMaterial의 조명/그림자를 유지하면서 석재 입자감·유리 창살/반사·수면 normal 물결을 추가한다. Three r182의 shader chunk에 연결되므로 버전 변경 시 실제 브라우저의 shader compilation 오류를 검사한다.
-- `NearbyCreators.jsx` / `creatorProximity.js`: 비행기는 건물 체적과의 거리로 카드 투명도를 계산한다. 비행 중 최대 3장, 일반 탐색 최대 6장. 카메라만 돌려도 거리가 바뀐 것으로 계산하지 않는다. 카드의 pointer-events는 꺼서 비행 조작을 방해하지 않는다.
+- `NearbyCreators.jsx` / `creatorProximity.js`: 비행기는 건물 체적과의 거리로 카드 투명도를 계산한다. 비행 중 최대 3장, 일반 탐색 최대 6장. 주행 중은 높은 건물 옥상 대신 카메라보다 4m 위이면서 카메라에 가장 가까운 외벽 위치를 따라가, 근거리에서도 제작자 카드가 화면 위나 건물 중심 너머로 사라지지 않는다. 카메라만 돌려도 거리가 바뀐 것으로 계산하지 않는다. 카드의 pointer-events는 꺼서 비행 조작을 방해하지 않는다.
 
 ### 1인칭 실내 시야
 
-항공기 캐노피는 앞유리 가장자리의 가는 기둥과 상부 프레임으로 구성한다. 기둥의 깊이를 실내 길이만큼 늘리면 측면 벽이 되어 시야를 가리므로 단면 두께를 유지한다. 계기판은 눈높이 아래에 두고 아날로그 계기와 화면의 투영 영역이 겹치지 않게 배치한다. 세단도 1인칭에서는 전용 실내를 사용하며 외장 차체는 숨긴다. 오토바이는 개방형 외장을 유지한다.
+항공기 캐노피는 앞유리 가장자리의 가는 기둥과 상부 프레임으로 구성한다. 기둥의 깊이를 실내 길이만큼 늘리면 측면 벽이 되어 시야를 가리므로 단면 두께를 유지한다. 계기판은 눈높이 아래에 두고 아날로그 계기와 화면의 투영 영역이 겹치지 않게 배치한다. 세단·SUV·오픈카·트럭은 1인칭 전용 실내에서 외장 캐빈을 숨기고, 오픈카는 얇은 후드와 매립 나셀을 쓴다. SUV 눈높이 `y=0.86`은 높은 착좌감을 위한 카메라·실내 기준값일 뿐 주행 충돌 상자나 차체 원점을 바꾸지 않는다. 포뮬러는 카메라와 겹치는 모노코크·사이드포드·외장 미러를 숨기고 전용 욕조, 사각 스티어링 휠, 디지털 화면, 변속등, 좌우 미러를 보여 준다. 오토바이는 개방형 외장을 유지한다.

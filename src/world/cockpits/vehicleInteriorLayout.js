@@ -19,18 +19,19 @@ export const ROAD_CABINS = Object.freeze({
   sedan: Object.freeze({
     innerWidth: 1.60, dashWidth: 1.50,
     roofY: 0.26, floorY: -0.70, sillY: -0.25,
+    headerHeight: 0.045, headerDepth: 0.04,
     // 대시 상단 앞 모서리는 앞유리 밑선(눈 기준 y -0.234, z -0.974) 바로 안쪽이다.
-    dashTopY: -0.25, dashZ: -0.96, dashBreakY: -0.285, dashBreakZ: -0.76,
+    dashTopY: -0.25, dashZ: -0.84, dashBreakY: -0.285, dashBreakZ: -0.76,
     dashFaceY: -0.52, dashFaceZ: -0.82,
     // 계기 후드 입술이다. 눈에서 계기 윗모서리로 가는 시선보다 1도 넘게 위에 둔다.
     // 입술 아래 앞모서리(hoodY - 0.02) 가 -10.6도이고 계기 윗변이 -12.4도다.
     // -0.17 이던 때는 입술이 -16.5도라 계기 윗변(-16.0도) 을 먹었다.
     hoodY: -0.10, hoodZ: -0.64,
-    pillarX: 0.76, glassAngle: 0.55, bPillarZ: 0.20,
+    pillarX: 0.76, glassAngle: 0.579, bPillarZ: 0.20,
     // glass 는 앞유리 아가리다. pane 이 참이면 실내가 유리 한 장을 직접 그린다.
     // 밑선(눈 기준 -0.239, -0.976) 은 대시에 묶여 그대로 두고 윗모서리만 0.312 까지 올렸다.
     // 유리 띠가 눈 위 25.2도에서 아래 13.7도까지 38.9도다(세로 화각 72).
-    glass: Object.freeze([0, 0.037, -0.807, 1.50, 0.646]), pane: true,
+    glass: Object.freeze([0, 0.0215, -0.6865, 1.50, 0.620]), pane: true,
     // 옆유리는 창틀(sillY) 에서 지붕까지다. 높이 = roofY - sillY - 0.03.
     sideGlass: Object.freeze([0.815, 0.005, 0.05, 1.40, 0.48]),
     rearGlass: Object.freeze([0, 0.05, 1.30, 1.50, 0.50, -0.5]),
@@ -40,6 +41,11 @@ export const ROAD_CABINS = Object.freeze({
     dials: Object.freeze([Object.freeze([-0.20, -0.25, -0.74]), Object.freeze([0.20, -0.25, -0.74])]),
     dialRadius: 0.088,
     display: Object.freeze([0, -0.25, -0.745, 0.19, 0.10]),
+    screens: Object.freeze([
+      Object.freeze({ id: 'driver', mode: 'executiveCluster', x: 0.06, y: -0.25, z: -0.748, width: 0.46, height: 0.18, yaw: 0.035 }),
+      Object.freeze({ id: 'center', mode: 'roadnav', x: 0.54, y: -0.245, z: -0.720, width: 0.52, height: 0.19, yaw: -0.025 }),
+    ]),
+    screenBackingDepth: 0.024, screenOffset: 0.018,
     // 림 윗점이 계기 아랫변보다 아래로 내려오도록 휠을 2cm 낮췄다. 앉은 운전자의 휠 중심은
     // 눈에서 0.5 안팎 아래다.
     wheel: Object.freeze({ y: -0.53, z: -0.60, radius: 0.19, tilt: -0.35, ratio: 2.2 }),
@@ -50,8 +56,8 @@ export const ROAD_CABINS = Object.freeze({
     vents: Object.freeze([Object.freeze([-0.17, -0.42, -0.75]), Object.freeze([0.77, -0.42, -0.75])]),
     switches: Object.freeze([Object.freeze([0.40, -0.50, -0.74]), Object.freeze([0.50, -0.50, -0.74]), Object.freeze([0.60, -0.50, -0.74])]),
     hazard: Object.freeze([0.50, -0.40, -0.74]),
-    pedals: Object.freeze([-0.02, -0.62, -0.88]),
-    wiper: Object.freeze({ y: -0.218, z: -1.00, length: 0.42, gap: 0.72 }),
+    pedals: Object.freeze([-0.02, -0.62, -0.75]),
+    wiper: Object.freeze({ y: -0.218, z: -0.88, length: 0.40, gap: 0.72, rest: -1.30 }),
   }),
   // 외장: 캐빈 상자 x ±0.95, 지붕판 y 0.88..0.96, 앞유리 중심 [0,0.62,-1.28] 기울기 0.42,
   // 섀시 윗면 y 0.06, 보닛 윗면 y 0.39. 눈 [-0.57,0.8,-0.2].
@@ -59,32 +65,35 @@ export const ROAD_CABINS = Object.freeze({
   // 0.30 으로 올려 헤더 아래 모서리를 21.6도에 둔다.
   suv: Object.freeze({
     innerWidth: 1.76, dashWidth: 1.66,
-    roofY: 0.30, floorY: -0.72, sillY: -0.30,
+    roofY: 0.269, floorY: -0.78, sillY: -0.36,
+    headerHeight: 0.045, headerDepth: 0.04,
     // 앞유리 면을 y=0.50(눈 기준 -0.30) 에서 만나므로 대시가 깊다. 캡 앞이 긴 SUV 의 비율이다.
-    dashTopY: -0.30, dashZ: -1.13, dashBreakY: -0.345, dashBreakZ: -0.90,
-    dashFaceY: -0.58, dashFaceZ: -0.94,
+    dashTopY: -0.34, dashZ: -1.13, dashBreakY: -0.385, dashBreakZ: -0.90,
+    dashFaceY: -0.62, dashFaceZ: -0.94,
     // 입술 아래 앞모서리가 -9.5도, 계기 윗변이 -11.1도, 계기 화면 윗변이 -14.7도다.
     // 입술을 뒤로(-0.70 에서 -0.78) 물리면서 함께 올려 계기 윗줄 위에서 끝나게 했다.
-    hoodY: -0.11, hoodZ: -0.78,
+    hoodY: -0.15, hoodZ: -0.78,
     pillarX: 0.84, glassAngle: 0.42, bPillarZ: 0.35,
     // 밑선(-0.463, -1.207) 고정, 윗모서리 0.341. 유리 띠가 42.6도다(세로 화각 70).
-    glass: Object.freeze([0, -0.061, -1.027, 1.66, 0.880]), pane: true,
-    sideGlass: Object.freeze([0.895, 0.00, 0.10, 1.60, 0.57]),
-    rearGlass: Object.freeze([0, -0.18, 1.98, 1.66, 0.58, -0.25]),
+    glass: Object.freeze([0, -0.119, -1.0255, 1.66, 0.885]), pane: true,
+    sideGlass: Object.freeze([0.895, -0.05, 0.10, 1.60, 0.65]),
+    rearGlass: Object.freeze([0, -0.075, 1.87, 1.60, 0.70, -0.42]),
     // 계기를 6cm 뒤로 물려 같은 지름이 차지하는 각을 줄였다. 아랫변 -22.3도, 림 윗점 -26.1도다.
     // z 는 대시 꺾임(-0.90) 보다 눈 쪽이라 대시 상판 앞모서리가 계기 앞을 지나지 않는다.
-    dials: Object.freeze([Object.freeze([-0.215, -0.26, -0.86]), Object.freeze([0.215, -0.26, -0.86])]),
+    dials: Object.freeze([Object.freeze([-0.185, -0.30, -0.86]), Object.freeze([0.245, -0.30, -0.86])]),
     dialRadius: 0.092,
-    display: Object.freeze([0, -0.28, -0.865, 0.21, 0.105]),
-    wheel: Object.freeze({ y: -0.56, z: -0.66, radius: 0.195, tilt: -0.38, ratio: 2.2 }),
+    display: Object.freeze([0, -0.32, -0.865, 0.21, 0.105]),
+    centerScreen: Object.freeze({ id: 'center', mode: 'roadnav', x: 0.60, y: -0.23, z: -0.895, width: 0.52, height: 0.24, yaw: -0.02 }),
+    screenBackingDepth: 0.024, screenOffset: 0.018,
+    wheel: Object.freeze({ y: -0.59, z: -0.66, radius: 0.195, tilt: -0.38, ratio: 2.2 }),
     seats: Object.freeze({ driverX: -0.55, passengerX: 0.50, y: -0.61, z: 0.14, width: 0.52, depth: 0.54, material: 'fabric' }),
     console: Object.freeze({ x: -0.03, width: 0.38, top: -0.52, z: -0.10, depth: 1.24 }),
     rear: Object.freeze({ y: -0.36, z: 1.05, width: 1.66, height: 0.54 }),
-    vents: Object.freeze([Object.freeze([-0.18, -0.46, -0.875]), Object.freeze([0.80, -0.46, -0.875])]),
-    switches: Object.freeze([Object.freeze([0.42, -0.54, -0.88]), Object.freeze([0.53, -0.54, -0.88]), Object.freeze([0.64, -0.54, -0.88])]),
-    hazard: Object.freeze([0.53, -0.43, -0.88]),
-    pedals: Object.freeze([-0.02, -0.64, -0.92]),
-    wiper: Object.freeze({ y: -0.40, z: -1.20, length: 0.46, gap: 0.80 }),
+    vents: Object.freeze([Object.freeze([-0.18, -0.50, -0.875]), Object.freeze([0.80, -0.50, -0.875])]),
+    switches: Object.freeze([Object.freeze([0.42, -0.58, -0.88]), Object.freeze([0.53, -0.58, -0.88]), Object.freeze([0.64, -0.58, -0.88])]),
+    hazard: Object.freeze([0.53, -0.47, -0.88]),
+    pedals: Object.freeze([-0.02, -0.70, -0.92]),
+    wiper: Object.freeze({ y: -0.46, z: -1.20, length: 0.42, gap: 0.80, rest: -1.32 }),
   }),
   // 외장: 차체 윗면 y 0.05, 앞유리 밑선 [0,0.1357,-0.8207] 기울기 0.5. 눈 [-0.53,0.5,-0.05].
   // 외장 앞유리 틀(헤더 y 0.53) 은 눈높이에 걸려 1인칭에서 시야를 막으므로 캐빈 group 으로
@@ -100,6 +109,9 @@ export const ROAD_CABINS = Object.freeze({
     // 나셀형 후드다. 대시가 낮고 눈이 낮아 계기를 림 위로 내놓으면 입술도 눈 아래 5cm 까지
     // 올라온다. 입술이 -6.9도, 계기 윗변이 -8.4도다. 고전 로드스터의 비율 그대로다.
     hoodY: -0.05, hoodZ: -0.58,
+    // 긴 회색 판 한 장처럼 떠 보이지 않게 짧고 얇은 캡과 매립 나셀을 따로 둔다.
+    hoodLead: Object.freeze([0.035, 0.10]), hoodThickness: 0.018,
+    binnacle: Object.freeze({ x: 0, y: -0.19, z: -0.705, width: 0.48, height: 0.22, depth: 0.035 }),
     // 필러는 차체 가장자리(외장 반폭 1.05) 바로 안쪽이다. 0.73 에 두면 운전석(x -0.53) 에서
     // 0.2 밖에 안 떨어져 얇은 기둥이 화면을 가로지르는 판으로 보인다.
     pillarX: 0.95, glassAngle: 0.5, bPillarZ: null,
@@ -129,6 +141,26 @@ export const ROAD_CABINS = Object.freeze({
     hazard: Object.freeze([0.50, -0.365, -0.56]),
     pedals: Object.freeze([-0.02, -0.36, -0.68]),
     wiper: Object.freeze({ y: -0.35, z: -0.80, length: 0.34, gap: 0.62 }),
+  }),
+  formula: Object.freeze({
+    innerWidth: 0.82, dashWidth: 0.76,
+    roofY: null, floorY: -0.62, sillY: -0.22,
+    dashTopY: -0.24, dashZ: -0.64, dashBreakY: -0.30, dashBreakZ: -0.48,
+    dashFaceY: -0.38, dashFaceZ: -0.50,
+    hoodY: -0.08, hoodZ: -0.50,
+    hoodLead: Object.freeze([0.03, 0.09]), hoodThickness: 0.018,
+    pillarX: 0.39, glassAngle: 0.35, bPillarZ: null,
+    glass: Object.freeze([0, 0.02, -0.55, 0.70, 0.34]), pane: false,
+    sideGlass: null, rearGlass: null,
+    dials: Object.freeze([Object.freeze([-0.14, -0.20, -0.56]), Object.freeze([0.14, -0.20, -0.56])]),
+    dialRadius: 0.055,
+    display: Object.freeze([0, -0.20, -0.565, 0.18, 0.09]),
+    wheel: Object.freeze({ x: 0, y: -0.385, z: -0.45, radius: 0.14, tilt: -0.28, ratio: 1.6 }),
+    console: Object.freeze({ x: 0, width: 0.34, top: -0.32, z: 0.05, depth: 0.82 }),
+    rear: Object.freeze({ y: -0.10, z: 0.62, width: 0.72, height: 0.50 }),
+    vents: Object.freeze([]), switches: Object.freeze([]), hazard: Object.freeze([0, -0.32, -0.52]),
+    pedals: Object.freeze([0, -0.56, -0.70]), wiper: null,
+    halo: Object.freeze({ openHalfWidth: 0.19, postX: 0, postY: 0.18, postZ: -0.55 }),
   }),
   // 외장: 캡 상자 x ±1.15 y -0.25..1.65, 지붕판 1.64..1.80, 앞유리 [0,1.05,-3.74] 기울기 0.08,
   // 옆창 [±1.16,1.05,-2.85], 적재함 앞면 z -1.5. 눈 [-0.6,1.3,-2.2]. 캡오버라 대시가 깊다.
@@ -332,11 +364,16 @@ const RIM_OUTER = 1.09;
 /** 승용차 네 대의 계기와 가림 조각이다. gaugeClearance 의 gaugeFaults 가 그대로 읽는다. */
 function roadRig(vehicle) {
   const spec = ROAD_CABINS[vehicle];
-  const gauges = spec.dials.map(([x, y, z], index) => ({
-    id: `${vehicle}-dial${index}`, x, y, z, radius: spec.dialRadius,
-  }));
-  const [dx, dy, dz, width, height] = spec.display;
-  gauges.push({ id: `${vehicle}-display`, x: dx, y: dy, z: dz, halfWidth: width / 2, halfHeight: height / 2 });
+  const gauges = vehicle === 'sedan'
+    ? spec.screens.map(screen => ({
+      id: `sedan-${screen.id}`, x: screen.x, y: screen.y, z: screen.z + spec.screenOffset + 0.008,
+      halfWidth: screen.width / 2, halfHeight: screen.height / 2,
+    }))
+    : spec.dials.map(([x, y, z], index) => ({ id: `${vehicle}-dial${index}`, x, y, z, radius: spec.dialRadius }));
+  if (vehicle !== 'sedan') {
+    const [dx, dy, dz, width, height] = spec.display;
+    gauges.push({ id: `${vehicle}-display`, x: dx, y: dy, z: dz, halfWidth: width / 2, halfHeight: height / 2 });
+  }
   const xs = spec.dials.map((dial) => dial[0]);
   const hoodSpan = [Math.min(...xs) - spec.dialRadius - 0.02, Math.max(...xs) + spec.dialRadius + 0.02];
   // 대시 상판은 차체 중심 기준이라 운전석 x 만큼 옮겨야 눈 기준 좌우각이 된다.
@@ -344,10 +381,10 @@ function roadRig(vehicle) {
   const dashSpan = [-spec.dashWidth / 2 - eyeX, spec.dashWidth / 2 - eyeX];
   const wheel = spec.wheel;
   return {
-    vehicle,
+    vehicle, aspect: vehicle === 'sedan' ? 16 / 9 : undefined,
     gauges,
     occluders: [
-      hoodEdge('hood', spec.hoodY - HOOD_HALF, spec.hoodZ, hoodSpan),
+      ...(['sedan', 'suv'].includes(vehicle) ? [] : [hoodEdge('hood', spec.hoodY - HOOD_HALF, spec.hoodZ, hoodSpan)]),
       ringTop('rim', { x: wheel.x || 0, y: wheel.y, z: wheel.z, radius: wheel.radius * RIM_OUTER, tilt: wheel.tilt }),
       ledgeEdge('dash', spec.dashBreakY + PAD_HALF, spec.dashBreakZ, dashSpan),
     ],

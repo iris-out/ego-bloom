@@ -40,6 +40,7 @@ export const ENGINES = Object.freeze({
   // SUV 는 6기통, 오픈카는 8기통이라 세단보다 굵고 부드럽다. 트럭은 디젤 6기통이다.
   suv: { kind: 'piston', harmonics: 6, sub: 0.7, airHz: 620, bodyIdle: 32, bodyRed: 200, whine: 0, air: 0.06, gain: 0.078, idle: 0.17 },
   convertible: { kind: 'piston', harmonics: 7, sub: 0.65, airHz: 720, bodyIdle: 36, bodyRed: 240, whine: 0, air: 0.07, gain: 0.08, idle: 0.18 },
+  formula: { kind: 'piston', harmonics: 9, sub: 0.42, airHz: 1180, bodyIdle: 48, bodyRed: 360, whine: 0, air: 0.16, gain: 0.078, idle: 0.16 },
   truck: { kind: 'piston', harmonics: 5, sub: 0.95, airHz: 420, bodyIdle: 20, bodyRed: 105, whine: 0, air: 0.11, gain: 0.082, idle: 0.24 },
   // 오토바이는 2기통이라 간격이 성기고 소리가 거칠다.
   motorcycle: { kind: 'piston', harmonics: 8, sub: 0.5, airHz: 780, bodyIdle: 15, bodyRed: 125, whine: 0, air: 0.06, gain: 0.08, idle: 0.2 },

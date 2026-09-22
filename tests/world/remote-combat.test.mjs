@@ -9,7 +9,7 @@ import { VEHICLE_KEYS } from '../../src/world/identity.js';
 /** 원점에서 -Z 를 보고 선 상대 전차다. shots 만 올리면 한 발 쏜 것이다. */
 const tank = (shots) => ({ id: 'other', kind: 'car', key: 'tank', x: 0, y: 1.2, z: 0,
   heading: 0, pitch: 0, roll: 0, phase: 'drive', hull: 1, shots, rockets: 0, turret: 0, barrel: 0 });
-const fighter = (shots, rockets) => ({ id: 'air', kind: 'flight', key: 'fighter', x: 0, y: 60, z: 0,
+const fighter = (shots, rockets, key = 'fighter') => ({ id: 'air', kind: 'flight', key, x: 0, y: 60, z: 0,
   heading: 0, pitch: 0, roll: 0, phase: 'airborne', hull: 1, shots, rockets, turret: 0, barrel: 0 });
 /** -Z 쪽 20m 앞에 선 내 전차다. */
 const selfTank = { kind: 'car', key: 'tank', x: 0, y: 1.2, z: -20, width: 3.6, depth: 7 };
@@ -79,6 +79,16 @@ test('전투기는 기관포와 미사일을 따로 센다', () => {
   const state = run(base, [fighter(2, 1)]);
   const weapons = state.shells.map((shell) => shell.weapon).sort();
   assert.deepEqual(weapons, ['cannon', 'cannon', 'missile']);
+});
+
+test('원격 요격기 기관포도 140m 수렴과 느린 탄속·큰 낙차를 쓴다', () => {
+  const peer = fighter(0, 0, 'interceptor');
+  const base = run(createRemoteCombat(), [peer]);
+  const fired = run(base, [{ ...peer, shots: 1 }]);
+  const shell = fired.shells[0];
+  assert.ok(shell.vx > 0, `좌현 포구의 탄이 중심으로 향하지 않음: ${shell.vx}`);
+  assert.ok(Math.hypot(shell.vx, shell.vz) < 211, `탄속 ${Math.hypot(shell.vx, shell.vz)}`);
+  assert.ok(shell.vy < -0.6, `수직 속도 ${shell.vy}`);
 });
 
 test('부서진 상대는 더 쏘지 않고 떠난 상대의 기준값은 사라진다', () => {

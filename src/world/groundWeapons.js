@@ -185,7 +185,7 @@ export function scopePoint(pose={},aim={},vehicle='tank'){
  * 지나갈 때 맞지 않게 하는 데만 쓴다. */
 export const HULL_FLOOR=.9;
 export const HULL_HEIGHT=Object.freeze({
-  sedan:1.75,suv:1.92,convertible:1.45,truck:2.9,motorcycle:1.8,
+  sedan:1.75,suv:1.92,convertible:1.45,formula:1.42,truck:2.9,motorcycle:1.8,
   tank:2.5,howitzer:2.8,armored:2.4,aa:2.4,
 });
 

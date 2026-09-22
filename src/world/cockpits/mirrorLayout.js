@@ -6,6 +6,9 @@ export const MIRROR_PASS = Object.freeze({
   high: { width: 512, height: 192, every: 2 },
 });
 export const FOV = 50;
+/** 측면 거울은 후측방 차선을 직접 담는다. 정후방에서 70도 돌리면 한 차선 옆과 뒤 차량을 함께 읽을 수 있다. */
+export const SIDE_MIRROR_YAW = Math.PI * (70 / 180);
+export const SIDE_FOV = 62;
 export const FAR = 420;
 
 /** 거울면이 텍스처에서 잘라 쓰는 영역이다. u 는 좌우, v 는 상하다. 룸미러가 가운데,
@@ -33,6 +36,10 @@ export const MIRROR_LAYOUTS = Object.freeze({
     left: { x: -0.62, y: 0.36, height: 0.13 },
     right: { x: 0.62, y: 0.36, height: 0.13 },
   }),
+  formula: Object.freeze({
+    left: { x: -0.70, y: 0.62, height: 0.10 },
+    right: { x: 0.70, y: 0.62, height: 0.10 },
+  }),
 });
 
 /** 거울 평면을 카메라 앞에 두는 거리다. 근접면 0.05 보다 멀고 실내 조각과 겹쳐도 깊이 검사를 꺼 늘 위에 그린다. */
@@ -44,12 +51,37 @@ export function cropAspect(key, pass = MIRROR_PASS.medium) {
   return ((u1 - u0) * pass.width) / ((v1 - v0) * pass.height);
 }
 
+/** 예전 단일 텍스처에서 각 거울이 차지하던 픽셀 예산을 그대로 쓰되, 이제는 독립 타깃으로 렌더한다. */
+export function mirrorTargetSize(key, pass = MIRROR_PASS.medium) {
+  const [u0, u1, v0, v1] = CROP[key] || CROP.rear;
+  return {
+    width: Math.max(1, Math.round(pass.width * (u1 - u0))),
+    height: Math.max(1, Math.round(pass.height * (v1 - v0))),
+  };
+}
+
+export function mirrorYaw(key) {
+  if (key === 'left') return Math.PI - SIDE_MIRROR_YAW;
+  if (key === 'right') return Math.PI + SIDE_MIRROR_YAW;
+  return Math.PI;
+}
+
 /** 뒤 카메라 자리다. 차체 원점 기준이며 차마다 뒤 유리 높이가 다르다. 카메라는 +Z 를 본다. */
 export const REAR_CAMERA = Object.freeze({
-  sedan: [0, 0.75, 2.2], suv: [0, 1.0, 2.3], convertible: [0, 0.6, 2.0], truck: [0, 2.1, -1.6],
+  sedan: [0, 0.75, 2.2], suv: [0, 1.0, 2.3], convertible: [0, 0.6, 2.0], formula: [0, 0.55, 2.65], truck: [0, 2.1, -1.6],
   // 라이더 몸을 피하려 승용차보다 조금 높게 둔다.
   motorcycle: [0, 0.75, 0.6],
 });
+
+const SIDE_CAMERA_X = Object.freeze({ sedan: 0.9, suv: 1.03, convertible: 0.88, formula: 0.82, truck: 1.1, motorcycle: 0.48 });
+
+/** 차체 중앙 후방 카메라와 달리, 측면 카메라는 각 도어/콕핏 가장자리로 옮겨 자기 차체 대신 옆 차선을 본다. */
+export function mirrorCameraPosition(vehicle, key) {
+  const rear = REAR_CAMERA[vehicle] || REAR_CAMERA.sedan;
+  if (key !== 'left' && key !== 'right') return [...rear];
+  const side = key === 'left' ? -1 : 1;
+  return [side * (SIDE_CAMERA_X[vehicle] || SIDE_CAMERA_X.sedan), rear[1], Math.max(-0.4, Math.min(0.9, rear[2] * 0.35))];
+}
 
 export function hasMirrors(vehicle) {
   return vehicle in REAR_CAMERA;

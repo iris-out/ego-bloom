@@ -7,6 +7,7 @@ export const PLANE_META = {
   fighter: { ko: '전투기', code: 'FTR', eyebrow: 'EGO AIR / FIGHTER', note: '삼각익에 쌍수직미익을 단 군용기다.' },
   prop: { ko: '프로펠러 전투기', code: 'PRP', eyebrow: 'EGO AIR / PROP FIGHTER', note: '기관총만 달았지만 연사가 가장 빠르다.' },
   interceptor: { ko: '요격기', code: 'ITC', eyebrow: 'EGO AIR / INTERCEPTOR', note: '연료를 쓰는 작은 제트다. Shift 로 1080km/h, Q 로 켜는 강화 부스트는 1340km/h 까지 낸다.' },
+  shotgun: { ko: '샷거너', code: 'SGN', eyebrow: 'EGO AIR / SHOTGUNNER', note: '요격기 동체를 공유하는 2연장 산탄 전투기다. 한 번 누르면 팡-팡 발사한다.' },
   bomber: { ko: '폭격기', code: 'BMR', eyebrow: 'EGO AIR / BOMBER', note: '폭탄창을 열고 아래로 폭탄을 떨군다.' },
   helicopter: { ko: '헬기', code: 'HEL', eyebrow: 'EGO AIR / HELICOPTER', note: '방향키로 로터 출력을 올려 수직으로 뜬다.' },
 };
@@ -17,6 +18,7 @@ export const VEHICLE_META = {
   sedan: { ko: '세단', code: 'SDN', eyebrow: 'EGO ROAD / SEDAN', note: '안정적이고 접지력이 좋은 4도어다.' },
   suv: { ko: 'SUV', code: 'SUV', eyebrow: 'EGO ROAD / SUV', note: '차고가 높아 시야가 넓고 무겁게 달린다.' },
   convertible: { ko: '오픈카', code: 'CNV', eyebrow: 'EGO ROAD / CONVERTIBLE', note: '지붕을 연 2도어다. 가볍고 빠르지만 바람을 다 맞는다.' },
+  formula: { ko: '포뮬러', code: 'F1', eyebrow: 'EGO FORMULA / OPEN WHEEL', note: '300km/h까지 가속하는 현대식 오픈휠 머신이다. Space로 드리프트한다.' },
   truck: { ko: '트럭', code: 'TRK', eyebrow: 'EGO ROAD / TRUCK', note: '적재함을 단 캡오버 트럭이다. 느리고 회전 반경이 크다.' },
   motorcycle: { ko: '오토바이', code: 'MTC', eyebrow: 'EGO ROAD / MOTORCYCLE', note: '가볍고 빠르지만 접지력이 낮다.' },
   tank: { ko: '전차', code: 'TNK', eyebrow: 'EGO ARMOR / TANK', note: '직사포를 쏘는 주력전차다. 느리지만 단단하다.' },

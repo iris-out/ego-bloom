@@ -69,9 +69,9 @@ test('선분과 구의 교차 판정', () => {
   assert.equal(hitsSphere({ x: 0, y: 0, z: 0 }, { x: 1, y: 0, z: 0 }, { x: 0, y: 0, z: 0, radius: 0 }), false);
 });
 
-test('기관총 14발, 미사일 2발에 격추된다', () => {
+test('기관총 14발, 미사일 한 발에 격추된다', () => {
   assert.equal(AIR_HITS.cannon, 14);
-  assert.equal(AIR_HITS.missile, 2);
+  assert.equal(AIR_HITS.missile, 1);
   const combat = createAirCombat();
   for (let shot = 1; shot < 14; shot += 1) {
     assert.equal(applyAirHit(combat, { index: 2, weapon: 'cannon', now: 1 }).downed, false, `${shot}발째는 살아 있다`);
@@ -81,8 +81,8 @@ test('기관총 14발, 미사일 2발에 격추된다', () => {
   assert.equal(combat.damage.has(2), false, '격추되면 진행도를 지운다');
 
   const rocket = createAirCombat();
-  assert.equal(applyAirHit(rocket, { index: 1, weapon: 'missile', now: 0 }).downed, false);
-  assert.equal(applyAirHit(rocket, { index: 1, weapon: 'missile', now: 0 }).downed, true);
+  assert.equal(applyAirHit(rocket, { index: 1, weapon: 'missile', now: 0 }).downed, true, '미사일은 직격 한 발이다');
+  assert.equal(rocket.damage.has(1), false);
 });
 
 test('격추된 기체는 더 맞지 않고 목표 목록에서 빠진다', () => {

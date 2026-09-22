@@ -46,7 +46,7 @@ export const AIRCRAFT_PLACARDS = Object.freeze({
 });
 
 /** 실제 hardpoint 에 미사일이 없는 기종은 어떤 화면에도 MSL 을 적지 않는다. */
-export const GUN_ONLY_PLANES = Object.freeze(['prop', 'interceptor']);
+export const GUN_ONLY_PLANES = Object.freeze(['prop', 'interceptor', 'shotgun']);
 
 /** 명판 한 장의 실제 크기와 캔버스 안 라벨 칸 좌표다. placardMaterial 이 같은 값으로 그린다.
  * 토글 스위치를 라벨 칸마다 하나씩 세우려면 캔버스 픽셀을 평면 좌표로 바꿔야 한다. */

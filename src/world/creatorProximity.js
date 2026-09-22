@@ -29,6 +29,22 @@ export function labelReach(mode = 'explore', height = 0) {
  return Math.max(spec.base, tall * spec.perHeight);
 }
 
+/** 주행 카메라가 고층 건물 밑에 있을 때 옥상 라벨은 화면 밖으로 사라진다.
+ * 주행 중에는 눈높이보다 4m 위의 외벽 위치를 쓰고, 탐색은 기존 옥상 위치를 유지한다. */
+export function creatorLabelAnchor(position, building, mode = 'explore', facadeOffset = 0) {
+ let x = Number(building?.x) || 0, z = Number(building?.z) || 0;
+ const height = Math.max(0, Number(building?.height) || 0);
+ if (mode !== 'drive') return { x, y: height + 7, z };
+ const eyeY = Number.isFinite(Number(position?.y)) ? Number(position.y) : 3;
+ const offset = Math.max(0, Number(facadeOffset) || 0);
+ if (position && offset > 0) {
+  const dx = Number(position.x) - x, dz = Number(position.z) - z;
+  if (Math.abs(dx) >= Math.abs(dz)) x += (Math.sign(dx) || 1) * offset;
+  else z += (Math.sign(dz) || 1) * offset;
+ }
+ return { x, y: Math.min(height + 7, Math.max(7, eyeY + 4)), z };
+}
+
 /** 라벨 카드의 크기 기준이다. drei 의 Html distanceFactor 라 값이 클수록 멀리서도 크게 보인다.
  * 주행은 먼 카드를 읽어야 하므로 탐색보다 크게 둔다. */
 export const LABEL_SCALE = Object.freeze({ explore: 55, drive: 70 });

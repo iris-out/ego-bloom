@@ -1,15 +1,19 @@
 import { useLayoutEffect } from 'react';
 import { BomberCockpit, FighterCockpit, HelicopterCockpit, InterceptorCockpit, JetCockpit, PropCockpit } from './AircraftCockpits.jsx';
 import { AntiAirInterior, ArmoredInterior, ConvertibleInterior, HowitzerInterior, MotorcycleInterior, SedanInterior, SuvInterior, TankInterior, TruckInterior } from './VehicleInteriors.jsx';
+import FormulaInterior from './FormulaInterior.jsx';
 import { applyPalette, setNightPanels } from './materials.js';
 import StaticBatch from '../StaticBatch.jsx';
+
+/** 거울 패스가 실내 뿌리를 찾는 표식이다. Mirrors 가 조상을 거슬러 올라가 본다. */
+export const COCKPIT_ROOT = Object.freeze({ cockpitRoot: true });
 
 /** 탈것 키 하나를 실내 하나로 잇는 선택기다. PlaneModel.jsx 와 같은 역할이다.
  * 카메라가 실내에 있을 때만 마운트한다. 호출자가 언마운트를 책임진다. */
 const COCKPITS = {
   jet: JetCockpit, bomber: BomberCockpit, prop: PropCockpit, fighter: FighterCockpit,
-  interceptor: InterceptorCockpit, helicopter: HelicopterCockpit,
-  sedan: SedanInterior, motorcycle: MotorcycleInterior, suv: SuvInterior, convertible: ConvertibleInterior, truck: TruckInterior,
+  interceptor: InterceptorCockpit, shotgun: InterceptorCockpit, helicopter: HelicopterCockpit,
+  sedan: SedanInterior, motorcycle: MotorcycleInterior, suv: SuvInterior, convertible: ConvertibleInterior, formula: FormulaInterior, truck: TruckInterior,
   tank: TankInterior, howitzer: HowitzerInterior, armored: ArmoredInterior, aa: AntiAirInterior,
 };
 
@@ -34,8 +38,12 @@ export default function Cockpit({ rideKey, statusRef, controlsRef, poseRef, aimR
   // StaticBatch 는 마운트 때 한 번만 합치므로 version 을 rideKey, night 에 묶어 탈것이
   // 바뀌거나 밤낮이 바뀔 때마다(장갑차·대공포 페리스코프처럼 night 로 재질이 바뀌는
   // 조각이 있다) 이전 병합을 풀고 다시 합치게 한다.
-  return <StaticBatch version={`${rideKey}:${night}`}>
-    <Interior statusRef={statusRef} controlsRef={controlsRef} poseRef={poseRef}
-      aimRef={aimRef} night={night} quality={quality} weather={weather} />
-  </StaticBatch>;
+  // 거울 패스가 이 표식을 찾아 실내를 잠깐 숨긴다. 뒤를 보는 카메라에 실내를 한 번 더
+  // 그리면 좁은 거울 한 장에 draw 수십 개가 더 들어간다.
+  return <group userData={COCKPIT_ROOT}>
+    <StaticBatch version={`${rideKey}:${night}`}>
+      <Interior statusRef={statusRef} controlsRef={controlsRef} poseRef={poseRef}
+        aimRef={aimRef} night={night} quality={quality} weather={weather} />
+    </StaticBatch>
+  </group>;
 }

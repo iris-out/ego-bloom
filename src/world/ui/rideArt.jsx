@@ -142,9 +142,20 @@ const AntiAir = () => <svg {...box}>
   <circle cx="33.6" cy="18.6" r="2.6" />
 </svg>;
 
+/* 현대식 포뮬러. 넓은 윙과 노출 바퀴, 좁은 모노코크가 위에서 보인다. */
+const Formula = () => <svg {...box}>
+  <rect x="4" y="4.5" width="36" height="2.5" rx=".8" />
+  <rect x="6" y="17" width="32" height="3" rx=".8" />
+  <path d="M20.5 3 L23.5 3 L25 10 L28 12 L27 17 L17 17 L16 12 L19 10 Z" />
+  <path d="M18 8 L11 10 L10 15 L17 14 Z M26 8 L33 10 L34 15 L27 14 Z" />
+  <circle cx="9" cy="8.5" r="3" /><circle cx="35" cy="8.5" r="3" />
+  <circle cx="10" cy="16" r="3.2" /><circle cx="34" cy="16" r="3.2" />
+  <path d="M19 9.5 Q22 6.5 25 9.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
+</svg>;
+
 const RIDE_ART = {
-  jet: Jet, fighter: Fighter, prop: PropFighter, interceptor: Interceptor, bomber: Bomber, helicopter: Helicopter,
-  sedan: Sedan, motorcycle: Motorcycle, suv: Suv, convertible: Convertible, truck: Truck,
+  jet: Jet, fighter: Fighter, prop: PropFighter, interceptor: Interceptor, shotgun: Interceptor, bomber: Bomber, helicopter: Helicopter,
+  sedan: Sedan, motorcycle: Motorcycle, suv: Suv, convertible: Convertible, formula: Formula, truck: Truck,
   tank: Tank, howitzer: Howitzer, armored: Armored, aa: AntiAir,
   walk: Walk,
 };

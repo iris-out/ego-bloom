@@ -87,13 +87,15 @@ test('느릴수록 기수와 뱅크가 덜 듣는다', () => {
   assert.ok(Math.abs(fast.roll) > Math.abs(slow.roll));
 });
 
-test('충분한 속도에서는 기수와 뱅크를 크게 꺾을 수 있다', () => {
+test('충분한 속도에서 기수는 크게 들지만 선회 뱅크는 45도 안쪽이다', () => {
   let climb = airborne({ speed: 110 });
   for (let i = 0; i < 90; i++) climb = stepFlight(climb, { throttle: 1, pitch: 1 }, 1 / 60, 300);
   assert.ok(climb.pitch > 0.75, `기수 ${climb.pitch}`);
   let bank = airborne({ speed: 110 });
-  for (let i = 0; i < 90; i++) bank = stepFlight(bank, { throttle: 1, roll: 1 }, 1 / 60, 300);
-  assert.ok(Math.abs(bank.roll) > 1, `뱅크 ${bank.roll}`);
+  for (let i = 0; i < 90; i++) bank = stepFlight(bank, { throttle: 1, roll: 1 }, 1 / 60, 300, [], 'fighter');
+  assert.ok(Math.abs(bank.roll) < Math.PI / 4, `뱅크 ${bank.roll}`);
+  assert.ok(Math.abs(bank.roll) > 0.55, `뱅크 ${bank.roll}`);
+  assert.ok(Math.abs(bank.heading) > 0.45, `방위 변화 ${bank.heading}`);
 });
 
 test('기수를 든 채 속도를 잃으면 실속하고 조종간을 당겨도 기수가 떨어진다', () => {
@@ -116,7 +118,7 @@ test('충분한 속도로 상승하며 선회해도 기수가 강제로 내려�
   for (let i = 0; i < 300; i++) state = stepFlight(state, { throttle: 0.8, pitch: 0.6, roll: 1 }, 1 / 60, 300);
   assert.ok(state.y > start + 100, `선회 중에도 고도를 얻는다 ${state.y}`);
   assert.ok(state.pitch > 0.5, `기수 ${state.pitch}`);
-  assert.ok(Math.abs(state.roll) > 1, `뱅크 ${state.roll}`);
+  assert.ok(Math.abs(state.roll) > 0.4 && Math.abs(state.roll) < Math.PI / 4, `뱅크 ${state.roll}`);
   assert.equal(state.message, '');
 });
 

@@ -140,6 +140,7 @@ export const PALETTES = Object.freeze({
   suv: Object.freeze({ shell: '#2a2d33', trim: '#40454d', grip: '#1d2024', leather: '#40382f', fabric: '#4a4d52', metal: '#888e95' }),
   // 오픈카만 은색 트림이다. 지붕이 없어 실내가 그대로 햇빛을 받는다.
   convertible: Object.freeze({ shell: '#2b2621', trim: '#9aa0a6', grip: '#221e1a', leather: '#6e2f24', fabric: '#4a4038', metal: '#a8aeb4' }),
+  formula: Object.freeze({ shell: '#22272e', trim: '#4a535e', grip: '#101318', leather: '#24282e', fabric: '#30363e', metal: '#8e989f' }),
   // 트럭은 가죽이 아니라 검정 비닐이고 대시만 짙은 청색이다.
   truck: Object.freeze({ shell: '#2a3340', trim: '#3f4a58', grip: '#1c1e22', leather: '#1c1e22', fabric: '#3a4049', metal: '#98a0a8' }),
   motorcycle: Object.freeze({ shell: '#1a1c20', trim: '#2e3238', grip: '#141619', leather: '#26221f', fabric: '#2a2d31', metal: '#9aa0a6' }),

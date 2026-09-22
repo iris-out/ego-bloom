@@ -5,6 +5,7 @@ import { aircraftGaugeRig } from '../../src/world/cockpits/aircraftDetail.js';
 import { FOV_MARGIN, gaugeFaults, gaugeSpan } from '../../src/world/cockpits/gaugeClearance.js';
 import { NEAR_COCKPIT, cockpitFov, eyePoint } from '../../src/world/eyePoints.js';
 import { GROUND_GUNS } from '../../src/world/groundWeapons.js';
+import { VEHICLE_SHAPES } from '../../src/world/models/carGeometry.js';
 
 const COMBAT_KEYS = ['tank', 'howitzer', 'armored', 'aa'];
 /** 눈에서 본 내림각이다(road cabin 절의 drop 과 같은 식). 세로 화각의 절반과 비교한다. */
@@ -31,6 +32,23 @@ test('road cabins keep their own trim, vents, and switch bank', () => {
   }
   assert.notDeepEqual(ROAD_CABINS.sedan.vents, ROAD_CABINS.truck.vents,
     'truck does not inherit the sedan vent arrangement');
+});
+
+test('세단 페달은 뒤로 이동한 카울의 실내 쪽에 남는다', () => {
+  const cowlZ = VEHICLE_SHAPES.sedan.windshield[0][2];
+  const pedalZ = eyePoint('sedan')[2] + ROAD_CABINS.sedan.pedals[2];
+  assert.ok(pedalZ >= cowlZ + 0.1,
+    `pedal z ${pedalZ} must stay at least 10 cm behind cowl ${cowlZ}`);
+});
+
+test('세단 디지털 화면 면은 대시 꺾임의 가장 앞쪽보다 운전자 쪽에 있다', () => {
+  const cabin = ROAD_CABINS.sedan;
+  const dashFront = cabin.dashBreakZ + 0.025;
+  for (const screen of cabin.screens) {
+    const screenFace = screen.z + cabin.screenOffset + 0.008;
+    assert.ok(screenFace > dashFront + 0.01,
+      `${screen.id} face ${screenFace} is not clear of dash front ${dashFront}`);
+  }
 });
 
 test('대시와 문 안쪽 판이 캐빈 폭 안에 든다', () => {
@@ -104,14 +122,14 @@ test('네 차가 서로 다른 비율을 가진다', () => {
 });
 
 test('앞유리 헤더가 눈 위 18도 이상에서 시야를 연다', () => {
-  // 헤더는 유리 윗모서리 위에 얹히고 눈 쪽으로 0.10 들어온다. 그 아래 모서리가 아가리 위끝이다.
-  const HEADER_IN = 0.10;
+  // 차종별 헤더 깊이만큼 눈 쪽으로 들어온 아래 모서리가 아가리 위끝이다.
   for (const key of ROAD_KEYS) {
     const cabin = ROAD_CABINS[key];
+    const headerIn = cabin.headerDepth ?? 0.10;
     const [, gy, gz, , height] = cabin.glass;
     const half = height / 2, angle = cabin.glassAngle;
     const topY = gy + half * Math.cos(angle), topZ = gz + half * Math.sin(angle);
-    const lipY = topY - HEADER_IN * Math.sin(angle), lipZ = topZ + HEADER_IN * Math.cos(angle);
+    const lipY = topY - headerIn * Math.sin(angle), lipZ = topZ + headerIn * Math.cos(angle);
     const up = Math.atan2(lipY, Math.abs(lipZ)) * 180 / Math.PI;
     // 캡오버 트럭만 앞유리가 눈에서 1.5 앞이라 같은 지붕 높이에서 각이 작다.
     const floor = key === 'truck' ? 17 : 18;
@@ -120,6 +138,19 @@ test('앞유리 헤더가 눈 위 18도 이상에서 시야를 연다', () => {
     // 지붕이 있으면 헤더 아랫모서리가 헤드라이너 높이와 같아야 천장과 틀이 이어진다.
     if (cabin.roofY !== null) assert.ok(Math.abs(lipY - cabin.roofY) < 0.01, `${key} 헤더와 천장이 어긋난다`);
   }
+});
+
+test('세단 계기 검사는 실제 두 디지털 화면을 사용하고 낡은 원형 계기를 쓰지 않는다', () => {
+  assert.equal(ROAD_CABINS.sedan.screens[0].mode, 'executiveCluster');
+  assert.equal(ROAD_CABINS.sedan.screens[1].mode, 'roadnav');
+  assert.equal(ROAD_CABINS.suv.centerScreen.mode, 'roadnav');
+  const rig = groundGaugeRig('sedan');
+  assert.deepEqual(rig.gauges.map(gauge => gauge.id), ['sedan-driver', 'sedan-center']);
+  for (const gauge of rig.gauges) {
+    assert.equal(gauge.radius, undefined, `${gauge.id} 가 원형 계기로 남아 있다`);
+    assert.ok(gauge.halfWidth > 0.2 && gauge.halfHeight > 0.08, `${gauge.id} 화면 사각형이 잘못됐다`);
+  }
+  assert.deepEqual(gaugeFaults(rig), []);
 });
 
 test('전투 차량 pivot 이 GROUND_GUNS.turret 과 같다', () => {
@@ -248,13 +279,13 @@ test('바스켓 벽이 있는 전투 차량 셋은 눈이 벽 안에 있고 중�
 });
 
 /** 15종 전부다. 계기가 화면 안에 온전히 보이는지 한 자리에서 검사한다. */
-const ALL_KEYS = [...ROAD_KEYS, 'motorcycle', ...COMBAT_KEYS, ...PLANE_KEYS];
+const ALL_KEYS = [...ROAD_KEYS, 'formula', 'motorcycle', ...COMBAT_KEYS, ...PLANE_KEYS];
 const rigOf = (key) => groundGaugeRig(key) || aircraftGaugeRig(key);
 
-test('탈것 15종의 계기가 모두 세로 화각 안에 들어오고 가림 조각에 먹히지 않는다', () => {
+test('탈것 16종의 계기가 모두 세로 화각 안에 들어오고 가림 조각에 먹히지 않는다', () => {
   // 화각 절반에서 3도, 가림 조각에서 1도를 남긴다. 계기 지름을 키우면 이 검사가 먼저 깨지므로
   // WP13 에서 계기를 키웠다가 아래가 잘린 일이 다시 나지 않는다.
-  assert.equal(ALL_KEYS.length, 15, '탈것이 15종이 아니다');
+  assert.equal(ALL_KEYS.length, 16, '탈것이 16종이 아니다');
   for (const key of ALL_KEYS) {
     const rig = rigOf(key);
     assert.ok(rig, `${key} 계기 배치 데이터가 없다`);
@@ -279,8 +310,9 @@ test('계기 아랫변이 화각 절반에서 3도 이상 안쪽이다', () => {
 test('가림 조각 목록이 후드, 림, 대시, 핸들바, 바스켓 벽을 실제로 담는다', () => {
   // 목록이 비면 위 검사가 화각만 보고 통과한다. 차종마다 무엇을 검사해야 하는지 못박는다.
   const expected = {
-    sedan: ['hood', 'rim', 'dash'], suv: ['hood', 'rim', 'dash'],
+    sedan: ['rim', 'dash'], suv: ['rim', 'dash'],
     convertible: ['hood', 'rim', 'dash'], truck: ['hood', 'rim', 'dash'],
+    formula: ['hood', 'rim', 'dash'],
     motorcycle: ['bar'],
     tank: ['wallL', 'wallR', 'front'], howitzer: ['wallL', 'wallR', 'front'], aa: ['wallR'],
     bomber: ['deck', 'yoke'], prop: ['deck', 'sight'], jet: ['deck'],
@@ -293,6 +325,26 @@ test('가림 조각 목록이 후드, 림, 대시, 핸들바, 바스켓 벽을 �
   // 큐폴라(장갑차) 와 헬기는 눈앞을 막는 조각이 없다. 빈 목록이 맞다.
   assert.deepEqual(groundGaugeRig('armored').occluders, [], '장갑차 큐폴라에는 가림 조각이 없다');
   assert.deepEqual(aircraftGaugeRig('helicopter').occluders, [], '헬기 코에는 덮개가 없다');
+});
+
+test('포뮬러 계기와 휠은 낮은 콕핏 안에서 서로 겹치지 않는다', () => {
+  const spec = ROAD_CABINS.formula;
+  assert.ok(spec, '포뮬러 실내 배치가 없다');
+  assert.equal(spec.dials.length, 2);
+  assert.ok(Math.abs(spec.wheel.z) > NEAR_COCKPIT);
+  assert.ok(Math.abs(spec.display[2]) > NEAR_COCKPIT);
+  assert.ok(spec.halo.openHalfWidth >= 0.16 && spec.halo.postX === 0, '헤일로 중앙 개구부가 너무 좁다');
+  assert.deepEqual(gaugeFaults(groundGaugeRig('formula')), []);
+});
+
+test('오픈카 대시는 얇은 후드와 뒤로 물린 계기 나셀로 이어진다', () => {
+  const spec = ROAD_CABINS.convertible;
+  assert.ok(spec.hoodThickness <= 0.02, `후드 두께 ${spec.hoodThickness}`);
+  assert.ok(Math.hypot(...spec.hoodLead) < 0.14, '후드가 눈앞의 큰 떠 있는 판처럼 길다');
+  assert.ok(spec.binnacle.z < spec.dials[0][2], '나셀이 계기 앞을 가린다');
+  const binnacleTop = spec.binnacle.y + spec.binnacle.height / 2;
+  assert.ok(Math.abs(spec.hoodY - binnacleTop) <= 0.04, '후드와 계기 나셀 사이가 떠 있다');
+  assert.deepEqual(gaugeFaults(groundGaugeRig('convertible')), []);
 });
 
 test('계기를 키우면 잘림 검사가 실제로 걸린다', () => {

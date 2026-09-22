@@ -9,13 +9,17 @@ export const EYE_POINTS = Object.freeze({
   prop: [0, 0.62, -0.7],
   fighter: [0, 1.16, -2.9],
   interceptor: [0, 0.86, -2.4],
+  shotgun: [0, 0.86, -2.4],
   // 헬기만 기장이 오른쪽에 앉는 기종을 따른다.
   helicopter: [0.38, 0.92, -3.6],
   // 차량은 실내 폭의 4분의 1 지점에 앉는다. 실내 조각은 차체 중심 기준이라(cockpits/VehicleInteriors 의
   // cabin) 여기 x 를 0 에 가깝게 두면 운전석이 한가운데로 보인다.
   sedan: [-0.55, 0.55, -0.15],
-  suv: [-0.57, 0.8, -0.2],
+  // 높은 SUV 착좌점을 반영한다. 주행 충돌/차체 원점은 바꾸지 않는다.
+  suv: [-0.57, 0.86, -0.2],
   convertible: [-0.53, 0.5, -0.05],
+  // 포뮬러는 차체 가운데 낮게 누워 앞바퀴 뒤를 본다.
+  formula: [0, 0.42, 0.35],
   // 캡오버라 운전석이 앞바퀴 위, 적재함보다 훨씬 앞에 있다.
   truck: [-0.6, 1.3, -2.2],
   // 두 바퀴라 눈이 세단보다 높고, 핸들바 위가 아니라 뒤에 앉으므로 z 가 양수다.
@@ -59,10 +63,12 @@ const COCKPIT_FOV = Object.freeze({
   prop: { fov: 68 },         // 버블 캐노피라 시야가 넓다
   fighter: { fov: 74 },      // 캐노피 시야가 가장 넓다
   interceptor: { fov: 70 },  // 좁은 캐노피에 기수가 길다
+  shotgun: { fov: 70 },
   helicopter: { fov: 70 },   // 발밑까지 유리다
   sedan: { fov: 72 },        // 승용차 앞유리 기준이다
   suv: { fov: 70 },          // 앞유리가 세워져 있어 조금 좁다
   convertible: { fov: 74 },  // 지붕이 없어 위가 트인다
+  formula: { fov: 72 },      // 헤일로 안에서 앞바퀴와 윙 끝까지 본다
   truck: { fov: 68 },        // 높고 넓은 앞유리지만 기둥이 굵다
   motorcycle: { fov: 72 },   // 헬멧 없이 바람을 맞는다
   tank: { fov: 42, zoom: 16 },      // 직사 조준경이다

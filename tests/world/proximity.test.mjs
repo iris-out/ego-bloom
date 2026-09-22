@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { creatorDistance, creatorCardOpacity, labelReach, LABEL_REACH, LABEL_SCALE } from '../../src/world/creatorProximity.js';
+import { creatorDistance, creatorCardOpacity, creatorLabelAnchor, labelReach, LABEL_REACH, LABEL_SCALE } from '../../src/world/creatorProximity.js';
 test('flight creator cards fade smoothly with distance to the building, including tall facades',()=>{
  const b={x:0,z:0,height:180};
  assert.equal(creatorDistance({x:40,y:30,z:0},b),30);
@@ -27,4 +27,14 @@ test('주행 라벨은 탐색보다 멀리서 뜬다', () => {
 
 test('주행 카드는 멀리서도 읽히게 더 크다', () => {
   assert.ok(LABEL_SCALE.drive > LABEL_SCALE.explore);
+});
+
+test('주행 중 제작자 카드는 높은 건물 옥상 대신 카메라 가까운 외벽에 붙는다', () => {
+  const building = { x: 20, z: -8, height: 90 };
+  assert.deepEqual(creatorLabelAnchor({ x: 12, y: 3, z: -5 }, building, 'drive'), { x: 20, y: 7, z: -8 });
+  assert.deepEqual(creatorLabelAnchor({ x: 12, y: 30, z: -5 }, building, 'drive'), { x: 20, y: 34, z: -8 });
+  assert.deepEqual(creatorLabelAnchor({ x: 12, y: 3, z: -5 }, building, 'drive', 6), { x: 14, y: 7, z: -8 });
+  assert.deepEqual(creatorLabelAnchor({ x: 20, y: 3, z: 10 }, building, 'drive', 6), { x: 20, y: 7, z: -2 });
+  assert.deepEqual(creatorLabelAnchor({ x: 12, y: 3, z: -5 }, building, 'explore'), { x: 20, y: 97, z: -8 });
+  assert.deepEqual(creatorLabelAnchor(null, building, 'drive'), { x: 20, y: 7, z: -8 });
 });

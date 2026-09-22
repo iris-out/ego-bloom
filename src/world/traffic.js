@@ -396,7 +396,9 @@ export function updateTrafficYield(player, dt) {
   for (let i = 0; i < frame.count; i += 1) {
     const lag = lags[i];
     // 멀리 있는 차는 볼 필요가 없다. 늦춰 둔 차는 풀어 줘야 하므로 계속 본다.
-    if (!lag && Math.abs(frame.x[i] - player.x) > YIELD_REACH && Math.abs(frame.z[i] - player.z) > YIELD_REACH) continue;
+    // 한 축이라도 반경을 넘으면 거리가 이미 반경 밖이다. 두 축을 and 로 묶으면 도로가
+    // 축에 나란한 도시에서 같은 줄에 선 차가 전부 판정을 타 500대가 매 프레임 돈다.
+    if (!lag && (Math.abs(frame.x[i] - player.x) > YIELD_REACH || Math.abs(frame.z[i] - player.z) > YIELD_REACH)) continue;
     const pose = poseInto(yieldBox, i, frame, i);
     // player.y is the driven vehicle origin while pose.y is the AI tyre-contact plane.
     // If their vertical slabs do not overlap, the apparent X/Z crossing is grade-separated.

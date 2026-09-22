@@ -19,6 +19,7 @@ test('기관총은 맵 너비의 1/3 을 넘겨 날아가지 않는다', () => {
   assert.equal(Math.round(cannonRange(600)), 400);
   assert.ok(cannonRange(3233) > 2000);
   assert.equal(cannonRange(0), 200, '아주 작은 값에도 바닥이 있다');
+  assert.equal(cannonRange(180, 'interceptor'), 300, '요격기 기관포는 300m 안에서만 쓴다');
 });
 
 test('프로펠러기 기관총 네 정이 기수 앞 한 점으로 모인다', () => {
@@ -52,10 +53,10 @@ test('수렴 사격 탄이 실제로 중심선으로 모인다', () => {
   assert.ok(Math.max(...spread) < 0.05, `수렴 지점 좌우 편차 ${Math.max(...spread)}`);
 });
 
-test('평행 사격 기종은 수렴을 쓰지 않는다', () => {
+test('전투기만 평행 사격을 쓰고 요격기는 수렴 사격한다', () => {
   assert.deepEqual(muzzleAim([-2, 0, -3], 0), [0, 0, -1]);
   assert.equal(armamentOf('fighter').converge, undefined);
-  assert.equal(armamentOf('interceptor').converge, undefined);
+  assert.equal(armamentOf('interceptor').converge, 100);
 });
 
 test('프로펠러기 조준 표식이 수렴 방향을 따른다', () => {

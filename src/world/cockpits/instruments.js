@@ -1,5 +1,7 @@
 import { FLIGHT_GROUND } from '../flightPhysics.js';
 import { MAX_RPM, REDLINE_RPM } from '../carGauges.js';
+import { createUrbanPlan } from '../../../shared/urbanPlan.js';
+import { navigationRadius, toNavigationSegment } from '../navigationMap.js';
 
 /** 계기와 HUD 가 그리는 내용이다. 순수 함수이며 Three, React 에 의존하지 않는다.
  * 캔버스 2D context 만 인자로 받으므로 단위 테스트가 그대로 호출한다.
@@ -159,6 +161,63 @@ function arcGauge(ctx, x, y, radius, ratio, accent) {
   ctx.stroke();
 }
 
+/** 세단 와이드 계기판의 꺾인 세로 트랙이다. 좌우를 같은 점에서 거울상으로 만들어
+ * 두 게이지가 정확히 마주 보게 한다. fill 은 실제 값 비율만큼 아래에서 올라온다. */
+function executiveChevron(ctx, side, ratio, fill) {
+  const mirror = (x) => side < 0 ? x : WIDE.width - x;
+  const points = [[232, 30], [188, 128], [232, 226], [210, 226], [164, 128], [210, 30]];
+  const path = () => {
+    ctx.beginPath();
+    points.forEach(([x, y], index) => index ? ctx.lineTo(mirror(x), y) : ctx.moveTo(mirror(x), y));
+    ctx.closePath();
+  };
+  path();
+  ctx.fillStyle = '#111a22';
+  ctx.fill();
+  if (finite(ratio)) {
+    const amount = Math.max(0, Math.min(1, Number(ratio)));
+    ctx.save();
+    path();
+    ctx.clip();
+    ctx.fillStyle = fill;
+    ctx.fillRect(156, 226 - 196 * amount, WIDE.width - 312, 196 * amount);
+    ctx.restore();
+  }
+  path();
+  ctx.strokeStyle = '#c6d2d9';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  // 안쪽 cyan 선은 은색 외곽과 겹치지 않아 작은 화면에서도 꺾인 윤곽을 남긴다.
+  ctx.beginPath();
+  [[218, 40], [176, 128], [218, 216]].forEach(([x, y], index) =>
+    index ? ctx.lineTo(mirror(x), y) : ctx.moveTo(mirror(x), y));
+  ctx.strokeStyle = side < 0 ? '#7895a4' : '#66d3e6';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.strokeStyle = '#71828c';
+  ctx.lineWidth = 2;
+  for (const y of [48, 101, 155, 208]) {
+    const from = mirror(201), to = mirror(216);
+    ctx.beginPath(); ctx.moveTo(from, y); ctx.lineTo(to, y); ctx.stroke();
+  }
+}
+
+/** 긴 오류값도 화면 밖으로 밀려나지 않게 숫자의 자릿수만큼 글자를 줄인다. */
+function executiveFont(value, normal, medium, compact) {
+  const length = String(value).length;
+  return length <= 3 ? normal : length <= 5 ? medium : compact;
+}
+
+/** 센서가 비정상적으로 큰 유한값을 보내도 물리 화면에서 읽을 수 있는 짧은 표기로 남긴다. */
+function executiveNumber(value) {
+  if (!finite(value)) return EMPTY;
+  const number = Number(value);
+  return Math.abs(number) >= 1e7
+    ? number.toExponential(0).replace('e+', 'e')
+    : String(Math.round(number));
+}
+
 /** 사격 통제 화면의 격자다. 거리감을 주는 배경일 뿐 눈금이 아니다. */
 function grid(ctx, width, height, step = 32) {
   ctx.strokeStyle = '#132029';
@@ -167,6 +226,16 @@ function grid(ctx, width, height, step = 32) {
   for (let x = step; x < width; x += step) { ctx.moveTo(x, 0); ctx.lineTo(x, height); }
   for (let y = step; y < height; y += step) { ctx.moveTo(0, y); ctx.lineTo(width, y); }
   ctx.stroke();
+}
+
+let roadPlanExtent;
+let roadPlanValue;
+function roadPlan(extent) {
+  if (extent !== roadPlanExtent) {
+    roadPlanExtent = extent;
+    roadPlanValue = createUrbanPlan(extent);
+  }
+  return roadPlanValue;
 }
 
 const LAYOUTS = {
@@ -306,6 +375,87 @@ const LAYOUTS = {
     // 레드존 위는 경고색이다. 회전계 눈금 끝은 carGauges 의 MAX_RPM 과 같은 값을 쓴다.
     bar(ctx, 312, 224, 176, 12, finite(revs) ? revs / MAX_RPM : null,
       finite(revs) && revs >= REDLINE_RPM ? '#e05a3a' : accent);
+  },
+
+  /** 세단 전용 executive cluster 다. 참조 화면의 마주 보는 꺾인 게이지 비례만 가져오고,
+   * 시뮬레이션에 없는 배터리·음악·ePower·주행거리 정보는 만들지 않는다. */
+  executiveCluster(ctx, read, accent, { status = {} } = {}) {
+    const speed = finite(status.speed) ? Number(status.speed) : null;
+    // carStatus 의 top 은 m/s, speed 는 km/h 다. 같은 단위로 바꾼 뒤 비율을 낸다.
+    const top = finite(status.top) && Number(status.top) > 0 ? Number(status.top) * 3.6 : null;
+    const rpm = finite(status.rpm) ? Number(status.rpm) : null;
+    const shownSpeed = executiveNumber(status.speed);
+    const shownRpm = executiveNumber(status.rpm);
+    const shownGear = read.gear.length <= 3 ? read.gear : EMPTY;
+    executiveChevron(ctx, -1, speed !== null && top ? speed / top : null, '#c88855');
+    executiveChevron(ctx, 1, rpm !== null ? rpm / MAX_RPM : null, '#317e91');
+
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#e9f0f3';
+    ctx.textAlign = 'left';
+    ctx.font = `700 ${executiveFont(shownSpeed, 60, 46, 34)}px monospace`;
+    ctx.fillText(shownSpeed, 108, 207, 76);
+    ctx.fillStyle = '#91a5af';
+    ctx.font = '700 18px monospace';
+    ctx.fillText('KM/H', 110, 232);
+
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#e9f0f3';
+    ctx.font = `700 ${executiveFont(shownGear, 64, 48, 36)}px monospace`;
+    ctx.fillText(shownGear, 404, 207, 64);
+
+    // 중앙은 실제 엔진 회전수와 방위만 남겨 작은 물리 화면에서도 숫자가 뭉치지 않는다.
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#728995';
+    ctx.font = '700 17px monospace';
+    ctx.fillText('RPM', 256, 72);
+    ctx.fillStyle = '#d9e4e9';
+    ctx.font = `700 ${executiveFont(shownRpm, 30, 25, 20)}px monospace`;
+    ctx.fillText(shownRpm, 256, 105, 68);
+    ctx.fillStyle = '#728995';
+    ctx.font = '700 17px monospace';
+    ctx.fillText('HDG', 256, 160);
+    ctx.fillStyle = accent;
+    ctx.font = '700 28px monospace';
+    ctx.fillText(read.heading, 256, 193, 64);
+  },
+
+  /** 실제 도시 도로 그래프를 차량 진행방향이 위인 간이 지도로 그린다. extent/좌표가 없으면
+   * 가짜 도로를 만들지 않고 데이터 없음만 표시한다. */
+  roadnav(ctx, read, accent, { status = {} } = {}) {
+    ctx.fillStyle = '#0d1820';
+    ctx.fillRect(14, 18, 484, 220);
+    if (![status.extent, status.x, status.z, status.heading].every(finite)) {
+      readout(ctx, 'NAV', EMPTY, 28, 54, 46);
+      return;
+    }
+    const extent = Number(status.extent), x = Number(status.x), z = Number(status.z), heading = Number(status.heading);
+    if (extent <= 0) {
+      readout(ctx, 'NAV', EMPTY, 28, 54, 46);
+      return;
+    }
+    const pose = { x, z, heading }, radius = navigationRadius(status.speed);
+    const plan = roadPlan(extent);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(14, 18, 484, 220);
+    ctx.clip();
+    ctx.strokeStyle = '#314754';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    for (const road of plan.roads) {
+      const segment = toNavigationSegment({ x: road.x1, z: road.z1 }, { x: road.x2, z: road.z2 }, pose, radius);
+      if (!segment.visible) continue;
+      ctx.moveTo(14 + segment.a.x * 4.84, 18 + segment.a.y * 2.20);
+      ctx.lineTo(14 + segment.b.x * 4.84, 18 + segment.b.y * 2.20);
+    }
+    ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = accent;
+    ctx.beginPath();
+    ctx.moveTo(256, 138); ctx.lineTo(244, 166); ctx.lineTo(256, 158); ctx.lineTo(268, 166); ctx.closePath(); ctx.fill();
+    ctx.textAlign = 'left'; ctx.font = '700 22px monospace'; ctx.fillText('NAV', 26, 44);
+    ctx.textAlign = 'right'; ctx.fillText('HDG', 402, 44); ctx.fillText(read.heading, 486, 44);
   },
 
   /** 정사각 다기능 표시다. 테두리 안쪽에 버튼 눈금 스무 개를 두고 제목이 페이지를 고른다.

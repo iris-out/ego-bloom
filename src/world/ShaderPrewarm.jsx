@@ -32,8 +32,9 @@ const MOUNT_TIMEOUT = 2000;
 const EXTRA = Object.freeze({ none: { point: 0, spot: 0 }, point: { point: 1, spot: 0 }, spot: { point: 0, spot: 1 }, both: { point: 1, spot: 1 } });
 const MAIN_VARIANTS = [EXTRA.point, EXTRA.spot, EXTRA.both];
 const CONTENT_VARIANTS = [EXTRA.none, EXTRA.point, EXTRA.spot, EXTRA.both];
-/** 룸미러가 있는 승용차 넷은 낮에 실내등 하나(오픈카는 없음), 밤에 실내등과 전조등이 켜진다. */
-const MIRROR_VARIANTS = [EXTRA.none, EXTRA.point, EXTRA.both];
+/** 룸미러가 있는 승용차 넷은 낮에 실내등 하나(오픈카는 없음), 밤에 실내등과 전조등이 켜진다.
+ * H 로 낮에도 전조등을 켤 수 있어 실내등 없이 스폿만 있는 조합도 미리 만든다. */
+const MIRROR_VARIANTS = [EXTRA.none, EXTRA.point, EXTRA.spot, EXTRA.both];
 const SLICES = ['aircraft', 'vehicles', 'arms'];
 
 const NOOP = () => {};

@@ -45,10 +45,10 @@ test('항공기 조종석은 코 쪽에 있다', () => {
   }
 });
 
-test('축마다 값이 겹치지 않는다', () => {
-  // 좌표 세 개를 이어 붙인 비교는 한 축만 같은 경우를 놓친다. 0 은 중앙을 뜻하는
-  // 기본값이라 여러 탈것이 함께 쓴다.
-  for (const axis of [0, 1, 2]) {
+test('중앙값이 아닌 좌우·앞뒤 착좌 위치는 축마다 구별된다', () => {
+  // 높이는 서로 다른 차종이 의도적으로 같을 수 있다(높은 SUV와 낮은 항공기 등). 좌우와
+  // 앞뒤는 조작석 위치를 정하므로, 0 중앙값을 제외하면 우연히 복제하지 않는다.
+  for (const axis of [0, 2]) {
     const owner = new Map();
     for (const [key, point] of Object.entries(EYE_POINTS)) {
       const value = point[axis];
@@ -66,6 +66,14 @@ test('우측통행이라 운전석과 기장석은 왼쪽이다', () => {
     assert.ok(eyePoint(key)[0] < 0, `${key} 조작석이 오른쪽에 있다`);
   }
   assert.ok(eyePoint('helicopter')[0] > 0, '헬기 기장석이 왼쪽으로 갔다');
+});
+
+test('포뮬러는 중앙의 낮고 뒤로 누운 전용 시점과 넓은 화각을 쓴다', () => {
+  const point = eyePoint('formula');
+  assert.ok(point && point[0] === 0, '포뮬러 눈이 차체 중앙에 있어야 한다');
+  assert.ok(point[1] > 0.25 && point[1] < eyePoint('sedan')[1], `포뮬러 눈높이 ${point?.[1]}`);
+  assert.ok(point[2] > 0, '포뮬러 눈은 낮게 누운 운전자처럼 차체 원점 뒤쪽이다');
+  assert.equal(cockpitFov('formula'), 72);
 });
 
 test('화각은 아홉 종 모두 유한하고 배율이 있는 탈것만 좁아진다', () => {

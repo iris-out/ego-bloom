@@ -7,6 +7,7 @@ import AntiAir from './AntiAir';
 import Suv from './Suv';
 import Convertible from './Convertible';
 import Truck from './Truck';
+import Formula from './Formula';
 import { validVehicle } from '../identity.js';
 
 /** 지상 차량의 시각 원본을 고른다. 주행, 주차, 원격 차량이 모두 이곳을 거친다.
@@ -19,7 +20,7 @@ import { validVehicle } from '../identity.js';
  */
 // Keep this exhaustive with VEHICLE_KEYS. validVehicle deliberately accepts every
 // key, so omitting one here turns Model into undefined and crashes Canvas.
-const MODELS = { sedan: Sedan, motorcycle: Motorcycle, suv: Suv, convertible: Convertible, truck: Truck, tank: Tank, howitzer: Howitzer, armored: ArmoredCar, aa: AntiAir };
+const MODELS = { sedan: Sedan, motorcycle: Motorcycle, suv: Suv, convertible: Convertible, formula: Formula, truck: Truck, tank: Tank, howitzer: Howitzer, armored: ArmoredCar, aa: AntiAir };
 
 export default function VehicleModel({ vehicle, wheelsRef, steer = 0, speed = 0, turretYaw = 0, barrelPitch = 0, aimRef, firstPerson = false, scoped = false }) {
   const Model = MODELS[validVehicle(vehicle)];

@@ -122,22 +122,28 @@ function CabinShell({ vehicle, spec, mid }) {
   const pillar = standing(baseY, baseZ, topY, topZ);
   // 필러는 유리 면에서 안쪽(눈 쪽) 으로 조금 물러나 앉는다. 유리와 겹치지 않는다.
   const inset = 0.05, nz = Math.cos(spec.glassAngle), ny = -Math.sin(spec.glassAngle);
+  const headerHeight = spec.headerHeight ?? HEADER;
+  const headerDepth = spec.headerDepth ?? HEADER_IN;
   // 헤더는 유리 윗모서리 위에 얹는다. 아랫면이 아가리 위끝과 같아 시야를 먹지 않는다.
   // 유리면을 따라 올라가는 방향이 (0, cos, sin) 이고 눈 쪽 법선이 (0, -sin, cos) 다.
   // 눈에 가장 가까운 아래 모서리는 윗모서리에서 법선으로 HEADER_IN 만큼 간 자리다.
   const up = [Math.cos(spec.glassAngle), Math.sin(spec.glassAngle)];
-  const headerY = topY + (HEADER / 2) * up[0] + (HEADER_IN / 2) * ny;
-  const headerZ = topZ + (HEADER / 2) * up[1] + (HEADER_IN / 2) * nz;
+  const headerY = topY + (headerHeight / 2) * up[0] + (headerDepth / 2) * ny;
+  const headerZ = topZ + (headerHeight / 2) * up[1] + (headerDepth / 2) * nz;
   const floorZ = (spec.dashZ + spec.rear.z) / 2, floorDepth = spec.rear.z - spec.dashZ;
   const roofZ = (topZ + spec.rear.z) / 2, roofDepth = spec.rear.z - topZ;
+  const modern = vehicle === 'sedan' || vehicle === 'suv';
+  const linerWidth = modern ? spec.innerWidth + 0.02 : spec.innerWidth - 0.07;
   return <group>
     <Panel material={vehicle === 'truck' ? 'rubber' : 'fabric'}
       position={cabin(vehicle, [0, spec.floorY - 0.02, floorZ])} scale={[spec.innerWidth - 0.05, 0.04, floorDepth]} />
     {!open && <Panel material="fabric" position={cabin(vehicle, [0, spec.roofY + 0.02, roofZ])}
-      scale={[spec.innerWidth - 0.07, 0.04, roofDepth]} />}
+      scale={[linerWidth, 0.04, roofDepth]} />}
+    {vehicle === 'sedan' && <Panel material="dark" position={cabin(vehicle, [0, spec.roofY - 0.012, roofZ + 0.06])}
+      scale={[spec.innerWidth * 0.68, 0.018, roofDepth * 0.72]} />}
     {/* 앞유리 헤더다. 아랫면이 유리 윗모서리와 같아 아가리를 가리지 않는다. */}
     <Panel material="trim" position={cabin(vehicle, [0, headerY, headerZ])}
-      scale={[spec.glass[3] - 0.04, HEADER, HEADER_IN]} rotation={[spec.glassAngle, 0, 0]} />
+      scale={[spec.glass[3] - 0.04, headerHeight, headerDepth]} rotation={[spec.glassAngle, 0, 0]} />
     {[-1, 1].map((side) => <Panel key={side} material="trim"
       position={cabin(vehicle, [side * spec.pillarX, pillar.y + ny * inset, pillar.z + nz * inset])}
       scale={[0.06, pillar.length, 0.08]} rotation={[pillar.angle, 0, 0]} />)}
@@ -153,7 +159,7 @@ function CabinShell({ vehicle, spec, mid }) {
       position={cabin(vehicle, [side * (spec.pillarX - 0.035), pillar.y + ny * inset, pillar.z + nz * inset + 0.045])}
       scale={[0.02, pillar.length - 0.04, 0.05]} rotation={[pillar.angle, 0, 0]} />)}
     {/* 헤더 안쪽 천 마감이다. 헤더 아랫면 뒤 모서리를 따라 한 줄만 간다. */}
-    {mid && <Panel material="fabric" position={cabin(vehicle, [0, headerY - HEADER / 2 + 0.012, headerZ + HEADER_IN * 0.42])}
+    {mid && <Panel material="fabric" position={cabin(vehicle, [0, headerY - headerHeight / 2 + 0.009, headerZ + headerDepth * 0.42])}
       scale={[spec.glass[3] - 0.12, 0.018, 0.03]} rotation={[spec.glassAngle, 0, 0]} />}
     {mid && <ShadeStrip position={cabin(vehicle, [0, spec.floorY + 0.14, floorZ - floorDepth / 2 + 0.03])}
       scale={[spec.innerWidth - 0.1, 0.28, 1]} />}
@@ -202,7 +208,8 @@ function DoorCard({ vehicle, spec, side, mid, high }) {
 function Dashboard({ vehicle, spec, mid }) {
   const pad = lying(spec.dashTopY, spec.dashZ, spec.dashBreakY, spec.dashBreakZ);
   const face = standing(spec.dashFaceY, spec.dashFaceZ, spec.dashBreakY, spec.dashBreakZ);
-  const hood = lying(spec.hoodY - 0.07, spec.hoodZ - 0.18, spec.hoodY, spec.hoodZ);
+  const [hoodDrop, hoodReach] = spec.hoodLead || [0.07, 0.18];
+  const hood = lying(spec.hoodY - hoodDrop, spec.hoodZ - hoodReach, spec.hoodY, spec.hoodZ);
   const cluster = clusterSpan(spec);
   const glove = gloveBox(spec);
   // 앞면 판 좌표계다. 판을 세웠으므로 로컬 위쪽(+y) 이 (0, cos, sin) 으로 간다.
@@ -215,18 +222,24 @@ function Dashboard({ vehicle, spec, mid }) {
       scale={[spec.dashWidth, 0.05, pad.length]} rotation={[pad.angle, 0, 0]} />
     <Panel material="shell" position={cabin(vehicle, [0, face.y, face.z])}
       scale={[spec.dashWidth, face.length, 0.05]} rotation={[face.angle, 0, 0]} />
-    <Panel material="trim" position={at(vehicle, [cluster.x, hood.y, hood.z])}
-      scale={[cluster.width, 0.04, hood.length]} rotation={[hood.angle, 0, 0]} />
+    {vehicle !== 'sedan' && vehicle !== 'suv' && <Panel material="trim" position={at(vehicle, [cluster.x, hood.y, hood.z])}
+      scale={[cluster.width, spec.hoodThickness || 0.04, hood.length]} rotation={[hood.angle, 0, 0]} />}
+    {vehicle === 'suv' && <Panel material="dark"
+      position={at(vehicle, [cluster.x, spec.dials[0][1], spec.dials[0][2] - 0.024])}
+      scale={[cluster.width, spec.dialRadius * 2 + 0.045, 0.024]} />}
+    {vehicle !== 'sedan' && spec.binnacle && <Panel material="dark"
+      position={at(vehicle, [spec.binnacle.x, spec.binnacle.y, spec.binnacle.z])}
+      scale={[spec.binnacle.width, spec.binnacle.height, spec.binnacle.depth]} />}
     {/* 조수석 에어백과 글로브박스 이음선이다. 얇은 홈이라 앞면 위에 한 줄만 긋는다. */}
-    <Panel material="dark" position={cabin(vehicle, [glove.x, face.y + 0.03, face.z + 0.03])}
-      scale={[spec.innerWidth * 0.32, 0.012, 0.03]} rotation={[face.angle, 0, 0]} />
+    {vehicle !== 'sedan' && <Panel material="dark" position={cabin(vehicle, [glove.x, face.y + 0.03, face.z + 0.03])}
+      scale={[spec.innerWidth * 0.32, 0.012, 0.03]} rotation={[face.angle, 0, 0]} />}
     {/* 대시 상판과 앞면 사이 이음선이다. 두 판이 꺾이는 자리에 두께 0.012 띠를 한 줄 끼운다. */}
-    {mid && <Panel material="trim" position={cabin(vehicle, [0, spec.dashBreakY - 0.015, spec.dashBreakZ + 0.03])}
+    {mid && vehicle !== 'sedan' && <Panel material="trim" position={cabin(vehicle, [0, spec.dashBreakY - 0.015, spec.dashBreakZ + 0.03])}
       scale={[spec.dashWidth - 0.03, 0.012, 0.04]} />}
     {/* 글로브박스 윤곽이다. 위와 좌우 세 줄만 긋고 아래는 대시 밑선이 대신한다. */}
-    {mid && <Panel material="dark" position={cabin(vehicle, [glove.x, gloveTopY, gloveTopZ])}
+    {mid && vehicle !== 'sedan' && <Panel material="dark" position={cabin(vehicle, [glove.x, gloveTopY, gloveTopZ])}
       scale={[glove.width, 0.012, 0.03]} rotation={[face.angle, 0, 0]} />}
-    {mid && [-1, 1].map((side) => <Panel key={side} material="dark"
+    {mid && vehicle !== 'sedan' && [-1, 1].map((side) => <Panel key={side} material="dark"
       position={cabin(vehicle, [glove.x + side * glove.width / 2, gloveMidY, gloveMidZ])}
       scale={[0.012, glove.height, 0.03]} rotation={[face.angle, 0, 0]} />)}
     {mid && <ShadeStrip position={cabin(vehicle, [0, spec.dashFaceY - 0.11, spec.dashFaceZ + 0.04])}
@@ -291,6 +304,63 @@ function Cluster({ vehicle, spec, statusRef, night, mid }) {
       radius={spec.dialRadius} position={at(vehicle, compassAt)} />}
     <InstrumentDisplay mode="cluster" statusRef={statusRef} night={night}
       position={at(vehicle, [dx, dy, dz])} width={width} height={height} accent="#ffe3b0" />
+  </group>;
+}
+
+/** G60 세단 전용 디지털 대시다. 두 화면을 살짝 꺾어 하나의 커브드 디스플레이처럼 잇고,
+ * 아래에는 물리 송풍구 대신 가는 이음선과 조명식 인터랙션 바만 둔다. */
+function DisplayFacet({ vehicle, facet, depth, offset, statusRef, night, accent }) {
+  return <group userData={{ part: 'display-facet', display: facet.id }}
+    position={at(vehicle, [facet.x, facet.y, facet.z])} rotation={[0, facet.yaw, 0]}>
+    <Panel material="dark" scale={[facet.width + 0.02, facet.height + 0.02, depth]} />
+    <InstrumentDisplay mode={facet.mode || 'cluster'} statusRef={statusRef} night={night}
+      position={[0, 0, offset]} width={facet.width} height={facet.height} accent={accent} />
+  </group>;
+}
+
+function SedanDigitalCockpit({ spec, statusRef, night }) {
+  return <group>
+    <group userData={{ part: 'g60-curved-display' }}>
+      {spec.screens.map((facet, index) => <DisplayFacet key={facet.id} vehicle="sedan" facet={facet}
+        depth={spec.screenBackingDepth} offset={spec.screenOffset} statusRef={statusRef} night={night}
+        accent={index ? '#72c8e8' : '#9edfff'} />)}
+    </group>
+    <group userData={{ part: 'g60-interaction-bar' }}>
+      <Panel material="glow" position={cabin('sedan', [0, -0.405, -0.735])} scale={[1.34, 0.026, 0.025]} />
+      <Panel material="dark" position={cabin('sedan', [0, -0.445, -0.738])} scale={[1.30, 0.018, 0.025]} />
+      {[-0.58, -0.2, 0.2, 0.58].map((x) => <Panel key={x} material="metal"
+        position={cabin('sedan', [x, -0.445, -0.72])} scale={[0.012, 0.045, 0.018]} />)}
+      <PushButton position={cabin('sedan', [0.48, -0.405, -0.70])} size={0.028} lit material="warn" />
+    </group>
+  </group>;
+}
+
+function SuvInfotainment({ spec, statusRef, night }) {
+  return <group userData={{ part: 'g01-infotainment' }}>
+    <DisplayFacet vehicle="suv" facet={spec.centerScreen} depth={spec.screenBackingDepth}
+      offset={spec.screenOffset} statusRef={statusRef} night={night} accent="#d7e8ef" />
+    {[-0.12, 0, 0.12].map(x => <Panel key={x} material="dark"
+      position={at('suv', [spec.centerScreen.x + x, -0.39, -0.872])} scale={[0.09, 0.025, 0.02]} />)}
+  </group>;
+}
+
+/** G60의 낮은 플로팅 콘솔이다. 긴 변속봉 대신 작은 토글과 로터리 컨트롤러를 쓴다. */
+function SedanFloatingConsole({ spec, mid, high }) {
+  const box = spec.console;
+  return <group userData={{ part: 'g60-floating-console' }}>
+    <Panel material="shell" position={cabin('sedan', [box.x, box.top - 0.05, box.z])}
+      scale={[box.width, 0.13, box.depth]} rotation={[-0.025, 0, 0]} />
+    <Panel material="metal" position={cabin('sedan', [box.x, box.top + 0.025, box.z - 0.13])}
+      scale={[box.width - 0.035, 0.025, box.depth * 0.52]} />
+    {mid && <Toggle position={cabin('sedan', [box.x - 0.075, box.top + 0.055, box.z - 0.25])}
+      rotation={[HALF_PI, 0, 0]} on />}
+    {mid && <Knob position={cabin('sedan', [box.x + 0.085, box.top + 0.045, box.z - 0.08])}
+      rotation={[HALF_PI, 0, 0]} radius={0.055} height={0.025} material="dark" pointer={false} />}
+    {high && [-0.055, 0.055].map((offset) => <Knob key={offset} material="dark"
+      position={cabin('sedan', [box.x + offset, box.top + 0.02, box.z + 0.28])}
+      rotation={[HALF_PI, 0, 0]} radius={0.042} height={0.025} pointer={false} />)}
+    <Panel material="leather" position={cabin('sedan', [box.x, box.top + 0.04, box.z + box.depth * 0.38])}
+      scale={[box.width - 0.04, 0.055, box.depth * 0.20]} />
   </group>;
 }
 
@@ -447,6 +517,7 @@ const EXTRAS = { sedan: SedanExtras, suv: SuvExtras, convertible: ConvertibleExt
 function RoadCabin({ vehicle, statusRef, night = false, quality, weather }) {
   const spec = ROAD_CABINS[vehicle];
   const { mid, high } = detailLevel(quality);
+  const modern = vehicle === 'sedan' || vehicle === 'suv';
   const wheel = spec.wheel, seats = spec.seats;
   const Extras = EXTRAS[vehicle];
   const rain = weather === 'rain';
@@ -458,11 +529,16 @@ function RoadCabin({ vehicle, statusRef, night = false, quality, weather }) {
     <CabinShell vehicle={vehicle} spec={spec} mid={mid} />
     {[-1, 1].map((side) => <DoorCard key={side} vehicle={vehicle} spec={spec} side={side} mid={mid} high={high} />)}
     <Dashboard vehicle={vehicle} spec={spec} mid={mid} />
-    <CentreStack vehicle={vehicle} spec={spec} mid={mid} />
-    <Cluster vehicle={vehicle} spec={spec} statusRef={statusRef} night={night} mid={mid} />
-    {vehicle !== 'truck' && <CentreConsole vehicle={vehicle} spec={spec} mid={mid} high={high} />}
+    {vehicle === 'sedan'
+      ? <SedanDigitalCockpit spec={spec} statusRef={statusRef} night={night} />
+      : <><CentreStack vehicle={vehicle} spec={spec} mid={mid} />
+        <Cluster vehicle={vehicle} spec={spec} statusRef={statusRef} night={night} mid={mid} />
+        {vehicle === 'suv' && <SuvInfotainment spec={spec} statusRef={statusRef} night={night} />}</>}
+    {vehicle === 'sedan'
+      ? <SedanFloatingConsole spec={spec} mid={mid} high={high} />
+      : vehicle !== 'truck' && <CentreConsole vehicle={vehicle} spec={spec} mid={mid} high={high} />}
     <Extras spec={spec} mid={mid} high={high} />
-    {mid && <DashControls vehicle={vehicle} spec={spec} />}
+    {mid && vehicle !== 'sedan' && <DashControls vehicle={vehicle} spec={spec} />}
     {mid && <Glazing vehicle={vehicle} spec={spec} rain={rain} />}
     {/* 스티어링은 운전자 정면이다. 손은 mid 부터 림을 쥔다. */}
     <Yoke get={() => (Number(statusRef?.current?.steer) || 0) * wheel.ratio} hands={mid}
@@ -476,10 +552,13 @@ function RoadCabin({ vehicle, statusRef, night = false, quality, weather }) {
       position={cabin(vehicle, [x, seats.y, seats.z])} width={seats.width} depth={seats.depth} height={0.56} />)}
     {mid && <Wipers get={() => wiperPhase(statusRef?.current?.weather || weather)}
       position={cabin(vehicle, [0, spec.wiper.y, spec.wiper.z])}
-      rotation={[spec.glassAngle, 0, 0]} length={spec.wiper.length} gap={spec.wiper.gap} rest={-0.4} />}
+      rotation={[spec.glassAngle, 0, 0]} length={spec.wiper.length} gap={spec.wiper.gap} rest={spec.wiper.rest ?? -0.4} />}
     {high && spec.roofY !== null && [-1, 1].map((side) => <Panel key={side} material="fabric"
-      position={cabin(vehicle, [side * spec.innerWidth * 0.22, topY - 0.05, topZ + 0.12])}
-      scale={[spec.innerWidth * 0.36, 0.02, 0.2]} rotation={[0.9, 0, 0]} />)}
+      position={modern
+        ? cabin(vehicle, [side * spec.innerWidth * 0.22, spec.roofY - 0.012, topZ + 0.16])
+        : cabin(vehicle, [side * spec.innerWidth * 0.22, topY - 0.05, topZ + 0.12])}
+      scale={[spec.innerWidth * 0.36, modern ? 0.012 : 0.02, modern ? 0.13 : 0.2]}
+      rotation={modern ? [0, 0, 0] : [0.9, 0, 0]} />)}
     {high && vehicle !== 'truck' && <MirrorPod vehicle={vehicle} spec={spec} />}
     {high && seats && [-1, 1].map((side) => <Panel key={side} material="fabric"
       position={cabin(vehicle, [side * spec.innerWidth * 0.24, spec.rear.y - 0.26, spec.rear.z - 0.3])}

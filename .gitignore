@@ -71,3 +71,4 @@ tests/*
 *.tmp.mjs
 *.tmp.js
 playwright.*.tmp.config.js
+dist-perf*

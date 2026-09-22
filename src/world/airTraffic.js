@@ -12,8 +12,9 @@ export const AIR_TRAFFIC_PLANES = Object.freeze(['jet', 'helicopter']);
 
 /** 격추에 필요한 탄수다. 피해량이 아니라 맞은 횟수로 센다. */
 /** 대공포는 12발, 전차와 자주포는 직격 두 발, 장갑차 기관포는 16발이다.
- * 항공 무장은 기관총 14발, 미사일 2발이다. */
-export const AIR_HITS = Object.freeze({ cannon: 14, missile: 2, bomb: 1, aa: 12, tank: 2, howitzer: 2, armored: 16 });
+ * 항공 무장은 기관총 14발이고 미사일은 직격 한 발이다. 유도 미사일이 맞고도
+ * 기체가 남아 있으면 맞힌 것처럼 보이지 않는다. */
+export const AIR_HITS = Object.freeze({ cannon: 14, missile: 1, bomb: 1, aa: 12, tank: 2, howitzer: 2, armored: 16 });
 
 /** 기종별 피격 반경(구) 과 순항 속도다. 상자를 쓰면 기체가 기울 때 판정이 어긋난다. */
 const SPEC = Object.freeze({

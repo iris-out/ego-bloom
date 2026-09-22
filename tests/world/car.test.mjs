@@ -58,6 +58,7 @@ test('브레이크는 차를 완전히 세우고 후진은 기어 R 로 보인�
   assert.equal(carStatus(reversing).gear, 'R');
   assert.equal(carStatus(rolling).gear, rolling.gear);
   assert.equal(carStatus(rolling).speed, Math.round(rolling.speed * 3.6));
+  assert.deepEqual({ x: carStatus(rolling).x, z: carStatus(rolling).z }, { x: rolling.x, z: rolling.z });
 });
 
 test('모든 차량은 실제 단수와 RPM으로 자동 변속한다', () => {

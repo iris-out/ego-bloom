@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { RIDE_GROUPS, rideOf } from '../../src/world/rideSpecs.js';
-import { PLANE_KEYS, VEHICLE_KEYS } from '../../src/world/identity.js';
+import { PLANE_KEYS, VEHICLE_KEYS, VEHICLE_META } from '../../src/world/identity.js';
 
 const all = RIDE_GROUPS.flatMap((group) => group.rides);
 
@@ -43,6 +43,18 @@ test('차량 막대는 물리 상수를 따라간다', () => {
   assert.ok(sedan.bars.stability > bike.bars.stability, '세단이 접지력이 좋다');
   assert.ok(sedan.bars.speed > tank.bars.speed, '전차가 가장 느리다');
   assert.ok(bike.bars.agility > tank.bars.agility, '전차가 가장 둔하다');
+});
+
+test('포뮬러 선택 카드는 전용 이름과 코드와 최고 속도를 보여준다', () => {
+  assert.ok(VEHICLE_KEYS.includes('formula'));
+  assert.deepEqual(VEHICLE_META.formula, {
+    ko: '포뮬러', code: 'F1', eyebrow: 'EGO FORMULA / OPEN WHEEL',
+    note: '300km/h까지 가속하는 현대식 오픈휠 머신이다. Space로 드리프트한다.',
+  });
+  const formula = rideOf('car', 'formula');
+  assert.equal(formula.ko, '포뮬러');
+  assert.equal(formula.bars.speed, 1, '차량 중 최고 속도 막대가 가득 찬다');
+  assert.ok(formula.bars.agility > rideOf('car', 'sedan').bars.agility);
 });
 
 test('항공기 막대는 기종별 성능을 따라간다', () => {
