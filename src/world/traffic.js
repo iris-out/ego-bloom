@@ -1,6 +1,7 @@
 import { nextYieldLag, yieldBrake, YIELD_REACH } from './trafficYield.js';
 import { ROAD_TOP } from './carPhysics.js';
 import { createUrbanPlan, pointOnRoute, ROAD_WIDTH } from '../../shared/urbanPlan.js';
+import { ROAD_PROFILE, roadLaneLayout } from '../../shared/roadProfile.js';
 
 /** 도시를 도는 AI 차량의 위치 계산. 순수 함수이며 렌더와 충돌 판정이 같은 식을 쓴다.
  * 위치는 (차 번호, 시간, 도시 크기) 만으로 정해진다. 차 수와 품질에 기대지 않으므로
@@ -21,15 +22,17 @@ const TURN_STEP = 1;
 /** urbanPlan.pointOnRoute 가 이음매 방위를 섞는 거리와 같다. 닫힌 경로의 시작 이음매는
  * pointOnRoute 가 섞지 않아 방위가 튀므로 여기서 같은 거리로 섞는다. */
 const BLEND_REACH = 14;
-/** 도로 종류별 자유 주행 속도(월드 단위/초) 다. 2차선 도로의 바깥 차선은 OUTER_LANE 배이고
- * 띠마다 SPREAD 폭 안에서 결정적으로 흔든다. */
-export const TRAFFIC_SPEED = Object.freeze({ highway: 13, arterial: 11, collector: 9, lane: 6.5 });
-const OUTER_LANE = 0.88, SPREAD = 0.1;
-export const TRAFFIC_TOP_SPEED = Math.max(...Object.values(TRAFFIC_SPEED)) * (1 + SPREAD / 2);
+/** 도로 종류별 최고 자유 주행 속도(월드 미터/초) 다. 실제 띠 목표는 공용 정책의
+ * minKmh..maxKmh 안에서 결정적으로 흩어지고, 곡선·교차로·양보는 그 아래로 늦춘다. */
+const KPH = 3.6;
+export const TRAFFIC_SPEED = Object.freeze(Object.fromEntries(Object.entries(ROAD_PROFILE)
+  .map(([kind, profile]) => [kind, profile.maxKmh / KPH])));
+export const TRAFFIC_TOP_SPEED = Math.max(...Object.values(TRAFFIC_SPEED));
 /** 횡가속, 가속, 감속 한계다. 실측이 아니라 화면에서 맞춘 설계 값이다. */
 const LATERAL = 2.4, ACCEL = 2.2, DECEL = 3.5;
-/** 속도 바닥(v0 배수) 이다. 0 에 가까우면 시간 표를 뒤집을 수 없고, 띠 안 차 간격이 이 값에 비례한다. */
-const FLOOR = 0.35;
+/** 시간 표를 안정적으로 뒤집기 위한 절대 속도 바닥이다. 제한 속도의 비율로 두면 빠른
+ * 도로의 작은 유턴에서 이 값이 곡률 횡가속 제한을 덮어쓴다. */
+const MIN_SPEED = 2;
 /** 유턴과 교차로 앞뒤 CROSS_REACH 안에서 누르는 속도(v0 배수) 다. 신호가 없어 서로 비키지는 않는다. */
 const TURN_SPEED = 0.5, CROSS_SPEED = 0.6, CROSS_REACH = 10;
 /** 경로 끝에서 이만큼 앞에서 유턴한다. 끝이 닿는 순환로(반폭 7.5) 나 간선(반폭 11) 의 차선을 침범하지 않는다. */
@@ -53,7 +56,9 @@ function shapeOf(plan, route) {
   const total = offsets[count - 1] || 1;
   const road = plan.roads.find((segment) => segment.path === route.id);
   const kind = route.kind || road?.kind || 'lane';
-  const half = (route.width || ROAD_WIDTH[kind] || ROAD_WIDTH.lane) / 2, lanes = half >= 10 ? 2 : 1;
+  const width = route.width || ROAD_WIDTH[kind] || ROAD_WIDTH.lane;
+  const half = width / 2, layout = roadLaneLayout(kind, width);
+  const policy = ROAD_PROFILE[kind] || ROAD_PROFILE.lane;
   // route.y is the tyre contact surface. Elevated road boxes are centred at deckY and
   // have the canonical 1.2 thickness, while ground routes keep the existing baseline.
   const y = route.elevated ? (route.deckY ?? plan.highwayDeck ?? 14) + 0.6 : ROAD_TOP;
@@ -61,8 +66,8 @@ function shapeOf(plan, route) {
   const first = Math.atan2(points[1][0] - fx, points[1][1] - fz);
   const last = Math.atan2(lx - points[count - 2][0], lz - points[count - 2][1]);
   return {
-    route, offsets, total, half, lanes, laneWidth: half / lanes,
-    kind, y, speed: TRAFFIC_SPEED[kind] || TRAFFIC_SPEED.lane,
+    route, offsets, total, half, lanes: layout.lanesPerDirection, laneOffsets: layout.laneOffsets,
+    kind, y, minSpeed: policy.minKmh / KPH, maxSpeed: policy.maxKmh / KPH,
     closed: count > 3 && Math.hypot(fx - lx, fz - lz) < 1,
     first, last, joint: last + wrapAngle(first - last) / 2,
     headReach: Math.min(BLEND_REACH, offsets[1] / 2), tailReach: Math.min(BLEND_REACH, (total - offsets[count - 2]) / 2),
@@ -111,10 +116,11 @@ function crossingsOf(shapes, own) {
 
 /** 경로 하나의 회로들이다. 조각은 중심선 구간(from, to) 이나 유턴(at) 이다. */
 function circuitsOf(shape) {
-  const { total, closed, lanes, laneWidth } = shape;
+  const { total, closed, laneOffsets } = shape;
   if (closed) return [[{ from: 0, to: total, dir: 1 }], [{ from: total, to: 0, dir: -1 }]];
-  // 차선이 둘이면 두 유턴을 같은 중심에 두어 반원끼리 닿지 않게 한다.
-  const reach = laneWidth * (lanes - 0.5) + END_CLEAR;
+  // 가장 바깥 유턴 반지름 뒤에도 END_CLEAR 를 남긴다. 차선 도색과 같은 canonical
+  // 오프셋을 써야 중앙분리대/갓길 인셋이 있는 6차선 도로에서도 끝을 침범하지 않는다.
+  const reach = Math.max(...laneOffsets) + END_CLEAR;
   const a = Math.min(reach, total / 2), b = Math.max(total - reach, total / 2);
   return [[{ from: a, to: b, dir: 1 }, { at: b, dir: 1 }, { from: b, to: a, dir: -1 }, { at: a, dir: -1 }]];
 }
@@ -187,7 +193,6 @@ function profileBand(raw, shape, crossings, v0) {
   }
   X[n] = X[0]; Z[n] = Z[0]; A[n] = A[n - 1] + wrapAngle(raw.heads[0] - raw.heads[n - 1]);
   for (let k = 0; k < n; k += 1) { const dx = X[k + 1] - X[k], dz = Z[k + 1] - Z[k]; DS[k] = Math.sqrt(dx * dx + dz * dz); }
-  const floor = FLOOR * v0;
   let slowest = 0;
   for (let k = 0; k < n; k += 1) {
     const prev = (k + n - 1) % n, reach = DS[prev] + DS[k];
@@ -195,7 +200,7 @@ function profileBand(raw, shape, crossings, v0) {
     let v = kappa > 1e-9 ? Math.min(v0, Math.sqrt(LATERAL / kappa)) : v0;
     if (TURN[k]) v = Math.min(v, TURN_SPEED * v0);
     else if (nearCrossing(shape, crossings, raw.along[k])) v = Math.min(v, CROSS_SPEED * v0);
-    V[k] = Math.max(floor, v);
+    V[k] = Math.max(MIN_SPEED, v);
     if (V[k] < V[slowest]) slowest = k;
   }
   // 가장 느린 칸에서 출발해 한 바퀴씩 뒤로(감속 한계), 앞으로(가속 한계) 훑는다.
@@ -228,8 +233,8 @@ function buildTables(plan) {
     circuitsOf(shape).forEach((circuit, index) => {
       for (let lane = 0; lane < shape.lanes; lane += 1) {
         const key = `${shape.route.id}:${index}:${lane}`, outer = lane === shape.lanes - 1;
-        const v0 = shape.speed * (shape.lanes > 1 && outer ? OUTER_LANE : 1) * (1 - SPREAD / 2 + SPREAD * hash01(key));
-        const band = profileBand(traceBand(shape, circuit, shape.laneWidth * (lane + 0.5)), shape, crossings, v0);
+        const v0 = shape.minSpeed + (shape.maxSpeed - shape.minSpeed) * hash01(key);
+        const band = profileBand(traceBand(shape, circuit, shape.laneOffsets[lane]), shape, crossings, v0);
         if (band.n < 2 || !(band.lap > 0)) continue;
         // 슬롯 시간 간격이 TRAFFIC_GAP / vmin 이상이면 가장 느린 곳에서도 앞차와 그만큼 떨어진다.
         const slots = Math.max(1, Math.floor(band.lap * band.vmin / TRAFFIC_GAP));

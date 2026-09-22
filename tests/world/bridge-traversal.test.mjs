@@ -68,12 +68,15 @@ test('bridge rails are sliced into the clear spans reported for each side', () =
       return [[0, 0.35], [0.65, 1]];
     },
   };
-  const rails = collectBridge(bridge, { clearance }).filter((part) => part.material === 'steel');
+  const rails = collectBridge(bridge, { clearance }).filter((part) => part.material === 'steel'
+    && part.shape === 'box' && part.scale[1] === 1.1);
 
-  assert.equal(calls.length, 2);
-  assert.ok(calls.every(({ segment }) => segment.x1 === 0 && segment.z2 === 80));
-  assert.deepEqual(calls.map(({ offset }) => Math.sign(offset)).sort(), [-1, 1]);
-  assert.ok(calls.every(({ margin }) => margin > 0));
+  const railOffset = bridge.width / 2 - 0.4;
+  const railCalls = calls.filter(({ offset }) => Math.abs(Math.abs(offset) - railOffset) < 1e-9);
+  assert.equal(railCalls.length, 2);
+  assert.ok(railCalls.every(({ segment }) => segment.x1 === 0 && segment.z2 === 80));
+  assert.deepEqual(railCalls.map(({ offset }) => Math.sign(offset)).sort(), [-1, 1]);
+  assert.ok(railCalls.every(({ margin }) => margin > 0));
   assert.equal(rails.length, 4);
   assert.ok(rails.every((rail) => Math.abs(rail.scale[2] - 35) < 1e-9));
 });

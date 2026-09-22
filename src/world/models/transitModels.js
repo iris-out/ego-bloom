@@ -7,7 +7,7 @@
 import { LEVELS } from '../../../shared/elevation.js';
 import { ROAD_WIDTH } from '../../../shared/urbanPlan.js';
 import { bridgeSegment } from '../../../shared/bridgeGeometry.js';
-import { addRamp, MARKING } from './roadStructures.js';
+import { addRamp, MARKING, roadMarkings } from './roadStructures.js';
 
 export const TRANSIT_MODEL_DEFAULTS = Object.freeze({
   // 지하철 출입구: 계단 단수, 캐노피 치수, 기둥 높이다.
@@ -38,6 +38,19 @@ export const TRANSIT_MODEL_DEFAULTS = Object.freeze({
   bridgePylonPosition: [0.32, 0.68],
   bridgePylonHeight: 40,
   bridgeCableCount: { low: 0, medium: 3, high: 5 },
+  bridgeFasciaWidth: 0.45,
+  bridgeFasciaHeight: 0.7,
+  bridgeGirderCount: { low: 2, medium: 3, high: 5 },
+  bridgeGirderWidth: 0.34,
+  bridgeGirderHeight: 0.5,
+  bridgeTransitionHeight: 0.04,
+  bridgeTransitionDepth: 0.45,
+  bridgeWalkwayHeight: 0.12,
+  bridgeRailPost: [0.14, 1.05, 0.14],
+  bridgeRailPostSpacing: { low: 0, medium: 32, high: 20 },
+  bridgePylonBase: [2.8, 2, 2.8],
+  bridgePylonCap: [2.4, 0.8, 2.4],
+  bridgeCableAnchor: [0.9, 0.5, 1.2],
 });
 
 function normalizeQuality(quality) {
@@ -144,40 +157,106 @@ export function addInterchange(add, node, quality, options = {}) {
 /** 강을 건너는 교량이다. bridge 는 shared/transit.js riverBridges() 의 항목
  * ({x, z, big, ko, width})이고, 강이 대략 X 축을 따라 흐른다고 보고 다리는
  * Z 축 방향으로 건넌다고 둔다. 상판은 지면 높이에 두고 교각은 강바닥
- * 아래까지 내려 세운다. big 이면 주탑 둘과 사장 케이블을 더한다. */
+ * 아래까지 내려 세운다. big 이면 주탑 둘과 사장 케이블을 더한다. options.sourceRoad 는
+ * 넓은 구조 상판과 별개인 실제 차도 폭·종류 및 clearance 자기 도로 식별자다. */
 export function addBridge(add, bridge, quality, options = {}) {
   const q = normalizeQuality(quality);
   const D = TRANSIT_MODEL_DEFAULTS;
   // endpoint 교량과 예전 axis 교량 모두 같은 정규화된 선분을 사용한다. 렌더, 수면
   // 제외와 지도에서 이 방향을 다시 추측하면 비스듬한 횡단부가 서로 어긋난다.
-  const segment = bridgeSegment({ length: D.bridgeSpan, ...bridge });
+  const sourceRoad = options.sourceRoad;
+  const canonical = bridgeSegment({ length: D.bridgeSpan, ...bridge });
+  const segment = { ...canonical, sourceRoad: sourceRoad ?? canonical.sourceRoad };
   const span = segment.length, half = span / 2;
   const deckThickness = D.bridgeDeckThickness;
   // 상판 윗면을 도로 포장 윗면에 맞춘다. 어긋나면 다리 진입에서 턱이 진다.
   const deckY = LEVELS.ROAD_TOP - deckThickness / 2;
+  const deckTop = deckY + deckThickness / 2;
+  const deckBottom = deckY - deckThickness / 2;
+  const roadKind = sourceRoad?.kind ?? bridge.kind ?? 'arterial';
+  const carriagewayWidth = Math.min(segment.width,
+    sourceRoad?.width ?? ROAD_WIDTH[roadKind] ?? ROAD_WIDTH.arterial);
   const { cx, cz, rotation, ux, uz, px, pz } = segment;
   const along = (offset) => [cx + ux * offset, cz + uz * offset];
+  const place = (offset, across = 0) => {
+    const [x, z] = along(offset);
+    return [x + px * across, z + pz * across];
+  };
+  const clearRanges = (offset, margin) => (options.clearance?.clearSpans?.(segment, offset, margin) ?? [[0, 1]])
+    .map((range) => {
+      const from = Math.max(0, Math.min(1, Number(range?.[0])));
+      const to = Math.max(from, Math.min(1, Number(range?.[1])));
+      return [from, to];
+    }).filter(([from, to]) => to - from > 1e-6);
 
   add('road', [cx, deckY, cz], [segment.width, deckThickness, span], null, 'box', rotation);
-  add('marking', [cx, deckY + deckThickness / 2 + 0.02, cz], [0.34, 0.05, span], null, 'box', rotation);
+  const markingSegment = { ...segment, kind: roadKind, width: carriagewayWidth,
+    joinIn: 0, joinOut: 0, sourceRoad: sourceRoad ?? segment.sourceRoad };
+  for (const mark of roadMarkings(markingSegment, { width: carriagewayWidth, quality: q,
+    clearance: options.clearance, y: deckTop + 0.02 })) {
+    add(mark.material, mark.position, mark.scale, null, 'box', mark.rotation, mark.color);
+  }
+
+  // The deck is one structural slab, but its visible shell keeps the broad shoulder from
+  // reading as a featureless floating rectangle. All long members remain instanced boxes.
+  for (const side of [-1, 1]) {
+    const [fx, fz] = place(0, side * (segment.width / 2 - D.bridgeFasciaWidth / 2));
+    add('dark', [fx, deckBottom - D.bridgeFasciaHeight / 2, fz],
+      [D.bridgeFasciaWidth, D.bridgeFasciaHeight, span], null, 'box', rotation);
+  }
+  const girderCount = D.bridgeGirderCount[q];
+  for (let i = 0; i < girderCount; i += 1) {
+    const across = segment.width * ((i + 1) / (girderCount + 1) - 0.5);
+    const [gx, gz] = place(0, across);
+    add('dark', [gx, deckBottom - D.bridgeGirderHeight / 2, gz],
+      [D.bridgeGirderWidth, D.bridgeGirderHeight, span], null, 'box', rotation);
+  }
+  for (const offset of [-half + D.bridgeTransitionDepth / 2, half - D.bridgeTransitionDepth / 2]) {
+    const [tx, tz] = place(offset);
+    add('dark', [tx, deckTop + D.bridgeTransitionHeight / 2, tz],
+      [segment.width, D.bridgeTransitionHeight, D.bridgeTransitionDepth], null, 'box', rotation);
+  }
+
   const railOffset = segment.width / 2 - 0.4;
   for (const side of [-1, 1]) {
     const offset = railOffset * side;
-    const ranges = options.clearance?.clearSpans?.(segment, offset, 0.08) ?? [[0, 1]];
-    for (const range of ranges) {
-      const from = Math.max(0, Math.min(1, Number(range?.[0])));
-      const to = Math.max(from, Math.min(1, Number(range?.[1])));
+    const ranges = clearRanges(offset, 0.08);
+    for (const [from, to] of ranges) {
       const length = (to - from) * span;
-      if (!(length > 1e-6)) continue;
       const middle = (from + to) / 2;
       const rx = segment.x1 + (segment.x2 - segment.x1) * middle + px * offset;
       const rz = segment.z1 + (segment.z2 - segment.z1) * middle + pz * offset;
       add('steel', [rx, deckY + deckThickness / 2 + 0.55, rz], [0.16, 1.1, length], null, 'box', rotation);
     }
+    const postSpacing = D.bridgeRailPostSpacing[q];
+    if (postSpacing) for (const [from, to] of ranges) {
+      const count = Math.max(1, Math.floor((to - from) * span / postSpacing));
+      for (let i = 0; i < count; i += 1) {
+        const t = from + (to - from) * ((i + 0.5) / count);
+        const [postX, postZ] = place(-half + span * t, offset);
+        add('dark', [postX, deckTop + D.bridgeRailPost[1] / 2, postZ], D.bridgeRailPost, null, 'box', rotation);
+        add('accent', [postX, deckTop + 0.62, postZ], [0.24, 0.16, 0.1], null, 'box', rotation, '#f0bd4e');
+        if (q === 'high' && i % 4 === 0) {
+          add('dark', [postX, deckTop + 1.45, postZ], [0.1, 2.8, 0.1], null, 'box', rotation);
+          add('lamp', [postX, deckTop + 2.9, postZ], [0.5, 0.18, 0.42], null, 'octagon', rotation);
+        }
+      }
+    }
+  }
+
+  const shoulder = (segment.width - carriagewayWidth) / 2;
+  if (shoulder > 1.2) for (const side of [-1, 1]) {
+    const width = shoulder - 0.8;
+    const offset = side * (carriagewayWidth / 2 + 0.4 + width / 2);
+    for (const [from, to] of clearRanges(offset, width / 2)) {
+      const length = (to - from) * span, middle = (from + to) / 2;
+      const [walkX, walkZ] = place(-half + span * middle, offset);
+      add('pavement', [walkX, deckTop + D.bridgeWalkwayHeight / 2, walkZ],
+        [width, D.bridgeWalkwayHeight, length], null, 'box', rotation);
+    }
   }
 
   const stations = D.bridgePierStations[q];
-  const deckBottom = deckY - deckThickness / 2;
   const pierBottom = LEVELS.WATER - D.bridgePierFoundation;
   const pierHeight = Math.max(1.5, deckBottom - pierBottom);
   for (let i = 0; i < stations; i += 1) {
@@ -189,6 +268,7 @@ export function addBridge(add, bridge, quality, options = {}) {
 
   const pylonHeight = D.bridgePylonHeight;
   const pylonBase = deckY + deckThickness / 2;
+  const pylonClearRadius = Math.hypot(D.bridgePylonBase[0] / 2 + 3, D.bridgePylonBase[2] / 2 + 3);
   const cableCount = D.bridgeCableCount[q];
   for (const station of D.bridgePylonPosition) {
     // 접속 도로가 주탑 아래를 통과하면 양쪽 탑을 함께 이웃 경간으로 옮긴다.
@@ -198,7 +278,7 @@ export function addBridge(add, bridge, quality, options = {}) {
       .find(candidate=>!options.clearance?.columnClear || [-1,1].every(side=>{
         const [x,z]=along(-half+span*candidate);
         return options.clearance.columnClear(x+px*(segment.width/2+.8)*side,
-          z+pz*(segment.width/2+.8)*side,Math.SQRT2*(.8+3),pylonBase,pylonBase+pylonHeight,bridge);
+          z+pz*(segment.width/2+.8)*side,pylonClearRadius,pylonBase,pylonBase+pylonHeight,segment);
       }));
     if(t===undefined)continue;
     const offset=-half+span*t;
@@ -206,8 +286,10 @@ export function addBridge(add, bridge, quality, options = {}) {
       const [alongX,alongZ]=along(offset);
       const pylonX=alongX+px*(segment.width/2+.8)*side,pylonZ=alongZ+pz*(segment.width/2+.8)*side;
       add('steel', [pylonX, pylonBase + pylonHeight / 2, pylonZ], [1.6, pylonHeight, 1.6], null, 'box');
+      add('stone', [pylonX, pylonBase + D.bridgePylonBase[1] / 2, pylonZ], D.bridgePylonBase, null, 'box');
+      add('dark', [pylonX, pylonBase + pylonHeight - D.bridgePylonCap[1] / 2, pylonZ], D.bridgePylonCap, null, 'box');
       // 주탑은 차도 바깥 난간 뒤에 선다.
-      options.onPylon?.({ x: pylonX, z: pylonZ, width: 1.6, depth: 1.6,
+      options.onPylon?.({ x: pylonX, z: pylonZ, width: D.bridgePylonBase[0], depth: D.bridgePylonBase[2],
         height: pylonBase + pylonHeight, roofMargin: 0 });
       for (let i = 1; i <= cableCount; i += 1) {
         const reach = (span * Math.min(t, 1 - t)) * (i / (cableCount + 1));
@@ -216,12 +298,17 @@ export function addBridge(add, bridge, quality, options = {}) {
         const topY = pylonBase + pylonHeight * (.94 - i * .025);
         const footY = pylonBase + .08;
         const footX = cableX+px*(segment.width/2+.8)*side, footZ = cableZ+pz*(segment.width/2+.8)*side;
+        const anchorRadius = Math.hypot(D.bridgeCableAnchor[0], D.bridgeCableAnchor[2]) / 2;
+        if (options.clearance?.columnClear && !options.clearance.columnClear(footX, footZ, anchorRadius,
+          footY, footY + D.bridgeCableAnchor[1], segment)) continue;
         const dx = pylonX - footX, dz = pylonZ - footZ, dy = topY - footY;
         const length = Math.hypot(dx,dy,dz);
         // Cylinder's +Y axis must meet the tower, not hang vertically in free space.
         const pitch = Math.atan2(Math.hypot(dx,dz),dy), yaw = Math.atan2(dx,dz);
         add('steel', [(footX+pylonX)/2, (footY+topY)/2, (footZ+pylonZ)/2],
           [0.1, length, 0.1], null, 'cylinder', [pitch,yaw,0]);
+        add('dark', [footX, footY + D.bridgeCableAnchor[1] / 2, footZ],
+          D.bridgeCableAnchor, null, 'box', rotation);
       }
     }
   }

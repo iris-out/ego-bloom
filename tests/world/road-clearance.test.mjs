@@ -129,7 +129,9 @@ test('road markings share intersection gaps and elevated highway markings use th
   const plan = { roads: [horizontal, vertical], bridges: [], ramps: [] };
   const clearance = roadClearance(plan);
   const cut = roadMarkings(horizontal, { quality: 'low', width: ROAD_WIDTH.arterial, clearance });
-  assert.equal(cut.length, 2, 'the arterial centreline is split around the perpendicular road');
+  assert.equal(cut.filter(part=>part.material==='centerline').length, 2, 'the arterial centreline is split around the perpendicular road');
+  for(const part of cut)assert.ok(Math.abs(part.position[0])-part.scale[2]/2>=ROAD_WIDTH.lane/2,
+    'all six-lane divider and edge strips must leave the crossing clear');
 
   const deckY = 14;
   const deck = { id: 'deck', x1: -100, z1: 60, x2: 100, z2: 60, length: 200, kind: 'highway', elevated: true, deckY };

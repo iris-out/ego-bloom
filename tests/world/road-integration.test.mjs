@@ -144,10 +144,11 @@ test('highway traffic follows the closed physical deck with stable height and se
   }
 
   assert.ok(highway.length > 20, `only ${highway.length} highway cars were assigned`);
-  assert.deepEqual([...byLane.keys()].sort(), [0, 1], 'both highway lanes must carry traffic');
+  assert.deepEqual([...byLane.keys()].sort(), [0, 1, 2], 'all three highway lanes per direction must carry traffic');
   const average = (values) => values.reduce((sum, value) => sum + value, 0) / values.length;
-  assert.ok(average(byLane.get(1)) > average(byLane.get(0)) + 4,
-    'the outer highway lane is not separated from the inner lane');
+  assert.ok(average(byLane.get(1)) > average(byLane.get(0)) + 3
+    && average(byLane.get(2)) > average(byLane.get(1)) + 3,
+  'the three highway lanes are not physically separated');
 
   const sample = highway[0];
   const next = trafficPose(sample.index, 37.25 + 1 / 60, EXTENT);

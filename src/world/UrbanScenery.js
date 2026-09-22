@@ -83,6 +83,23 @@ function spanRoad(road,t0,t1){
   return {...road,x1,z1,x2,z2,length:Math.hypot(x2-x1,z2-z1)};
 }
 
+/** Complement of this road's bridge footprints. A bridge owns its approach paint
+ * as well as its wet span, so the land pass must not paint underneath it. */
+export function roadMarkingSpans(road,bridges){
+  const dx=road.x2-road.x1,dz=road.z2-road.z1,lengthSq=dx*dx+dz*dz;
+  if(!lengthSq)return [];
+  const intervals=bridges.filter(bridge=>[ [bridge.x1,bridge.z1],[bridge.x2,bridge.z2] ]
+    .every(([x,z])=>Math.abs((x-road.x1)*dz-(z-road.z1)*dx)<1e-5*Math.sqrt(lengthSq))).map(bridge=>{
+    const a=((bridge.x1-road.x1)*dx+(bridge.z1-road.z1)*dz)/lengthSq;
+    const b=((bridge.x2-road.x1)*dx+(bridge.z2-road.z1)*dz)/lengthSq;
+    return [Math.max(0,Math.min(a,b)),Math.min(1,Math.max(a,b))];
+  }).filter(([a,b])=>b>a).sort((a,b)=>a[0]-b[0]);
+  const spans=[];let cursor=0;
+  for(const [a,b] of intervals){if(a>cursor)spans.push([cursor,a]);cursor=Math.max(cursor,b);}
+  if(cursor<1)spans.push([cursor,1]);
+  return spans;
+}
+
 /** 도심을 지나는 고속도로 터널이다. 벽과 복개 언덕을 땅 위에 세우면 가로지르는 지상
  * 도로를 막으므로, 양 끝 포탈만 세우고 그 사이는 지면 높이의 녹지 띠(복개 공원)로 덮는다.
  * 물 위 구간은 아무것도 그리지 않는다. 강 밑을 지나는 것으로 본다. */
@@ -309,6 +326,14 @@ export function buildUrbanScenery(buildings,extent,quality='medium',gallery=fals
   for(const corner of plan.nature||[])addNature(add,corner,plan.ponds||[],quality,clearance);
   for(const pond of plan.ponds||[])addPond(add,pond,quality,clearance);
 
+  const bridgesByRoad=new Map();
+  const routeKey=road=>road?.path??road?.id;
+  for(const bridge of plan.bridges){
+    const key=routeKey(plan.roads[bridge.sourceRoadIndex]);
+    if(key===undefined)continue;
+    const list=bridgesByRoad.get(key)||[];
+    list.push(bridge);bridgesByRoad.set(key,list);
+  }
   for(const road of plan.roads){
     const width=ROAD_WIDTH[road.kind]||8;
     // 터널 구간은 땅속이다. 복개 띠와 포탈은 tunnels 가 따로 그린다.
@@ -327,7 +352,13 @@ export function buildUrbanScenery(buildings,extent,quality='medium',gallery=fals
       addSegment(add,'pavement',piece,width+4,.12,.22);
       addSegment(add,'road',piece,width,.27,.12,road.kind==='alley'?'#87908c':undefined);
       // 중앙선은 노랑 실선, 차선 구분선과 가장자리선은 흰 점선이다. 표는 roadStructures 에 있다.
-      for(const mark of roadMarkings(piece,{width,quality,clearance}))add(mark.material,mark.position,mark.scale,null,'box',mark.rotation,mark.color);
+      for(const [start,end] of roadMarkingSpans(piece,bridgesByRoad.get(routeKey(road))||[])){
+        const painted=spanRoad(piece,start,end);
+        // An approach cut is continuous road, not an intersection setback.
+        if(start>0)painted.joinIn=0;
+        if(end<1)painted.joinOut=0;
+        for(const mark of roadMarkings(painted,{width,quality,clearance}))add(mark.material,mark.position,mark.scale,null,'box',mark.rotation,mark.color);
+      }
     }
     // 횡단보도는 경로 끝과 교차점(join 이 null 인 곳) 에만 깐다. 대로와 집산로만 놓아 조각 수를 묶는다.
     if(quality!=='low'&&(road.kind==='arterial'||road.kind==='collector')){
@@ -367,7 +398,8 @@ export function buildUrbanScenery(buildings,extent,quality='medium',gallery=fals
     if(road.kind!=='arterial'||road.length<120)continue;
     addRoadFurniture(add,road,{width:ROAD_WIDTH.arterial,median:true,quality,clearance});
   }
-  for(const bridge of plan.bridges)addBridge(add,bridge,quality,{clearance,onPylon:(pylon)=>obstacles.push(pylon)});
+  for(const bridge of plan.bridges)addBridge(add,bridge,quality,{clearance,
+    sourceRoad:plan.roads[bridge.sourceRoadIndex],onPylon:(pylon)=>obstacles.push(pylon)});
   for(const node of plan.interchanges)addInterchange(add,node,quality,{clearance,
     onPier:(pier)=>obstacles.push(pier),addRoadTriangle});
   for(const line of plan.subway.lines)for(const station of line.stations)

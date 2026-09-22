@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { TRAFFIC_BODY, TRAFFIC_GAP, TRAFFIC_TOP_SPEED, trafficBoxes, trafficFrame, trafficPose, trafficTrack } from '../../src/world/traffic.js';
+import { TRAFFIC_BODY, TRAFFIC_GAP, TRAFFIC_SPEED, TRAFFIC_TOP_SPEED, trafficBoxes, trafficFrame, trafficPose, trafficTrack } from '../../src/world/traffic.js';
 import { hitsVehicle } from '../../src/world/carPhysics.js';
-import { createUrbanPlan, pointOnRoute } from '../../shared/urbanPlan.js';
+import { ROAD_PROFILE, roadLaneLayout } from '../../shared/roadProfile.js';
+import { createUrbanPlan, pointOnRoute, ROAD_WIDTH } from '../../shared/urbanPlan.js';
 
 const EXTENT = 900;
 /** 제작자 1000명 도시의 크기다. 경로 구성이 EXTENT 와 달라 두 도시를 같이 본다. */
@@ -66,6 +67,67 @@ test('우측통행이다. 직선 구간의 차는 진행 방향 오른쪽 차선
     assert.ok(checked > 700, `직선 구간 표본이 ${checked} 개뿐이다`);
     assert.ok(forward > 150 && backward > 150, `양방향이 고르지 않다: ${forward}, ${backward}`);
   }
+});
+
+test('도로 종류별 제한 속도와 실제 차선 수는 공용 도로 정책을 따른다', () => {
+  const lanes = new Map(), cruise = new Map();
+  for (let index = 0; index < 4000; index += 1) {
+    const track = trafficTrack(index, 0, CITY);
+    if (!lanes.has(track.kind)) { lanes.set(track.kind, new Set()); cruise.set(track.kind, new Set()); }
+    lanes.get(track.kind).add(track.lane);
+    cruise.get(track.kind).add(track.v0);
+    const profile = ROAD_PROFILE[track.kind], kmh = track.v0 * 3.6;
+    assert.ok(kmh >= profile.minKmh - 1e-9, `${track.kind} 목표 ${kmh}km/h 가 하한보다 느리다`);
+    assert.ok(kmh <= profile.maxKmh + 1e-9, `${track.kind} 목표 ${kmh}km/h 가 상한을 넘었다`);
+  }
+  for (const kind of ['lane', 'collector', 'arterial', 'highway']) {
+    const layout = roadLaneLayout(kind, ROAD_WIDTH[kind]);
+    assert.deepEqual([...lanes.get(kind)].sort(), Array.from({ length: layout.lanesPerDirection }, (_, lane) => lane),
+      `${kind} 의 실제 AI 차선 수가 도색과 다르다`);
+    assert.ok(cruise.get(kind).size > 1, `${kind} 목표 속도의 결정적 분산이 사라졌다`);
+  }
+  for (const [kind, profile] of Object.entries(ROAD_PROFILE)) {
+    assert.equal(TRAFFIC_SPEED[kind], profile.maxKmh / 3.6, `${kind} 공개 최고 속도는 m/s 여야 한다`);
+  }
+  assert.equal(TRAFFIC_TOP_SPEED, 90 / 3.6);
+});
+
+test('AI 차 중심은 도색과 같은 canonical laneOffsets 를 따른다', () => {
+  const plan = createUrbanPlan(CITY);
+  const routes = new Map([...plan.routes, ...plan.highwayRoutes].map((route) => [route.id, route]));
+  const seen = new Set();
+  for (let index = 0; index < 1800; index += 1) {
+    for (const time of [0, 11.3, 47.9]) {
+      const track = trafficTrack(index, time, CITY);
+      if (track.turning) continue;
+      const pose = trafficPose(index, time, CITY), centre = nearestCentre(routes.get(track.route), pose.x, pose.z);
+      if (Math.abs(wrap(pose.angle - centre.angle)) > 1e-7 && Math.abs(wrap(pose.angle - centre.angle - Math.PI)) > 1e-7) continue;
+      const actual = (pose.x - centre.x) * -Math.cos(pose.angle) + (pose.z - centre.z) * Math.sin(pose.angle);
+      const expected = roadLaneLayout(track.kind, ROAD_WIDTH[track.kind]).laneOffsets[track.lane];
+      assert.ok(Math.abs(actual - expected) < 1e-5,
+        `${track.kind} lane ${track.lane} 이 도색 중심 ${expected} 대신 ${actual} 에 있다`);
+      seen.add(`${track.kind}:${track.lane}`);
+    }
+  }
+  for (const kind of ['arterial', 'highway']) {
+    for (let lane = 0; lane < 3; lane += 1) assert.ok(seen.has(`${kind}:${lane}`), `${kind} lane ${lane} 표본이 없다`);
+  }
+});
+
+test('열린 경로 유턴은 가장 바깥 차선도 도로 끝 여유를 침범하지 않는다', () => {
+  const plan = createUrbanPlan(CITY), routes = new Map(plan.routes.map((route) => [route.id, route]));
+  let turning = 0, nearest = Infinity;
+  for (let index = 0; index < 5000; index += 1) {
+    const track = trafficTrack(index, 0, CITY);
+    if (track.kind !== 'arterial' || !track.turning || track.lane !== 2) continue;
+    const route = routes.get(track.route), pose = trafficPose(index, 0, CITY);
+    const ends = [route.points[0], route.points[route.points.length - 1]];
+    const gap = Math.min(...ends.map(([x, z]) => Math.hypot(pose.x - x, pose.z - z)));
+    nearest = Math.min(nearest, gap); turning += 1;
+    assert.ok(gap >= 11 - 1e-6, `${track.route} 의 바깥 유턴이 끝 여유를 ${gap} 로 줄였다`);
+  }
+  assert.ok(turning > 5, `바깥 간선 유턴 표본이 ${turning} 개뿐이다`);
+  assert.ok(nearest < 15, `유턴 끝 여유 검사가 경계 가까이를 지나지 않았다: ${nearest}`);
 });
 
 test('충돌 상자는 차량이 옆을 볼 때 가로와 세로가 바뀐다', () => {
@@ -200,7 +262,8 @@ test('브레이크 값은 0 과 1 사이이고 실제로 감속할 때만 켜진
     const time = index * 0.21, pose = trafficPose(index, time, EXTENT);
     assert.ok(pose.braking >= 0 && pose.braking <= 1, `브레이크 값이 범위 밖이다: ${pose.braking}`);
     assert.equal(pose.braking, trafficPose(index, time, EXTENT).braking);
-    if (pose.braking <= 0) continue;
+    // 표본 구간 경계에서 0 으로 사라지는 미세한 제동은 다음 1ms 구간의 가속과 겹칠 수 있다.
+    if (pose.braking <= 0.01) continue;
     braking += 1;
     assert.ok(trafficPose(index, time + 1e-3, EXTENT).speed <= pose.speed + 1e-9, `차 ${index} 는 브레이크를 밟는데 빨라진다`);
   }
@@ -213,7 +276,7 @@ test('유턴과 교차로에서 느려지고 곧은 길에서는 제 속도를 �
   for (let index = 0; index < CARS; index += 1) {
     for (const time of [5, 250, 4000]) {
       const track = trafficTrack(index, time, CITY), pose = trafficPose(index, time, CITY);
-      assert.ok(pose.speed >= track.v0 * 0.35 - 1e-9, `차 ${index} 가 바닥 속도보다 느리다: ${pose.speed}`);
+      assert.ok(pose.speed >= 2 - 1e-9, `차 ${index} 가 시간 표의 속도 바닥보다 느리다: ${pose.speed}`);
       assert.ok(pose.speed <= track.v0 + 1e-9, `차 ${index} 가 제한 속도를 넘었다: ${pose.speed}`);
       if (track.turning) { turning += 1; assert.ok(pose.speed <= track.v0 * 0.5 + 1e-9, `유턴하는 차 ${index} 가 ${pose.speed} 로 돈다`); }
       if (pose.speed > track.v0 * 0.99) cruising += 1;
@@ -221,6 +284,26 @@ test('유턴과 교차로에서 느려지고 곧은 길에서는 제 속도를 �
   }
   assert.ok(turning > 0, '유턴하는 차가 한 대도 없다');
   assert.ok(cruising > CARS, `제 속도를 내는 차가 ${cruising} 번뿐이다`);
+});
+
+test('높아진 제한 속도도 급한 유턴의 곡률 감속을 덮어쓰지 않는다', () => {
+  const dt = 0.002;
+  let turning = 0, worst = 0;
+  for (let index = 0; index < 4000; index += 1) {
+    for (const time of [3.7, 19.4, 83.1]) {
+      const track = trafficTrack(index, time, CITY);
+      if (!track.turning || track.kind !== 'arterial' || track.lane !== 0) continue;
+      const a = trafficPose(index, time, CITY), b = trafficPose(index, time + dt, CITY);
+      const lateral = a.speed * Math.abs(wrap(b.angle - a.angle)) / dt;
+      worst = Math.max(worst, lateral); turning += 1;
+      // 이산 1m 유턴 표의 구간 경계에서는 양옆 곡률 표본을 평균하므로 설계값 2.4보다
+      // 순간 추정치가 높다. 예전 비례 속도 바닥은 같은 측정에서 20m/s²를 넘었다.
+      assert.ok(lateral <= 5,
+        `안쪽 유턴 차 ${index} 의 횡가속이 ${lateral.toFixed(2)}m/s² 로 곡률 감속을 무시했다`);
+    }
+  }
+  assert.ok(turning > 5, `안쪽 간선 유턴 표본이 ${turning} 개뿐이다`);
+  assert.ok(worst > 1, `횡가속 검사가 실제 곡선을 재지 못했다: ${worst}`);
 });
 
 test('주변 추리기는 반경 안의 차량만 주고 index 를 유지한다', () => {

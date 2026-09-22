@@ -6,6 +6,7 @@
  * 램프 상판은 인스턴스 파트가 아니므로 options.addRoadTriangle 콜백도 반드시 넘긴다.
  */
 import { roadClearance } from '../../../shared/roadClearance.js';
+import { ROAD_PROFILE, roadLaneLayout } from '../../../shared/roadProfile.js';
 import { roadRibbon } from '../../../shared/roadRibbon.js';
 
 export const ROAD_STRUCTURE_DEFAULTS = Object.freeze({
@@ -467,8 +468,8 @@ export function addRoadFurniture(add, segment, options = {}) {
 /** 도로 종류별 차선 수와 도색표다. center 는 중앙선 줄 수, dividers 는 한쪽 차선
  * 구분선 수, edge 는 양 끝 가장자리선이다. 우측통행이라 중앙선은 항상 도로 중심이다. */
 export const LANE_PLAN = Object.freeze({
-  highway: { lanes: 4, center: 2, dividers: 1, edge: true, dashedCenter: false },
-  arterial: { lanes: 4, center: 1, dividers: 1, edge: false, dashedCenter: false },
+  highway: { lanes: ROAD_PROFILE.highway.lanes, center: 2, dividers: ROAD_PROFILE.highway.lanes / 2 - 1, edge: true, dashedCenter: false },
+  arterial: { lanes: ROAD_PROFILE.arterial.lanes, center: 1, dividers: ROAD_PROFILE.arterial.lanes / 2 - 1, edge: true, dashedCenter: false },
   collector: { lanes: 2, center: 1, dividers: 0, edge: false, dashedCenter: false },
   // 이면도로다. 큰길과 달리 중앙선이 없어야 골목과 함께 한눈에 작은 길로 읽힌다.
   lane: { lanes: 2, center: 0, dividers: 0, edge: false, dashedCenter: false },
@@ -479,6 +480,7 @@ export const MARKING = Object.freeze({
   y: 0.35, thickness: 0.04, lineWidth: 0.34, centerGap: 1.1, edgeInset: 0.7,
   // 점선 한 조각의 길이와 주기다. low 는 점선을 실선 하나로 대체한다.
   dash: { low: null, medium: { length: 4, period: 10 }, high: { length: 4, period: 8 } },
+  sixLaneDash: { length: 4, period: 12 },
   crosswalk: { bars: 5, barWidth: 1.2, barLength: 5, clearance: 5 },
 });
 
@@ -518,7 +520,7 @@ export function roadMarkings(segment, options = {}) {
   const from = markingClear(segment.joinIn, width);
   const to = geo.length - markingClear(segment.joinOut, width);
   if (to - from <= 1) return [];
-  const dash = MARKING.dash[quality];
+  const dash = quality === 'medium' && plan.lanes === 6 ? MARKING.sixLaneDash : MARKING.dash[quality];
   const clearance = clearanceOf(options);
   const y = options.y ?? MARKING.y;
   const line = (offset, material, dashed) => {
@@ -533,12 +535,12 @@ export function roadMarkings(segment, options = {}) {
   const parts = [];
   const centers = plan.center === 1 ? [0] : [-MARKING.centerGap / 2, MARKING.centerGap / 2];
   for (const offset of centers) parts.push(...line(offset, 'centerline', plan.dashedCenter));
-  if (quality === 'low') return parts;
-  for (let i = 0; i < plan.dividers; i += 1) {
-    const step = (width / 2) * ((i + 1) / (plan.dividers + 1));
+  const layout = roadLaneLayout(segment.kind, width);
+  // Low quality keeps lane topology; its dividers are single strips, not dashes.
+  for (const step of layout.dividerOffsets) {
     for (const side of [-1, 1]) parts.push(...line(step * side, 'marking', true));
   }
-  if (plan.edge) for (const side of [-1, 1]) parts.push(...line((width / 2 - MARKING.edgeInset) * side, 'marking', false));
+  if (plan.edge) for (const side of [-1, 1]) parts.push(...line(layout.edgeOffset * side, 'marking', false));
   return parts;
 }
 
