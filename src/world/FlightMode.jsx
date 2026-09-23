@@ -89,7 +89,7 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
   // 발사 반동만 충격량을 쌓고 지수 감쇠로 푼다. 비행 중에는 인위적인 진동을 넣지 않는다.
   const shake=useRef({pitch:0,shots:0,rockets:0,bombs:0});
   const calm=useRef(false);
-  const gunHit=useRef(null), missileHit=useRef(null), bombHit=useRef(null), lastSolve=useRef(-1);
+  const gunHit=useRef(null), missileHit=useRef(null), bombHit=useRef(null);
   // 미사일 포착이다. 사거리 안 적기를 기수에 담고 있으면 진행도가 차고, 다 차면 락온이다.
   // 락온한 채로 쏜 미사일만 유도된다. 판정은 missileLock.js 한 곳이 한다.
   const lock = useRef(createLock());
@@ -363,9 +363,9 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
     if (firedBomb) playBombDrop();
     if ((firedGun || firedRocket) && !calm.current) shake.current.pitch = Math.min(0.06, shake.current.pitch + firedGun * 0.002 + firedRocket * 0.016);
     shake.current.pitch *= Math.exp(-dt * 8);
-    // 탄착 해답은 0.05초마다만 다시 푼다. 매 프레임 두 번 적분하면 탄 수명을 프레임마다 굴린다.
-    if (mounts && clock.elapsedTime - lastSolve.current > 0.05) {
-      lastSolve.current = clock.elapsedTime;
+    // 탄착 해답은 현재 발사 자세와 맞춰 매 프레임 갱신한다. 오래된 화면 좌표를 쓰면
+    // 기체가 빠르게 선회할 때 실제 탄도와 조준선이 벌어진다.
+    if (mounts) {
       // 기종마다 푸는 해답이 다르다. 전투기는 기관총과 미사일, 프로펠러기는 기관총, 폭격기는 폭탄이다.
       gunHit.current = mounts.cannon ? airImpact({ ...next, key: plane }, 'cannon', obstacles) : null;
       missileHit.current = mounts.missile ? airImpact({ ...next, key: plane }, 'missile', obstacles) : null;

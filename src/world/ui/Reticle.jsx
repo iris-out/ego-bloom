@@ -17,9 +17,7 @@ const DEFAULT_FOV = 62;
 /** 중앙 십자의 팔 길이와 가운데 빈 칸이다. 탄착점을 가리지 않을 만큼만 띄운다. */
 const ARM = 12;
 const GAP = 5;
-/** 조준선이 목표 자리를 따라잡는 빠르기다. 크면 즉시 붙고 작으면 끌린다. 18이면 60Hz 한
- * 프레임에 26퍼센트를 따라가, 포탑을 돌릴 때 끌리지 않으면서 20Hz 로 갱신되는 탄착 거리의
- * 계단이 드러나지 않는다. */
+/** 차량 조준선이 목표 자리를 따라잡는 빠르기다. 비행 조준선은 탄도 위치를 그대로 표시한다. */
 const FOLLOW = 18;
 /** 이 시간(ms) 넘게 새 값이 없으면 화면 중앙으로 돌아간다. 탈것에서 내렸거나 아직 첫 프레임이다. */
 const STALE = 500;
@@ -35,9 +33,9 @@ function useViewportHeight() {
   return height;
 }
 
-/** store 의 픽셀을 루트 div 의 transform 으로 옮기는 rAF 루프다. 지수 감쇠로 따라가므로
- * 포탑을 돌리면 조준선이 미끄러지듯 따라오고 20Hz 로 바뀌는 거리에는 계단이 지지 않는다. */
-function useAimFollow(active) {
+/** store 의 픽셀을 루트 div 의 transform 으로 옮기는 rAF 루프다. 비행 조준선은 즉시 붙고,
+ * 차량 조준선은 지수 감쇠로 따라가 포탑 움직임을 부드럽게 보인다. */
+function useAimFollow(active, immediate = false) {
   const root = useRef(null);
   useEffect(() => {
     if (!active) return undefined;
@@ -53,7 +51,7 @@ function useAimFollow(active) {
       const toY = fresh ? aim.y : window.innerHeight / 2;
       const dt = last ? Math.min(0.1, (time - last) / 1000) : 0;
       last = time;
-      if (x === null || !dt) { x = toX; y = toY; }
+      if (immediate || x === null || !dt) { x = toX; y = toY; }
       else {
         const follow = 1 - Math.exp(-dt * FOLLOW);
         x += (toX - x) * follow; y += (toY - y) * follow;
@@ -66,14 +64,14 @@ function useAimFollow(active) {
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [active]);
+  }, [active, immediate]);
   return root;
 }
 
 export default function Reticle({ kind, rideKey, status = {} }) {
   const spec = reticleOf(kind, rideKey);
   const height = useViewportHeight();
-  const root = useAimFollow(!!spec);
+  const root = useAimFollow(!!spec, kind === 'flight');
   const fov = Number.isFinite(status.fov) ? status.fov : DEFAULT_FOV;
 
   const marks = useMemo(() => {
