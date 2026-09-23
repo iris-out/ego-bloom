@@ -2,7 +2,7 @@
  * 좌표 변환과 가림 판정을 직접 넣는다. 그리는 쪽은 NearbyCreators.jsx 다. */
 
 /** 화면 정규 좌표가 이 상자를 벗어나면 후보에서 뺀다. 가장자리 라벨은 어차피 잘린다. */
-const EDGE = 0.9;
+export const LABEL_EDGE = 0.9;
 /** 가림 판정을 해 볼 후보 수다. 판정 하나가 충돌 격자를 훑으므로 상한을 둔다. */
 const PROBE = 14;
 
@@ -15,14 +15,15 @@ const PROBE = 14;
  * @param isOccluded 라벨 자리가 다른 건물에 가리는지 본다
  * @param limit 띄울 개수
  * @param selectedId 고른 제작자는 거리와 상관없이 먼저 본다
+ * @param edgeXOf 가까운 주행 건물처럼 화면 옆에 걸친 후보의 가로 허용 범위
  */
-export function pickLabelIds({ buildings, anchorOf, distanceOf, reachOf, project, isOccluded, limit, selectedId = null }) {
+export function pickLabelIds({ buildings, anchorOf, distanceOf, reachOf, project, isOccluded, limit, selectedId = null, edgeXOf = () => LABEL_EDGE }) {
   const candidates = [];
   for (const building of buildings) {
     const distance = distanceOf(building);
     if (!(distance <= reachOf(building))) continue;
     const screen = project(anchorOf(building), building);
-    if (Math.abs(screen.x) > EDGE || Math.abs(screen.y) > EDGE || Math.abs(screen.z) > 1) continue;
+    if (Math.abs(screen.x) > edgeXOf(building, distance) || Math.abs(screen.y) > LABEL_EDGE || Math.abs(screen.z) > 1) continue;
     candidates.push({ building, distance });
   }
   candidates.sort((a, b) => Number(b.building.id === selectedId) - Number(a.building.id === selectedId) || a.distance - b.distance);

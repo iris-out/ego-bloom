@@ -7,10 +7,10 @@ import {Html} from '@react-three/drei';
 import * as THREE from 'three';
 import {proxyThumbnailUrl} from '../utils/imageUtils';
 import {getCreatorTierMeta} from '../design/tiers';
-import {creatorDistance,creatorCardOpacity,creatorLabelAnchor,labelReach,LABEL_SCALE} from './creatorProximity';
+import {creatorDistance,creatorCardOpacity,creatorLabelAnchor,driveCardScale,driveCardScreenPosition,labelReach,LABEL_SCALE} from './creatorProximity';
 import {lotSizeOf,MASS_LOT_RATIO} from './cityModels';
 import {hitsAnyBuilding} from './solidIndex.js';
-import {pickLabelIds} from './labelCandidates.js';
+import {LABEL_EDGE,pickLabelIds} from './labelCandidates.js';
 import {creatorAlias} from './identity.js';
 
 /** 비행 중에는 카드를 건물 벽면에 붙인다. 기체가 다가온 면을 골라 그 벽에 세우고
@@ -55,17 +55,20 @@ function WallCard({building,aircraft,anonymous}) {
 }
 
 function GroundCard({ building, driving, selected, onSelect, avatar, name, tier, anonymous }) {
- const group = useRef();
+ const group = useRef(), card = useRef();
+ const projection = useMemo(() => new THREE.Vector3(), []);
  const facadeOffset = driving ? lotSizeOf(building)*MASS_LOT_RATIO/2+0.4 : 0;
  const initial = creatorLabelAnchor(null, building, driving ? 'drive' : 'explore', facadeOffset);
  useFrame(({camera})=>{
   if(!group.current)return;
   const point=creatorLabelAnchor(camera.position,building,driving?'drive':'explore',facadeOffset);
   group.current.position.set(point.x,point.y,point.z);
+  if(driving&&card.current)card.current.style.transform=`scale(${driveCardScale(Math.hypot(camera.position.x-point.x,camera.position.y-point.y,camera.position.z-point.z))})`;
  });
+ const drivePosition=(element,camera,size)=>driveCardScreenPosition(projection.setFromMatrixPosition(element.matrixWorld).project(camera),size);
  return <group ref={group} position={[initial.x,initial.y,initial.z]}>
-  <Html transform={!driving} sprite={!driving} center={driving} distanceFactor={driving ? undefined : LABEL_SCALE.explore} zIndexRange={[20, 1]}>
-   <button type="button" className="world-building-label" data-driving={driving || undefined} data-selected={selected || undefined}
+  <Html transform={!driving} sprite={!driving} center={driving} distanceFactor={driving ? undefined : LABEL_SCALE.explore} calculatePosition={driving ? drivePosition : undefined} zIndexRange={[20, 1]}>
+   <button ref={card} type="button" className="world-building-label" data-driving={driving || undefined} data-selected={selected || undefined}
     style={{borderBottomColor:tier?`var(${tier.cssVar})`:undefined}}
     onPointerDown={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); onSelect?.(building); }}
     aria-label={`${name} 선택`}>
@@ -102,6 +105,7 @@ export default function NearbyLabels({ buildings, selectedId, onSelect, pickMesh
       // 거리 규칙은 creatorProximity 한 곳에 있다. 비행, 주행, 탐색이 각각 다르다.
       reachOf: (building) => labelReach(flightMode ? 'flight' : driving ? 'drive' : 'explore', building.height),
       project: (point) => scratch.projected.copy(point).project(camera),
+      edgeXOf: driving ? (_building, distance) => LABEL_EDGE + 0.45 * Math.max(0, 1 - distance / 150) : undefined,
       // picking mesh 에 광선을 쏘면 광선마다 상자 1000개를 다 보므로 충돌 격자로 선분만 검사한다.
       isOccluded: (point, building) => hitsAnyBuilding(camera.position, point, buildings, building),
       limit: flightMode ? 3 : driving ? 3 : 6, selectedId,

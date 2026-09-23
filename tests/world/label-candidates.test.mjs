@@ -30,6 +30,16 @@ test('화면 밖으로 투영되면 뺀다', () => {
   assert.deepEqual(ids, ['b0', 'b1', 'b2']);
 });
 
+test('주행 중 가까운 옆 건물의 라벨 자리가 화면 가장자리를 넘어도 후보에 넣는다', () => {
+  const ids = pick({
+    buildings: [buildings[0]],
+    distanceOf: () => 25,
+    project: () => ({ x: 1.1, y: 0, z: 0.5 }),
+    edgeXOf: () => 1.2,
+  });
+  assert.deepEqual(ids, ['b0']);
+});
+
 test('깊이가 절두체 밖이면 뺀다', () => {
   assert.deepEqual(pick({ project: () => ({ x: 0, y: 0, z: 1.2 }) }), []);
 });

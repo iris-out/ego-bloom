@@ -242,7 +242,8 @@ test('convertible first-person dashboard keeps its recessed cluster clear',async
 
 test('driving beside a tall creator building keeps its creator card in view',async({page})=>{
   const nearby={id:'near-road-creator',nickname:'도로 옆 제작자',handle:'roadside',tier_name:'Diamond',elo_score:25000,x:160,z:30,height:120,rank:1};
-  await page.setViewportSize({width:1440,height:960});await mock(page,[nearby]);await page.goto('/world');
+  const beside={id:'beside-road-creator',nickname:'옆 건물 제작자',handle:'beside',tier_name:'Gold',elo_score:12000,x:195,z:60,height:80,rank:2,cityExtent:200};
+  await page.setViewportSize({width:1440,height:960});await mock(page,[nearby,beside]);await page.goto('/world');
   await expect(page.locator('.world-stage')).toHaveAttribute('data-ready','true',{timeout:15000});
   await ride(page,'차량','세단');
   const card=page.getByRole('button',{name:'도로 옆 제작자 선택'});
@@ -252,8 +253,10 @@ test('driving beside a tall creator building keeps its creator card in view',asy
     return !!bounds&&bounds.x>=0&&bounds.y>=0&&bounds.x+bounds.width<=1440&&bounds.y+bounds.height<=960;
   },{timeout:15000}).toBe(true);
   const bounds=await card.boundingBox();
-  expect(bounds.width).toBeLessThanOrEqual(220);
+  expect(bounds.width).toBeGreaterThanOrEqual(140);
+  expect(bounds.width).toBeLessThanOrEqual(180);
   expect(bounds.height).toBeLessThanOrEqual(100);
+  await expect(page.getByRole('button',{name:'옆 건물 제작자 선택'})).toBeVisible();
 });
 
 test('home navbar exposes an Open World tab',async({page})=>{

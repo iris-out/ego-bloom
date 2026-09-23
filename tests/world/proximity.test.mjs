@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { creatorDistance, creatorCardOpacity, creatorLabelAnchor, labelReach, LABEL_REACH } from '../../src/world/creatorProximity.js';
+import { creatorDistance, creatorCardOpacity, creatorLabelAnchor, driveCardScale, driveCardScreenPosition, labelReach, LABEL_REACH } from '../../src/world/creatorProximity.js';
 test('flight creator cards fade smoothly with distance to the building, including tall facades',()=>{
  const b={x:0,z:0,height:180};
  assert.equal(creatorDistance({x:40,y:30,z:0},b),30);
@@ -33,4 +33,17 @@ test('주행 중 제작자 카드는 높은 건물 옥상 대신 카메라 가�
   assert.deepEqual(creatorLabelAnchor({ x: 20, y: 3, z: 10 }, building, 'drive', 6), { x: 20, y: 7, z: -2 });
   assert.deepEqual(creatorLabelAnchor({ x: 12, y: 3, z: -5 }, building, 'explore'), { x: 20, y: 97, z: -8 });
   assert.deepEqual(creatorLabelAnchor(null, building, 'drive'), { x: 20, y: 7, z: -8 });
+});
+
+test('주행 카드는 가까이서 읽기 쉬운 80%, 멀리서 60% 크기가 된다', () => {
+  assert.equal(driveCardScale(0), 0.8);
+  assert.equal(driveCardScale(50), 0.8);
+  assert.ok(Math.abs(driveCardScale(125) - 0.7) < 1e-10);
+  assert.equal(driveCardScale(200), 0.6);
+  assert.equal(driveCardScale(400), 0.6);
+});
+
+test('옆 건물 카드는 화면 가장자리 안쪽에 놓인다', () => {
+  assert.deepEqual(driveCardScreenPosition({ x: 1.1, y: 0 }, { width: 1440, height: 960 }), [1340, 480]);
+  assert.deepEqual(driveCardScreenPosition({ x: -1.1, y: 1.1 }, { width: 390, height: 844 }), [100, 50]);
 });

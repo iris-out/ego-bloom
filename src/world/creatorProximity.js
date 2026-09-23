@@ -45,5 +45,26 @@ export function creatorLabelAnchor(position, building, mode = 'explore', facadeO
  return { x, y: Math.min(height + 7, Math.max(7, eyeY + 4)), z };
 }
 
+/** 200px 주행 카드를 50m 안에서는 160px, 200m 밖에서는 120px로 표시한다. */
+export function driveCardScale(distance) {
+ const safeDistance = Number.isFinite(distance) ? distance : 50;
+ if (safeDistance <= 50) return 0.8;
+ if (safeDistance >= 200) return 0.6;
+ const t = Math.max(0, Math.min(1, (safeDistance - 50) / 150));
+ return 0.8 - 0.2 * t;
+}
+
+/** 화면 밖으로 조금 벗어난 주행 카드를 읽을 수 있는 가장자리 안쪽으로 놓는다. */
+export function driveCardScreenPosition(projected, size) {
+ const x = (projected.x + 1) * size.width / 2;
+ const y = (1 - projected.y) * size.height / 2;
+ const marginX = Math.min(100, size.width / 2);
+ const marginY = Math.min(50, size.height / 2);
+ return [
+  Math.max(marginX, Math.min(size.width - marginX, x)),
+  Math.max(marginY, Math.min(size.height - marginY, y)),
+ ];
+}
+
 /** 탐색 라벨의 3D 크기 기준이다. 주행 라벨은 화면 픽셀 크기로 고정한다. */
 export const LABEL_SCALE = Object.freeze({ explore: 55 });
