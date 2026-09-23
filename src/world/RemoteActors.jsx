@@ -4,7 +4,7 @@ import { Html } from '@react-three/drei';
 import PlaneModel from './models/PlaneModel';
 import VehicleModel from './models/VehicleModel';
 import { isArmed } from './health.js';
-import { airHealthBarScale } from './airTraffic.js';
+import { airHealthBarScale, showAirHealthBar } from './airTraffic.js';
 
 /** 같은 도시에 있는 다른 세션의 탈것이다. 항공기, 차량, 도보를 한 곳에서 그린다.
  * 모델 원본은 PlaneModel 과 VehicleModel 이고 여기서 복제하지 않는다.
@@ -64,7 +64,12 @@ function RemoteActor({ id, kind, rideKey, phase, name, peersRef }) {
       const left = Math.max(0, Math.min(1, pose.hull));
       hull.current.style.width = `${Math.round(left * 100)}%`;
       hull.current.dataset.level = left <= 0.3 ? 'critical' : left <= 0.6 ? 'warn' : 'ok';
-      if (kind === 'flight') hull.current.parentElement.style.transform = `scale(${airHealthBarScale(camera.position.distanceTo(object.position))})`;
+      if (kind === 'flight') {
+        const bar = hull.current.parentElement;
+        const range = camera.position.distanceTo(object.position);
+        bar.style.display = showAirHealthBar(1 - left, false, range) ? 'block' : 'none';
+        bar.style.transform = `scale(${airHealthBarScale(range)})`;
+      }
     }
     initialized.current = true;
   });

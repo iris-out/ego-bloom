@@ -10,11 +10,11 @@ import { flightBoundary } from '../../src/world/flightPhysics.js';
 
 const EXTENT = 900;
 
-test('가까운 적기는 풀피에도 체력바가 있고 격추되면 사라진다', () => {
-  assert.equal(showAirHealthBar(0, false, 500), true);
-  assert.equal(showAirHealthBar(0, false, 1000), true);
+test('적기 체력바는 피격 후에만 보이고 격추되면 사라진다', () => {
+  assert.equal(showAirHealthBar(0, false, 500), false);
+  assert.equal(showAirHealthBar(0, false, 1000), false);
   assert.equal(showAirHealthBar(0.3, false, 1000), true);
-  assert.equal(showAirHealthBar(0, false, 2500), false);
+  assert.equal(showAirHealthBar(0.3, false, 2500), false);
   assert.equal(showAirHealthBar(0.3, true, 500), false);
 });
 

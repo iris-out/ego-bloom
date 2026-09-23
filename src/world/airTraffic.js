@@ -121,10 +121,10 @@ export function createAirCombat() {
   return { damage: new Map(), downed: new Map(), kills: 0, label: '' };
 }
 
-/** 표식 거리 안의 적기는 풀피에도 체력바를 보여준다. */
+/** 표식 거리 안에서 피해를 입은 적기의 체력바만 보여준다. */
 export const AIR_MARK_RANGE = 2400, AIR_MODEL_RANGE = 900;
 export function showAirHealthBar(hurt, down, range) {
-  return !down && range < AIR_MARK_RANGE && hurt >= 0;
+  return !down && range < AIR_MARK_RANGE && hurt > 0;
 }
 
 /** 막대는 100m 안에서 최대 크기, 900m 밖에서 최소 크기로 고정한다. */
