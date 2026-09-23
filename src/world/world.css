@@ -127,6 +127,11 @@
 .world-building-text { display: flex; flex-direction: column; gap: 8px; min-width: 0; text-align: left; }
 .world-building-name { font: 700 28px var(--font-display); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .world-building-tier { font-size: 18px; font-weight: 700; }
+.world-building-label[data-driving] { gap: 9px; width: 200px; min-height: 0; padding: 8px 10px; border-bottom-width: 4px; border-radius: 8px; }
+.world-building-label[data-driving] .world-building-avatar { width: 44px; height: 44px; border-radius: 6px; font-size: 18px; }
+.world-building-label[data-driving] .world-building-text { gap: 3px; }
+.world-building-label[data-driving] .world-building-name { font-size: 14px; }
+.world-building-label[data-driving] .world-building-tier { font-size: 10px; }
 .world-npc-label { color: var(--fg); background: var(--surface); padding: 3px 7px; font: 600 11px var(--font-sans); border: 1px solid var(--line); border-radius: 4px; white-space: nowrap; pointer-events: none; }
 .world-flight-panel { position: absolute; top: 100px; left: 20px; width: 284px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; z-index: 23; }
 .world-flight-heading { display: flex; align-items: center; justify-content: space-between; }

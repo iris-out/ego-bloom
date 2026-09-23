@@ -64,8 +64,8 @@ function GroundCard({ building, driving, selected, onSelect, avatar, name, tier,
   group.current.position.set(point.x,point.y,point.z);
  });
  return <group ref={group} position={[initial.x,initial.y,initial.z]}>
-  <Html transform sprite distanceFactor={driving ? LABEL_SCALE.drive : LABEL_SCALE.explore} zIndexRange={[20, 1]}>
-   <button type="button" className="world-building-label" data-selected={selected || undefined}
+  <Html transform={!driving} sprite={!driving} center={driving} distanceFactor={driving ? undefined : LABEL_SCALE.explore} zIndexRange={[20, 1]}>
+   <button type="button" className="world-building-label" data-driving={driving || undefined} data-selected={selected || undefined}
     style={{borderBottomColor:tier?`var(${tier.cssVar})`:undefined}}
     onPointerDown={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); onSelect?.(building); }}
     aria-label={`${name} 선택`}>

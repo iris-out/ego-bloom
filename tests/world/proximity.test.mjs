@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { creatorDistance, creatorCardOpacity, creatorLabelAnchor, labelReach, LABEL_REACH, LABEL_SCALE } from '../../src/world/creatorProximity.js';
+import { creatorDistance, creatorCardOpacity, creatorLabelAnchor, labelReach, LABEL_REACH } from '../../src/world/creatorProximity.js';
 test('flight creator cards fade smoothly with distance to the building, including tall facades',()=>{
  const b={x:0,z:0,height:180};
  assert.equal(creatorDistance({x:40,y:30,z:0},b),30);
@@ -23,10 +23,6 @@ test('주행 라벨은 탐색보다 멀리서 뜬다', () => {
   // 모르는 모드는 탐색으로 떨어지고 높이가 이상해도 기준값을 지킨다.
   assert.equal(labelReach('nope', 0), LABEL_REACH.explore.base);
   assert.equal(labelReach('drive', Number.NaN), LABEL_REACH.drive.base);
-});
-
-test('주행 카드는 멀리서도 읽히게 더 크다', () => {
-  assert.ok(LABEL_SCALE.drive > LABEL_SCALE.explore);
 });
 
 test('주행 중 제작자 카드는 높은 건물 옥상 대신 카메라 가까운 외벽에 붙는다', () => {

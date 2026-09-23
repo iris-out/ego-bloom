@@ -45,6 +45,5 @@ export function creatorLabelAnchor(position, building, mode = 'explore', facadeO
  return { x, y: Math.min(height + 7, Math.max(7, eyeY + 4)), z };
 }
 
-/** 라벨 카드의 크기 기준이다. drei 의 Html distanceFactor 라 값이 클수록 멀리서도 크게 보인다.
- * 주행은 먼 카드를 읽어야 하므로 탐색보다 크게 둔다. */
-export const LABEL_SCALE = Object.freeze({ explore: 55, drive: 70 });
+/** 탐색 라벨의 3D 크기 기준이다. 주행 라벨은 화면 픽셀 크기로 고정한다. */
+export const LABEL_SCALE = Object.freeze({ explore: 55 });

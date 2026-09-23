@@ -133,7 +133,7 @@
 | 탄의 차량 명중 | `carPhysics.hitsVehicle`(x, y, z 3축 슬랩) 과 `VEHICLE_LIFT`, `traffic.TRAFFIC_BODY`, `weapons`/`groundWeapons` 의 traffic 판정, `remoteCombat.hitsSelf` 의 내 차 상자 |
 | 앞바퀴 조향 방향 | `models/carGeometry.steerAngle` 한 곳이 부호를 정한다. 바퀴 group 을 가진 모델 일곱과 `steering` 단위 테스트 |
 | 조준선 자리 | `aimScreen.projectAim`, `aimScreenStore`, `CarMode`/`FlightMode` 의 매 프레임 기록, `ui/Reticle` 의 rAF 루프와 `.wui-reticle` transform |
-| 제작자 라벨 거리·높이 | `creatorProximity.labelReach`·`creatorLabelAnchor`·`LABEL_SCALE`, `NearbyCreators` 의 reachOf·distanceFactor·주행 외벽 추적, proximity 단위 테스트 |
+| 제작자 라벨 거리·높이 | `creatorProximity.labelReach`·`creatorLabelAnchor`·`LABEL_SCALE`, `NearbyCreators` 의 reachOf·탐색 distanceFactor·주행 외벽 추적과 고정 픽셀 크기, proximity 단위 테스트·주행 브라우저 테스트 |
 | 주행 내비게이션 | `navigationMap` 의 헤딩업 투영·속도별 반경·티어 마커, `Map` 의 navigation 모드, `carStatus` 의 x/z/heading/speed, `WorldPage` 차량 HUD 연결 |
 | 포뮬러 차종 | `carPhysics.VEHICLES.formula`, `models/Formula`, `cockpits/FormulaInterior`, `eyePoints`, `engineSound`, `mirrorLayout`, `triangles`, `rideArt`, Space 핸드브레이크·드리프트 테스트 |
 | 도보 출발점과 벽 | `models/airportLayout.walkSpawn`, `walkPhysics.stepWalk` 의 축 분리 미끄러짐과 갇힘 탈출, walk 와 airport-layout 단위 테스트 |
@@ -187,7 +187,7 @@ WORLD_REALTIME_TEST=1 npm run test:world
 - `season.js`: `Asia/Seoul` 날짜로 나무·지면·대기 팔레트를 매일 보간한다. 9월은 초가을로 표시하며 9월 12일 기준 팔레트는 녹색과 누런 녹색이 섞인 분위기다. 특정 연도에 고정하지 않으며 KST 자정 경계를 테스트한다. 실제 날씨/천문 관측 자료는 아니다.
 - `shaders/atmosphere.js`: 태양 원반·주변 산란·수평선 노을·달 표면을 그린다. 일출은 +X(동쪽), 노을은 -X(서쪽), 도시 directionalLight와 같은 광원 방향을 사용한다.
 - `shaders/surfaces.js`: 기존 MeshStandardMaterial의 조명/그림자를 유지하면서 석재 입자감·유리 창살/반사·수면 normal 물결을 추가한다. Three r182의 shader chunk에 연결되므로 버전 변경 시 실제 브라우저의 shader compilation 오류를 검사한다.
-- `NearbyCreators.jsx` / `creatorProximity.js`: 비행기는 건물 체적과의 거리로 카드 투명도를 계산한다. 비행 중 최대 3장, 일반 탐색 최대 6장. 주행 중은 높은 건물 옥상 대신 카메라보다 4m 위이면서 카메라에 가장 가까운 외벽 위치를 따라가, 근거리에서도 제작자 카드가 화면 위나 건물 중심 너머로 사라지지 않는다. 카메라만 돌려도 거리가 바뀐 것으로 계산하지 않는다. 카드의 pointer-events는 꺼서 비행 조작을 방해하지 않는다.
+- `NearbyCreators.jsx` / `creatorProximity.js`: 비행기는 건물 체적과의 거리로 카드 투명도를 계산한다. 비행 중 최대 3장, 일반 탐색 최대 6장. 주행 중은 높은 건물 옥상 대신 카메라보다 4m 위이면서 카메라에 가장 가까운 외벽 위치를 따라가고, 카드 크기는 200px로 고정한다. 카메라만 돌려도 거리가 바뀐 것으로 계산하지 않는다. 카드의 pointer-events는 꺼서 비행 조작을 방해하지 않는다.
 
 ### 1인칭 실내 시야
 

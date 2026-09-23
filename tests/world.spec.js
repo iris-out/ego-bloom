@@ -251,6 +251,9 @@ test('driving beside a tall creator building keeps its creator card in view',asy
     const bounds=await card.boundingBox().catch(()=>null);
     return !!bounds&&bounds.x>=0&&bounds.y>=0&&bounds.x+bounds.width<=1440&&bounds.y+bounds.height<=960;
   },{timeout:15000}).toBe(true);
+  const bounds=await card.boundingBox();
+  expect(bounds.width).toBeLessThanOrEqual(220);
+  expect(bounds.height).toBeLessThanOrEqual(100);
 });
 
 test('home navbar exposes an Open World tab',async({page})=>{
