@@ -1,7 +1,7 @@
 import { hitsAnyBuilding } from './solidIndex.js';
 import { hitsVehicle } from './carPhysics.js';
 import { GROUND_GUNS, hullBox, muzzlePoint } from './groundWeapons.js';
-import { MISSILE, gunOf, muzzleAim, toWorld } from './weapons.js';
+import { MISSILE, gunOf, muzzleAim, pelletOffset, toWorld } from './weapons.js';
 import { armamentOf } from './hardpoints.js';
 import { damageOf, isArmed } from './health.js';
 
@@ -33,7 +33,7 @@ const SHELLS = Object.freeze({
 
 /** 기관포는 발사한 기종의 탄속·낙차를 쓴다. 나머지 무기는 공통 표를 읽는다. */
 function shellSpec(weapon, plane) {
-  return weapon === 'cannon' ? gunOf(plane) : SHELLS[weapon];
+  return weapon === 'cannon' || weapon === 'shotgun' ? gunOf(plane) : SHELLS[weapon];
 }
 
 export function createRemoteCombat() {
@@ -47,31 +47,40 @@ function groundMuzzle(pose, index) {
 }
 
 /** 전투기 포구다. 기관포는 기수 포트, 미사일은 파일런이다. */
-function airMuzzle(pose, weapon, index) {
+function airMuzzle(pose, weapon, index, pellet = null) {
   const mounts = armamentOf(pose.key);
   const ports = (weapon === 'missile' ? mounts?.missile : mounts?.cannon) || [[0, 0, -5]];
   const port = ports[index % ports.length];
   const local = toWorld(pose, port);
-  const forward = toWorld(pose, muzzleAim(port, weapon === 'cannon' ? mounts?.converge : 0));
+  const aim = muzzleAim(port, weapon === 'missile' ? 0 : mounts?.converge);
+  if (pellet !== null) {
+    const spec = gunOf(pose.key);
+    const [dx, dy] = pelletOffset(pellet, spec.pellets, spec.spread);
+    aim[0] += dx; aim[1] += dy;
+    const length = Math.hypot(...aim) || 1;
+    aim[0] /= length; aim[1] /= length; aim[2] /= length;
+  }
+  const forward = toWorld(pose, aim);
   return { x: finite(pose.x) + local.x, y: finite(pose.y) + local.y, z: finite(pose.z) + local.z, forward };
 }
 
-function spawn(state, pose, weapon, index) {
+function spawn(state, pose, weapon, index, pellet = null) {
   const spec = shellSpec(weapon, pose.key);
   if (!spec) return null;
-  const mouth = pose.kind === 'car' ? groundMuzzle(pose, index) : airMuzzle(pose, weapon, index);
+  const mouth = pose.kind === 'car' ? groundMuzzle(pose, index) : airMuzzle(pose, weapon, index, pellet);
   if (![mouth.x, mouth.y, mouth.z].every(Number.isFinite)) return null;
+  const speed = spec.speed + (weapon === 'shotgun' ? finite(pose.speed) : 0);
   return {
     id: state.nextId++, weapon, owner: pose.id,
     x: mouth.x, y: mouth.y, z: mouth.z,
-    vx: mouth.forward.x * spec.speed, vy: mouth.forward.y * spec.speed, vz: mouth.forward.z * spec.speed,
-    age: 0, life: spec.life, plane: pose.kind === 'flight' ? pose.key : null,
+    vx: mouth.forward.x * speed, vy: mouth.forward.y * speed, vz: mouth.forward.z * speed,
+    age: 0, life: spec.life, travel: 0, plane: pose.kind === 'flight' ? pose.key : null,
   };
 }
 
 /** 상대가 든 주무기 이름이다. 지상은 차종이 곧 포 이름이고 전투기는 기관포다. */
 function primaryOf(peer) {
-  return peer.kind === 'car' ? peer.key : 'cannon';
+  return peer.kind === 'car' || peer.key === 'shotgun' ? peer.key : 'cannon';
 }
 
 /** 상대가 새로 쏜 만큼 포탄을 만든다. 발사 횟수는 단조 증가하므로 차이만큼 만들면 된다. */
@@ -89,8 +98,11 @@ function launchFrom(state, peers, fired) {
       fired[key] = count;
       const added = Math.min(BURST_MAX, count - seen);
       for (let index = 0; index < added; index += 1) {
-        const shell = spawn(state, peer, weapon, seen + index);
-        if (shell) fresh.push(shell);
+        const pellets = weapon === 'shotgun' ? gunOf(peer.key).pellets : 1;
+        for (let pellet = 0; pellet < pellets; pellet += 1) {
+          const shell = spawn(state, peer, weapon, seen + index, weapon === 'shotgun' ? pellet : null);
+          if (shell) fresh.push(shell);
+        }
       }
     }
   }
@@ -135,6 +147,7 @@ export function stepRemoteCombat(previous, { dt = 0, peers = [], self = null, bu
     }
     moved.vy -= finite(spec.gravity) * step;
     moved.x += moved.vx * step; moved.y += moved.vy * step; moved.z += moved.vz * step;
+    moved.travel = finite(shell.travel) + Math.hypot(moved.x - shell.x, moved.y - shell.y, moved.z - shell.z);
     if (![moved.x, moved.y, moved.z].every(Number.isFinite)) continue;
     const struck = vulnerable && hitsSelf(shell, moved, target);
     if (struck) {
@@ -145,7 +158,7 @@ export function stepRemoteCombat(previous, { dt = 0, peers = [], self = null, bu
       blasts.push({ id: state.nextId++, x: moved.x, y: Math.max(0.3, moved.y), z: moved.z, age: 0, life: 0.9, size: spec.blast });
       continue;
     }
-    if (moved.age < moved.life) state.shells.push(moved);
+    if (moved.age < moved.life && (shell.weapon !== 'shotgun' || moved.travel <= spec.range)) state.shells.push(moved);
   }
   state.blasts = [...(previous.blasts || []), ...blasts]
     .map((blast) => ({ ...blast, age: blast.age + step }))

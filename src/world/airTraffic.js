@@ -14,7 +14,7 @@ export const AIR_TRAFFIC_PLANES = Object.freeze(['jet', 'helicopter']);
 /** 대공포는 12발, 전차와 자주포는 직격 두 발, 장갑차 기관포는 16발이다.
  * 항공 무장은 기관총 14발이고 미사일은 직격 한 발이다. 유도 미사일이 맞고도
  * 기체가 남아 있으면 맞힌 것처럼 보이지 않는다. */
-export const AIR_HITS = Object.freeze({ cannon: 14, missile: 1, bomb: 1, aa: 12, tank: 2, howitzer: 2, armored: 16 });
+export const AIR_HITS = Object.freeze({ cannon: 14, shotgun: 14 / 0.6, missile: 1, bomb: 1, aa: 12, tank: 2, howitzer: 2, armored: 16 });
 
 /** 기종별 피격 반경(구) 과 순항 속도다. 상자를 쓰면 기체가 기울 때 판정이 어긋난다. */
 const SPEC = Object.freeze({
@@ -119,6 +119,17 @@ export function downAirTraffic(combat, index, now = 0) {
  * damage 는 index -> 0(멀쩡)~1(격추) 이고 downed 는 index -> 격추 시각이다. */
 export function createAirCombat() {
   return { damage: new Map(), downed: new Map(), kills: 0, label: '' };
+}
+
+/** 표식 거리 안의 적기는 풀피에도 체력바를 보여준다. */
+export const AIR_MARK_RANGE = 2400, AIR_MODEL_RANGE = 900;
+export function showAirHealthBar(hurt, down, range) {
+  return !down && range < AIR_MARK_RANGE && hurt >= 0;
+}
+
+/** 막대는 100m 안에서 최대 크기, 900m 밖에서 최소 크기로 고정한다. */
+export function airHealthBarScale(range) {
+  return Math.max(0.55, Math.min(1.2, 1.2 - (range - 100) * 0.65 / 800));
 }
 
 /** 명중 한 발을 적용한다. 상태를 제자리에서 고치고 격추 여부를 준다.

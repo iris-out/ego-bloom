@@ -24,15 +24,20 @@ test('기종 표가 샷거너를 포함한 일곱 기종을 갖는다', () => {
   assert.equal(armamentOf('jet'), null, '라이트 제트는 무장이 없다');
 });
 
-test('샷거너는 한 번 누르면 산탄을 팡-팡 두 번 쏘고 0.9초 대기한다', () => {
+test('샷거너는 한 번 누르면 14펠릿을 팡-팡 두 번 쏘고 0.9초 대기한다', () => {
   const gun = gunOf('shotgun');
-  assert.equal(gun.range, 150);
-  assert.equal(gun.pellets, 8);
+  assert.equal(effectiveRange('flight', 'shotgun'), 300);
+  assert.equal(gun.pellets, 14);
   let state = createArsenal('shotgun');
   const options = { pose: pose({ speed: 0 }), mounts: armamentOf('shotgun'), plane: 'shotgun' };
   state = stepWeapons(state, { ...options, dt: 1 / 60, fire: { cannon: true } });
   assert.equal(state.shots, 1);
   assert.equal(state.projectiles.length, gun.pellets);
+  const center = state.projectiles[0];
+  const radial = state.projectiles.map((shell) => Math.hypot(shell.vx - center.vx, shell.vy - center.vy) / gun.speed);
+  assert.equal(radial.filter((radius) => radius < 0.001).length, 1, '중심 펠릿');
+  assert.equal(radial.filter((radius) => radius > 0.016 && radius < 0.019).length, 6, '안쪽 고리');
+  assert.equal(radial.filter((radius) => radius > 0.033 && radius < 0.037).length, 7, '바깥 고리');
   state = stepWeapons(state, { ...options, dt: 1 / 60, fire: { cannon: true } });
   assert.equal(state.shots, 1, '첫 포신 직후에는 다시 쏘지 않는다');
   for (let i = 0; i < 6; i += 1) state = stepWeapons(state, { ...options, dt: 1 / 60, fire: { cannon: true } });
@@ -44,6 +49,16 @@ test('샷거너는 한 번 누르면 산탄을 팡-팡 두 번 쏘고 0.9초 대
   state = stepWeapons(state, { ...options, dt: 1 / 60, fire: {} });
   state = stepWeapons(state, { ...options, dt: 1 / 60, fire: { cannon: true } });
   assert.equal(state.shots, 3, '손을 뗐다 다시 누르면 새 더블 샷이 시작된다');
+});
+
+test('샷거너가 AI 적기를 맞히면 산탄 피해 유형으로 기록한다', () => {
+  let state = createArsenal('shotgun');
+  const options = { dt: 1 / 60, pose: pose({ speed: 0 }), mounts: armamentOf('shotgun'), plane: 'shotgun',
+    airTargets: [{ index: 3, x: 0, y: 240, z: -30, radius: 9 }] };
+  state = stepWeapons(state, { ...options, fire: { cannon: true } });
+  for (let frame = 0; frame < 8 && !state.airHits.length; frame += 1) state = stepWeapons(state, options);
+  assert.ok(state.airHits.length > 0);
+  assert.ok(state.airHits.every((hit) => hit.weapon === 'shotgun'));
 });
 
 test('프로펠러기 기관총이 전투기보다 빠르게 나가고 탄속은 더 느리다', () => {

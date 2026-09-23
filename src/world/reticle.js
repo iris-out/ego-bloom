@@ -111,7 +111,7 @@ export function angleToScreen(angle, fovDegrees = 62, heightPixels = 900) {
 export const RETICLE = Object.freeze({
   // 요격기다. 기수에 모은 기관포라 산포가 좁다.
   interceptor: { type: 'pipper', ladder: [], ring: 0.032, lead: true, label: '요격' },
-  shotgun: { type: 'pipper', ladder: [], ring: 0.075, lead: true, label: '산탄' },
+  shotgun: { type: 'pipper', ladder: [], ring: 0.035, lead: true, label: '산탄' },
   // 프로펠러 전투기다. 기관총만 달았고 탄속이 낮아 유효 사거리 원이 더 좁다.
   prop: { type: 'pipper', ladder: [], ring: 0.05, lead: true, label: '기총' },
   // 폭격기다. 조준선이 아니라 투하 표식이다. 탄착점은 AimMarker 가 땅에 그린다.

@@ -2,13 +2,35 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   AIR_HITS, AIR_RESPAWN, AIR_WRECK_LIFE, airPlaneOf, airTrafficPose, airTrafficTargets,
-  applyAirHit, collidesWith, createAirCombat, downAirTraffic, hitsSphere, reviveAirTraffic, wreckAge,
+  airHealthBarScale, applyAirHit, collidesWith, createAirCombat, downAirTraffic, hitsSphere, reviveAirTraffic, showAirHealthBar, wreckAge,
 } from '../../src/world/airTraffic.js';
 import { createArsenal, stepWeapons, toWorld } from '../../src/world/weapons.js';
 import { armamentOf } from '../../src/world/hardpoints.js';
 import { flightBoundary } from '../../src/world/flightPhysics.js';
 
 const EXTENT = 900;
+
+test('가까운 적기는 풀피에도 체력바가 있고 격추되면 사라진다', () => {
+  assert.equal(showAirHealthBar(0, false, 500), true);
+  assert.equal(showAirHealthBar(0, false, 1000), true);
+  assert.equal(showAirHealthBar(0.3, false, 1000), true);
+  assert.equal(showAirHealthBar(0, false, 2500), false);
+  assert.equal(showAirHealthBar(0.3, true, 500), false);
+});
+
+test('적기 체력바는 가까이서 크고 멀리서 작아진다', () => {
+  assert.equal(airHealthBarScale(100), 1.2);
+  assert.equal(airHealthBarScale(900), 0.55);
+  assert.ok(airHealthBarScale(500) < 1.2);
+  assert.ok(airHealthBarScale(500) > 0.55);
+});
+
+test('샷거너의 14펠릿은 AI 적기 체력의 60%를 깎는다', () => {
+  const combat = createAirCombat();
+  for (let index = 0; index < 14; index += 1) applyAirHit(combat, { index: 2, weapon: 'shotgun' });
+  assert.equal(combat.downed.has(2), false);
+  assert.ok(Math.abs(combat.damage.get(2) - 0.6) < 1e-9);
+});
 
 test('같은 시간과 같은 index 는 항상 같은 자세를 준다', () => {
   for (const index of [0, 1, 5, 9, 13]) {

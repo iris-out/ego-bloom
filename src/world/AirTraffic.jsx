@@ -6,7 +6,7 @@ import PlaneModel from './models/PlaneModel';
 import Blast from './models/Blast';
 import { mergeStatic } from './staticBatch.js';
 import { markMoved, snapshotPoses } from './cityTiles.js';
-import { AIR_WRECK_LIFE, airTrafficPose, reviveAirTraffic, wreckAge } from './airTraffic.js';
+import { AIR_MARK_RANGE, AIR_MODEL_RANGE, AIR_WRECK_LIFE, airHealthBarScale, airTrafficPose, reviveAirTraffic, showAirHealthBar, wreckAge } from './airTraffic.js';
 
 /** 도시 상공을 도는 AI 항공기다. 좌표는 airTraffic.js 가 시간마다 다시 계산하는 값이므로
  * 이 파일은 매 프레임 같은 index 로 자세를 구해 모델을 옮기기만 한다. 상태를 들고 있지 않다.
@@ -19,10 +19,7 @@ import { AIR_WRECK_LIFE, airTrafficPose, reviveAirTraffic, wreckAge } from './ai
 /** marked 는 표식을 볼 자격이다. 무장한 탈것과 도보만 켠다. 세단이나 라이트 제트처럼
  * 쏠 수단이 없는 자리에서는 점이 정보가 아니라 화면 잡음이다.
  */
-// 표식이 보이는 거리다. 이보다 멀면 점도 체력 막대도 끈다.
-const MARK_RANGE = 2400;
-// 기체 모델을 그리는 거리다. 이보다 멀면 점만 남긴다.
-const MODEL_RANGE = 900;
+// 표식과 모델 거리는 airTraffic.js 의 체력바 가시 거리와 함께 정한다.
 /** 모델 마운트 목록을 다시 정하는 주기다. 매 프레임 바꾸면 거리 경계에서 기체가 깜빡인다. */
 const MODEL_REFRESH = 0.35;
 /** 동시에 모델을 그리는 기체 수다. 모델은 정지 부품을 재질별로 합쳐 제트 한 대가 draw 20개 안쪽이다.
@@ -86,13 +83,13 @@ function settle(group, poses) {
   };
 }
 
-function Aircraft({ index, extent, combatRef, onBar, onNear, onDot, modelled }) {
+function Aircraft({ index, extent, combatRef, onBar, onNear, onDot, modelled, marked }) {
   const body = useRef();
   // 기종은 index 가 정하므로 궤도가 살아 있는 동안 바뀌지 않는다.
   const pose = useMemo(() => airTrafficPose(index, 0, extent), [index, extent]);
   const label = pose.plane === 'helicopter' ? 4.4 : 6;
   // 품질을 낮춰 기체 수가 줄면 빠진 기체의 표식과 막대가 남지 않게 지운다.
-  useEffect(() => () => { onDot(index, null); onNear(index, null); onBar(index, 0, null); }, [index, onDot, onNear, onBar]);
+  useEffect(() => () => { onDot(index, null); onNear(index, null); onBar(index, null, null); }, [index, onDot, onNear, onBar]);
 
   useFrame(({ clock, camera }) => {
     const now = clock.elapsedTime;
@@ -105,13 +102,14 @@ function Aircraft({ index, extent, combatRef, onBar, onNear, onDot, modelled }) 
     // 격추된 기체는 폭발이 끝나기 전에도 껍데기를 감춘다. 불덩이만 남는다.
     const down = combat.downed.has(index);
     const range = camera.position.distanceTo(group.position);
-    const near = !down && range < MARK_RANGE;
+    const near = !down && range < AIR_MARK_RANGE;
     group.visible = near;
     onDot(index, near ? group : null, label);
-    onBar(index, near ? combat.damage.get(index) || 0 : 0, next);
+    const hurt = combat.damage.get(index) || 0;
+    onBar(index, marked && showAirHealthBar(hurt, down, range) ? hurt : null, next, range);
     // 멀면 기체 모델을 아예 마운트하지 않는다. 감추기만 하면 mesh 가 장면에 남아
     // 매 프레임 행렬을 다시 쓴다.
-    onNear(index, !down && range < MODEL_RANGE ? range : null);
+    onNear(index, !down && range < AIR_MODEL_RANGE ? range : null);
   });
 
   return <group ref={body}>
@@ -162,9 +160,8 @@ function Markers({ dotsRef, capacity, marked }) {
   return <points ref={points} geometry={geometry} material={material} frustumCulled={false} dispose={null} />;
 }
 
-/** 맞은 기체 위에만 뜨는 체력 막대다. 기체마다 Html 을 하나씩 달아 두면 스물여덟 개
- * DOM 노드가 늘 매 프레임 행렬을 다시 쓴다. 맞은 기체는 보통 한둘이라 목록이 바뀔 때만
- * 마운트하고 값은 DOM 을 직접 고쳐 넣는다. */
+/** 가까운 기체와 피격된 기체의 체력 막대다. 화면에 보이는 목록이 바뀔 때만
+ * Html 을 마운트하고 값과 위치는 DOM·Three 객체를 직접 고쳐 넣는다. */
 function HealthBars({ hurtRef }) {
   const [shown, setShown] = useState([]);
   const listed = useRef('');
@@ -179,6 +176,7 @@ function HealthBars({ hurtRef }) {
       const entry = hurt.get(index);
       if (!slot || !entry) continue;
       if (slot.group) slot.group.position.set(entry.x, entry.y + 7.6, entry.z);
+      if (slot.bar) slot.bar.style.transform = `scale(${airHealthBarScale(entry.range)})`;
       if (slot.fill) {
         const left = Math.max(0, Math.min(1, 1 - entry.hurt));
         slot.fill.style.width = `${left * 100}%`;
@@ -190,8 +188,11 @@ function HealthBars({ hurtRef }) {
     const slot = nodes.current.get(index) || {};
     slot.group = node; nodes.current.set(index, slot);
   }}>
-    <Html center zIndexRange={[16, 1]} distanceFactor={30} style={{ pointerEvents: 'none' }}>
-      <div className="world-vehicle-hp"><i ref={(node) => {
+    <Html center zIndexRange={[16, 1]} style={{ pointerEvents: 'none' }}>
+      <div className="world-aircraft-hp" ref={(node) => {
+        const slot = nodes.current.get(index) || {};
+        slot.bar = node; nodes.current.set(index, slot);
+      }}><i ref={(node) => {
         const slot = nodes.current.get(index) || {};
         slot.fill = node; nodes.current.set(index, slot);
       }} data-level="ok" /></div>
@@ -225,10 +226,10 @@ function Wrecks({ extent, combatRef }) {
 
 function AirTraffic({ extent, count = 0, combatRef, marked = false }) {
   const slots = useMemo(() => Array.from({ length: Math.max(0, count) }, (_, index) => index), [count]);
-  // 맞은 기체만 담는다. Aircraft 가 매 프레임 채우고 HealthBars 가 읽는다.
+  // 가까운 기체와 맞은 기체만 담는다. Aircraft 가 매 프레임 채우고 HealthBars 가 읽는다.
   const hurt = useRef(new Map());
-  const onBar = useCallback((index, amount, pose) => {
-    if (amount > 0) hurt.current.set(index, { hurt: amount, x: pose.x, y: pose.y, z: pose.z });
+  const onBar = useCallback((index, amount, pose, range) => {
+    if (amount !== null) hurt.current.set(index, { hurt: amount, x: pose.x, y: pose.y, z: pose.z, range });
     else hurt.current.delete(index);
   }, []);
   // 표식을 띄울 기체와 표식 높이다. Aircraft 가 매 프레임 채우고 Markers 가 읽는다.
@@ -254,7 +255,7 @@ function AirTraffic({ extent, count = 0, combatRef, marked = false }) {
   if (!combatRef) return null;
   return <>
     {slots.map((index) => <Aircraft key={index} index={index} extent={extent} combatRef={combatRef}
-      onBar={onBar} onNear={onNear} onDot={onDot} modelled={modelled.has(index)} />)}
+      onBar={onBar} onNear={onNear} onDot={onDot} modelled={modelled.has(index)} marked={marked} />)}
     <Markers dotsRef={dots} capacity={slots.length} marked={marked} />
     <HealthBars hurtRef={hurt} />
     <Wrecks extent={extent} combatRef={combatRef} />

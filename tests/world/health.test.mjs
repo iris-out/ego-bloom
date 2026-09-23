@@ -7,9 +7,9 @@ test('무장 탈것은 무기 체력을, 민간 지상 차량은 부딪힘 체�
   const armed = [];
   for (const key of PLANE_KEYS) if (isArmed('flight', key)) armed.push(key);
   for (const key of VEHICLE_KEYS) if (isArmed('car', key)) armed.push(key);
-  assert.deepEqual(armed, ['fighter', 'prop', 'interceptor', 'bomber', 'tank', 'howitzer', 'armored', 'aa']);
+  assert.deepEqual(armed, ['fighter', 'prop', 'interceptor', 'shotgun', 'bomber', 'tank', 'howitzer', 'armored', 'aa']);
   assert.equal(isArmed('walk', 'walk'), false);
-  const planes = ['fighter', 'prop', 'interceptor', 'bomber'];
+  const planes = ['fighter', 'prop', 'interceptor', 'shotgun', 'bomber'];
   for (const key of armed) assert.equal(createHealth(planes.includes(key) ? 'flight' : 'car', key).max, HULL[key]);
   // 민간 차량은 무기에는 안 다치지만 부딪힘 내구도를 갖는다.
   for (const key of ['sedan', 'motorcycle']) assert.equal(createHealth('car', key).max, ROAD_HULL);

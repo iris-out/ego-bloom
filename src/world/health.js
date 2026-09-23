@@ -9,7 +9,7 @@
 export const HULL = Object.freeze({ tank: 1400, howitzer: 900, armored: 700, aa: 620, fighter: 500, prop: 320, bomber: 900, interceptor: 380, shotgun: 380 });
 
 /** 무기별 한 발 피해다. 키는 발사체가 들고 다니는 weapon 값과 같다. */
-export const DAMAGE = Object.freeze({ tank: 480, howitzer: 700, armored: 60, aa: 45, cannon: 16, missile: 420, bomb: 700 });
+export const DAMAGE = Object.freeze({ tank: 480, howitzer: 700, armored: 60, aa: 45, cannon: 16, shotgun: 7.2, missile: 420, bomb: 700 });
 
 /** 마지막 피격 후 이 시간이 지나면 차체가 스스로 수리된다. 초당 최대 체력의 비율로 찬다. */
 export const REPAIR_DELAY = 8, REPAIR_RATE = 0.06;

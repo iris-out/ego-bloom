@@ -32,12 +32,24 @@ const GUNS = Object.freeze({
   interceptor: { interval: 1 / (8.4 * 1.1 * 1.2), speed: 240, gravity: 12.25, range: 300, life: 1.3, ammo: 360, blast: 2.2, blastLife: 0.34 },
   // 샷거너는 요격기 동체를 공유하는 근거리 산탄 전투기다. 한 번 누르면 두 포신을
   // 0.10초 간격으로 쏘고, 두 번째 포신 뒤 0.9초 동안 다시 장전한다.
-  shotgun: { interval: 0.10, cooldown: 0.9, speed: 260, life: 0.7, range: 150, ammo: 80, pellets: 8, spread: 0.11, blast: 1.4, blastLife: 0.28 },
+  shotgun: { interval: 0.10, cooldown: 0.9, speed: 260, life: 1.2, range: 300, ammo: 80, pellets: 14, spread: 0.035, blast: 1.4, blastLife: 0.28 },
 });
 
 /** 없는 기종에는 전투기 기관총을 준다. 호출자가 무장 여부를 먼저 본다. */
 export function gunOf(plane) {
   return GUNS[plane] || CANNON;
+}
+
+/** 첫 펠릿은 중앙, 나머지는 안팎 두 고리에 고르게 놓는다. 로컬과 원격 탄도가 공유한다. */
+export function pelletOffset(index, pellets, spread) {
+  if (index === 0) return [0, 0];
+  const inner = Math.floor((pellets - 1) / 2);
+  const inside = index <= inner;
+  const ringIndex = inside ? index - 1 : index - inner - 1;
+  const count = inside ? inner : pellets - inner - 1;
+  const angle = ringIndex / count * Math.PI * 2;
+  const radius = spread * (inside ? 0.5 : 1);
+  return [Math.cos(angle) * radius, Math.sin(angle) * radius];
 }
 
 const finite = (value, fallback = 0) => Number.isFinite(value) ? value : fallback;
@@ -166,10 +178,8 @@ export function stepWeapons(previous, { dt = 0, pose, fire = {}, mounts = {}, ob
       const mount = ports[barrel % ports.length];
       const pellets = Math.max(1, Math.floor(gun.pellets || 1));
       for (let index = 0; index < pellets; index += 1) {
-        const angle = (index / pellets) * Math.PI * 2;
-        const radius = index === 0 ? 0 : gun.spread;
         active.push(spawn(state, 'cannon', pose, mount, gun.speed, gun.life, mounts.converge, null,
-          [Math.cos(angle) * radius, Math.sin(angle) * radius]));
+          pelletOffset(index, pellets, gun.spread)));
       }
       state.cannonAmmo -= 1;
       state.shots = (state.shots || 0) + 1;
@@ -271,7 +281,8 @@ export function stepWeapons(previous, { dt = 0, pose, fire = {}, mounts = {}, ob
     const struck = airTargets.find((target) => hitsSphere(projectile, moved, fuzeOf(moved, target)));
     if (struck) {
       blasts.push(burst(moved.kind, moved, plane));
-      state.airHits.push({ index: struck.index, weapon: moved.kind, x: moved.x, y: moved.y, z: moved.z });
+      state.airHits.push({ index: struck.index, weapon: plane === 'shotgun' && moved.kind === 'cannon' ? 'shotgun' : moved.kind,
+        x: moved.x, y: moved.y, z: moved.z });
       continue;
     }
     // 기관총은 사거리로도 끊는다. 빠른 기체에서 쏘면 탄속에 기체 속도가 더해져 더 멀리 간다.

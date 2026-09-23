@@ -4,6 +4,7 @@ import { Html } from '@react-three/drei';
 import PlaneModel from './models/PlaneModel';
 import VehicleModel from './models/VehicleModel';
 import { isArmed } from './health.js';
+import { airHealthBarScale } from './airTraffic.js';
 
 /** 같은 도시에 있는 다른 세션의 탈것이다. 항공기, 차량, 도보를 한 곳에서 그린다.
  * 모델 원본은 PlaneModel 과 VehicleModel 이고 여기서 복제하지 않는다.
@@ -44,7 +45,7 @@ function RemoteActor({ id, kind, rideKey, phase, name, peersRef }) {
   // 포탑 각도는 모델이 props 로 받으므로 매 프레임 state 로 올리지 않고 ref 를 공유한다.
   const turret = useRef(0), barrel = useRef(0);
   const armed = isArmed(kind, rideKey);
-  useFrame((_, delta) => {
+  useFrame(({ camera }, delta) => {
     const peer = findPeer(peersRef, id);
     if (!peer || !group.current) return;
     const object = group.current, pose = peer.pose;
@@ -59,15 +60,20 @@ function RemoteActor({ id, kind, rideKey, phase, name, peersRef }) {
     }
     turret.current = pose.turret; barrel.current = pose.barrel;
     // 체력 게이지는 DOM 을 직접 고친다. state 로 올리면 피격마다 상대 모델이 다시 렌더된다.
-    if (hull.current) hull.current.style.width = `${Math.round(pose.hull * 100)}%`;
+    if (hull.current) {
+      const left = Math.max(0, Math.min(1, pose.hull));
+      hull.current.style.width = `${Math.round(left * 100)}%`;
+      hull.current.dataset.level = left <= 0.3 ? 'critical' : left <= 0.6 ? 'warn' : 'ok';
+      if (kind === 'flight') hull.current.parentElement.style.transform = `scale(${airHealthBarScale(camera.position.distanceTo(object.position))})`;
+    }
     initialized.current = true;
   });
   const label = kind === 'flight' ? 6 : 2.4;
   return <group ref={group} rotation-order="YXZ">
     <Body kind={kind} rideKey={rideKey} phase={phase} turret={turret} barrel={barrel} />
-    <Html position={[0, label, 0]} center zIndexRange={[14, 1]} distanceFactor={kind === 'flight' ? 24 : 14} style={{ pointerEvents: 'none' }}>
+    <Html position={[0, label, 0]} center zIndexRange={[14, 1]} distanceFactor={kind === 'flight' ? undefined : 14} style={{ pointerEvents: 'none' }}>
       <span className="world-pilot-label" data-peer-id={id}>{name}</span>
-      {armed && <span className="world-peer-hull" aria-hidden="true"><i ref={hull} /></span>}
+      {armed && <span className={`world-peer-hull${kind === 'flight' ? ' world-peer-hull--air' : ''}`} aria-hidden="true"><i ref={hull} /></span>}
     </Html>
   </group>;
 }
