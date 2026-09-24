@@ -5,6 +5,7 @@ export default class SceneBoundary extends Component {
   static getDerivedStateFromError(){return {failed:true};}
   componentDidCatch(error, errorInfo) {
     console.warn('SceneBoundary caught 3D scene error:', error, errorInfo);
+    this.props.onError?.(error);
   }
   render(){
     if(this.state.failed) return <div className="world-scene-message" role="alert">

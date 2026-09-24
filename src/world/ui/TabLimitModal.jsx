@@ -7,7 +7,7 @@ export default function TabLimitModal() {
   return <div className="wui-block" role="dialog" aria-modal="true" aria-labelledby="wui-block-title">
     <div className="wui-block-card">
       <h2 id="wui-block-title">연결이 너무 많습니다</h2>
-      <p>한 회선에서는 크리에이터 시티를 최대 {TABS_PER_ORIGIN}개 탭까지 열 수 있다. 먼저 열어 둔 탭을 닫으면 이 화면이 사라진다.</p>
+      <p>한 회선에서는 에고 시티를 최대 {TABS_PER_ORIGIN}개 탭까지 열 수 있다. 먼저 열어 둔 탭을 닫으면 이 화면이 사라진다.</p>
     </div>
   </div>;
 }

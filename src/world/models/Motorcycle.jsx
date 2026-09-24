@@ -1,6 +1,8 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import Block from './ModelBlock';
+import { Wheel as RoadWheel } from './carParts.jsx';
+import { Shell, Fender } from './SurfaceParts.jsx';
 import StaticBatch from '../StaticBatch.jsx';
 import { steerAngle } from './carGeometry.js';
 
@@ -43,22 +45,10 @@ const WHEEL_Y = -0.58; // -0.9 + WHEEL_RADIUS. 두 바퀴 모두 이 값을 쓴�
 const FRONT_Z = -1.2;
 const REAR_Z = 1.0;
 
-/* 바퀴 스포크, 트레드 홈은 각도 배열로 한 번만 만들고 두 바퀴가 함께 쓴다 */
-const SPOKE_ANGLES = [0, TWO_PI / 4, (TWO_PI * 2) / 4, (TWO_PI * 3) / 4];
-const TREAD_ANGLES = [0, TWO_PI / 3, (TWO_PI * 2) / 3];
+const SPOKE_ANGLES = [0, Math.PI/2, Math.PI, Math.PI*1.5];
 const SIDES = [-1, 1];
-
 function Wheel({ withDisc }) {
-  return <>
-    <mesh rotation={[0, 0, HALF_PI]} castShadow><cylinderGeometry args={[WHEEL_RADIUS, WHEEL_RADIUS, 0.22, 10]} /><meshStandardMaterial color={TIRE} roughness={0.85} /></mesh>
-    {/* 타이어 트레드 홈: 원주에 얕은 홈 몇 줄만 표시한다 */}
-    {TREAD_ANGLES.map((a) => <mesh key={a} position={[0, Math.sin(a) * (WHEEL_RADIUS - 0.01), Math.cos(a) * (WHEEL_RADIUS - 0.01)]} rotation={[a, 0, 0]}><boxGeometry args={[0.23, 0.012, 0.05]} /><meshStandardMaterial color="#15181a" roughness={0.9} /></mesh>)}
-    <mesh rotation={[0, 0, HALF_PI]}><cylinderGeometry args={[0.17, 0.17, 0.24, 8]} /><meshStandardMaterial color={METAL} metalness={0.5} roughness={0.35} /></mesh>
-    {/* 스포크 휠: 허브에서 림까지 얇은 막대 4개 */}
-    {SPOKE_ANGLES.map((a) => <mesh key={a} position={[0, Math.sin(a) * WHEEL_RADIUS * 0.5, Math.cos(a) * WHEEL_RADIUS * 0.5]} rotation={[a, 0, 0]}><boxGeometry args={[0.2, 0.02, 0.02]} /><meshStandardMaterial color={METAL} metalness={0.6} roughness={0.3} /></mesh>)}
-    <mesh rotation={[0, 0, HALF_PI]}><cylinderGeometry args={[0.045, 0.045, 0.26, 8]} /><meshStandardMaterial color={DARK_METAL} metalness={0.5} roughness={0.4} /></mesh>
-    {withDisc && <mesh position={[0.13, 0, 0]} rotation={[0, 0, HALF_PI]}><cylinderGeometry args={[0.14, 0.14, 0.01, 16]} /><meshStandardMaterial color={DARK_METAL} metalness={0.7} roughness={0.25} /></mesh>}
-  </>;
+  return <RoadWheel radius={WHEEL_RADIUS} width={.22} brake={withDisc} spokes={5} spokeColor={METAL}/>;
 }
 
 export default function Motorcycle({ wheelsRef, steer = 0, speed = 0, firstPerson = false }) {
@@ -107,7 +97,7 @@ export default function Motorcycle({ wheelsRef, steer = 0, speed = 0, firstPerso
     {[0, 1, 2].map((i) => <Block key={i} position={[0.24, -0.42 - i * 0.05, 0.4 + i * 0.18]} scale={[0.02, 0.03, 0.06]} rotation={[-0.28, 0, 0]} color={DARK_METAL} />)}
     {SPOKE_ANGLES.map((a) => <Block key={a} position={[0.24, -0.58 + Math.sin(a) * 0.18, 0.95 + Math.cos(a) * 0.18]} scale={[0.02, 0.035, 0.02]} rotation={[a, 0, 0]} color={METAL} />)}
 
-    <Block position={[0, 0.15, -0.15]} scale={[0.36, 0.28, 0.55]} color={BODY} />
+    <Shell color={BODY} stations={[{z:-.425,rx:.1,ry:.07,cy:.14},{z:-.28,rx:.19,ry:.14,cy:.15},{z:-.05,rx:.17,ry:.12,cy:.15},{z:.125,rx:.09,ry:.06,cy:.12}]}/>
     <Block position={[0, 0.31, -0.18]} scale={[0.2, 0.015, 0.36]} color={DARK_METAL} />
     <mesh position={[0, 0.32, -0.15]}><cylinderGeometry args={[0.05, 0.05, 0.04, 8]} /><meshStandardMaterial color={METAL} metalness={0.5} roughness={0.4} /></mesh>
     {/* 연료탱크 주유구 캡: 탱크 상면 중앙 */}
@@ -118,9 +108,9 @@ export default function Motorcycle({ wheelsRef, steer = 0, speed = 0, firstPerso
     <mesh position={[0.22, -0.7, 0.4]} rotation={[1.45, 0, 0.08]}><cylinderGeometry args={[0.038, 0.038, 0.65, 8]} /><meshStandardMaterial color={METAL} metalness={0.6} roughness={0.3} /></mesh>
     <mesh position={[0.24, -0.58, 0.95]} rotation={[HALF_PI, 0, 0]}><cylinderGeometry args={[0.065, 0.065, 0.06, 12]} /><meshStandardMaterial color={DARK_METAL} metalness={0.5} roughness={0.3} /></mesh>
 
-    <Block position={[0, 0.22, 0.35]} scale={[0.3, 0.12, 0.55]} color={TIRE} />
+    <Shell color={TIRE} roughness={.85} stations={[{z:.075,rx:.1,ry:.035,cy:.22,power:3},{z:.3,rx:.15,ry:.06,cy:.22,power:4},{z:.625,rx:.12,ry:.055,cy:.25,power:3}]}/>
     {[-1, 0, 1].map((offset) => <Block key={`vent-${offset}`} position={[offset * 0.08, -0.06, -0.18]} scale={[0.04, 0.015, 0.06]} color="#252c2f" />)}
-    <Block position={[0, 0.25, 0.75]} scale={[0.28, 0.16, 0.35]} rotation={[0.15, 0, 0]} color={BODY} />
+    <Shell color={BODY} stations={[{z:.575,rx:.14,ry:.08,cy:.25},{z:.8,rx:.11,ry:.075,cy:.27},{z:.925,rx:.05,ry:.035,cy:.28}]}/>
     <Block position={[0, 0.22, 0.92]} scale={[0.14, 0.08, 0.04]} color={TAILLAMP} />
     {/* 번호판과 방향지시등 두 개(뒤) */}
     <Block position={[0, 0.05, 0.98]} scale={[0.14, 0.1, 0.01]} rotation={[-0.3, 0, 0]} color={PLATE} />
@@ -134,7 +124,7 @@ export default function Motorcycle({ wheelsRef, steer = 0, speed = 0, firstPerso
       <group ref={rearWheel} position={[0, WHEEL_Y, 0]} userData={{ dynamic: true }}><Wheel withDisc /></group>
       <Block position={[0.15, WHEEL_Y + 0.14, 0]} scale={[0.06, 0.1, 0.05]} color={DARK_METAL} />
     </group>
-    <Block position={[0, -0.2, 0.95]} scale={[0.3, 0.06, 0.55]} rotation={[-0.1, 0, 0]} color={BODY} />
+    <Fender position={[0,WHEEL_Y,.95]} radius={.36} width={.26} color={BODY}/>
     {/* 작고 고정된 라이더 실루엣. 눈높이와 미러 높이를 넘지 않는다. */}
     <group position={[0, 0.04, 0.34]}>
       <Block position={[0, 0.22, 0]} scale={[0.24, 0.38, 0.18]} color="#26343a" />
@@ -152,7 +142,7 @@ export default function Motorcycle({ wheelsRef, steer = 0, speed = 0, firstPerso
       <StaticBatch>
         <group ref={frontWheel} position={[0, WHEEL_Y, 0]} userData={{ dynamic: true }}><Wheel withDisc /></group>
         <Block position={[0.15, WHEEL_Y + 0.14, 0]} scale={[0.06, 0.1, 0.05]} color={DARK_METAL} />
-        <Block position={[0, -0.18, 0.08]} scale={[0.3, 0.06, 0.5]} rotation={[-0.15, 0, 0]} color={BODY} />
+        <Fender position={[0,WHEEL_Y,.08]} radius={.36} width={.26} color={BODY}/>
 
         {SIDES.map((side) => <group key={side}>
           <mesh position={[side * 0.09, 0.07, 0]} castShadow><cylinderGeometry args={[0.035, 0.035, 0.5, 8]} /><meshStandardMaterial color={METAL} metalness={0.6} roughness={0.3} /></mesh>

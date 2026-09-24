@@ -2,7 +2,7 @@ import { hitsAnyBuilding } from './solidIndex.js';
 import { hitsVehicle } from './carPhysics.js';
 import { hitsSphere } from './airTraffic.js';
 import { GROUND_GUNS, hullBox, muzzlePoint } from './groundWeapons.js';
-import { MISSILE, gunOf, muzzleAim, pelletOffset, toWorld } from './weapons.js';
+import { MISSILE, cannonRange, gunOf, muzzleAim, pelletOffset, toWorld } from './weapons.js';
 import { armamentOf } from './hardpoints.js';
 import { damageOf, isArmed } from './health.js';
 
@@ -38,7 +38,7 @@ function shellSpec(weapon, plane) {
 }
 
 export function createRemoteCombat() {
-  return { shells: [], blasts: [], fired: {}, nextId: 1, damage: 0, weapon: null, targetPose: null };
+  return { shells: [], blasts: [], fired: {}, nextId: 1, damage: 0, weapon: null, hits: [], targetPose: null };
 }
 
 /** 지상 전투 차량의 포구다. 로컬 발사와 같은 muzzlePoint 를 쓴다. */
@@ -74,7 +74,7 @@ function spawn(state, pose, weapon, index, pellet = null) {
   const inheritsSpeed = pose.kind === 'flight' || weapon === 'shotgun';
   const speed = spec.speed + (inheritsSpeed ? finite(pose.speed) : 0);
   return {
-    id: state.nextId++, weapon, owner: pose.id,
+    id: state.nextId++, weapon, owner: pose.id, ownerLife: pose.life,
     x: mouth.x, y: mouth.y, z: mouth.z,
     vx: mouth.forward.x * speed, vy: mouth.forward.y * speed, vz: mouth.forward.z * speed,
     age: 0, life: spec.life, travel: 0, plane: pose.kind === 'flight' ? pose.key : null,
@@ -94,7 +94,7 @@ function launchFrom(state, peers, fired) {
     if (peer.phase === 'crashed') continue;
     for (const [field, weapon] of [['shots', primaryOf(peer)], ['rockets', 'missile']]) {
       const count = Math.max(0, Math.floor(finite(peer[field])));
-      const key = `${peer.id}:${field}`;
+      const key = `${peer.id}:${peer.life || 0}:${field}`;
       const seen = fired[key];
       // 처음 본 상대의 누적 발사 수는 과거의 합이다. 기준만 잡고 탄을 만들지 않는다.
       if (seen === undefined) { fired[key] = count; continue; }
@@ -131,10 +131,10 @@ function hitsSelf(from, to, self, previousSelf = self) {
 /** 원격 포탄을 한 걸음 굴린다. peers 는 pose 를 펼친 배열이고 self 는 내 탈것의 충돌 상자다.
  * self 가 무장하지 않았거나 없으면 피해를 계산하지 않는다. 세단과 오토바이, 도보는 터지지 않는다.
  */
-export function stepRemoteCombat(previous, { dt = 0, peers = [], self = null, buildings = [] } = {}) {
+export function stepRemoteCombat(previous, { dt = 0, peers = [], self = null, buildings = [], extent = 180 } = {}) {
   const step = Math.max(0, Math.min(finite(dt), 0.05));
   const fired = { ...previous.fired };
-  const state = { ...previous, shells: [], blasts: [], fired, damage: 0, weapon: null };
+  const state = { ...previous, shells: [], blasts: [], fired, damage: 0, weapon: null, hits: [] };
   const previousTarget = previous.targetPose;
   const sameTargetLife = previousTarget && self
     && previousTarget.kind === self.kind && previousTarget.key === self.key && previousTarget.life === self.life;
@@ -142,7 +142,8 @@ export function stepRemoteCombat(previous, { dt = 0, peers = [], self = null, bu
   state.targetPose = self ? { x: finite(self.x), y: finite(self.y), z: finite(self.z), kind: self.kind, key: self.key, life: self.life } : null;
   // 떠난 상대의 기준값은 버린다. 다시 들어오면 그때 다시 잡는다.
   const present = new Set(peers.map((peer) => peer?.id));
-  for (const key of Object.keys(fired)) if (!present.has(key.slice(0, key.lastIndexOf(':')))) delete fired[key];
+  const activeCounters = new Set(peers.flatMap(peer => ['shots', 'rockets'].map(field => `${peer.id}:${peer.life || 0}:${field}`)));
+  for (const key of Object.keys(fired)) if (!activeCounters.has(key)) delete fired[key];
 
   const active = [...(previous.shells || []), ...launchFrom(state, peers, fired)];
   const vulnerable = self && isArmed(self.kind, self.key);
@@ -150,6 +151,9 @@ export function stepRemoteCombat(previous, { dt = 0, peers = [], self = null, bu
   const target = vulnerable && self.kind === 'car' ? hullBox(self) : self;
   const blasts = [];
   for (const shell of active.slice(-REMOTE_SHELL_MAX)) {
+    if (!present.has(shell.owner)) continue;
+    const owner = peers.find(peer => peer.id === shell.owner);
+    if (shell.ownerLife !== owner?.life) continue;
     const spec = shellSpec(shell.weapon, shell.plane);
     const moved = { ...shell, age: shell.age + step };
     if (spec.accel) {
@@ -167,12 +171,15 @@ export function stepRemoteCombat(previous, { dt = 0, peers = [], self = null, bu
     if (struck) {
       state.damage += damageOf(shell.weapon);
       state.weapon = shell.weapon;
+      state.hits.push({ owner: shell.owner, amount: damageOf(shell.weapon), weapon: shell.weapon, life: self.life });
     }
     if (struck || moved.y <= 0.25 || hitsAnyBuilding(shell, moved, buildings)) {
       blasts.push({ id: state.nextId++, x: moved.x, y: Math.max(0.3, moved.y), z: moved.z, age: 0, life: 0.9, size: spec.blast });
       continue;
     }
-    if (moved.age < moved.life && (shell.weapon !== 'shotgun' || moved.travel <= spec.range)) state.shells.push(moved);
+    // Match local cannon lifetime/range; collision is checked before expiry in both paths.
+    const range = shell.weapon === 'cannon' || shell.weapon === 'shotgun' ? cannonRange(extent, shell.plane) : Infinity;
+    if (moved.age < moved.life && moved.travel <= range) state.shells.push(moved);
   }
   state.blasts = [...(previous.blasts || []), ...blasts]
     .map((blast) => ({ ...blast, age: blast.age + step }))

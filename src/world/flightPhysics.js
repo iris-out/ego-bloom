@@ -1,4 +1,4 @@
-import { hitsAnyBuilding, hitsBuilding } from './solidIndex.js';
+import { FLIGHT_CLEARANCE, hitsAnyBuilding, hitsBuilding } from './solidIndex.js';
 
 export { hitsBuilding };
 
@@ -268,7 +268,7 @@ export function stepFlight(previous, input = {}, delta = 0, extent = 180, buildi
   }
   state.x -= Math.sin(state.heading) * Math.cos(state.pitch) * state.speed * dt;
   state.z -= Math.cos(state.heading) * Math.cos(state.pitch) * state.speed * dt;
-  if(hitsAnyBuilding(previous,state,buildings))return crash(state);
+  if(hitsAnyBuilding(previous,state,buildings,null,FLIGHT_CLEARANCE))return crash(state);
   if(state.y<=FLIGHT_GROUND) {
     if(onRunway(state,extent)) {
       if(state.phase==='airborne'){state.message='착륙 완료 · 스로틀을 줄여 감속하세요';state.pitch=0;}

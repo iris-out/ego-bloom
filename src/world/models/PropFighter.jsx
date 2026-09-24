@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import Block from './ModelBlock';
+import { fuselageGeometry, airfoilGeometry } from './vehicleSurfaces.js';
+import { Airfoil, CanopyFrame } from './SurfaceParts.jsx';
 import { PLANE_DIMENSIONS } from './planeDimensions.js';
 import { DetailLamp, PanelSeam, SurfaceVent } from './exteriorDetails.jsx';
 import StaticBatch from '../StaticBatch.jsx';
@@ -22,7 +24,7 @@ const HALF_SPAN = PLANE_DIMENSIONS.prop.span / 2;
 const CABIN_NOSE_Z = -1.8, CABIN_TAIL_Z = 0.4;
 
 const SKIN = '#5c6f62', SKIN_DARK = '#47564c', TRIM = '#c9a227';
-const GLASS = '#40606d', METAL = '#38424a', RUBBER = '#2c3338';
+const METAL = '#38424a', RUBBER = '#2c3338';
 
 /** 프로펠러 회전 속도다. 공회전에서도 돌고 스로틀 1 에서 가장 빠르다(rad/s). */
 const PROP_IDLE = 9, PROP_MAX = 58;
@@ -41,11 +43,7 @@ const CABIN_PROFILE = FUSELAGE_PROFILE.filter(([, z]) => z >= CABIN_NOSE_Z && z 
 const REAR_PROFILE = FUSELAGE_PROFILE.filter(([, z]) => z >= CABIN_TAIL_Z);
 
 function latheOf(profile) {
-  const points = profile.map(([radius, z]) => new THREE.Vector2(radius, z));
-  const geometry = new THREE.LatheGeometry(points, 14);
-  geometry.rotateX(HALF_PI);
-  geometry.computeVertexNormals();
-  return geometry;
+  return fuselageGeometry(FUSELAGE_PROFILE, profile[0][1], profile.at(-1)[1], 1);
 }
 
 export default function PropFighter({ glowRef, throttle = 0, phase = 'runway', firstPerson = false }) {
@@ -58,19 +56,7 @@ export default function PropFighter({ glowRef, throttle = 0, phase = 'runway', f
   const fuselageRear = useMemo(() => latheOf(REAR_PROFILE), []);
 
   /** 타원형 주익이다. 뿌리에서 끝까지 앞뒤가 함께 좁아진다. */
-  const wing = useMemo(() => {
-    const shape = new THREE.Shape();
-    shape.moveTo(0.5, -1.5);
-    shape.quadraticCurveTo(HALF_SPAN * 0.7, -1.35, HALF_SPAN, -0.35);
-    shape.lineTo(HALF_SPAN, 0.35);
-    shape.quadraticCurveTo(HALF_SPAN * 0.7, 1.3, 0.5, 1.6);
-    shape.closePath();
-    const geometry = new THREE.ExtrudeGeometry(shape, { depth: 0.3, bevelEnabled: false, curveSegments: 6 });
-    geometry.rotateX(HALF_PI);
-    geometry.translate(0, 0.15, 0);
-    geometry.computeVertexNormals();
-    return geometry;
-  }, []);
+  const wing = useMemo(() => airfoilGeometry([{x:.5,front:-1.5,back:1.6,thickness:.35},{x:2.8,front:-1.37,back:1.38,thickness:.26},{x:4.9,front:-.92,back:.95,thickness:.15},{x:HALF_SPAN,front:-.35,back:.35,thickness:.045,y:.15}]), []);
 
   const blade = useMemo(() => {
     const shape = new THREE.Shape();
@@ -147,9 +133,9 @@ export default function PropFighter({ glowRef, throttle = 0, phase = 'runway', f
       </group>)}
 
       {/* 꼬리 날개와 꼬리 바퀴 */}
-      <Block position={[0, 0.9, 3.6]} scale={[0.16, 1.8, 1.7]} color={SKIN_DARK} rotation={[-0.2, 0, 0]} />
-      <Block position={[0, 0.1, 3.9]} scale={[3.6, 0.14, 1.0]} color={SKIN_DARK} />
-      <Block position={[0, 0.5, 2.2]} scale={[0.9, 0.5, 1.4]} color={TRIM} />
+      <Airfoil color={SKIN_DARK} rotation={[0,0,Math.PI/2]} stations={[{x:0,front:2.65,back:4.5,thickness:.18},{x:1.3,front:3.25,back:4.6,thickness:.12},{x:1.8,front:3.8,back:4.4,thickness:.06}]}/>
+      {[-1,1].map(side=><Airfoil key={side} position={[0,.1,0]} scale={[side,1,1]} color={SKIN_DARK} stations={[{x:.2,front:3.3,back:4.5,thickness:.16},{x:1.4,front:3.5,back:4.4,thickness:.1},{x:1.8,front:3.8,back:4.2,thickness:.035}]}/>)}
+
       <Block position={[0, -1.25, 4.2]} scale={[0.1, 0.7, 0.1]} color="#7d8a86" />
       <mesh position={[0, -1.66, 4.2]} rotation={[0, 0, HALF_PI]} castShadow>
         <cylinderGeometry args={[0.22, 0.22, 0.16, 8]} /><meshStandardMaterial color={RUBBER} />
@@ -162,8 +148,9 @@ export default function PropFighter({ glowRef, throttle = 0, phase = 'runway', f
           <meshStandardMaterial color={SKIN} metalness={0.25} roughness={0.5} />
         </mesh>
         <mesh position={[0, 0.62, -0.6]} scale={[0.6, 0.52, 1.3]} castShadow>
-          <sphereGeometry args={[1, 14, 10]} /><meshStandardMaterial color={GLASS} metalness={0.35} roughness={0.2} />
+          <sphereGeometry args={[1, 32, 20]} /><meshStandardMaterial color="#1c3542" metalness={0.12} roughness={0.2} />
         </mesh>
+      <CanopyFrame position={[0,.62,-.6]} rx={0.6} ry={0.52} rz={1.3} color="#45545e"/>
       </StaticBatch>
     </group>
   </group>;

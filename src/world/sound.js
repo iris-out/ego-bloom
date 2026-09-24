@@ -21,6 +21,8 @@ const SHOTS = {
 };
 
 let context = null;
+let outputVolume = 1;
+let outputPaused = false;
 let noise = null;
 let effects = null;
 let engine = null;
@@ -66,7 +68,7 @@ function ready() {
 function effectOut(ctx) {
   if (effects && effects.context === ctx) return effects;
   effects = ctx.createGain();
-  effects.gain.value = 0.9;
+  effects.gain.value = outputPaused ? 0 : 0.9 * outputVolume;
   let tail = effects;
   try {
     const limiter = ctx.createDynamicsCompressor();
@@ -88,7 +90,7 @@ function effectOut(ctx) {
 export function engineOut(ctx) {
   if (engine && engine.context === ctx) return engine;
   engine = ctx.createGain();
-  engine.gain.value = 1;
+  engine.gain.value = outputPaused ? 0 : outputVolume;
   engine.connect(ctx.destination);
   return engine;
 }
@@ -515,4 +517,12 @@ export function playTick() {
   ping.start(now);
   ping.stop(now + 0.06);
   release(ping, slot);
+}
+
+/** Apply preferences to both existing and subsequently created audio buses. */
+export function setWorldAudio({ volume = 1, paused = false } = {}) {
+  outputVolume = Number.isFinite(volume) ? Math.max(0, Math.min(1, volume)) : 1;
+  outputPaused = !!paused;
+  if (effects) effects.gain.value = outputPaused ? 0 : 0.9 * outputVolume;
+  if (engine) engine.gain.value = outputPaused ? 0 : outputVolume;
 }

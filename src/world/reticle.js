@@ -1,6 +1,6 @@
 import { hitsAnyBuilding } from './solidIndex.js';
 import { GROUND_GUNS, muzzlePoint, shellGravity } from './groundWeapons.js';
-import { BOMB, MISSILE, gunOf, muzzleAim, toWorld } from './weapons.js';
+import { BOMB, MISSILE, cannonRange, gunOf, muzzleAim, toWorld } from './weapons.js';
 import { armamentOf } from './hardpoints.js';
 
 /** 조준선이 쓰는 탄도 계산이다. 순수 함수이며 Three, React, 네트워크에 의존하지 않는다.
@@ -24,9 +24,10 @@ const finite = (value, fallback = 0) => Number.isFinite(value) ? value : fallbac
 
 /** 포탄 하나를 탄착까지 굴린다. 지면이나 건물에 닿으면 그 지점을, 못 닿으면 수명 끝 지점을 준다.
  * range 는 발사점에서 탄착점까지의 수평 거리다. */
-export function probeShell(start, velocity, { gravity = GROUND_GRAVITY, life = PROBE_LIFE, step = PROBE_STEP, buildings = [], floor = GROUND_FLOOR, accel = 0 } = {}) {
+export function probeShell(start, velocity, { gravity = GROUND_GRAVITY, life = PROBE_LIFE, step = PROBE_STEP, buildings = [], floor = GROUND_FLOOR, accel = 0, maxTravel = Infinity } = {}) {
   let x = finite(start?.x), y = finite(start?.y), z = finite(start?.z);
   let vx = finite(velocity?.x), vy = finite(velocity?.y), vz = finite(velocity?.z);
+  let traveled = 0;
   const span = Math.max(step, Math.min(finite(life, PROBE_LIFE), 12));
   for (let time = 0; time < span; time += step) {
     const from = { x, y, z };
@@ -38,6 +39,10 @@ export function probeShell(start, velocity, { gravity = GROUND_GRAVITY, life = P
     vy -= gravity * step;
     x += vx * step; y += vy * step; z += vz * step;
     if (![x, y, z].every(Number.isFinite)) break;
+    const distance = Math.hypot(x-from.x,y-from.y,z-from.z);
+    const share = Number.isFinite(maxTravel) && distance > 0 ? Math.max(0,Math.min(1,(maxTravel-traveled)/distance)) : 1;
+    if(share<1){x=from.x+(x-from.x)*share;y=from.y+(y-from.y)*share;z=from.z+(z-from.z)*share;}
+    traveled += distance*share;
     const to = { x, y, z };
     if (y <= floor) {
       return { x, y: floor, z, range: Math.hypot(x - finite(start?.x), z - finite(start?.z)), time: time + step, hit: 'ground' };
@@ -45,6 +50,7 @@ export function probeShell(start, velocity, { gravity = GROUND_GRAVITY, life = P
     if (hitsAnyBuilding(from, to, buildings)) {
       return { x, y, z, range: Math.hypot(x - finite(start?.x), z - finite(start?.z)), time: time + step, hit: 'building' };
     }
+    if(traveled>=maxTravel)return {x,y,z,range:Math.hypot(x-finite(start?.x),z-finite(start?.z)),time:time+step*share,hit:'none'};
   }
   return { x, y, z, range: Math.hypot(x - finite(start?.x), z - finite(start?.z)), time: span, hit: 'none' };
 }
@@ -62,7 +68,7 @@ export function groundImpact(pose, aim, vehicle = 'tank', buildings = []) {
 
 /** 전투기의 탄착점이다. 기관포는 기종별 낙차를 쓰고 미사일은 중력과 가속을
  * 함께 받는다. 기체 속도가 탄속에 더해지는 것도 같게 맞춘다. */
-export function airImpact(pose, weapon = 'cannon', buildings = []) {
+export function airImpact(pose, weapon = 'cannon', buildings = [], extent) {
   const key = pose?.key || 'fighter';
   const mounts = armamentOf(key);
   if (!mounts) return null;
@@ -79,6 +85,8 @@ export function airImpact(pose, weapon = 'cannon', buildings = []) {
   return {
     ...probeShell(start, velocity, {
       buildings, floor: 0, life: spec.life,
+      // Live flight passes the map extent used by stepWeapons; generic probes retain their life-only default.
+      maxTravel: !missile && !bomb && Number.isFinite(extent) ? cannonRange(extent,key) : Infinity,
       gravity: bomb ? BOMB.gravity : missile ? MISSILE.gravity : finite(spec.gravity),
       accel: missile ? MISSILE.accel : 0,
     }),
@@ -109,6 +117,7 @@ export function angleToScreen(angle, fovDegrees = 62, heightPixels = 900) {
 /** 기종별 조준선 생김새다. DOM 이 이 값을 읽어 그린다. 좌표를 여기서 만들지 않는다.
  * ladder 는 눈금을 둘 사거리이고 ring 은 유효 사거리를 알리는 원의 시야각(라디안) 이다. */
 export const RETICLE = Object.freeze({
+  helicopter: { type: 'pipper', ladder: [], ring: 0.04, lead: true, label: '기총 2정' },
   // 요격기다. 기수에 모은 기관포라 산포가 좁다.
   interceptor: { type: 'pipper', ladder: [], ring: 0.032, lead: true, label: '요격' },
   shotgun: { type: 'pipper', ladder: [], ring: 0.035, lead: true, label: '산탄' },
@@ -129,7 +138,7 @@ export const RETICLE = Object.freeze({
 });
 
 export function reticleOf(kind, key) {
-  if (kind === 'flight') return RETICLE[key] && key !== 'helicopter' ? RETICLE[key] : null;
+  if (kind === 'flight') return RETICLE[key] || null;
   if (kind === 'car') return RETICLE[key] || null;
   return null;
 }

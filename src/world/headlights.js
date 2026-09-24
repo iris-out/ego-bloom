@@ -75,13 +75,13 @@ export const SEDAN_FRONT_LIGHTS = Object.freeze({
   projectors: Object.freeze([-1, 1].flatMap(side => [0.68, 0.86].map(x => Object.freeze({
     side,
     position: Object.freeze([side * x, 0.09, -2.553]),
-    radius: 0.052,
+    radius: 0.027,
   })))),
   drlSegments: Object.freeze([-1, 1].flatMap(side => [
-    frontPart(side, 0.60, 0.073, 0.016, 0.066, 'vertical'),
-    frontPart(side, 0.645, 0.042, 0.09, 0.014, 'horizontal'),
-    frontPart(side, 0.95, 0.073, 0.016, 0.066, 'vertical'),
-    frontPart(side, 0.905, 0.042, 0.09, 0.014, 'horizontal'),
+    frontPart(side, 0.66, 0.090, 0.017, 0.086, 'vertical'),
+    frontPart(side, 0.69, 0.047, 0.07, 0.016, 'horizontal'),
+    frontPart(side, 0.85, 0.090, 0.017, 0.086, 'vertical'),
+    frontPart(side, 0.88, 0.047, 0.07, 0.016, 'horizontal'),
   ])),
   accents: Object.freeze([-1, 1].map(side => frontPart(side, 0.77, 0.015, 0.18, 0.008, 'accent'))),
 });
@@ -96,16 +96,14 @@ const suvFrontHousing = side => Object.freeze({
     [side * 1.04, 0.25], [side * 0.97, 0.17], [side * 0.72, 0.15],
   ]),
 });
-const suvFrontRow = (side, upper) => Object.freeze({
-  side,
-  rear: freezePoints(upper ? [
-    [side * 0.62, 0.278], [side * 0.96, 0.302], [side * 1.00, 0.285],
-    [side * 0.96, 0.270], [side * 0.65, 0.252],
-  ] : [
-    [side * 0.66, 0.216], [side * 0.93, 0.238], [side * 0.98, 0.218],
-    [side * 0.94, 0.202], [side * 0.69, 0.188],
-  ]),
-});
+const suvFrontRow = (side, outer) => {
+  const x=outer?.955:.79;
+  return Object.freeze({side,rear:freezePoints([
+    [side*(x-.012),.323],[side*(x+.012),.323],[side*(x-.006),.218],
+    [side*(x-.045),.183],[side*(x-.14),.17],[side*(x-.14),.19],
+    [side*(x-.06),.207],[side*(x-.025),.235],
+  ])});
+};
 
 /** SUV 정적/동적 헤드램프가 공유하는 좌우 독립형 두 줄 좌표다. */
 export const SUV_FRONT_LIGHTS = Object.freeze({

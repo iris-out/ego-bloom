@@ -1,5 +1,5 @@
 import { CEILING, FLIGHT_GROUND, GRAVITY, flightBoundary, GUARD_RELEASE } from './flightPhysics.js';
-import { hitsAnyBuilding } from './solidIndex.js';
+import { FLIGHT_CLEARANCE, hitsAnyBuilding } from './solidIndex.js';
 
 /** 헬기 비행 물리. 고정익과 상태 모양은 같지만 양력이 속도가 아니라 로터에서 나온다.
  * 조작은 방향키가 collective(로터 추진력), WASD 가 cyclic 과 기수 방향이다.
@@ -93,7 +93,7 @@ export function stepRotor(previous, input = {}, delta = 0, extent = 180, buildin
   state.x += state.vx * dt; state.y += state.vy * dt; state.z += state.vz * dt;
   state.speed = Math.hypot(state.vx, state.vz);
   state.climb = state.vy;
-  if (hitsAnyBuilding(from, state, buildings)) return crash(state);
+  if (hitsAnyBuilding(from, state, buildings, null, FLIGHT_CLEARANCE)) return crash(state);
 
   if (state.y <= FLIGHT_GROUND) {
     // 평지 어디에나 내려앉는다. 다만 내려꽂는 속도면 기체가 부서진다.

@@ -1,3 +1,4 @@
+import { nextCombatLife, consumeCombatHits } from './worldScores.js';
 /** Flight controller only: visual models live in models/.
  * Obstacle dimensions below approximate civic/airport meshes; review them when
  * changing those models. Input, physics, weapons and network pose publication share
@@ -18,7 +19,7 @@ import Cockpit from './cockpits';
 import Projectiles from './models/Projectiles';
 import Blast from './models/Blast';
 import { armamentOf } from './hardpoints.js';
-import { createHealth, hullRatio, hurt, repair } from './health.js';
+import { createHealth, hullRatio, repair } from './health.js';
 import { BOMB, createArsenal, muzzleAim, stepWeapons, toWorld } from './weapons.js';
 import { projectAim } from './aimScreen.js';
 import { clearAimScreen, setAimScreen } from './aimScreenStore.js';
@@ -29,6 +30,7 @@ import { scoreTimeAttack, tickTimeAttack } from './timeAttackStore.js';
 import { trafficBoxes } from './traffic.js';
 import { createFlightState, stepFlight, flightStatus, hasOverdrive, isDry, machOf } from './flightPhysics.js';
 import { createRotorState, stepRotor } from './rotorPhysics.js';
+import { AIRSHIP, createAirshipState, stepAirship, stepAirshipAutopilot } from './airshipPhysics.js';
 import { createAutopilot, stepAutopilot } from './autopilot.js';
 
 /** 추락 폭발은 발사체 폭발과 같은 Blast 를 쓴다. 나이는 물리가 세는 crashElapsed 뿐이다.
@@ -55,7 +57,7 @@ function CrashBlast({ state }) {
 
 /** 3인칭 추적 거리다. 기체가 클수록 멀리 잡아야 전체가 들어온다.
  * 폭격기는 날개가 30m 라 기본 거리로는 화면을 벗어난다. */
-const CHASE_DISTANCE = Object.freeze({ default: 43, bomber: 68, prop: 36, interceptor: 40 });
+const CHASE_DISTANCE = Object.freeze({ default: 43, airship: 76, bomber: 68, prop: 36, interceptor: 40 });
 /** 부스트 중 추적 거리 배수와 넓어지는 화각(도) 이다. 화면이 뒤로 빠지며 시야가 열린다. */
 const BOOST_PULLBACK = 1.18, BOOST_FOV = 7;
 /** 초음속에서 더해지는 추적 거리 배수와 화각(도) 이다. 부스트 위에 얹혀 속도감을 키운다. */
@@ -69,7 +71,7 @@ const SELF_RADIUS = 6;
 /** 탄착 해답이 아직 없을 때 조준선을 맺는 거리(m) 다. 시차 보정에만 쓴다. */
 const AIM_REACH = 400;
 
-export default function FlightMode({ extent, buildings=[], controlsRef, onCameraChange, onStatus, onFlightPose, plane, pilotName, view = 'third', incomingRef, airCount = 0, airCombatRef, trafficCount = 0, onTrafficHit, peersRef, night = false, weather = 'clear'}) {
+export default function FlightMode({ paused = false, inputBlocked = false, reducedMotion = false, extent, buildings=[], controlsRef, onCameraChange, onStatus, onFlightPose, plane, pilotName, view = 'third', incomingRef, onFatal, onAirKill, airCount = 0, airCombatRef, trafficCount = 0, onTrafficHit, peersRef, night = false, weather = 'clear'}) {
   // 폭발음을 파괴당 한 번만 낸다. phase 를 바꾸는 경로가 여러 갈래라 값 비교로는 놓친다.
   const boomed=useRef(false);
   // 엔진 소리다. 기종마다 하나를 만들어 두고 매 프레임 값만 옮긴다.
@@ -98,12 +100,15 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
   const cockpitStatusRef=useRef({});
   // 헬기는 고정익과 상태 모양이 같고 물리만 다르다. 카메라, 네트워크, 라벨은 그대로 쓴다.
   const rotor = plane === 'helicopter';
+  const airship = plane === 'airship';
   // 헬리패드가 터미널 단지와 함께 서쪽으로 20 옮겨 로컬 x -55 가 됐다. 카메라 홈도 같이 옮긴다.
-  const home = useMemo(() => rotor ? { x: extent + 55, z: -20, look: -60 } : { x: extent + 110, z: 176, look: 125 }, [rotor, extent]);
-  const jet = useRef(), state = useRef(rotor ? createRotorState(extent) : createFlightState(extent)), keys = useRef(new Set());
+  const home = useMemo(() => airship ? { x: extent + 55, z: -74, look: -150 } : rotor ? { x: extent + 55, z: -20, look: -60 } : { x: extent + 110, z: 176, look: 125 }, [rotor, airship, extent]);
+  const jet = useRef(), state = useRef(airship ? createAirshipState(extent) : rotor ? createRotorState(extent) : createFlightState(extent, plane)), keys = useRef(new Set());
   const arsenal = useRef(createArsenal(plane));
   // 체력은 무장한 기체만 갖는다. 제트와 헬기는 max 가 0 이라 포탄이 통하지 않는다.
   const health = useRef(createHealth('flight', plane));
+  const life = useRef(0);
+  if (!life.current) life.current = nextCombatLife();
   const autopilot = useRef(createAutopilot());
   const applied = useRef({ pitch: 0, roll: 0, yaw: 0, throttle: 0 });
   // Q 로 고르는 부스트 단계다. 요격기만 쓰고 다른 기종에서는 물리가 무시한다. */
@@ -134,8 +139,8 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
       camera.updateProjectionMatrix();
     };
   }, [camera, view, plane]);
-  // 값은 마운트 때 한 번만 읽는다. 참이면 발사 반동을 0 으로 둔다.
-  useEffect(() => { calm.current = !!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches; }, []);
+  // 접근성 설정이나 운영체제 설정이 켜지면 발사 반동을 줄인다.
+  useEffect(() => { calm.current = reducedMotion || !!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches; }, [reducedMotion]);
 
   // 엔진 소리는 기종마다 하나다. 기종을 바꾸거나 비행을 끝내면 끈다.
   useEffect(() => {
@@ -145,6 +150,7 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
 
   const vectors = useMemo(() => ({ position: new THREE.Vector3(), target: new THREE.Vector3() }), []);
   useEffect(() => {
+    if (inputBlocked) return;
     const canvas = gl.domElement;
     const codes = ['KeyW', 'KeyS', 'KeyA', 'KeyD', 'KeyQ', 'KeyE', 'KeyZ', 'KeyV', 'Space', 'ShiftLeft', 'ShiftRight',
       'Equal', 'Minus', 'NumpadAdd', 'NumpadSubtract', 'ArrowUp', 'ArrowDown'];
@@ -184,24 +190,25 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
       if (pointer.current.id !== null && canvas.hasPointerCapture(pointer.current.id)) canvas.releasePointerCapture(pointer.current.id);
       clear();
     };
-  }, [gl]);
+  }, [gl, inputBlocked]);
   useEffect(() => {
-    state.current = rotor ? createRotorState(extent) : createFlightState(extent, plane);
+    state.current = airship ? createAirshipState(extent) : rotor ? createRotorState(extent) : createFlightState(extent, plane);
     arsenal.current = createArsenal(plane);
     overdrive.current = false;
     camera.position.set(home.x, 15, home.z);
     camera.lookAt(home.x, 3, home.look);
-  }, [extent, camera, rotor, home, plane]);
+  }, [extent, camera, rotor, airship, home, plane]);
   useFrame(({ clock }, delta) => {
+    if (paused) return;
     tickTimeAttack(clock.elapsedTime);
     const dt = Number.isFinite(delta) ? Math.max(0, Math.min(delta, 0.05)) : 0;
     const controls = controlsRef?.current || {};
     if (controls.resetNonce !== resetNonce.current) {
       resetNonce.current = controls.resetNonce;
       overdrive.current = false;
-      state.current = rotor ? createRotorState(extent) : createFlightState(extent, plane);
+      state.current = airship ? createAirshipState(extent) : rotor ? createRotorState(extent) : createFlightState(extent, plane);
       arsenal.current = createArsenal(plane);
-      health.current = createHealth('flight', plane);
+      health.current = createHealth('flight', plane); life.current = nextCombatLife();
       autopilot.current = createAutopilot();
       controls.throttle = 0;
       keys.current.clear(); pointer.current.pitch = 0; pointer.current.yaw = 0;
@@ -210,7 +217,7 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
     // 활주로 밖에서 기종을 바꾸면 타던 기체가 터지고 3초 뒤 새 기체로 다시 탄다.
     if (mounted.current !== plane) {
       mounted.current = plane;
-      health.current = createHealth('flight', plane);
+      health.current = createHealth('flight', plane); life.current = nextCombatLife();
       // 기종이 바뀌면 반동과 탄착 해답을 비운다. 전투기의 표식이 다음 기체에 남지 않는다.
       shake.current = { pitch: 0, shots: 0, rockets: 0, bombs: 0 };
       gunHit.current = null; missileHit.current = null; bombHit.current = null;
@@ -222,7 +229,7 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
     // 남이 쏜 포탄의 피해는 RemoteCombat 이 한 방향 대기열에 쌓아 둔다. 여기서 읽고 비운다.
     const taken = incomingRef?.current;
     if (taken && taken.amount > 0) {
-      health.current = hurt(health.current, taken.amount, clock.elapsedTime);
+      health.current = consumeCombatHits(health.current, taken, life.current, clock.elapsedTime, state.current.phase === 'crashed' ? undefined : onFatal);
       taken.amount = 0;
       if (health.current.wrecked && state.current.phase !== 'crashed') {
         state.current = { ...state.current, phase: 'crashed', speed: 0, crashElapsed: 0, message: '피탄 · 3초 후 새 기체로 탑승합니다' };
@@ -252,7 +259,9 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
     const auto = !!controls.autopilot;
     if (!auto) { if (autopilot.current.mode !== 'depart') autopilot.current = createAutopilot(); }
     else {
-      const guided = stepAutopilot(autopilot.current, state.current, { extent, dt, rotor });
+      const guided = airship
+        ? stepAirshipAutopilot(autopilot.current, state.current, { extent, dt })
+        : stepAutopilot(autopilot.current, state.current, { extent, dt, rotor });
       autopilot.current = guided.ap;
       command = guided.input;
       controls.throttle = guided.input.throttle;
@@ -263,11 +272,12 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
     // 키보드로만 조종하면 조종간이 꿈쩍하지 않았다. 자동 비행 입력도 같은 자리를 지난다.
     applied.current.pitch = command.pitch; applied.current.roll = command.roll;
     applied.current.yaw = command.yaw; applied.current.throttle = command.throttle;
-    const next = rotor ? stepRotor(state.current, command, delta, extent, obstacles)
+    const next = airship ? stepAirship(state.current, command, delta, extent, obstacles)
+      : rotor ? stepRotor(state.current, command, delta, extent, obstacles)
       : stepFlight(state.current, command, delta, extent, obstacles, plane);
     if (next.phase==='crashed' || (state.current.phase==='crashed' && next.phase==='runway')) controls.throttle = 0;
     const respawned=state.current.phase==='crashed' && next.phase==='runway';
-    if(respawned){camera.position.set(home.x,15,home.z);orbit.current={yaw:0,pitch:.32};health.current=createHealth('flight',plane);}
+    if(respawned){camera.position.set(home.x,15,home.z);orbit.current={yaw:0,pitch:.32};health.current=createHealth('flight',plane);life.current=nextCombatLife();}
     // 격추, 추락, 충돌 어느 쪽이든 'crashed' 진입은 한 번뿐이다. 여기서 소리를 낸다.
     // 마하 1 을 넘은 순간 한 번 울린다. 되돌아올 때는 0.97 아래로 떨어져야 다시 무장한다.
     if (next.supersonic && !sonic.current) { sonic.current = true; playSonicBoom(); }
@@ -276,7 +286,7 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
     else if (next.phase !== 'crashed') boomed.current = false;
     state.current = next;
     // AI 항공기 목표는 사거리 안쪽만 추린다. 도시 전체를 매 프레임 훑지 않는다.
-    const airTargets = mounts && airCombatRef
+    const airTargets = (mounts || airship) && airCombatRef
       ? airTrafficTargets(airCount, clock.elapsedTime, extent, next, AIR_TARGET_RANGE, airCombatRef.current.downed)
       : [];
     // 미사일을 든 기종만 포착한다. 목표는 지금 프레임의 airTargets 에서 고른다.
@@ -310,7 +320,7 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
     });
     // 배기, 프로펠러, 폭탄창 문이 매 프레임 이 ref 를 읽는다. 0.1 단위 버킷으로 반올림하지
     // 않는다. 렌더를 다시 돌리는 게 아니라 ref 를 바꾸는 것뿐이라 매 프레임 값 그대로 써도 된다.
-    glowRef.current = { throttle: isDry(next) ? 0 : (next.throttle || 0), phase: next.phase, bay: arsenal.current.bayOpen || 0 };
+    glowRef.current = { throttle: isDry(next) ? 0 : (next.throttle || 0), phase: next.phase, bay: arsenal.current.bayOpen || 0, shots: arsenal.current.shots || 0 };
     // 부순 지상 차량은 화면에서 지우고 처치 기록에 올린다. 주행, 도보와 같은 경로다.
     for (const hit of arsenal.current.hits || []) {
       if (wrecked.current.has(hit.index)) continue;
@@ -325,16 +335,16 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
       // 한 발 맞을 때마다 틱을 치고 조준선을 번쩍인다. 격추는 그 위에 폭발음을 얹는다.
       airHits.current += 1;
       playTick();
-      if (result.downed) { kills.current = airCombatRef.current.kills; killed.current = airCombatRef.current.label; playBoom('car'); scoreTimeAttack(1); }
+      if (result.downed) { kills.current += 1; onAirKill?.(`air:${hit.index}:${clock.elapsedTime}`); killed.current = airCombatRef.current.label; playBoom('car'); scoreTimeAttack(1); }
     }
     // 공중 충돌이다. AI 항공기든 다른 조종사든 닿으면 둘 다 터진다.
     // 상대 조종사 쪽은 그 브라우저가 같은 판정을 따로 하므로 여기서는 내 기체만 부순다.
     if (next.phase === 'airborne') {
-      const me = { x: next.x, y: next.y, z: next.z, radius: SELF_RADIUS };
+      const me = { x: next.x, y: next.y + (airship ? 7 : 0), z: next.z, radius: airship ? AIRSHIP.radius : SELF_RADIUS };
       const struck = collidesWith(me, airTargets)
         || collidesWith(me, peersRef?.current
           ?.filter((peer) => peer.pose?.kind === 'flight' && peer.pose.phase === 'airborne')
-          .map((peer) => ({ x: peer.pose.x, y: peer.pose.y, z: peer.pose.z, radius: peer.pose.radius || SELF_RADIUS })) || []);
+          .map((peer) => ({ x: peer.pose.x, y: peer.pose.y + (peer.pose.key === 'airship' ? 7 : 0), z: peer.pose.z, radius: peer.pose.key === 'airship' ? AIRSHIP.radius : SELF_RADIUS })) || []);
       if (struck) {
         if (Number.isFinite(struck.index) && airCombatRef) downAirTraffic(airCombatRef.current, struck.index, clock.elapsedTime);
         state.current = { ...next, phase: 'crashed', speed: 0, crashElapsed: 0, message: '공중 충돌 · 3초 후 새 기체로 탑승합니다' };
@@ -343,7 +353,7 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
     }
     // 발사 수를 센 뒤에 내보낸다. 같은 프레임의 발사가 남의 화면에서 한 틱 늦지 않게 한다.
     // radius 는 공중 충돌 판정용 구다. 상자를 쓰면 기체가 기울 때 판정이 어긋난다.
-    onFlightPose?.({ ...next, kind: 'flight', key: plane, radius: 6, hull: hullRatio(health.current) ?? 1,
+    onFlightPose?.({ ...next, kind: 'flight', key: plane, life: life.current, radius: airship ? AIRSHIP.radius : SELF_RADIUS, hull: hullRatio(health.current) ?? 1,
       shots: arsenal.current.shots || 0, rockets: arsenal.current.rockets || 0, turret: 0, barrel: 0 });
     // 엔진 소리다. 추락하면 스로틀을 0 으로 보내 소리가 잦아든다.
     // 연료가 마르면 엔진이 선다. 스로틀 레버는 그대로여도 소리와 배기는 끊긴다.
@@ -367,7 +377,7 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
     // 기체가 빠르게 선회할 때 실제 탄도와 조준선이 벌어진다.
     if (mounts) {
       // 기종마다 푸는 해답이 다르다. 전투기는 기관총과 미사일, 프로펠러기는 기관총, 폭격기는 폭탄이다.
-      gunHit.current = mounts.cannon ? airImpact({ ...next, key: plane }, 'cannon', obstacles) : null;
+      gunHit.current = mounts.cannon ? airImpact({ ...next, key: plane }, 'cannon', obstacles, extent) : null;
       missileHit.current = mounts.missile ? airImpact({ ...next, key: plane }, 'missile', obstacles) : null;
       bombHit.current = mounts.bomb ? airImpact({ ...next, key: plane }, 'bomb', obstacles) : null;
     }
@@ -400,7 +410,7 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
       vectors.position.set(next.x+Math.sin(viewYaw)*Math.cos(lookPitch)*(distance+blast*74),
         Math.max(3,next.y+Math.sin(lookPitch)*distance+blast*16),next.z+Math.cos(viewYaw)*Math.cos(lookPitch)*distance);
       camera.position.lerp(vectors.position, 1 - Math.exp(-dt * (blast?2.4:5)));
-      vectors.target.set(next.x, next.y+1, next.z);
+      vectors.target.set(next.x, next.y+(airship?7:1), next.z);
       camera.lookAt(vectors.target);
       // 발사할 때만 3인칭 시선에도 반동을 적용한다.
       if (shake.current.pitch) camera.rotateX(shake.current.pitch*.6);
@@ -461,8 +471,8 @@ export default function FlightMode({ extent, buildings=[], controlsRef, onCamera
     {/* 콕핏은 카메라가 실내에 있을 때만 마운트한다. 3인칭에서는 삼각형을 쓰지 않는다. */}
     {/* status, 조종간, 자세, 날씨 모두 ref 나 prop 이다. Cockpit 과 계기는 부모가 다시 렌더하지
         않아도 매 프레임 스스로 읽는다. */}
-    {view==='first' && <Cockpit rideKey={plane} statusRef={cockpitStatusRef} controlsRef={applied} poseRef={state} night={night} weather={weather} />}
-    {pilotName && view!=='first' && <Html position={[0,6,0]} center zIndexRange={[14,1]} distanceFactor={24} style={{pointerEvents:'none'}}><span className="world-pilot-label" data-self="">{pilotName}</span></Html>}
+    {view==='first' && <Cockpit rideKey={plane} statusRef={cockpitStatusRef} controlsRef={applied} poseRef={state} night={night} weather={weather} quality="low" />}
+    {pilotName && view!=='first' && <Html position={[0,airship?18:6,0]} center zIndexRange={[14,1]} style={{pointerEvents:'none'}}><span className="world-pilot-label actor-player-label" data-self="">● PLAYER · {pilotName}</span></Html>}
   </group>
   {mounts && <Projectiles arsenalRef={arsenal} />}
   {mounts?.cannon && <AimMarker solutionRef={gunHit} tone="air" />}

@@ -2,6 +2,7 @@
  * 모델의 노즐이나 파일런을 옮기면 이 표도 같이 옮긴다.
  */
 export const ENGINE_PORTS = {
+  airship: [],
   jet: [{ position: [-3.4, -0.82, 4.05], radius: 0.4 }, { position: [3.4, -0.82, 4.05], radius: 0.4 }],
   bomber: [
     { position: [-2.9, 0.25, 2.3], radius: 0.34 }, { position: [2.9, 0.25, 2.3], radius: 0.34 },
@@ -17,6 +18,8 @@ export const ENGINE_PORTS = {
 };
 
 const ARMAMENT = {
+  // Fixed paired helicopter machine guns; the model mounts read these same ports.
+  helicopter: { cannon: [[-1.5, -.5, -4.9], [1.5, -.5, -4.9]], converge: 220 },
   fighter: {
     cannon: [[-0.69, 0.06, -6.05], [0.69, 0.06, -6.05]],
     missile: [[-4.37, -1.01, 1.46], [4.37, -1.01, 1.46], [-5.99, -0.62, 2.13], [5.99, -0.62, 2.13]],

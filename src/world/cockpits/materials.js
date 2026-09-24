@@ -136,7 +136,7 @@ const DEFAULT_PALETTE = Object.freeze({ shell: '#2b2f36', trim: '#3c424b', grip:
 
 export const PALETTES = Object.freeze({
   // 승용차는 가죽과 직물이 보이게 한다. 대시는 반사를 줄인 검정이다.
-  sedan: Object.freeze({ shell: '#23262b', trim: '#3a4048', grip: '#1b1d21', leather: '#6b4f3a', fabric: '#4c4439', metal: '#8e949b' }),
+  sedan: Object.freeze({ shell: '#23262b', trim: '#3a4048', grip: '#1b1d21', leather: '#51433d', fabric: '#272c32', metal: '#8e949b' }),
   suv: Object.freeze({ shell: '#2a2d33', trim: '#40454d', grip: '#1d2024', leather: '#40382f', fabric: '#4a4d52', metal: '#888e95' }),
   // 오픈카만 은색 트림이다. 지붕이 없어 실내가 그대로 햇빛을 받는다.
   convertible: Object.freeze({ shell: '#2b2621', trim: '#9aa0a6', grip: '#221e1a', leather: '#6e2f24', fabric: '#4a4038', metal: '#a8aeb4' }),

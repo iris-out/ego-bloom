@@ -8,7 +8,7 @@ export const COUNTDOWN_MS = COUNTDOWN_STEP_MS * 3;
 const RIDE_KINDS = ['flight', 'car', 'walk'];
 
 export function createWorldPhase() {
-  return { phase: 'establishing', ride: null, countdownStartedAt: 0, resumePhase: 'establishing' };
+  return { phase: 'establishing', ride: null, countdownStartedAt: 0, resumePhase: 'establishing', session: null, menuOpen: false, menuStartedAt: 0 };
 }
 
 /** 선택 시트를 닫으면 열기 직전 상태로 돌아간다. 주행 중에도 열 수 있다.
@@ -35,6 +35,19 @@ function launch(state, action) {
 
 export function worldPhaseReducer(state, action) {
   switch (action?.type) {
+    case 'enterSession':
+      return ['single', 'multi'].includes(action.mode) && !state.session
+        ? { ...createWorldPhase(), session: action.mode, phase: 'exploring' } : state;
+    case 'leaveSession':
+      return createWorldPhase();
+    case 'openMenu':
+      return state.session && !state.menuOpen
+        ? { ...state, menuOpen: true, menuStartedAt: Number.isFinite(action.now) ? action.now : 0 } : state;
+    case 'closeMenu': {
+      if (!state.menuOpen) return state;
+      const delay = state.session === 'single' ? Math.max(0, (Number.isFinite(action.now) ? action.now : state.menuStartedAt) - state.menuStartedAt) : 0;
+      return { ...state, menuOpen: false, countdownStartedAt: state.countdownStartedAt + (state.phase === 'countdown' ? delay : 0) };
+    }
     case 'explore':
       return state.phase === 'establishing' ? { ...state, phase: 'exploring' } : state;
     case 'openPicker':
@@ -56,7 +69,7 @@ export function worldPhaseReducer(state, action) {
 
 /** 전경 정지와 선택 시트, 카운트다운 중에는 조작 입력을 버린다. */
 export function acceptsInput(state) {
-  return state.phase === 'exploring' || state.phase === 'driving';
+  return !state.menuOpen && (state.phase === 'exploring' || state.phase === 'driving');
 }
 
 /** 0,1,2 는 각각 3,2,1 이고 3 은 GO 다. */
@@ -64,4 +77,9 @@ export function countdownStep(state, now) {
   if (state.phase !== 'countdown') return 3;
   const elapsed = Math.max(0, (Number.isFinite(now) ? now : 0) - state.countdownStartedAt);
   return Math.min(3, Math.floor(elapsed / COUNTDOWN_STEP_MS));
+}
+
+/** Single player freezes its clock; a shared room keeps simulating. */
+export function sessionPolicy(state) {
+  return { multiplayer: state.session === 'multi', paused: state.session === 'single' && state.menuOpen, inputBlocked: !state.session || state.menuOpen || !acceptsInput(state) };
 }

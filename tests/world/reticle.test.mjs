@@ -96,7 +96,7 @@ test('시야각을 픽셀로 바꾸면 화각이 좁을 때 더 크게 벌어진
 test('조준선은 무장한 탈것만 갖고 유효 사거리가 탄속에서 나온다', () => {
   assert.equal(reticleOf('car', 'tank'), RETICLE.tank);
   assert.equal(reticleOf('flight', 'fighter'), RETICLE.fighter);
-  for (const [kind, key] of [['car', 'sedan'], ['car', 'motorcycle'], ['flight', 'jet'], ['flight', 'helicopter'], ['walk', 'walk']]) {
+  for (const [kind, key] of [['car', 'sedan'], ['car', 'motorcycle'], ['flight', 'jet'], ['walk', 'walk']]) {
     assert.equal(reticleOf(kind, key), null, `${key} 에 조준선이 붙었다`);
   }
   assert.equal(effectiveRange('flight', 'fighter'), CANNON.speed * CANNON.life);

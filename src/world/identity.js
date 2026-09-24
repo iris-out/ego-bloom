@@ -9,15 +9,23 @@ export const PLANE_META = {
   interceptor: { ko: '요격기', code: 'ITC', eyebrow: 'EGO AIR / INTERCEPTOR', note: '연료를 쓰는 작은 제트다. Shift 로 1080km/h, Q 로 켜는 강화 부스트는 1340km/h 까지 낸다.' },
   shotgun: { ko: '샷거너', code: 'SGN', eyebrow: 'EGO AIR / SHOTGUNNER', note: '요격기 동체를 공유하는 2연장 산탄 전투기다. 한 번 누르면 팡-팡 발사한다.' },
   bomber: { ko: '폭격기', code: 'BMR', eyebrow: 'EGO AIR / BOMBER', note: '폭탄창을 열고 아래로 폭탄을 떨군다.' },
-  helicopter: { ko: '헬기', code: 'HEL', eyebrow: 'EGO AIR / HELICOPTER', note: '방향키로 로터 출력을 올려 수직으로 뜬다.' },
+  helicopter: { ko: '헬기', code: 'HEL', eyebrow: 'EGO AIR / HELICOPTER', note: '방향키로 로터 출력을 올려 수직으로 뜬다. 좌우 기관총 2정으로 사격한다.' },
+  airship: { ko: '비행선', code: 'AIR', eyebrow: 'EGO AIR / AIRSHIP', note: 'W/S로 상승·하강, A/D로 선회한다. 스로틀로 천천히 순항하고 손을 놓으면 고도를 유지한다.' },
 };
 export const PLANE_KEYS = Object.keys(PLANE_META);
+/** Jet remains a supported scene/network model, but is no longer a player choice. */
+export const SELECTABLE_PLANE_KEYS = PLANE_KEYS.filter((key) => key !== 'jet');
+export const DEFAULT_PLAYER_PLANE = 'fighter';
 
 // 지상 차량은 비행기와 따로 고른다. 모드를 바꿔도 각각의 선택이 남는다.
 export const VEHICLE_META = {
   sedan: { ko: '세단', code: 'SDN', eyebrow: 'EGO ROAD / SEDAN', note: '안정적이고 접지력이 좋은 4도어다.' },
   suv: { ko: 'SUV', code: 'SUV', eyebrow: 'EGO ROAD / SUV', note: '차고가 높아 시야가 넓고 무겁게 달린다.' },
-  convertible: { ko: '오픈카', code: 'CNV', eyebrow: 'EGO ROAD / CONVERTIBLE', note: '지붕을 연 2도어다. 가볍고 빠르지만 바람을 다 맞는다.' },
+  convertible: { ko: '오픈카', code: 'CNV', eyebrow: 'EGO ROAD / CONVERTIBLE', note: '지붕을 연 2+2 스포츠 컨버터블이다.' },
+  drift: { ko: '드리프트 튜닝카', code: 'DFT', eyebrow: 'EGO ROAD / DRIFT', note: '오픈카 기반 튜닝카. Space로 드리프트를 시작하고 가속과 반대 조향으로 미끄러짐을 조절한다.' },
+  coupe: { ko: '쿠페', code: 'CPE', eyebrow: 'EGO ROAD / FOUR-DOOR COUPE', note: '유려한 지붕선을 지닌 4도어 쿠페다.' },
+  supercar: { ko: '슈퍼카', code: 'SUP', eyebrow: 'EGO ROAD / SUPERCAR', note: '낮고 넓은 2인승 슈퍼카다.' },
+  electric: { ko: '전기차', code: 'EV', eyebrow: 'EGO ROAD / ELECTRIC', note: '조용한 단일 감속기와 회생 제동을 쓰는 전기 세단이다.' },
   formula: { ko: '포뮬러', code: 'F1', eyebrow: 'EGO FORMULA / OPEN WHEEL', note: '300km/h까지 가속하는 현대식 오픈휠 머신이다. Space로 드리프트한다.' },
   truck: { ko: '트럭', code: 'TRK', eyebrow: 'EGO ROAD / TRUCK', note: '적재함을 단 캡오버 트럭이다. 느리고 회전 반경이 크다.' },
   motorcycle: { ko: '오토바이', code: 'MTC', eyebrow: 'EGO ROAD / MOTORCYCLE', note: '가볍고 빠르지만 접지력이 낮다.' },
@@ -54,6 +62,11 @@ export function validPlane(value) {
   return PLANE_KEYS.includes(value) ? value : PLANE_KEYS[0];
 }
 
+/** Normalize a saved or requested player choice without changing legacy model keys. */
+export function validSelectablePlane(value) {
+  return SELECTABLE_PLANE_KEYS.includes(value) ? value : DEFAULT_PLAYER_PLANE;
+}
+
 export function validVehicle(value) {
   return VEHICLE_KEYS.includes(value) ? value : VEHICLE_KEYS[0];
 }
@@ -62,16 +75,16 @@ export function loadIdentity() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const parsed = raw ? JSON.parse(raw) : null;
-    const identity = { name: sanitizeName(parsed?.name) || makeName(), plane: validPlane(parsed?.plane), vehicle: validVehicle(parsed?.vehicle) };
-    if (!sanitizeName(parsed?.name)) saveIdentity(identity);
+    const identity = { name: sanitizeName(parsed?.name) || makeName(), plane: validSelectablePlane(parsed?.plane), vehicle: validVehicle(parsed?.vehicle) };
+    if (!sanitizeName(parsed?.name) || (parsed && parsed.plane !== identity.plane)) saveIdentity(identity);
     return identity;
   } catch {
-    return { name: makeName(), plane: PLANE_KEYS[0], vehicle: VEHICLE_KEYS[0] };
+    return { name: makeName(), plane: DEFAULT_PLAYER_PLANE, vehicle: VEHICLE_KEYS[0] };
   }
 }
 
 export function saveIdentity(identity) {
-  const value = { name: sanitizeName(identity?.name), plane: validPlane(identity?.plane), vehicle: validVehicle(identity?.vehicle) };
+  const value = { name: sanitizeName(identity?.name), plane: validSelectablePlane(identity?.plane), vehicle: validVehicle(identity?.vehicle) };
   // 저장이 막힌 브라우저에서도 이번 세션은 그대로 쓴다.
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(value)); } catch { /* 무시한다 */ }
   return value;

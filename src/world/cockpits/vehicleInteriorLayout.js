@@ -1,3 +1,4 @@
+import { modernScreenFacets } from './modernCabinLayout.js';
 import { cockpitFov, eyePoint } from '../eyePoints.js';
 import { barTop, hoodEdge, ledgeEdge, ringTop, sideWall } from './gaugeClearance.js';
 import { GROUND_GUNS } from '../groundWeapons.js';
@@ -41,10 +42,7 @@ export const ROAD_CABINS = Object.freeze({
     dials: Object.freeze([Object.freeze([-0.20, -0.25, -0.74]), Object.freeze([0.20, -0.25, -0.74])]),
     dialRadius: 0.088,
     display: Object.freeze([0, -0.25, -0.745, 0.19, 0.10]),
-    screens: Object.freeze([
-      Object.freeze({ id: 'driver', mode: 'executiveCluster', x: 0.06, y: -0.25, z: -0.748, width: 0.46, height: 0.18, yaw: 0.035 }),
-      Object.freeze({ id: 'center', mode: 'roadnav', x: 0.54, y: -0.245, z: -0.720, width: 0.52, height: 0.19, yaw: -0.025 }),
-    ]),
+    screens: modernScreenFacets('sedan'),
     screenBackingDepth: 0.024, screenOffset: 0.018,
     // 림 윗점이 계기 아랫변보다 아래로 내려오도록 휠을 2cm 낮췄다. 앉은 운전자의 휠 중심은
     // 눈에서 0.5 안팎 아래다.
@@ -83,7 +81,8 @@ export const ROAD_CABINS = Object.freeze({
     dials: Object.freeze([Object.freeze([-0.185, -0.30, -0.86]), Object.freeze([0.245, -0.30, -0.86])]),
     dialRadius: 0.092,
     display: Object.freeze([0, -0.32, -0.865, 0.21, 0.105]),
-    centerScreen: Object.freeze({ id: 'center', mode: 'roadnav', x: 0.60, y: -0.23, z: -0.895, width: 0.52, height: 0.24, yaw: -0.02 }),
+    screens: modernScreenFacets('suv'),
+    centerScreen: modernScreenFacets('suv')[1],
     screenBackingDepth: 0.024, screenOffset: 0.018,
     wheel: Object.freeze({ y: -0.59, z: -0.66, radius: 0.195, tilt: -0.38, ratio: 2.2 }),
     seats: Object.freeze({ driverX: -0.55, passengerX: 0.50, y: -0.61, z: 0.14, width: 0.52, depth: 0.54, material: 'fabric' }),

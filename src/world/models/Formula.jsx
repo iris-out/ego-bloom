@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import Block from './ModelBlock';
+import { Shell, Airfoil, Duct } from './SurfaceParts.jsx';
 import { Wheel } from './carParts.jsx';
 import { rollWheels, steerAngle } from './carGeometry.js';
 import StaticBatch from '../StaticBatch.jsx';
@@ -40,14 +41,13 @@ export default function Formula({ wheelsRef, steer = 0, speed = 0, firstPerson =
       {/* 바닥과 모노코크. 얇은 플로어가 사이드포드와 디퓨저를 한 실루엣으로 묶는다. */}
       <group userData={{ part: 'monocoque' }}>
         <Block position={[0, -0.58, 0.25]} scale={[1.72, 0.08, 3.95]} color={CARBON} />
-        <Block position={[0, -0.41, -1.72]} scale={[0.34, 0.24, 1.75]} rotation={[-0.07, 0, 0]} color={BODY_LIGHT} />
-        <Block position={[0, -0.27, -2.35]} scale={[0.18, 0.18, 0.9]} color={BODY_LIGHT} />
-        <Block position={[0, -0.22, -2.72]} scale={[0.1, 0.12, 0.24]} color={ACCENT} />
+        <Shell color={BODY_LIGHT} stations={[{z:-2.84,rx:.045,ry:.045,cy:-.22},{z:-2.35,rx:.1,ry:.09,cy:-.27},{z:-1.65,rx:.19,ry:.15,cy:-.32},{z:-.845,rx:.27,ry:.16,cy:-.34}]}/>
+
       </group>
 
       {/* 프런트 윙은 주 날개, 플랩, 끝판으로 층을 나눈다. */}
       <group userData={{ part: 'front-wing' }}>
-        <Block position={[0, -0.57, -2.76]} scale={[2.08, 0.06, 0.42]} color={CARBON} />
+        <Airfoil position={[0,-.57,0]} color={CARBON} stations={[{x:-1.04,front:-2.97,back:-2.55,thickness:.04},{x:0,front:-2.91,back:-2.55,thickness:.07},{x:1.04,front:-2.97,back:-2.55,thickness:.04}]}/>
         <Block position={[0, -0.49, -2.64]} scale={[1.76, 0.05, 0.26]} rotation={[0.12, 0, 0]} color={BODY_LIGHT} />
         {[-1, 1].map(side => <Block key={side} position={[side * 1.03, -0.43, -2.74]}
           scale={[0.05, 0.34, 0.48]} color={ACCENT} />)}
@@ -69,7 +69,7 @@ export default function Formula({ wheelsRef, steer = 0, speed = 0, firstPerson =
 
       {/* 리어 윙과 디퓨저. */}
       <group userData={{ part: 'rear-wing' }}>
-        <Block position={[0, 0.24, 2.35]} scale={[1.82, 0.1, 0.34]} rotation={[-0.08, 0, 0]} color={CARBON} />
+        <Airfoil position={[0,.24,0]} color={CARBON} stations={[{x:-.91,front:2.18,back:2.52,thickness:.1},{x:.91,front:2.18,back:2.52,thickness:.1}]}/>
         <Block position={[0, 0.4, 2.22]} scale={[1.7, 0.08, 0.24]} rotation={[-0.16, 0, 0]} color={ACCENT} />
         {[-1, 1].map(side => <Block key={side} position={[side * 0.86, 0.05, 2.3]}
           scale={[0.06, 0.7, 0.42]} color={BODY_LIGHT} />)}
@@ -91,7 +91,7 @@ export default function Formula({ wheelsRef, steer = 0, speed = 0, firstPerson =
     {/* 카메라와 겹치는 머리받침·콕핏 두레·외장 미러는 1인칭 실내가 대신한다. */}
     <group visible={!firstPerson} userData={{ part: 'camera-intersection' }}>
       <Block position={[0, -0.55, 0.1]} scale={[0.72, 0.42, 3.7]} color={BODY} />
-      <Block position={[0, -0.03, 0.72]} scale={[0.52, 0.72, 1.55]} rotation={[0.04, 0, 0]} color={BODY_LIGHT} />
+      <Shell color={BODY_LIGHT} stations={[{z:-.05,rx:.25,ry:.2,cy:-.14},{z:.4,rx:.26,ry:.36,cy:-.03},{z:1,rx:.22,ry:.3,cy:-.08},{z:1.5,rx:.09,ry:.12,cy:-.29}]}/>
       <Block position={[0, 0.28, 0.94]} scale={[0.08, 0.62, 1.15]} color={ACCENT} />
       <Block position={[0, 0.14, 0.62]} scale={[0.46, 0.56, 0.42]} rotation={[-0.18, 0, 0]} color={CARBON} />
       <Block position={[0, -0.02, -0.05]} scale={[0.74, 0.3, 1.05]} color={CARBON} />
@@ -100,8 +100,8 @@ export default function Formula({ wheelsRef, steer = 0, speed = 0, firstPerson =
         <Block position={[side * 0.84, 0.17, -0.66]} scale={[0.24, 0.12, 0.08]} color={BODY_LIGHT} />
       </group>)}
       {[-1, 1].map(side => <group key={`pod-${side}`} userData={{ part: 'sidepod' }}>
-        <Block position={[side * 0.59, -0.28, 0.18]} scale={[0.58, 0.5, 1.65]} rotation={[0, side * 0.025, 0]} color={BODY} />
-        <Block position={[side * 0.62, -0.19, -0.43]} scale={[0.48, 0.3, 0.34]} color={CARBON} />
+        <Shell position={[side*.59,0,0]} color={BODY} stations={[{z:-.645,rx:.24,ry:.21,cy:-.24,power:3},{z:-.25,rx:.29,ry:.25,cy:-.28,power:3},{z:.5,rx:.24,ry:.19,cy:-.32,power:3},{z:1.005,rx:.09,ry:.1,cy:-.38}]}/>
+        <Duct position={[side*.62,-.19,-.43]} scale={[1,.64,1]} radius={.24} length={.34} wall={.025} color={CARBON}/>
         <Block position={[side * 0.63, -0.43, 0.32]} scale={[0.5, 0.1, 1.5]} color={ACCENT} />
       </group>)}
     </group>

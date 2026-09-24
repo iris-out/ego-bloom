@@ -1,4 +1,5 @@
 import { flightBoundary } from './flightPhysics.js';
+import { showDamagedHealthBar } from './health.js';
 
 /** 도시 상공을 도는 AI 항공기다. 순수 함수이며 Three, React, 네트워크에 의존하지 않는다.
  * traffic.js 와 계약이 같다. 시간만 주면 같은 배치가 나오므로 상태를 들고 있지 않고,
@@ -121,10 +122,10 @@ export function createAirCombat() {
   return { damage: new Map(), downed: new Map(), kills: 0, label: '' };
 }
 
-/** 표식 거리 안에서 피해를 입은 적기의 체력바만 보여준다. */
+/** 피해를 입은 적기만 표식 거리 안에서 체력바를 보여준다. */
 export const AIR_MARK_RANGE = 2400, AIR_MODEL_RANGE = 900;
 export function showAirHealthBar(hurt, down, range) {
-  return !down && range < AIR_MARK_RANGE && hurt > 0;
+  return !down && range < AIR_MARK_RANGE && showDamagedHealthBar(1 - hurt);
 }
 
 /** 막대는 100m 안에서 최대 크기, 900m 밖에서 최소 크기로 고정한다. */

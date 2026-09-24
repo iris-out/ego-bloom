@@ -68,12 +68,15 @@ export function mirrorYaw(key) {
 
 /** 뒤 카메라 자리다. 차체 원점 기준이며 차마다 뒤 유리 높이가 다르다. 카메라는 +Z 를 본다. */
 export const REAR_CAMERA = Object.freeze({
-  sedan: [0, 0.75, 2.2], suv: [0, 1.0, 2.3], convertible: [0, 0.6, 2.0], formula: [0, 0.55, 2.65], truck: [0, 2.1, -1.6],
+  drift: [0, .62, 2.22],
+  sedan: [0, 0.75, 2.2], suv: [0, 1.0, 2.3], convertible: [0, .62, 2.22],
+  coupe: [0, .77, 2.32], supercar: [0, .44, 2.16], electric: [0, .80, 2.30],
+  formula: [0, 0.55, 2.65], truck: [0, 2.1, -1.6],
   // 라이더 몸을 피하려 승용차보다 조금 높게 둔다.
   motorcycle: [0, 0.75, 0.6],
 });
 
-const SIDE_CAMERA_X = Object.freeze({ sedan: 0.9, suv: 1.03, convertible: 0.88, formula: 0.82, truck: 1.1, motorcycle: 0.48 });
+const SIDE_CAMERA_X = Object.freeze({ drift: 1.10, sedan: 0.9, suv: 1.03, convertible: .94, coupe: .97, supercar: .98, electric: .96, formula: 0.82, truck: 1.1, motorcycle: 0.48 });
 
 /** 차체 중앙 후방 카메라와 달리, 측면 카메라는 각 도어/콕핏 가장자리로 옮겨 자기 차체 대신 옆 차선을 본다. */
 export function mirrorCameraPosition(vehicle, key) {

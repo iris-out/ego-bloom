@@ -29,12 +29,14 @@ test('없는 키는 폴백하지 않는다', () => {
   assert.equal(hasFirstPerson('walk'), false);
 });
 
-test('눈높이는 모두 서로 다르고 접지면 위에 있다', () => {
+test('눈높이는 공유 동체를 제외하고 서로 다르며 접지면 위에 있다', () => {
   const seen = new Set();
   for (const [key, point] of Object.entries(EYE_POINTS)) {
     const signature = point.join(',');
-    assert.ok(!seen.has(signature), `${key} 가 다른 탈것과 같은 좌표를 쓴다`);
-    seen.add(signature);
+    if (key === 'shotgun') assert.deepEqual(point, EYE_POINTS.interceptor, '공유 동체는 같은 조종석을 쓴다');
+    else if (key === 'drift') assert.deepEqual(point, EYE_POINTS.convertible, '드리프트 차는 같은 오픈카 캐빈을 쓴다');
+    else assert.ok(!seen.has(signature), `${key} 가 다른 탈것과 같은 좌표를 쓴다`);
+    if (key !== 'drift') seen.add(signature);
     assert.ok(point[1] > -1.9, `${key} 눈높이가 접지면 아래다`);
   }
 });
@@ -53,6 +55,8 @@ test('중앙값이 아닌 좌우·앞뒤 착좌 위치는 축마다 구별된다
     for (const [key, point] of Object.entries(EYE_POINTS)) {
       const value = point[axis];
       if (value === 0) continue;
+      if (key === 'shotgun' && owner.get(value) === 'interceptor') continue;
+      if (key === 'drift') continue; // Complete coordinate equality is asserted above, independent of key order.
       assert.equal(owner.has(value), false, `${key} 와 ${owner.get(value)} 가 ${axis} 축에서 ${value} 를 공유한다`);
       owner.set(value, key);
     }

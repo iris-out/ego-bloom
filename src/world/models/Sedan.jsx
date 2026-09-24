@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import Block from './ModelBlock';
+import { Shell } from './SurfaceParts.jsx';
 import { Wheel } from './carParts.jsx';
 import {
-  beamBetween, createVehicleBodyGeometries, flatPolygonGeometry, loftBody, quadGeometry,
+  beamBetween, curvedPane, createVehicleBodyGeometries, flatPolygonGeometry, loftBody, quadGeometry,
   steerAngle, VEHICLE_SHAPES,
 } from './carGeometry.js';
 import { DetailLamp, PanelSeam, SurfaceVent } from './exteriorDetails.jsx';
@@ -24,9 +25,9 @@ const TWO_PI = Math.PI * 2;
 const MAX_STEER = 0.5;
 const MAX_STEP = 0.05;
 
-const BODY = '#315d70';
-const BODY_DARK = '#244653';
-const BODY_HIGHLIGHT = '#477b8e';
+const BODY = '#455e78';
+const BODY_DARK = '#243b50';
+const BODY_HIGHLIGHT = '#6b8297';
 const GLASS = '#203d4b';
 const TIRE = '#2a3134';
 const RIM = '#c7ccce';
@@ -54,10 +55,10 @@ function mirroredPane(points) {
   return points.map(([x, y, z]) => [-x, y, z]);
 }
 
-function FrameBeam({ from, to, width = 0.055, depth = 0.075, color = BODY_DARK }) {
+function FrameBeam({ from, to, width = 0.037, depth = 0.052, color = BODY_DARK }) {
   const beam = beamBetween(from, to);
   return <mesh position={beam.position} quaternion={beam.quaternion} scale={[width, beam.length, depth]}>
-    <boxGeometry />
+    <cylinderGeometry args={[.5,.5,1,12]} />
     <meshStandardMaterial color={color} metalness={0.32} roughness={0.4} />
   </mesh>;
 }
@@ -77,13 +78,13 @@ export default function Sedan({ wheelsRef, steer = 0, speed = 0, firstPerson = f
     return {
       ...body,
       roofShell: loftBody(SHAPE.roofSections),
-      roofInset: quadGeometry([[-0.52, 0.885, 0.65], [0.52, 0.885, 0.65], [0.55, 0.895, -0.50], [-0.55, 0.895, -0.50]]),
-      windshield: quadGeometry(SHAPE.windshield),
-      rearWindow: quadGeometry(SHAPE.rearWindow),
-      sideFrontLeft: quadGeometry(left.front),
-      sideRearLeft: quadGeometry(left.rear),
-      sideFrontRight: quadGeometry(mirroredPane(left.front)),
-      sideRearRight: quadGeometry(mirroredPane(left.rear)),
+      roofInset: curvedPane([[-0.50, 0.885, 0.67], [0.50, 0.885, 0.67], [0.50, 0.885, -0.10], [-0.50, 0.885, -0.10]], .010),
+      windshield: curvedPane(SHAPE.windshield),
+      rearWindow: curvedPane(SHAPE.rearWindow),
+      sideFrontLeft: curvedPane(left.front),
+      sideRearLeft: curvedPane(left.rear),
+      sideFrontRight: curvedPane(mirroredPane(left.front)),
+      sideRearRight: curvedPane(mirroredPane(left.rear)),
       frontGrilles: [flatPolygonGeometry(mirroredOutline(GRILLE_RIGHT), -2.536), flatPolygonGeometry(GRILLE_RIGHT, -2.536)],
       frontLampHousings: SEDAN_FRONT_LIGHTS.housings.map(lamp => flatPolygonGeometry(lamp.rear, -2.541)),
       frontLowerIntake: flatPolygonGeometry([[-0.70, -0.235], [0.70, -0.235], [0.54, -0.46], [-0.54, -0.46]], -2.542),
@@ -134,7 +135,7 @@ export default function Sedan({ wheelsRef, steer = 0, speed = 0, firstPerson = f
       {['hood', 'tail', 'sideSkin', 'frontDeck', 'rearDeck'].map((name) => <mesh key={name}
         userData={name === 'sideSkin' ? { part: 'sculpted-body-shell' } : undefined}
         geometry={geometries[name]} dispose={null}>
-        <meshStandardMaterial color={BODY} metalness={0.38} roughness={0.36} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={BODY} metalness={0.42} roughness={0.29} side={THREE.DoubleSide} />
       </mesh>)}
       <mesh geometry={geometries.floor} dispose={null}>
         <meshStandardMaterial color={BODY_DARK} metalness={0.22} roughness={0.48} />
@@ -159,12 +160,12 @@ export default function Sedan({ wheelsRef, steer = 0, speed = 0, firstPerson = f
 
       {/* 사이드미러 */}
       {[-1, 1].map((side) => <group key={side} position={[side * 1.06, 0.33, -0.78]}>
-        <Block scale={[0.18, 0.11, 0.16]} rotation={[0, side * 0.12, 0]} color={BODY_DARK} />
+        <Shell color={BODY_DARK} stations={[{z:-.08,rx:.045,ry:.034},{z:-.015,rx:.09,ry:.055,power:3},{z:.08,rx:.075,ry:.042,power:4}]}/>
         <DetailLamp position={[side * 0.09, -0.015, -0.085]} color={TRIM} scale={0.025} />
       </group>)}
 
       {/* 전면: 독립 듀얼 그릴, 각진 프로젝터 램프와 넓은 하단 흡기구다. */}
-      <Block position={[0, -0.16, -2.38]} scale={[1.96, 0.64, 0.30]} color={BODY} />
+      <Shell color={BODY} stations={[{z:-2.53,rx:.98,ry:.30,cy:-.16,power:6},{z:-2.42,rx:1,ry:.32,cy:-.16,power:5},{z:-2.23,rx:.98,ry:.32,cy:-.16,power:5}]}/>
       <Block position={[0, -0.48, -2.50]} scale={[1.82, 0.07, 0.08]} color={BODY_DARK} />
       {[-1, 1].map((side, grilleIndex) => {
         const points = side < 0 ? mirroredOutline(GRILLE_RIGHT) : GRILLE_RIGHT;
@@ -175,11 +176,11 @@ export default function Sedan({ wheelsRef, steer = 0, speed = 0, firstPerson = f
         {points.map(([x, y], index) => {
           const [nextX, nextY] = points[(index + 1) % points.length];
           return <FrameBeam key={index} from={[x, y, -2.548]} to={[nextX, nextY, -2.548]}
-            width={0.014} depth={0.012} color={TRIM} />;
+            width={0.010} depth={0.012} color="#8e9da9" />;
         })}
         {Array.from({ length: 7 }, (_, index) => side * (0.105 + index * 0.062)).map(x => <Block key={x}
           userData={{ part: 'kidney-grille-slat' }} position={[x, -0.015, -2.550]}
-          scale={[0.010, 0.21, 0.008]} color={TRIM} />)}
+          scale={[0.010, 0.21, 0.008]} color="#55636e" />)}
       </group>})}
       {SEDAN_FRONT_LIGHTS.housings.map((lamp, index) => <mesh key={lamp.side}
         userData={{ part: 'sedan-headlamp-housing' }} geometry={geometries.frontLampHousings[index]} dispose={null}>
@@ -209,7 +210,7 @@ export default function Sedan({ wheelsRef, steer = 0, speed = 0, firstPerson = f
       </mesh>)}
 
       {/* 후면: 램프선에 붙는 트렁크 립, 두 줄 램프, 오목한 번호판과 넓은 검은 디퓨저다. */}
-      <Block position={[0, -0.18, 2.38]} scale={[1.96, 0.64, 0.30]} color={BODY} />
+      <Shell color={BODY} stations={[{z:2.23,rx:.98,ry:.32,cy:-.18,power:5},{z:2.42,rx:1,ry:.32,cy:-.18,power:5},{z:2.53,rx:.98,ry:.30,cy:-.18,power:6}]}/>
       <Block userData={{ part: 'trunk-lip' }} position={[0, 0.145, 2.43]} scale={[1.82, 0.035, 0.16]} color={BODY_HIGHLIGHT} />
       <mesh userData={{ part: 'rear-plate-inset' }} geometry={geometries.rearPlateInset} dispose={null}>
         <meshStandardMaterial color={BODY_DARK} metalness={0.2} roughness={0.42} side={THREE.DoubleSide} />

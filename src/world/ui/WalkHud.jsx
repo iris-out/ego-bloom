@@ -1,4 +1,4 @@
-import { ChevronsUp, Crosshair, Eye, Flashlight, Footprints, RefreshCw } from 'lucide-react';
+import { Crosshair, Eye, Flashlight, Footprints, RefreshCw } from 'lucide-react';
 import { MAX_HP, WALK_WEAPONS, WEAPON_KEYS } from '../walkPhysics.js';
 import FpsCrosshair from './FpsCrosshair.jsx';
 import KillFeed from './KillFeed.jsx';
@@ -10,7 +10,7 @@ import KillFeed from './KillFeed.jsx';
 
 /** 체력 막대를 나누는 칸 하나의 크기다. 오버워치처럼 눈금으로 남은 양을 읽는다. */
 const HP_PER_PIP = 25;
-const ABILITY_ICON = { sprint: Footprints, jump: ChevronsUp, lean: Eye, torch: Flashlight, reload: RefreshCw };
+const ABILITY_ICON = { sprint: Footprints, torch: Flashlight };
 
 /** 눌러서 유지하는 버튼이다. 키보드가 없는 기기의 사격과 정조준 수단이다. */
 function HoldPad({ label, hotkey, icon, onHold }) {
@@ -44,7 +44,6 @@ export default function WalkHud({ status = {}, onFire, onAim, onWeapon, onReload
   const kills = status.kills || 0;
   const stamina = Number.isFinite(status.stamina) ? status.stamina : 1;
   const reloading = !!status.reloading;
-  const lean = Number(status.lean) || 0;
 
   return <div className="wui-fps" data-level={level}>
     <FpsCrosshair spread={status.spread} aiming={status.aiming} weapon={status.weapon}
@@ -58,7 +57,7 @@ export default function WalkHud({ status = {}, onFire, onAim, onWeapon, onReload
     <div className="wui-fps-bar">
       <div className="wui-fps-health" role="meter" aria-label="체력"
         aria-valuemin={0} aria-valuemax={Math.round(maxHp)} aria-valuenow={Math.round(hp)}>
-        <b>{Math.round(hp)}</b>
+        <div className="wui-fps-health-value"><span>HEALTH</span><b>{Math.round(hp)}</b><small>/ {Math.round(maxHp)}</small></div>
         <span className="wui-fps-pips">
           {Array.from({ length: pips }).map((_, index) => {
             // 칸마다 채운 비율을 따로 계산한다. 마지막 한 칸이 반쯤 남는 것도 보인다.
@@ -78,10 +77,7 @@ export default function WalkHud({ status = {}, onFire, onAim, onWeapon, onReload
         </div>
         <div className="wui-fps-abilities">
           <Ability kind="sprint" name="달리기" hotkey="SHIFT" fill={stamina} active={!!status.running} dim={stamina <= 0.05} />
-          <Ability kind="jump" name="점프" hotkey="SPACE" fill={status.airborne ? 0 : 1} active={!!status.airborne} />
-          <Ability kind="lean" name="피킹" hotkey="Q/C" fill={Math.abs(lean)} active={Math.abs(lean) > 0.15} />
           <Ability kind="torch" name="손전등" hotkey="E" fill={status.torch ? 1 : 0} active={!!status.torch} />
-          <Ability kind="reload" name="재장전" hotkey="R" fill={reloading ? (status.reloadAt || 0) : 1} active={reloading} />
         </div>
       </div>
 
@@ -92,15 +88,15 @@ export default function WalkHud({ status = {}, onFire, onAim, onWeapon, onReload
           : <span className="wui-fps-ammo-count"><b>∞</b></span>}
         {reloading && <span className="wui-fps-reload"><i style={{ width: `${Math.round((status.reloadAt || 0) * 100)}%` }} />재장전</span>}
       </div>
-    </div>
 
-    {/* 마우스가 없는 기기의 사격과 정조준이다. 데스크톱에서는 CSS 가 숨긴다. */}
-    <div className="wui-fps-touch">
-      <HoldPad label="정조준" hotkey="우클릭" icon={<Eye size={16} aria-hidden="true" />} onHold={onAim} />
-      <HoldPad label="사격" hotkey="좌클릭" icon={<Crosshair size={16} aria-hidden="true" />} onHold={onFire} />
-      <button type="button" className="wui-fps-pad" aria-label="재장전, 단축키 R" onClick={() => onReload?.()}>
-        <RefreshCw size={16} aria-hidden="true" /><span>재장전</span>
-      </button>
+      {/* Attach touch actions to the bar so their clearance follows HUD scale and content height. */}
+      <div className="wui-fps-touch">
+        <HoldPad label="정조준" hotkey="우클릭" icon={<Eye size={16} aria-hidden="true" />} onHold={onAim} />
+        <HoldPad label="사격" hotkey="좌클릭" icon={<Crosshair size={16} aria-hidden="true" />} onHold={onFire} />
+        <button type="button" className="wui-fps-pad" aria-label="재장전, 단축키 R" onClick={() => onReload?.()}>
+          <RefreshCw size={16} aria-hidden="true" /><span>재장전</span>
+        </button>
+      </div>
     </div>
   </div>;
 }

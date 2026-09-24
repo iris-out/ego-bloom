@@ -160,7 +160,7 @@ function Markers({ dotsRef, capacity, marked }) {
   return <points ref={points} geometry={geometry} material={material} frustumCulled={false} dispose={null} />;
 }
 
-/** 피격된 기체의 체력 막대다. 화면에 보이는 목록이 바뀔 때만
+/** 가까운 기체와 피격된 기체의 체력 막대다. 화면에 보이는 목록이 바뀔 때만
  * Html 을 마운트하고 값과 위치는 DOM·Three 객체를 직접 고쳐 넣는다. */
 function HealthBars({ hurtRef }) {
   const [shown, setShown] = useState([]);
@@ -226,7 +226,7 @@ function Wrecks({ extent, combatRef }) {
 
 function AirTraffic({ extent, count = 0, combatRef, marked = false }) {
   const slots = useMemo(() => Array.from({ length: Math.max(0, count) }, (_, index) => index), [count]);
-  // 맞은 기체만 담는다. Aircraft 가 매 프레임 채우고 HealthBars 가 읽는다.
+  // 가까운 기체와 맞은 기체만 담는다. Aircraft 가 매 프레임 채우고 HealthBars 가 읽는다.
   const hurt = useRef(new Map());
   const onBar = useCallback((index, amount, pose, range) => {
     if (amount !== null) hurt.current.set(index, { hurt: amount, x: pose.x, y: pose.y, z: pose.z, range });

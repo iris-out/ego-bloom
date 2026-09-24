@@ -1,3 +1,5 @@
+const aircraftAliases = (table) => Object.freeze({ ...table, shotgun: table.interceptor });
+
 import { cockpitFov } from '../eyePoints.js';
 import { hoodEdge, ringTop } from './gaugeClearance.js';
 
@@ -36,7 +38,7 @@ export const SPECIAL_DIALS = Object.freeze({
 });
 
 /** 한 장의 캔버스에 그리는 스위치 명판이다. 입력 상태를 흉내 내지 않고 기능만 적는다. */
-export const AIRCRAFT_PLACARDS = Object.freeze({
+export const AIRCRAFT_PLACARDS = aircraftAliases({
   jet: { title: 'SYSTEMS', labels: ['BAT', 'GEN', 'NAV', 'PITOT'] },
   bomber: { title: 'BAY CTRL', labels: ['BAY', 'SAFE', 'LIGHTS', 'TRIM'] },
   prop: { title: 'ENGINE', labels: ['MAG', 'PROP', 'MIX', 'PITOT'] },
@@ -46,7 +48,7 @@ export const AIRCRAFT_PLACARDS = Object.freeze({
 });
 
 /** 실제 hardpoint 에 미사일이 없는 기종은 어떤 화면에도 MSL 을 적지 않는다. */
-export const GUN_ONLY_PLANES = Object.freeze(['prop', 'interceptor', 'shotgun']);
+export const GUN_ONLY_PLANES = Object.freeze(['prop', 'interceptor', 'shotgun', 'helicopter']);
 
 /** 명판 한 장의 실제 크기와 캔버스 안 라벨 칸 좌표다. placardMaterial 이 같은 값으로 그린다.
  * 토글 스위치를 라벨 칸마다 하나씩 세우려면 캔버스 픽셀을 평면 좌표로 바꿔야 한다. */
@@ -96,7 +98,7 @@ export function placardToggles() {
  *
  * 덮개 앞 모서리는 계기 윗변보다 1.2도 이상 위에서 끝난다. 요격기는 그 여유가 없어
  * 덮개를 빼고 외장 노즈에 맡겼다. 덮개가 계기 윗변까지 내려오면 계기판이 통째로 사라진다. */
-export const COCKPIT_FRAME = Object.freeze({
+export const COCKPIT_FRAME = aircraftAliases({
   // 캐노피 구 [0,0.74,-3.5] scale[0.82,0.6,1.85], 눈 [0,1.02,-3.4]
   jet: Object.freeze({
     // 셸 앞 끝(-1.36) 을 앞유리 틀(-1.40) 보다 뒤에 둔다. 앞서면 유리 끝면이 틀 앞에 드러나
@@ -237,7 +239,7 @@ function sixPack({ columns, rows, radius, centre = 0 }) {
   });
 }
 
-const PANEL_SLOTS = Object.freeze({
+const PANEL_SLOTS = aircraftAliases({
   jet: [
     ...sixPack({ columns: 0.145, rows: 0.075, radius: 0.068 }),
     screenSlot('FLIGHT', -0.33, -0.005, 0.26, 0.13, 'flight'),
@@ -269,7 +271,7 @@ const PANEL_SLOTS = Object.freeze({
   ],
   helicopter: [
     ...sixPack({ columns: 0.125, rows: 0.062, radius: 0.058 }),
-    screenSlot('FLIGHT', 0.30, -0.005, 0.24, 0.12, 'flight'),
+    screenSlot('GUNS', 0.30, -0.005, 0.24, 0.12, 'guns'),
     screenSlot('NAV', -0.30, -0.005, 0.24, 0.12, 'nav', '', 'mid'),
   ],
 });
@@ -286,7 +288,7 @@ export function visibleSlots(plane) {
 
 /** combiner 유리와 그 위에 덧그리는 HUD 평면이다. 평면이 유리보다 크면 상이 허공에 뜬다.
  * 유리 크기는 사다리가 잘리지 않을 만큼만 키우고 평면은 유리와 같은 크기로 맞춘다. */
-export const HUD_COMBINER = Object.freeze({
+export const HUD_COMBINER = aircraftAliases({
   fighter: Object.freeze({
     position: [0, 0.03, -0.52], tilt: 0.16,
     glass: [0.30, 0.24], plane: [0.30, 0.24], frame: 0.010, weapons: 'stores',
@@ -300,13 +302,13 @@ export const HUD_COMBINER = Object.freeze({
 
 /** 실제 기종의 계기 조명 색이다. 전투기는 호박색, 헬기는 야시경과 맞추는 녹색,
  * 폭격기와 제트는 흰색에 가까운 호박색, 프로펠러기는 옅은 호박색이다. */
-export const LAMP_COLOUR = Object.freeze({
+export const LAMP_COLOUR = aircraftAliases({
   jet: '#fff0d2', bomber: '#fff0d2', prop: '#ffd9a8',
   fighter: '#ffb25c', interceptor: '#ffb25c', helicopter: '#74d69a',
 });
 
 /** 화면 글자 색이다. 계기 조명과 같은 계열로 맞춘다. */
-export const SCREEN_ACCENT = Object.freeze({
+export const SCREEN_ACCENT = aircraftAliases({
   jet: '#ffd18a', bomber: '#9fe8ff', prop: '#ffd18a',
   fighter: '#8cf7a6', interceptor: '#9fe8ff', helicopter: '#74d69a',
 });

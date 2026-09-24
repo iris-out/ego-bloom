@@ -2,14 +2,25 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   BUDGET, COCKPIT_PARTS, COCKPIT_TRIANGLES, DIAL_TICKS, PART, QUALITY_PARTS, TRI,
-  cockpitTriangles, dialTicks, withinBudget,
+  cockpitTriangles, dialTicks, withinBudget, budgetFor,
 } from '../../src/world/cockpits/triangles.js';
+import { COCKPIT_FRAME } from '../../src/world/cockpits/aircraftDetail.js';
+import { loadModelFixture, modelTriangles } from './model-mount-fixture.mjs';
 import { QUALITY_ORDER, detailLevel } from '../../src/world/cockpits/detail.js';
 import { PLANE_KEYS, VEHICLE_KEYS } from '../../src/world/identity.js';
 
 test('등급별 상한이 정의돼 있다', () => {
   assert.deepEqual(BUDGET, { low: 1800, medium: 4500, high: 9000 });
   assert.ok(BUDGET.low < BUDGET.medium && BUDGET.medium < BUDGET.high);
+});
+
+test('full four and five seat cabins have measured scoped allowances while older cars retain global ceilings', () => {
+  assert.equal(budgetFor('convertible', 'low'), 3300);
+  assert.equal(budgetFor('coupe', 'low'), 4800);
+  assert.equal(budgetFor('coupe', 'medium'), 7000);
+  for (const key of ['sedan','suv','formula','electric','supercar']) {
+    for (const quality of ['low','medium','high']) assert.equal(budgetFor(key, quality), BUDGET[quality]);
+  }
 });
 
 test('아홉 종 모두 콕핏 구성이 있다', () => {
@@ -20,9 +31,9 @@ test('아홉 종 모두 콕핏 구성이 있다', () => {
   }
 });
 
-test('모든 콕핏이 가장 낮은 등급 예산 안에 든다', () => {
+test('모든 콕핏이 각 기종의 가장 낮은 등급 예산 안에 든다', () => {
   for (const [key, count] of Object.entries(COCKPIT_TRIANGLES)) {
-    assert.ok(count <= BUDGET.low, `${key} 가 ${count} 로 low 예산 ${BUDGET.low} 을 넘는다`);
+    assert.ok(count <= budgetFor(key, 'low'), `${key} 가 ${count} 로 low 예산 ${budgetFor(key, 'low')} 을 넘는다`);
     assert.equal(withinBudget(key, 'low'), true);
     assert.equal(withinBudget(key, 'medium'), true);
   }
@@ -34,15 +45,15 @@ test('없는 기종은 예산을 통과하지 않는다', () => {
 });
 
 test('조각을 더하면 삼각형 수가 늘어난다', () => {
-  // 다이얼 여섯 개를 쓰는 제트가 전용 대시보드와 휠을 가진 세단보다 커야 한다.
-  assert.ok(COCKPIT_TRIANGLES.jet > COCKPIT_TRIANGLES.sedan);
+  // Curved sedan surfaces cost more than the simple jet; bomber adds aircraft controls.
+  assert.ok(COCKPIT_TRIANGLES.sedan > COCKPIT_TRIANGLES.jet);
   assert.ok(COCKPIT_TRIANGLES.bomber > COCKPIT_TRIANGLES.jet);
 });
 
-test('every aircraft reserves structure for a layered dash, canopy, and seat tub', () => {
+test('legacy aircraft reserve structure for a layered dash, canopy, and seat tub', () => {
   // 계기판 한 장만 크게 늘려 놓지 않는다. 캐노피, 글레어실드, 중앙 터널, 양쪽 콘솔과
   // 좌석 볼스터가 각각 남아 있어야 1인칭에서 검은 판 하나로 보이지 않는다.
-  for (const key of PLANE_KEYS) {
+  for (const key of Object.keys(COCKPIT_FRAME)) {
     assert.ok(COCKPIT_PARTS[key].panel >= 14, `${key} structural trim is too sparse`);
   }
 });
@@ -67,9 +78,10 @@ test('계기 눈금이 삼각형 수에 들어 있다', () => {
   assert.equal(DIAL_TICKS, 12);
   assert.equal(PART.tick, 2);
   assert.equal(PART.dial, PART.dialBody + DIAL_TICKS * PART.tick);
-  // 눈금 없는 계기보다 눈금 있는 계기가 비싸다. 세단은 대시보드, 벤트·스위치, 휠, 속도·RPM 계기, 화면과 거울 셋을 쓴다.
-  assert.equal(cockpitTriangles('sedan'), PART.panel * 19 + PART.yoke + PART.dial * 2 + PART.display + PART.mirror * 3);
-  assert.ok(cockpitTriangles('sedan', 12) > cockpitTriangles('sedan', 2));
+  // Digital sedan has no mesh dial ticks; analog truck still has them.
+  assert.equal(cockpitTriangles('sedan'), 1504);
+  assert.equal(cockpitTriangles('sedan', 12), cockpitTriangles('sedan', 2));
+  assert.ok(cockpitTriangles('truck', 12) > cockpitTriangles('truck', 2));
 });
 
 test('기종별 눈금 수를 기본값으로 쓴다', () => {
@@ -88,11 +100,11 @@ test('눈금을 줄여도 예산 안에 든다', () => {
   }
 });
 
-test('조각이 가장 많은 폭격기도 기본 눈금으로 low 안에 든다', () => {
+test('폭격기는 기존 low 예산 안에 있고 모든 콕핏은 해당 low 예산 안에 든다', () => {
   // 기본 눈금 12 를 고른 근거다. 박스 눈금이면 계기가 많은 기종이 예산을 넘는다.
   assert.equal(COCKPIT_TRIANGLES.bomber, 1526);
   assert.ok(COCKPIT_TRIANGLES.bomber <= BUDGET.low);
-  assert.equal(Math.max(...Object.values(COCKPIT_TRIANGLES)), COCKPIT_TRIANGLES.bomber);
+  assert.ok(Object.entries(COCKPIT_TRIANGLES).every(([key, count]) => count <= budgetFor(key, 'low')));
 });
 
 test('열다섯 기종 모두 등급별 추가분 칸을 갖는다', () => {
@@ -109,7 +121,7 @@ test('등급을 올려도 그 등급 예산 안에 든다', () => {
     for (const quality of QUALITY_ORDER) {
       const count = cockpitTriangles(key, dialTicks(key), quality);
       assert.ok(Number.isInteger(count) && count > 0, `${key} ${quality} 삼각형 수가 ${count} 다`);
-      assert.ok(count <= BUDGET[quality], `${key} 가 ${quality} 에서 ${count} 로 ${BUDGET[quality]} 을 넘는다`);
+      assert.ok(count <= budgetFor(key, quality), `${key} 가 ${quality} 에서 ${count} 로 ${budgetFor(key, quality)} 을 넘는다`);
       assert.equal(withinBudget(key, quality), true);
     }
   }
@@ -159,4 +171,15 @@ test('새 공용 조각 값이 parts.jsx 의 geometry 와 맞는다', () => {
   assert.equal(PART.wipers, 48);
   assert.equal(PART.bolt, 24);
   assert.equal(PART.grabHandle, 36);
+});
+
+// Count the actual shared gondola geometry; its surfaces do not use the legacy part inventory.
+test('airship budget equals mounted cabin geometry at every quality', async () => {
+  const { default: AirshipCabin } = await loadModelFixture('src/world/cockpits/AirshipCabin.jsx');
+  for (const quality of QUALITY_ORDER) {
+    const mounted = modelTriangles(AirshipCabin({ quality }));
+    // The headless fixture has no canvas; the browser adds one two-triangle display plane.
+    assert.equal(cockpitTriangles('airship', undefined, quality), mounted + 2);
+    assert.ok(mounted + 2 <= budgetFor('airship', quality));
+  }
 });

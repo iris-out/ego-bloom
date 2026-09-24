@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createWorldRoom } from './multiplayer';
 
-const IDLE_STATE = { status: 'connecting', count: null, roster: [], crowded: false };
+const IDLE_STATE = { status: 'idle', count: null, roster: [], crowded: false, scores: {} };
 
 /** 같은 회선에서 몇 번째 탭인지 세려면 서버가 준 출처 키가 필요하다. 실패하거나
  * 서버에 비밀이 없으면 빈 문자열이고, 그때는 탭 제한을 걸지 않는다. */
@@ -14,7 +14,7 @@ async function sessionOrigin() {
   } catch { return ''; }
 }
 
-export default function useWorldMultiplayer(riding, identity) {
+export default function useWorldMultiplayer(riding, identity, enabled = false) {
   const room = useRef(null);
   const [state, setState] = useState(IDLE_STATE);
   const [sessionId, setSessionId] = useState(null);
@@ -22,8 +22,11 @@ export default function useWorldMultiplayer(riding, identity) {
   const peersRef = useRef([]);
   const initial = useRef(identity);
   const origin = useRef('');
+  useEffect(() => { initial.current = identity; }, [identity]);
   useEffect(() => {
+    if (!enabled) return;
     let cancelled=false, connection, interval;
+    setState({...IDLE_STATE,status:'connecting'});
     // Keep Supabase out of the initial bundle used by every route.
     Promise.all([import('../utils/supabase'),sessionOrigin()]).then(([{supabase},key])=>{
       if(cancelled)return;
@@ -35,12 +38,14 @@ export default function useWorldMultiplayer(riding, identity) {
       setSessionId(id);
       interval=setInterval(()=>connection.tick(),50);
     }).catch(()=>{if(!cancelled)setState({...IDLE_STATE,status:'offline'});});
-    return ()=>{cancelled=true;clearInterval(interval);connection?.close();room.current=null;peersRef.current=[];setSessionId(null);};
-  }, []);
+    return ()=>{cancelled=true;clearInterval(interval);connection?.close();room.current=null;peersRef.current=[];setSessionId(null);setState(IDLE_STATE);};
+  }, [enabled]);
   // 탈것에서 내리면 곧바로 빈 pose 를 보낸다. 남의 화면에서 내 기체가 바로 사라진다.
   useEffect(() => { if (!riding) { room.current?.setPose(null); room.current?.tick(); } }, [riding]);
   // setIdentity 는 profile 을 통째로 갈아 끼운다. 출처 키를 매번 다시 실어야 사라지지 않는다.
   useEffect(() => { room.current?.setIdentity({ ...identity, origin: origin.current }); }, [identity]);
   const publish = useCallback(pose => room.current?.setPose(pose), []);
-  return { ...state, sessionId, publish, peersRef };
+  const confirmFatal = useCallback(event => room.current?.confirmFatal(event), []);
+  const confirmAI = useCallback(event => room.current?.confirmAI(event), []);
+  return { ...state, sessionId, publish, peersRef, confirmFatal, confirmAI };
 }

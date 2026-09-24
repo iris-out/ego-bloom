@@ -651,9 +651,9 @@ const WIPER_SWEEP = 1.6;
 
 function WiperArm({ get, offset, length, rest, sweep }) {
   const arm = useRef();
-  useFrame(() => {
+  useFrame(({ clock }) => {
     if (!arm.current) return;
-    const phase = get ? Number(get()) : NaN;
+    const phase = get ? Number(get(clock.elapsedTime)) : NaN;
     // 위상이 없으면 눕힌 자리에 그대로 둔다. 비가 오지 않는데 쓸면 안 된다.
     arm.current.rotation.z = Number.isFinite(phase)
       ? rest + ((1 - Math.cos(phase * Math.PI * 2)) / 2) * sweep

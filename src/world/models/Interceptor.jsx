@@ -1,6 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import Block from './ModelBlock';
+import { fuselageGeometry, airfoilGeometry } from './vehicleSurfaces.js';
+import { Airfoil, Duct, CanopyFrame } from './SurfaceParts.jsx';
 import { PLANE_DIMENSIONS } from './planeDimensions.js';
 import { DetailLamp, PanelSeam, SurfaceVent } from './exteriorDetails.jsx';
 import StaticBatch from '../StaticBatch.jsx';
@@ -15,7 +17,7 @@ const HALF_PI = Math.PI / 2;
 const HALF_SPAN = PLANE_DIMENSIONS.interceptor.span / 2;
 
 const SKIN = '#6c757a', SKIN_DARK = '#525c61', BELLY = '#8a949a';
-const GLASS = '#3c5f70', METAL = '#333c42', GUN = '#20262a';
+const METAL = '#333c42', GUN = '#20262a';
 
 /** 동체 프로파일의 두 점([-3.4], [-0.6])을 경계로 쓴다. 눈 [0,0.86,-2.4] 와 실내 계기판(z 약 -3.2)
  * 이 그 사이에 든다. 경계를 -2.6 에 두면 코 껍데기 윗면이 1인칭 계기판 아랫줄을 덮는다.
@@ -31,13 +33,7 @@ const CABIN_PROFILE = FUSELAGE_PROFILE.filter(([, z]) => z >= CABIN_NOSE_Z && z 
 const REAR_PROFILE = FUSELAGE_PROFILE.filter(([, z]) => z >= CABIN_TAIL_Z);
 
 function latheOf(profile) {
-  const points = profile.map(([radius, z]) => new THREE.Vector2(radius, z));
-  const geometry = new THREE.LatheGeometry(points, 12);
-  geometry.rotateX(HALF_PI);
-  // 삼각 단면처럼 보이도록 아래를 눌러 납작하게 만든다.
-  geometry.scale(1, 0.92, 1);
-  geometry.computeVertexNormals();
-  return geometry;
+  return fuselageGeometry(FUSELAGE_PROFILE, profile[0][1], profile.at(-1)[1], .92);
 }
 
 export default function Interceptor({ firstPerson = false }) {
@@ -47,30 +43,10 @@ export default function Interceptor({ firstPerson = false }) {
   const fuselageRear = useMemo(() => latheOf(REAR_PROFILE), []);
 
   /** 주익이다. 앞전이 뒤로 젖혀져 있고 끝으로 갈수록 좁아진다. */
-  const wing = useMemo(() => {
-    const shape = new THREE.Shape();
-    shape.moveTo(0.7, -1.3); shape.lineTo(HALF_SPAN, 0.7);
-    shape.lineTo(HALF_SPAN, 1.5); shape.lineTo(0.7, 1.6);
-    shape.closePath();
-    const geometry = new THREE.ExtrudeGeometry(shape, { depth: 0.26, bevelEnabled: false });
-    geometry.rotateX(HALF_PI);
-    geometry.translate(0, 0.13, 0);
-    geometry.computeVertexNormals();
-    return geometry;
-  }, []);
+  const wing = useMemo(() => airfoilGeometry([{x:.65,front:-1.3,back:1.6,thickness:.29},{x:1.25,front:-1.05,back:1.6,thickness:.27},{x:HALF_SPAN,front:.7,back:1.5,thickness:.07,y:.1}]), []);
 
   /** 수평 미익이다. 주익과 같은 방식이고 수직 미익 중간 높이에 붙는다. */
-  const stabilizer = useMemo(() => {
-    const shape = new THREE.Shape();
-    shape.moveTo(0.3, 3.6); shape.lineTo(2.6, 4.3);
-    shape.lineTo(2.6, 4.9); shape.lineTo(0.3, 5.0);
-    shape.closePath();
-    const geometry = new THREE.ExtrudeGeometry(shape, { depth: 0.18, bevelEnabled: false });
-    geometry.rotateX(HALF_PI);
-    geometry.translate(0, 0.09, 0);
-    geometry.computeVertexNormals();
-    return geometry;
-  }, []);
+  const stabilizer = useMemo(() => airfoilGeometry([{x:.3,front:3.6,back:5,thickness:.18},{x:2.6,front:4.3,back:4.9,thickness:.055}]), []);
 
   useEffect(() => () => {
     fuselageNose.dispose(); fuselageCabin.dispose(); fuselageRear.dispose(); wing.dispose(); stabilizer.dispose();
@@ -101,13 +77,7 @@ export default function Interceptor({ firstPerson = false }) {
         <mesh geometry={wing} scale={[side, 1, 1]} position={[0, -0.16, 0]} castShadow dispose={null}>
           <meshStandardMaterial color={SKIN_DARK} roughness={0.5} side={THREE.DoubleSide} />
         </mesh>
-        <mesh position={[side * 2.2, -0.5, 0.4]} rotation={[HALF_PI, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.44, 0.48, 3.1, 14]} /><meshStandardMaterial color={SKIN} metalness={0.4} roughness={0.35} />
-        </mesh>
-        <mesh position={[side * 2.2, -0.5, -1.15]} rotation={[HALF_PI, 0, 0]}>
-          <cylinderGeometry args={[0.36, 0.36, 0.12, 14, 1, true]} />
-          <meshStandardMaterial color={METAL} side={THREE.DoubleSide} />
-        </mesh>
+        <Duct position={[side*2.2,-.5,.4]} radius={.48} length={3.1} color={SKIN}/>
         <SurfaceVent position={[side * 2.2, -0.5, 1.05]} scale={[0.34, 0.018, 0.08]} />
         {/* 주 랜딩기어. 나셀 안쪽 날개 밑이다. */}
         <Block position={[side * 1.25, -1.0, -0.4]} scale={[0.12, 1.0, 0.14]} color="#7d8a86" />
@@ -123,7 +93,7 @@ export default function Interceptor({ firstPerson = false }) {
       </group>)}
 
       {/* 수직 미익. 뒤로 물러나 있고 위가 좁다. */}
-      <Block position={[0, 1.0, 4.4]} scale={[0.16, 2.0, 1.5]} color={SKIN_DARK} rotation={[-0.18, 0, 0]} />
+      <Airfoil color={SKIN_DARK} rotation={[0,0,Math.PI/2]} stations={[{x:0,front:3.45,back:5.2,thickness:.18},{x:2,front:4.4,back:5.25,thickness:.055}]}/>
 
       {/* 앞바퀴. 삼점식이라 코 밑에 하나 더 있다. */}
       <Block position={[0, -1.05, -3.5]} scale={[0.11, 1.1, 0.12]} color="#7d8a86" />
@@ -140,8 +110,9 @@ export default function Interceptor({ firstPerson = false }) {
           <meshStandardMaterial color={SKIN} metalness={0.35} roughness={0.42} />
         </mesh>
         <mesh position={[0, 0.62, -1.9]} scale={[0.44, 0.4, 1.1]} castShadow>
-          <sphereGeometry args={[1, 12, 9]} /><meshStandardMaterial color={GLASS} metalness={0.35} roughness={0.2} />
+          <sphereGeometry args={[1, 32, 20]} /><meshStandardMaterial color="#1c3542" metalness={0.12} roughness={0.2} />
         </mesh>
+      <CanopyFrame position={[0,.62,-1.9]} rx={0.44} ry={0.4} rz={1.1} color="#45545e"/>
       </StaticBatch>
     </group>
   </group>;

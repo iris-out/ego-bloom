@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { NAME_MAX, PLANE_KEYS, creatorAlias, defaultName, displayName, sanitizeName, validPlane } from '../../src/world/identity.js';
+import { DEFAULT_PLAYER_PLANE, NAME_MAX, PLANE_KEYS, SELECTABLE_PLANE_KEYS, creatorAlias, defaultName, displayName, loadIdentity, sanitizeName, saveIdentity, validPlane, validSelectablePlane } from '../../src/world/identity.js';
 
 test('닉네임에서 제어문자를 지우고 길이를 제한한다', () => {
   assert.equal(sanitizeName('  하늘   위  '), '하늘 위');
@@ -16,9 +16,32 @@ test('빈 닉네임은 세션 아이디에서 만든 기본 이름으로 대체�
   assert.equal(displayName('9f3a-xyz', '하늘빛'), '하늘빛');
 });
 
-test('알 수 없는 기체 값은 기본 기체로 떨어진다', () => {
+test('씬 모델 키와 플레이어 선택 키는 라이트 제트만 다르다', () => {
+  assert.equal(DEFAULT_PLAYER_PLANE, 'fighter');
+  assert.deepEqual(SELECTABLE_PLANE_KEYS, PLANE_KEYS.filter(key => key !== 'jet'));
   for (const key of PLANE_KEYS) assert.equal(validPlane(key), key);
   for (const bad of ['ufo', null, 3]) assert.equal(validPlane(bad), 'jet');
+  for (const key of SELECTABLE_PLANE_KEYS) assert.equal(validSelectablePlane(key), key);
+  for (const bad of ['jet', 'ufo', null, 3]) assert.equal(validSelectablePlane(bad), 'fighter');
+});
+
+test('저장된 라이트 제트는 전투기로 마이그레이션하고 다른 설정을 지킨다', () => {
+  const previous = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+  const entries = new Map([['eb-world-pilot', JSON.stringify({ name: '테스트 파일럿', plane: 'jet', vehicle: 'suv' })]]);
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: {
+    getItem: key => entries.get(key) ?? null,
+    setItem: (key, value) => entries.set(key, value),
+  } });
+  try {
+    assert.deepEqual(loadIdentity(), { name: '테스트 파일럿', plane: 'fighter', vehicle: 'suv' });
+    assert.deepEqual(JSON.parse(entries.get('eb-world-pilot')), { name: '테스트 파일럿', plane: 'fighter', vehicle: 'suv' });
+    assert.equal(saveIdentity({ name: '다음 파일럿', plane: 'jet', vehicle: 'sedan' }).plane, 'fighter');
+    entries.delete('eb-world-pilot');
+    assert.equal(loadIdentity().plane, 'fighter', '새 프로필도 전투기로 시작한다');
+  } finally {
+    if (previous) Object.defineProperty(globalThis, 'localStorage', previous);
+    else delete globalThis.localStorage;
+  }
 });
 
 test('미공개 이름은 순위로 만들고 같은 제작자는 늘 같은 번호다', () => {

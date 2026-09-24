@@ -1,6 +1,7 @@
 import { hitsAnyBuilding } from './solidIndex.js';
 import { hitsVehicle } from './carPhysics.js';
 import { hitsSphere } from './airTraffic.js';
+import { FOUR_VEHICLE_LAYOUT } from './models/fourVehicleLayout.js';
 
 /** 포구는 모델 좌표에서 그대로 옮긴 값이다. turret 은 차체 원점에서 본 포탑 중심,
  * pivot 은 포탑 중심에서 본 포신 회전축, reach 는 회전축에서 포구 끝까지의 길이다.
@@ -146,7 +147,7 @@ export function stepGroundWeapons(previous,{dt=0,fire=false,pose={},aim={},vehic
 /** 한 발이 시선에 얹는 반동(라디안) 이다. 연사가 빠른 포일수록 한 발을 약하게 둔다.
  * 대공포는 분당 750발이라 기본값 그대로면 조준경이 하늘에서 계속 튄다.
  * 읽는 곳은 카메라(CarMode) 뿐이지만 값 자체는 포의 제원이라 여기 둔다. */
-export const RECOIL_KICK=Object.freeze({armored:.008,aa:.0298,default:.035});
+export const RECOIL_KICK=Object.freeze({armored:.008,aa:.01788,default:.035});
 export const recoilKick=(vehicle)=>RECOIL_KICK[vehicle]??RECOIL_KICK.default;
 
 /** 광학 조준경 자리다. out 은 포신 회전축에서 포신 방향으로 나가는 거리, rise 는 포신 축 위로
@@ -185,7 +186,9 @@ export function scopePoint(pose={},aim={},vehicle='tank'){
  * 지나갈 때 맞지 않게 하는 데만 쓴다. */
 export const HULL_FLOOR=.9;
 export const HULL_HEIGHT=Object.freeze({
-  sedan:1.75,suv:1.92,convertible:1.45,formula:1.42,truck:2.9,motorcycle:1.8,
+  drift:1.67,sedan:1.75,suv:1.92,convertible:FOUR_VEHICLE_LAYOUT.convertible.height,
+  coupe:FOUR_VEHICLE_LAYOUT.coupe.height,supercar:FOUR_VEHICLE_LAYOUT.supercar.height,
+  electric:FOUR_VEHICLE_LAYOUT.electric.height,formula:1.42,truck:2.9,motorcycle:1.8,
   tank:2.5,howitzer:2.8,armored:2.4,aa:2.4,
 });
 

@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import StaticBatch from '../StaticBatch.jsx';
 import * as THREE from 'three';
 import Block from './ModelBlock';
+import { ArmorShell, TrackLoop } from './SurfaceParts.jsx';
 import { PanelSeam, SurfaceVent } from './exteriorDetails.jsx';
 
 /** 플레이어가 모는 자주포(자주곡사포) 시각 모델이다. Sedan, Helicopter 와 같은 축 규약을 따른다.
@@ -50,7 +51,7 @@ function extrudeFacing(points, depth) {
 /** 굴러가는 보기륜이다. 매 프레임 도는 조각이라 정적 병합에서 뺀다. */
 function RoadWheel({ innerRef }) {
   return <mesh ref={innerRef} userData={{ dynamic: true }} rotation={[0, 0, HALF_PI]} castShadow>
-    <cylinderGeometry args={[WHEEL_RADIUS, WHEEL_RADIUS, 0.3, 10]} />
+    <cylinderGeometry args={[WHEEL_RADIUS, WHEEL_RADIUS, 0.3, 24]} />
     <meshStandardMaterial color={TRACK_METAL} roughness={0.85} />
   </mesh>;
 }
@@ -95,10 +96,10 @@ export default function Howitzer({ turretYaw = 0, barrelPitch = 0, wheelsRef, sp
     {/* 차체와 궤도, 1인칭에서도 항상 보인다 */}
     <StaticBatch>
       {/* 하부 차체, 상부 조종실, 엔진 데크, 전면 경사장갑, 후면판 */}
-      <Block position={[0, -0.4, 0]} scale={[2.6, 0.7, 7.2]} color={OLIVE} />
-      <Block position={[0, 0.15, -2.0]} scale={[2.4, 0.9, 2.8]} color={OLIVE} />
-      <Block position={[0, 0.05, 1.8]} scale={[2.4, 0.7, 3.2]} color={DARK_OLIVE} />
-      <Block position={[0, -0.05, -3.5]} scale={[2.3, 0.9, 0.5]} rotation={[0.5, 0, 0]} color={OLIVE} />
+      <ArmorShell position={[0, -0.4, 0]} scale={[2.6, 0.7, 7.2]} color={OLIVE} />
+      <ArmorShell position={[0, 0.15, -2.0]} scale={[2.4, 0.9, 2.8]} color={OLIVE} />
+      <ArmorShell position={[0, 0.05, 1.8]} scale={[2.4, 0.7, 3.2]} color={DARK_OLIVE} />
+      <ArmorShell position={[0, -0.05, -3.5]} scale={[2.3, 0.9, 0.5]} rotation={[0.5, 0, 0]} color={OLIVE} />
       <Block position={[0, -0.3, 3.6]} scale={[2.4, 0.6, 0.25]} color={DARK_OLIVE} />
 
       {/* 엔진 데크 그릴 */}
@@ -116,8 +117,8 @@ export default function Howitzer({ turretYaw = 0, barrelPitch = 0, wheelsRef, sp
       <mesh position={[0.9, 0.7, 2.5]}><cylinderGeometry args={[0.015, 0.025, 1.1, 6]} /><meshStandardMaterial color={STEEL} metalness={0.4} roughness={0.5} /></mesh>
 
       {/* 궤도, 사이드스커트 */}
-      {[-1, 1].map((side) => <Block key={side} position={[side * TRACK_X, (TRACK_TOP + TRACK_BOTTOM) / 2, 0]} scale={[0.42, TRACK_TOP - TRACK_BOTTOM, 6.9]} color={TRACK_METAL} />)}
-      {[-1, 1].map((side) => <Block key={side} position={[side * 1.95, -0.15, 0]} scale={[0.06, 1.0, 7.0]} color={DARK_OLIVE} />)}
+      {[-1, 1].map((side) => <TrackLoop key={side} position={[side*TRACK_X,-.375,0]} length={7.84} height={1.05} width={.42} color={TRACK_METAL}/>)}
+      {[-1,1].flatMap(side=>[-2.9,-1.74,-.58,.58,1.74,2.9].map(z=><ArmorShell key={`${side}-${z}`} position={[side*1.95,.08,z]} scale={[.06,.5,1.12]} color={DARK_OLIVE}/>))}
 
       {/* 보기륜(양쪽 7개씩) */}
       {[-1, 1].map((side) => WHEEL_Z.map((z, index) => <group key={`${side}-${z}`} position={[side * TRACK_X, WHEEL_Y, z]}>
@@ -126,8 +127,8 @@ export default function Howitzer({ turretYaw = 0, barrelPitch = 0, wheelsRef, sp
 
       {/* 유동륜(전방), 기동륜(후방)과 허브캡 */}
       {[-1, 1].map((side) => BOGIE_Z.map((z) => <group key={`${side}-${z}`} position={[side * TRACK_X, TRACK_TOP - 0.1, z]}>
-        <mesh rotation={[0, 0, HALF_PI]} castShadow><cylinderGeometry args={[0.42, 0.42, 0.34, 12]} /><meshStandardMaterial color={TRACK_METAL} roughness={0.8} /></mesh>
-        <mesh rotation={[0, 0, HALF_PI]}><cylinderGeometry args={[0.14, 0.14, 0.36, 8]} /><meshStandardMaterial color={STEEL} metalness={0.5} roughness={0.4} /></mesh>
+        <mesh rotation={[0, 0, HALF_PI]} castShadow><cylinderGeometry args={[0.42, 0.42, 0.34, 24]} /><meshStandardMaterial color={TRACK_METAL} roughness={0.8} /></mesh>
+        <mesh rotation={[0, 0, HALF_PI]}><cylinderGeometry args={[0.14, 0.14, 0.36, 24]} /><meshStandardMaterial color={STEEL} metalness={0.5} roughness={0.4} /></mesh>
       </group>))}
 
       {/* 스페이드(차체 뒤 주퇴판)와 지지대 */}
@@ -148,27 +149,27 @@ export default function Howitzer({ turretYaw = 0, barrelPitch = 0, wheelsRef, sp
       {/* 캐빈: 포탑 상자, 측면 장갑, 뒤쪽 지붕 연장. firstPerson 이거나 조준경을 켠 동안 숨긴다 */}
       <group visible={!firstPerson && !scoped}>
         {/* 전면 마운트. 1인칭 조준선을 막으므로 캐빈과 함께 숨긴다 */}
-        <Block position={[0, 0.35, -1.35]} scale={[1.7, 0.7, 0.35]} rotation={[0.35, 0, 0]} color={DARK_OLIVE} />
-        <Block position={[0, 0.5, 0]} scale={[1.9, 1.0, 2.6]} color={OLIVE} />
+        <ArmorShell position={[0, 0.35, -1.35]} scale={[1.7, 0.7, 0.35]} rotation={[0.35, 0, 0]} color={DARK_OLIVE} />
+        <ArmorShell position={[0, 0.5, 0]} scale={[1.9, 1.0, 2.6]} color={OLIVE} />
         {[-1, 1].map((side) => <Block key={side} position={[side * 0.98, 0.55, 0.3]} scale={[0.06, 1.0, 1.6]} color={DARK_OLIVE} />)}
-        <Block position={[0, 0.5, 1.55]} scale={[1.6, 0.9, 0.9]} color={DARK_OLIVE} />
+        <ArmorShell position={[0, 0.5, 1.55]} scale={[1.6, 0.9, 0.9]} color={DARK_OLIVE} />
       </group>
 
       {/* 지붕 해치 두 개와 페리스코프 */}
       {[[-0.5, -0.2], [0.5, 0.3]].map(([x, z]) => <group key={`${x}-${z}`} position={[x, 1.05, z]}>
-        <mesh castShadow><cylinderGeometry args={[0.3, 0.3, 0.1, 10]} /><meshStandardMaterial color={STEEL} roughness={0.6} /></mesh>
+        <mesh castShadow><cylinderGeometry args={[0.3, 0.3, 0.1, 24]} /><meshStandardMaterial color={STEEL} roughness={0.6} /></mesh>
         <Block position={[0.18, 0.06, 0]} scale={[0.08, 0.02, 0.08]} color={TRACK_METAL} />
       </group>)}
 
       {/* 지붕 기관총과 거치대 */}
       <group position={[0.5, 1.0, -0.15]}>
         <Block scale={[0.15, 0.1, 0.15]} color={STEEL} />
-        <mesh position={[0, 0.02, -0.28]} rotation={[HALF_PI, 0, 0]}><cylinderGeometry args={[0.025, 0.03, 0.5, 8]} /><meshStandardMaterial color={TRACK_METAL} metalness={0.5} roughness={0.4} /></mesh>
+        <mesh position={[0, 0.02, -0.28]} rotation={[HALF_PI, 0, 0]}><cylinderGeometry args={[0.025, 0.03, 0.5, 24]} /><meshStandardMaterial color={TRACK_METAL} metalness={0.5} roughness={0.4} /></mesh>
       </group>
 
       {/* 연막탄 발사기 (양쪽 3발씩) */}
       {[-1, 1].map((side) => [0, 1, 2].map((row) => <mesh key={`${side}-${row}`} position={[side * 0.88, 0.55 + row * 0.1, -1.15]} rotation={[-0.3, 0, side * 0.15]}>
-        <cylinderGeometry args={[0.045, 0.045, 0.32, 8]} /><meshStandardMaterial color={TRACK_METAL} roughness={0.7} />
+        <cylinderGeometry args={[0.045, 0.045, 0.32, 24]} /><meshStandardMaterial color={TRACK_METAL} roughness={0.7} />
       </mesh>))}
 
       {/* 포탑 뒤 안테나 마운트 */}
@@ -181,15 +182,15 @@ export default function Howitzer({ turretYaw = 0, barrelPitch = 0, wheelsRef, sp
 
         {/* 주퇴복좌기 (포신 위 두 개) */}
         {[-1, 1].map((side) => <mesh key={side} position={[side * 0.18, 0.16, -1.0]} rotation={[HALF_PI, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.06, 0.06, 1.6, 8]} /><meshStandardMaterial color={STEEL} metalness={0.5} roughness={0.35} />
+          <cylinderGeometry args={[0.06, 0.06, 1.6, 24]} /><meshStandardMaterial color={STEEL} metalness={0.5} roughness={0.35} />
         </mesh>)}
 
         {/* 대구경 포신 (뒤가 굵고 앞으로 갈수록 가늘다) */}
-        <mesh position={[0, 0, -0.9]} rotation={[HALF_PI, 0, 0]} castShadow><cylinderGeometry args={[0.14, 0.16, 1.6, 10]} /><meshStandardMaterial color={TRACK_METAL} metalness={0.4} roughness={0.5} /></mesh>
-        <mesh position={[0, 0, -2.2]} rotation={[HALF_PI, 0, 0]} castShadow><cylinderGeometry args={[0.115, 0.14, 1.0, 10]} /><meshStandardMaterial color={TRACK_METAL} metalness={0.4} roughness={0.5} /></mesh>
+        <mesh position={[0, 0, -0.9]} rotation={[HALF_PI, 0, 0]} castShadow><cylinderGeometry args={[0.14, 0.16, 1.6, 24]} /><meshStandardMaterial color={TRACK_METAL} metalness={0.4} roughness={0.5} /></mesh>
+        <mesh position={[0, 0, -2.2]} rotation={[HALF_PI, 0, 0]} castShadow><cylinderGeometry args={[0.115, 0.14, 1.0, 24]} /><meshStandardMaterial color={TRACK_METAL} metalness={0.4} roughness={0.5} /></mesh>
 
         {/* 포구 제퇴기 */}
-        <mesh position={[0, 0, -2.75]} rotation={[HALF_PI, 0, 0]}><cylinderGeometry args={[0.2, 0.17, 0.3, 10]} /><meshStandardMaterial color={MUZZLE} metalness={0.3} roughness={0.4} /></mesh>
+        <mesh position={[0, 0, -2.75]} rotation={[HALF_PI, 0, 0]}><cylinderGeometry args={[0.2, 0.17, 0.3, 24]} /><meshStandardMaterial color={MUZZLE} metalness={0.3} roughness={0.4} /></mesh>
         {[-2.62, -2.88].map((z) => <mesh key={z} position={[0, 0, z]} rotation={[HALF_PI, 0, 0]}><torusGeometry args={[0.19, 0.02, 6, 12]} /><meshStandardMaterial color={MUZZLE} metalness={0.3} roughness={0.4} /></mesh>)}
       </group>
     </group>

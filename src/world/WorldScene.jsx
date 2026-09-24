@@ -1,3 +1,4 @@
+import ActorLabels from './ActorLabels';
 /** Scene assembly and shared GPU resource ownership. Model sources and change
  * dependencies are indexed in README.md. Keep geometry edits separate from
  * CameraRig, picking, networking, and readiness/error handling.
@@ -5,6 +6,8 @@
 import RemoteActors from './RemoteActors';
 import RemoteCombat from './RemoteCombat';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { installSimulationClock } from './simulationClock.js';
+import { discardUnconfiguredRoot } from './rendererFailure.js';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Html, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -363,7 +366,7 @@ function useCasterIndex(batchLists, enabled) {
   return enabled && built?.source === batchLists ? built.index : null;
 }
 
-function CameraRig({ extent, focusTarget, onCameraChange, joystickValues, locked, onUnlock }) {
+function CameraRig({ inputBlocked = false, extent, focusTarget, onCameraChange, joystickValues, locked, onUnlock }) {
   const controls = useRef();
   const keys = useRef(new Set());
   const destination = useRef(null);
@@ -371,6 +374,8 @@ function CameraRig({ extent, focusTarget, onCameraChange, joystickValues, locked
   const scratch = useMemo(() => ({ forward: new THREE.Vector3(), right: new THREE.Vector3(), shift: new THREE.Vector3() }), []);
   const { camera, gl } = useThree();
   useEffect(() => {
+    keys.current.clear();
+    if (inputBlocked) return;
     const keydown = (event) => {
       if (event.target.closest?.('input, textarea, select, [contenteditable="true"]')) return;
       if (event.code==='Space' && event.target.closest?.('button,a,[role="button"]')) return;
@@ -390,7 +395,7 @@ function CameraRig({ extent, focusTarget, onCameraChange, joystickValues, locked
       window.removeEventListener('keydown', keydown); window.removeEventListener('keyup', keyup); window.removeEventListener('blur', clear);
       gl.domElement.removeEventListener('pointerdown', cancelFocus); gl.domElement.removeEventListener('wheel', cancelFocus);
     };
-  }, [gl, locked, onUnlock]);
+  }, [gl, locked, onUnlock, inputBlocked]);
   useEffect(() => {
     if (!locked) return;
     // 도시 크기가 인원수에 따라 바뀌므로 extent 비례 포즈를 쓴다. 입력은 받지 않는다.
@@ -409,7 +414,7 @@ function CameraRig({ extent, focusTarget, onCameraChange, joystickValues, locked
   }, [focusTarget, extent]);
   useFrame(({ clock }, delta) => {
     const orbit = controls.current;
-    if (!orbit) return;
+    if (!orbit || inputBlocked) return;
     if (![camera.position.x, camera.position.y, camera.position.z, orbit.target.x, orbit.target.y, orbit.target.z].every(Number.isFinite)) {
       orbit.target.set(0, 4, 0); camera.position.set(220, 260, 300); destination.current = null;
     }
@@ -449,7 +454,7 @@ function CameraRig({ extent, focusTarget, onCameraChange, joystickValues, locked
       onCameraChange?.({ x: orbit.target.x, z: orbit.target.z });
     }
   });
-  return <OrbitControls ref={controls} makeDefault enableDamping={false} minDistance={28} maxDistance={Math.max(500, extent * 1.8)}
+  return <OrbitControls enabled={!inputBlocked} ref={controls} makeDefault enableDamping={false} minDistance={28} maxDistance={Math.max(500, extent * 1.8)}
     minPolarAngle={0.2} maxPolarAngle={Math.PI / 2.02} target={[0, 4, 0]} zoomSpeed={0.75} panSpeed={0.7}
     mouseButtons={{ LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN }} />;
 }
@@ -565,7 +570,7 @@ function withoutOwners(batches, ownerIds) {
   return stripped;
 }
 
-function City({ buildings, selectedId, onSelect, focusTarget, quality, timeOfDay, weather, anonymous, cameraRef, onReady, onPerformance, joystickValues, flightMode, flightControls, onFlightStatus, onFlightPose, peersRef, season, plane, pilotName, gallery, carMode, carControls, onCarStatus, vehicle, carView, rideView, walkMode, walkControls, onWalkStatus, cameraLocked, ridePending, onExplore, onContextLost, onContextRestored }) {
+function City({ multiplayer = false, scoreSession, onConfirmAI, onConfirmFatal, paused = false, inputBlocked = false, reducedMotion = false, buildings, selectedId, onSelect, focusTarget, quality, timeOfDay, weather, anonymous, cameraRef, onReady, onPerformance, joystickValues, flightMode, flightControls, onFlightStatus, onFlightPose, peersRef, season, plane, pilotName, gallery, carMode, carControls, onCarStatus, vehicle, carView, rideView, walkMode, walkControls, onWalkStatus, cameraLocked, ridePending, onExplore, onContextLost, onContextRestored }) {
   const pickMesh = useRef(), aircraft=useRef(null), reported=useRef(0), staticRoot = useRef(), shadowFrustum = useRef(null);
   // 남이 쏜 포탄이 쌓아 두는 피해 대기열이다. 주행 모드가 매 프레임 읽고 0 으로 비운다.
   const incoming = useRef({ amount: 0, weapon: null });
@@ -574,7 +579,11 @@ function City({ buildings, selectedId, onSelect, focusTarget, quality, timeOfDay
   // 부서진 AI 차량 번호다. TrafficCars 가 매 프레임 이 Set 을 읽으므로 state 로 올릴 이유가 없다.
   // 한 대 부술 때마다 도시 전체가 다시 조정되던 자리다.
   const hiddenTraffic = useRef(new Set());
-  const hideTraffic = useCallback((hit) => { hiddenTraffic.current.add(hit.index); }, []);
+  const hideTraffic = useCallback((hit) => {
+    if (hiddenTraffic.current.has(hit.index)) return;
+    hiddenTraffic.current.add(hit.index); onConfirmAI?.(`ground:${hit.index}`);
+  }, [onConfirmAI]);
+  useEffect(() => { hiddenTraffic.current.clear(); airCombat.current = createAirCombat(); }, [scoreSession]);
   // 항공기와 차량이 같은 경로로 자세를 올린다. aircraft 는 근접 라벨과 피탄 판정이 읽고,
   // onFlightPose 는 네트워크로 내보낸다. validPose 가 모르는 필드는 버린다.
   const reportPose=useCallback(pose=>{aircraft.current=pose;onFlightPose?.(pose);},[onFlightPose]);
@@ -589,19 +598,19 @@ function City({ buildings, selectedId, onSelect, focusTarget, quality, timeOfDay
     slot.x = pose.x; slot.z = pose.z;
   }, [cameraRef]);
   // picking 콜백은 한 번만 만든다. 바뀌는 값은 ref 로 읽어 1000개 상자를 가진 mesh 가 다시 렌더되지 않는다.
-  const latest = useRef({ flightMode, buildings, onSelect });
-  useLayoutEffect(() => { latest.current = { flightMode, buildings, onSelect }; }, [flightMode, buildings, onSelect]);
+  const latest = useRef({ flightMode, inputBlocked, buildings, onSelect });
+  useLayoutEffect(() => { latest.current = { flightMode, inputBlocked, buildings, onSelect }; }, [flightMode, inputBlocked, buildings, onSelect]);
   const pickBuilding = useCallback((id) => {
-    const { flightMode: flying, buildings: records, onSelect: select } = latest.current;
-    if (flying) return;
+    const { flightMode: flying, inputBlocked: blocked, buildings: records, onSelect: select } = latest.current;
+    if (flying || blocked) return;
     const building = records.find((record) => record.id === id);
     if (building) select?.(building);
   }, []);
   // 탈것에서 내리면 자세를 비운다. 남겨 두면 내리고 난 자리에서 포탄이 나를 계속 맞힌다.
   useEffect(() => {
-    if (carMode || flightMode) return;
-    aircraft.current = null; incoming.current.amount = 0;
-  }, [carMode, flightMode]);
+    if (carMode || flightMode || walkMode) return;
+    aircraft.current = null; incoming.current.amount = 0; incoming.current.hits = [];
+  }, [carMode, flightMode, walkMode]);
   const extent = useMemo(() => Math.max(180, ...buildings.map((b) => b.cityExtent||Math.max(Math.abs(b.x), Math.abs(b.z)) + 40)), [buildings]);
   const night = timeOfDay === 'night';
   const shadows = QUALITY[quality].shadows;
@@ -660,7 +669,7 @@ function City({ buildings, selectedId, onSelect, focusTarget, quality, timeOfDay
       <CityTiles cells={cells.cells} resources={resources} shadows={shadows} bands={bands} />
       <Instances batch={pickBatch} resources={resources} shadows={false} meshRef={pickMesh} onSelect={pickBuilding} />
     </group>
-    <Labels buildings={buildings} selectedId={selectedId} onSelect={onSelect} pickMesh={pickMesh} resources={resources} flightMode={flightMode} aircraft={aircraft} driving={carMode} anonymous={anonymous} />
+    <Labels buildings={buildings} selectedId={selectedId} onSelect={inputBlocked ? undefined : onSelect} pickMesh={pickMesh} resources={resources} flightMode={flightMode} aircraft={aircraft} driving={carMode} anonymous={anonymous} />
     <StreetLamps lamps={scenery.lamps} night={night} cap={QUALITY[quality].streetlights} />
     <Traffic resources={resources} extent={extent} quality={quality} hiddenRef={hiddenTraffic} night={night} />
     <AirTraffic extent={extent} count={QUALITY[quality].aircraft} combatRef={airCombat} marked={marked} />
@@ -675,15 +684,16 @@ function City({ buildings, selectedId, onSelect, focusTarget, quality, timeOfDay
       <ringGeometry args={[selectedRing - 0.4, selectedRing + 0.4, 48]} /><meshBasicMaterial color="#fff5bb" transparent opacity={0.95} depthWrite={false} />
     </mesh>}
     {(weather === 'rain' || weather === 'snow') && <Precipitation weather={weather} quality={quality} />}
-    <Remotes peersRef={peersRef} />
-    <RemoteFire peersRef={peersRef} buildings={buildings} selfRef={aircraft} incomingRef={incoming} />
-    {walkMode ? <Walk extent={extent} buildings={solids} controlsRef={walkControls} pilotName={pilotName}
-      trafficCount={QUALITY[quality].cars} onCameraChange={reportCamera} onStatus={onWalkStatus} onKill={hideTraffic} />
-      : carMode ? <Drive extent={extent} buildings={solids} controlsRef={carControls} vehicle={vehicle} view={carView} quality={quality}
+    <Remotes peersRef={peersRef} buildings={solids} />
+    {!gallery && scoreSession && <ActorLabels extent={extent} trafficCount={QUALITY[quality].cars} airCount={QUALITY[quality].aircraft} hiddenRef={hiddenTraffic} airCombatRef={airCombat} buildings={solids} />}
+    <RemoteFire key={scoreSession || "local"} extent={extent} peersRef={multiplayer ? peersRef : null} buildings={solids} selfRef={aircraft} incomingRef={incoming} />
+    {walkMode ? <Walk paused={paused} inputBlocked={inputBlocked} reducedMotion={reducedMotion} extent={extent} buildings={solids} controlsRef={walkControls} pilotName={pilotName}
+      trafficCount={QUALITY[quality].cars} onCameraChange={reportCamera} onStatus={onWalkStatus} onKill={hideTraffic} onPose={reportPose} />
+      : carMode ? <Drive paused={paused} inputBlocked={inputBlocked} reducedMotion={reducedMotion} extent={extent} buildings={solids} controlsRef={carControls} vehicle={vehicle} view={carView} quality={quality}
       pilotName={pilotName} trafficCount={QUALITY[quality].cars} night={night} weather={weather} onCameraChange={reportCamera} onStatus={onCarStatus} onTrafficHit={hideTraffic}
-      onPose={reportPose} incomingRef={incoming} airCount={QUALITY[quality].aircraft} airCombatRef={airCombat} />
-      : flightMode ? <Fly extent={extent} buildings={solids} controlsRef={flightControls} view={rideView} onCameraChange={reportCamera} onStatus={onFlightStatus} onFlightPose={reportPose} plane={plane} pilotName={pilotName} incomingRef={incoming} airCount={QUALITY[quality].aircraft} airCombatRef={airCombat} trafficCount={QUALITY[quality].cars} onTrafficHit={hideTraffic} peersRef={peersRef} night={night} weather={weather} />
-      : <CameraRig extent={extent} focusTarget={focusTarget} onCameraChange={reportCamera} joystickValues={joystickValues} locked={cameraLocked} onUnlock={onExplore} />}
+      onPose={reportPose} incomingRef={incoming} onFatal={onConfirmFatal} onAirKill={onConfirmAI} airCount={QUALITY[quality].aircraft} airCombatRef={airCombat} />
+      : flightMode ? <Fly paused={paused} inputBlocked={inputBlocked} reducedMotion={reducedMotion} extent={extent} buildings={solids} controlsRef={flightControls} view={rideView} onCameraChange={reportCamera} onStatus={onFlightStatus} onFlightPose={reportPose} plane={plane} pilotName={pilotName} incomingRef={incoming} onFatal={onConfirmFatal} onAirKill={onConfirmAI} airCount={QUALITY[quality].aircraft} airCombatRef={airCombat} trafficCount={QUALITY[quality].cars} onTrafficHit={hideTraffic} peersRef={peersRef} night={night} weather={weather} />
+      : <CameraRig inputBlocked={inputBlocked} extent={extent} focusTarget={focusTarget} onCameraChange={reportCamera} joystickValues={joystickValues} locked={cameraLocked} onUnlock={onExplore} />}
     {/* 조종 중에는 멈추고, 탈것을 고른 뒤 카운트다운 동안에는 도시 조명 조합만 미리 만든다.
         무거운 실내 묶음까지 돌리면 조종에 들어가는 첫 프레임이 늦는다. */}
     <ShaderPrewarm night={night} quality={quality}
@@ -691,6 +701,15 @@ function City({ buildings, selectedId, onSelect, focusTarget, quality, timeOfDay
     <RenderStatus onReady={onReady} onPerformance={onPerformance} />
     <ContextHealth onContextLost={onContextLost} onContextRestored={onContextRestored} />
   </>;
+}
+
+/** Keep one shared simulation time for traffic, weapons, animation and timers. */
+function SimulationClock({ paused }) {
+  const clock = useThree(state => state.clock);
+  const pausedRef = useRef(paused);
+  useLayoutEffect(() => { pausedRef.current = paused; }, [paused]);
+  useLayoutEffect(() => installSimulationClock(clock, () => pausedRef.current), [clock]);
+  return null;
 }
 
 /** 품질 등급이 정한 dpr 을 화면 배율 안에서 고른다. 자동 조절은 이 값 아래로만 간다. */
@@ -714,6 +733,19 @@ function prepareRenderer({ gl, scene, setDpr }, dpr) {
 
 function WorldScene({ quality = 'medium', timeOfDay = 'day', weather = 'clear', ...props }) {
   const level = QUALITY[quality] ? quality : 'medium';
+  const [rendererError, setRendererError] = useState(null);
+  const createRenderer = useCallback(defaults => {
+    try {
+      return new THREE.WebGLRenderer({ ...defaults, antialias: level !== 'low', powerPreference: 'high-performance', logarithmicDepthBuffer: true });
+    } catch (error) {
+      // R3F awaits renderer creation outside its render error boundary. Re-throw
+      // through React state and stop this failed configure task until unmount.
+      discardUnconfiguredRoot(defaults.canvas);
+      setRendererError(error);
+      return new Promise(() => {});
+    }
+  }, [level]);
+  if (rendererError) throw rendererError;
   const dpr = baseDpr(level);
   // 조종 중에는 해상도를 올리지 않는다. 한 번의 전환이 100ms 넘게 멈추므로 화면이 흔들리는
   // 자리에서는 되돌리지 않고 조감 카메라에서만 여유를 본다.
@@ -723,8 +755,9 @@ function WorldScene({ quality = 'medium', timeOfDay = 'day', weather = 'clear', 
     // 도시 반폭이 2400 을 넘는데 near 0.5, far 5000 이면 거리 300 에서 이미 깊이 해상도가
     // 0.011 이다. 지면 판과 지구 바닥, 노면과 차선이 0.01 에서 0.1 간격이라 카메라가 움직일
     // 때마다 승자가 바뀌어 바닥이 깜빡였다. 로그 깊이 버퍼는 이 거리에서 해상도가 0.002 다.
-    gl={{ antialias: level !== 'low', powerPreference: 'high-performance', logarithmicDepthBuffer: true }}
+    gl={createRenderer}
     onCreated={(state) => prepareRenderer(state, dpr)}>
+    <SimulationClock paused={!!props.paused} />
     <City {...props} quality={level} timeOfDay={timeOfDay} weather={weather} />
     <AdaptiveResolution key={level} base={dpr} piloting={piloting} />
   </Canvas>;

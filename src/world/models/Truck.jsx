@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import Block from './ModelBlock';
+import { Shell } from './SurfaceParts.jsx';
 import { Wheel } from './carParts.jsx';
 import { CAR_PALETTE as P, GLASS_OPACITY, MAX_STEER, rollWheels, steerAngle } from './carGeometry.js';
 import { PanelSeam, SurfaceVent } from './exteriorDetails.jsx';
@@ -48,7 +49,7 @@ export default function Truck({ wheelsRef, steer = 0, speed = 0, firstPerson = f
       </mesh>
       <Block position={[0, -0.6, 3.72]} scale={[2.2, 0.1, 0.1]} color={FRAME} />
       {/* 캡 지붕 위 바람막이. 지붕 자체가 아니라 얹힌 페어링이라 앞부분에 둔다 */}
-      <Block position={[0, 1.95, -2.05]} scale={[2.0, 0.3, 0.6]} rotation={[0.35, 0, 0]} color={CAB_DARK} />
+      <Shell color={CAB_DARK} stations={[{z:-2.6,rx:.88,ry:.025,cy:1.8,power:3},{z:-2.1,rx:1,ry:.12,cy:1.91,power:4},{z:-1.75,rx:1,ry:.17,cy:1.94,power:4}]}/>
       <Block position={[0, -0.3, -3.78]} scale={[2.34, 0.34, 0.14]} color={P.trim} />
       <PanelSeam position={[0, 0.28, -3.58]} scale={[1.8, 0.02, 0.04]} color={CAB_DARK} />
       {/* 도어 라인, 손잡이, 사이드미러(긴 팔), 발판 */}
@@ -95,7 +96,7 @@ export default function Truck({ wheelsRef, steer = 0, speed = 0, firstPerson = f
     <group visible={!firstPerson}>
       <StaticBatch>
         {/* 캡. 앞이 수직에 가깝다 */}
-        <Block position={[0, 0.7, -2.75]} scale={[2.3, 1.9, 2.0]} color={CAB} />
+        <Shell color={CAB} stations={[{z:-3.75,rx:1.04,ry:.86,cy:.7,power:5},{z:-3.45,rx:1.15,ry:.95,cy:.7,power:7},{z:-2,rx:1.15,ry:.95,cy:.7,power:7},{z:-1.75,rx:1.08,ry:.9,cy:.7,power:5}]}/>
         <Block position={[0, 1.72, -2.55]} scale={[2.2, 0.16, 1.4]} color={CAB_DARK} />
         {/* 앞유리, 측면 창 */}
         <mesh position={[0, 1.05, -3.74]} scale={[2.0, 0.9, 0.06]} rotation={[0.08, 0, 0]}>

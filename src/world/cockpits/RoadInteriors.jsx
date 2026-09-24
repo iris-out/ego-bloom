@@ -1,3 +1,6 @@
+import { wiperPhase } from './wiperMotion.js';
+import { Shell } from '../models/SurfaceParts.jsx';
+import { ModernDashboard, ModernConsole, ModernDoor, ModernWheel, ModernSeats } from './ModernRoadCabin.jsx';
 import { Bolts, Dial, GearLever, GlassPane, GrabHandle, Knob, Panel, Pedals, PushButton, Seat, ShadeStrip, Toggle, Wipers, Yoke } from './parts.jsx';
 import { MAX_RPM, REDLINE_RPM } from '../carGauges.js';
 import { VEHICLES } from '../carPhysics.js';
@@ -44,17 +47,6 @@ const RPM_NUMBERS = Object.freeze([0, 1, 2, 3, 4, 5, 6, 7, 8]);
 /** 나침반은 한 바퀴를 다 쓰면 0 과 360 이 같은 자리에 겹쳐 글자가 뭉갠다. 조금 덜 돌린다. */
 const COMPASS_SWEEP = 6.02;
 const COMPASS_NUMBERS = Object.freeze([0, 90, 180, 270, 360]);
-
-/** 와이퍼 한 번 왕복에 걸리는 시간이다. */
-const WIPER_PERIOD = 1.4;
-
-/** 비가 올 때만 위상을 준다. Wipers 의 get 이 매 프레임 부르므로 여기서 시각을 직접 읽어도
- * 실내에 useFrame 을 두지 않는다. 0 을 주면 Wipers 가 눕힌 자리에 그대로 둔다. */
-function wiperPhase(weather) {
-  if (weather !== 'rain') return 0;
-  const now = typeof performance === 'undefined' ? Date.now() : performance.now();
-  return (now / 1000 / WIPER_PERIOD) % 1;
-}
 
 /** 누운 판(대시 상판, 후드, 헤드라이너) 의 자세다. 앞점에서 뒷점으로 눕는다.
  * 박스의 로컬 +z 가 (0, -sin, cos) 로 가므로 뒷점이 낮으면 각이 양수다. */
@@ -144,9 +136,10 @@ function CabinShell({ vehicle, spec, mid }) {
     {/* 앞유리 헤더다. 아랫면이 유리 윗모서리와 같아 아가리를 가리지 않는다. */}
     <Panel material="trim" position={cabin(vehicle, [0, headerY, headerZ])}
       scale={[spec.glass[3] - 0.04, headerHeight, headerDepth]} rotation={[spec.glassAngle, 0, 0]} />
-    {[-1, 1].map((side) => <Panel key={side} material="trim"
-      position={cabin(vehicle, [side * spec.pillarX, pillar.y + ny * inset, pillar.z + nz * inset])}
-      scale={[0.06, pillar.length, 0.08]} rotation={[pillar.angle, 0, 0]} />)}
+    {[-1, 1].map((side) => modern ? <Shell key={side} color="#2b333b" metalness={.06} roughness={.85}
+      position={cabin(vehicle,[side*spec.pillarX,pillar.y+ny*inset,pillar.z+nz*inset])} rotation={[pillar.angle,0,0]} scale={[1,pillar.length,1]} segments={16} steps={1}
+      stations={[{z:-.04,rx:.022,ry:.5,power:5},{z:.04,rx:.026,ry:.49,power:5}]}/>
+      : <Panel key={side} material="trim" position={cabin(vehicle,[side*spec.pillarX,pillar.y+ny*inset,pillar.z+nz*inset])} scale={[.06,pillar.length,.08]} rotation={[pillar.angle,0,0]}/>)}
     {spec.bPillarZ !== null && [-1, 1].map((side) => <Panel key={side} material="trim"
       position={cabin(vehicle, [side * (half - 0.015), (spec.sillY + spec.roofY) / 2, spec.bPillarZ])}
       scale={[0.05, spec.roofY - spec.sillY, 0.13]} />)}
@@ -155,7 +148,7 @@ function CabinShell({ vehicle, spec, mid }) {
       position={cabin(vehicle, [0, spec.rear.y, spec.rear.z])}
       scale={[spec.rear.width, spec.rear.height, 0.12]} rotation={[vehicle === 'truck' ? 0 : -0.1, 0, 0]} />
     {/* A 필러 안쪽 천 마감 띠다. 민무늬 회색 판에 결을 한 줄 넣어 판 한 장으로 읽히지 않게 한다. */}
-    {mid && [-1, 1].map((side) => <Panel key={`wrap${side}`} material="fabric"
+    {mid && !modern && [-1, 1].map((side) => <Panel key={`wrap${side}`} material="fabric"
       position={cabin(vehicle, [side * (spec.pillarX - 0.035), pillar.y + ny * inset, pillar.z + nz * inset + 0.045])}
       scale={[0.02, pillar.length - 0.04, 0.05]} rotation={[pillar.angle, 0, 0]} />)}
     {/* 헤더 안쪽 천 마감이다. 헤더 아랫면 뒤 모서리를 따라 한 줄만 간다. */}
@@ -307,82 +300,6 @@ function Cluster({ vehicle, spec, statusRef, night, mid }) {
   </group>;
 }
 
-/** G60 세단 전용 디지털 대시다. 두 화면을 살짝 꺾어 하나의 커브드 디스플레이처럼 잇고,
- * 아래에는 물리 송풍구 대신 가는 이음선과 조명식 인터랙션 바만 둔다. */
-function DisplayFacet({ vehicle, facet, depth, offset, statusRef, night, accent }) {
-  return <group userData={{ part: 'display-facet', display: facet.id }}
-    position={at(vehicle, [facet.x, facet.y, facet.z])} rotation={[0, facet.yaw, 0]}>
-    <Panel material="dark" scale={[facet.width + 0.02, facet.height + 0.02, depth]} />
-    <InstrumentDisplay mode={facet.mode || 'cluster'} statusRef={statusRef} night={night}
-      position={[0, 0, offset]} width={facet.width} height={facet.height} accent={accent} />
-  </group>;
-}
-
-function SedanDigitalCockpit({ spec, statusRef, night }) {
-  return <group>
-    <group userData={{ part: 'g60-curved-display' }}>
-      {spec.screens.map((facet, index) => <DisplayFacet key={facet.id} vehicle="sedan" facet={facet}
-        depth={spec.screenBackingDepth} offset={spec.screenOffset} statusRef={statusRef} night={night}
-        accent={index ? '#72c8e8' : '#9edfff'} />)}
-    </group>
-    <group userData={{ part: 'g60-interaction-bar' }}>
-      <Panel material="glow" position={cabin('sedan', [0, -0.405, -0.735])} scale={[1.34, 0.026, 0.025]} />
-      <Panel material="dark" position={cabin('sedan', [0, -0.445, -0.738])} scale={[1.30, 0.018, 0.025]} />
-      {[-0.58, -0.2, 0.2, 0.58].map((x) => <Panel key={x} material="metal"
-        position={cabin('sedan', [x, -0.445, -0.72])} scale={[0.012, 0.045, 0.018]} />)}
-      <PushButton position={cabin('sedan', [0.48, -0.405, -0.70])} size={0.028} lit material="warn" />
-    </group>
-  </group>;
-}
-
-function SuvInfotainment({ spec, statusRef, night }) {
-  return <group userData={{ part: 'g01-infotainment' }}>
-    <DisplayFacet vehicle="suv" facet={spec.centerScreen} depth={spec.screenBackingDepth}
-      offset={spec.screenOffset} statusRef={statusRef} night={night} accent="#d7e8ef" />
-    {[-0.12, 0, 0.12].map(x => <Panel key={x} material="dark"
-      position={at('suv', [spec.centerScreen.x + x, -0.39, -0.872])} scale={[0.09, 0.025, 0.02]} />)}
-  </group>;
-}
-
-/** G60의 낮은 플로팅 콘솔이다. 긴 변속봉 대신 작은 토글과 로터리 컨트롤러를 쓴다. */
-function SedanFloatingConsole({ spec, mid, high }) {
-  const box = spec.console;
-  return <group userData={{ part: 'g60-floating-console' }}>
-    <Panel material="shell" position={cabin('sedan', [box.x, box.top - 0.05, box.z])}
-      scale={[box.width, 0.13, box.depth]} rotation={[-0.025, 0, 0]} />
-    <Panel material="metal" position={cabin('sedan', [box.x, box.top + 0.025, box.z - 0.13])}
-      scale={[box.width - 0.035, 0.025, box.depth * 0.52]} />
-    {mid && <Toggle position={cabin('sedan', [box.x - 0.075, box.top + 0.055, box.z - 0.25])}
-      rotation={[HALF_PI, 0, 0]} on />}
-    {mid && <Knob position={cabin('sedan', [box.x + 0.085, box.top + 0.045, box.z - 0.08])}
-      rotation={[HALF_PI, 0, 0]} radius={0.055} height={0.025} material="dark" pointer={false} />}
-    {high && [-0.055, 0.055].map((offset) => <Knob key={offset} material="dark"
-      position={cabin('sedan', [box.x + offset, box.top + 0.02, box.z + 0.28])}
-      rotation={[HALF_PI, 0, 0]} radius={0.042} height={0.025} pointer={false} />)}
-    <Panel material="leather" position={cabin('sedan', [box.x, box.top + 0.04, box.z + box.depth * 0.38])}
-      scale={[box.width - 0.04, 0.055, box.depth * 0.20]} />
-  </group>;
-}
-
-/** 센터 콘솔이다. 트럭은 이 자리에 엔진 덮개가 솟으므로 TruckExtras 가 따로 그린다. */
-function CentreConsole({ vehicle, spec, mid, high }) {
-  const box = spec.console;
-  const height = box.top - spec.floorY;
-  return <group>
-    <Panel material="shell" position={cabin(vehicle, [box.x, spec.floorY + height / 2, box.z])}
-      scale={[box.width, height, box.depth]} />
-    {mid && <Panel material="leather" position={cabin(vehicle, [box.x, box.top + 0.03, box.z + box.depth * 0.3])}
-      scale={[box.width - 0.04, 0.06, box.depth * 0.34]} />}
-    {mid && <Panel material="grip" position={cabin(vehicle, [box.x - box.width * 0.34, box.top + 0.06, box.z + box.depth * 0.06])}
-      scale={[0.04, 0.05, 0.22]} rotation={[-0.5, 0, 0]} />}
-    {mid && <GearLever position={cabin(vehicle, [box.x, box.top + 0.01, box.z - box.depth * 0.22])}
-      get={() => 0.5} length={0.14} />}
-    {high && [-0.055, 0.055].map((offset) => <Knob key={offset} material="dark"
-      position={cabin(vehicle, [box.x + offset, box.top + 0.005, box.z + box.depth * 0.06])}
-      rotation={[HALF_PI, 0, 0]} radius={0.046} height={0.05} pointer={false} />)}
-  </group>;
-}
-
 /** 앞유리, 옆유리, 뒷유리다. 앞유리 각도는 외장과 같다. 비가 오면 빗방울 알파를 쓴다. */
 function Glazing({ vehicle, spec, rain }) {
   const [, gy, gz, gw, gh] = spec.glass;
@@ -419,10 +336,7 @@ function Stalks({ vehicle, spec }) {
 
 /** 세단만의 은색 트림 한 줄이다. 우드 트림은 두지 않는다. */
 function SedanExtras({ spec, mid }) {
-  const face = standing(spec.dashFaceY, spec.dashFaceZ, spec.dashBreakY, spec.dashBreakZ);
   return <group>
-    <Panel material="metal" position={cabin('sedan', [0, face.y + 0.09, face.z + 0.035])}
-      scale={[spec.dashWidth - 0.08, 0.018, 0.02]} rotation={[face.angle, 0, 0]} />
     {mid && <Panel material="trim" position={cabin('sedan', [0, spec.rear.y + 0.3, spec.rear.z + 0.16])}
       scale={[spec.rear.width, 0.06, 0.12]} />}
   </group>;
@@ -527,30 +441,27 @@ function RoadCabin({ vehicle, statusRef, night = false, quality, weather }) {
     <Mirrors vehicle={vehicle} quality={quality} />
     <CabinLamp vehicle={vehicle} offset={[0.1, (spec.roofY ?? 0.1) - 0.08, -0.3]} intensity={night ? 0.3 : 0.1} color="#ffd7b3" distance={1.8} />
     <CabinShell vehicle={vehicle} spec={spec} mid={mid} />
-    {[-1, 1].map((side) => <DoorCard key={side} vehicle={vehicle} spec={spec} side={side} mid={mid} high={high} />)}
-    <Dashboard vehicle={vehicle} spec={spec} mid={mid} />
-    {vehicle === 'sedan'
-      ? <SedanDigitalCockpit spec={spec} statusRef={statusRef} night={night} />
-      : <><CentreStack vehicle={vehicle} spec={spec} mid={mid} />
-        <Cluster vehicle={vehicle} spec={spec} statusRef={statusRef} night={night} mid={mid} />
-        {vehicle === 'suv' && <SuvInfotainment spec={spec} statusRef={statusRef} night={night} />}</>}
-    {vehicle === 'sedan'
-      ? <SedanFloatingConsole spec={spec} mid={mid} high={high} />
-      : vehicle !== 'truck' && <CentreConsole vehicle={vehicle} spec={spec} mid={mid} high={high} />}
+    {[-1,1].map(side=>modern?<ModernDoor key={side} vehicle={vehicle} spec={spec} side={side} mid={mid} high={high}/>:<DoorCard key={side} vehicle={vehicle} spec={spec} side={side} mid={mid} high={high}/>)}
+    {modern ? <><ModernDashboard mid={mid} vehicle={vehicle} spec={spec} statusRef={statusRef} night={night} high={high}/>
+      <ModernConsole mid={mid} vehicle={vehicle} spec={spec} high={high}/></>
+      : <><Dashboard vehicle={vehicle} spec={spec} mid={mid}/><CentreStack vehicle={vehicle} spec={spec} mid={mid}/>
+        <Cluster vehicle={vehicle} spec={spec} statusRef={statusRef} night={night} mid={mid}/>
+        {vehicle!=='truck'&&<CentreConsole vehicle={vehicle} spec={spec} mid={mid} high={high}/>}</>}
     <Extras spec={spec} mid={mid} high={high} />
-    {mid && vehicle !== 'sedan' && <DashControls vehicle={vehicle} spec={spec} />}
+    {mid && !modern && <DashControls vehicle={vehicle} spec={spec} />}
     {mid && <Glazing vehicle={vehicle} spec={spec} rain={rain} />}
     {/* 스티어링은 운전자 정면이다. 손은 mid 부터 림을 쥔다. */}
-    <Yoke get={() => (Number(statusRef?.current?.steer) || 0) * wheel.ratio} hands={mid}
-      position={at(vehicle, [wheel.x || 0, wheel.y, wheel.z])} radius={wheel.radius} tilt={wheel.tilt} />
+    <>{modern?<ModernWheel mid={mid} vehicle={vehicle} spec={spec} statusRef={statusRef} high={high}/>:<Yoke get={() => (Number(statusRef?.current?.steer) || 0) * wheel.ratio} hands={mid}
+      position={at(vehicle, [wheel.x || 0, wheel.y, wheel.z])} radius={wheel.radius} tilt={wheel.tilt} />}</>
     {/* 스티어링 컬럼과 스토크 둘이다. 컬럼은 휠 뒤에서 대시로 들어가고 스토크는 그 좌우에 붙는다. */}
     {mid && <Panel material="dark" position={at(vehicle, [wheel.x || 0, wheel.y - 0.05, wheel.z - 0.14])}
       scale={[0.11, 0.11, 0.24]} rotation={[wheel.tilt + HALF_PI, 0, 0]} />}
     {mid && <Stalks vehicle={vehicle} spec={spec} />}
     {mid && <Pedals position={at(vehicle, spec.pedals)} count={2} spacing={0.16} />}
-    {mid && seats && [seats.driverX, seats.passengerX].map((x) => <Seat key={x} material={seats.material}
+    {mid && modern && <ModernSeats vehicle={vehicle} spec={spec}/>}
+    {mid && !modern && seats && [seats.driverX, seats.passengerX].map((x) => <Seat key={x} material={seats.material}
       position={cabin(vehicle, [x, seats.y, seats.z])} width={seats.width} depth={seats.depth} height={0.56} />)}
-    {mid && <Wipers get={() => wiperPhase(statusRef?.current?.weather || weather)}
+    {mid && <Wipers get={elapsedTime => wiperPhase(statusRef?.current?.weather || weather,elapsedTime)}
       position={cabin(vehicle, [0, spec.wiper.y, spec.wiper.z])}
       rotation={[spec.glassAngle, 0, 0]} length={spec.wiper.length} gap={spec.wiper.gap} rest={spec.wiper.rest ?? -0.4} />}
     {high && spec.roofY !== null && [-1, 1].map((side) => <Panel key={side} material="fabric"

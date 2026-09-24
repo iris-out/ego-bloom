@@ -21,9 +21,9 @@ const fly = (state, input, seconds) => {
   return next;
 };
 
-test('연료는 요격기만 갖는다', () => {
-  assert.equal(usesFuel('interceptor'), true);
-  for (const key of PLANE_KEYS.filter((key) => key !== 'interceptor')) assert.equal(usesFuel(key), false);
+test('요격기 동체 두 기종만 연료를 갖는다', () => {
+  for (const key of ['interceptor', 'shotgun']) assert.equal(usesFuel(key), true, `${key} 연료`);
+  for (const key of PLANE_KEYS.filter((key) => !['interceptor', 'shotgun'].includes(key))) assert.equal(usesFuel(key), false);
   assert.equal(createFlightState(EXTENT, 'jet').fuel, undefined);
   assert.equal(createFlightState(EXTENT, 'interceptor').fuel, 1);
   assert.equal(flightStatus(createFlightState(EXTENT, 'jet')).fuel, null);
@@ -121,9 +121,9 @@ test('다른 기종은 부스트 입력을 무시한다', () => {
 });
 
 /** Q 로 고르는 강화 부스트다. 단계는 입력으로 들어오고 물리는 그 값을 그대로 쓴다. */
-test('강화 부스트는 요격기만 갖고 기본 단계에서 시작한다', () => {
-  assert.equal(hasOverdrive('interceptor'), true);
-  for (const key of PLANE_KEYS.filter((key) => key !== 'interceptor')) assert.equal(hasOverdrive(key), false);
+test('요격기 동체 두 기종만 강화 부스트를 갖고 기본 단계에서 시작한다', () => {
+  for (const key of ['interceptor', 'shotgun']) assert.equal(hasOverdrive(key), true, `${key} 강화 부스트`);
+  for (const key of PLANE_KEYS.filter((key) => !['interceptor', 'shotgun'].includes(key))) assert.equal(hasOverdrive(key), false);
   assert.equal(createFlightState(EXTENT, 'interceptor').overdrive, false);
   assert.equal(createFlightState(EXTENT, 'jet').overdrive, undefined);
   assert.equal(flightStatus(createFlightState(EXTENT, 'interceptor')).overdrive, false);

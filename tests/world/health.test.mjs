@@ -1,24 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BUMP_DAMAGE, BUMP_GRACE, BUMP_REPAIR_DELAY, DAMAGE, HULL, REPAIR_DELAY, ROAD_HULL, bump, bumpGuarded, canHarm, createHealth, damageOf, hullRatio, hurt, isArmed, repair } from '../../src/world/health.js';
+import { BUMP_DAMAGE, BUMP_GRACE, BUMP_REPAIR_DELAY, DAMAGE, HULL, REPAIR_DELAY, ROAD_HULL, bump, bumpGuarded, canHarm, createHealth, damageOf, hullRatio, hurt, isArmed, repair, showDamagedHealthBar } from '../../src/world/health.js';
+
+test('월드 대상의 체력바는 풀피와 알 수 없는 체력에서 숨긴다', () => {
+  assert.equal(showDamagedHealthBar(1), false);
+  assert.equal(showDamagedHealthBar(0.7), true);
+  assert.equal(showDamagedHealthBar(0), true);
+  assert.equal(showDamagedHealthBar(undefined), false);
+});
 import { PLANE_KEYS, VEHICLE_KEYS } from '../../src/world/identity.js';
 
 test('무장 탈것은 무기 체력을, 민간 지상 차량은 부딪힘 체력을 갖는다', () => {
   const armed = [];
   for (const key of PLANE_KEYS) if (isArmed('flight', key)) armed.push(key);
   for (const key of VEHICLE_KEYS) if (isArmed('car', key)) armed.push(key);
-  assert.deepEqual(armed, ['fighter', 'prop', 'interceptor', 'shotgun', 'bomber', 'tank', 'howitzer', 'armored', 'aa']);
+  assert.deepEqual(armed, ['fighter', 'prop', 'interceptor', 'shotgun', 'bomber', 'helicopter', 'tank', 'howitzer', 'armored', 'aa']);
   assert.equal(isArmed('walk', 'walk'), false);
-  const planes = ['fighter', 'prop', 'interceptor', 'shotgun', 'bomber'];
+  const planes = ['fighter', 'prop', 'interceptor', 'shotgun', 'bomber', 'helicopter'];
   for (const key of armed) assert.equal(createHealth(planes.includes(key) ? 'flight' : 'car', key).max, HULL[key]);
   // 민간 차량은 무기에는 안 다치지만 부딪힘 내구도를 갖는다.
   for (const key of ['sedan', 'motorcycle']) assert.equal(createHealth('car', key).max, ROAD_HULL);
-  for (const key of ['jet', 'helicopter']) assert.equal(createHealth('flight', key).max, 0);
+  for (const key of ['jet']) assert.equal(createHealth('flight', key).max, 0);
   assert.equal(createHealth('walk', 'walk').max, 0);
 });
 
 test('비전투 탈것은 어떤 포탄에도 피해를 받지 않는다', () => {
-  for (const [kind, key] of [['car', 'sedan'], ['car', 'motorcycle'], ['flight', 'jet'], ['flight', 'helicopter'], ['walk', 'walk']]) {
+  for (const [kind, key] of [['car', 'sedan'], ['car', 'motorcycle'], ['flight', 'jet'], ['walk', 'walk']]) {
     const health = createHealth(kind, key);
     assert.equal(canHarm(health), false, `${key} 가 목표가 됐다`);
     for (const weapon of Object.keys(DAMAGE)) {

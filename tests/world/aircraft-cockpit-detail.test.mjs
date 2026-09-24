@@ -9,11 +9,18 @@ import {
 } from '../../src/world/cockpits/aircraftDetail.js';
 import { gaugeFaults } from '../../src/world/cockpits/gaugeClearance.js';
 
+// AircraftCockpits consumes this frame table; the panoramic gondola is a separate cabin.
+const LEGACY_AIRCRAFT_KEYS = Object.keys(COCKPIT_FRAME);
 const DEG = 180 / Math.PI;
+
+test('every registered aircraft has either a legacy frame or the panoramic airship cabin', () => {
+  assert.deepEqual([...LEGACY_AIRCRAFT_KEYS, 'airship'].sort(), [...PLANE_KEYS].sort());
+});
 
 /** 외장 캐노피 구다. models/*.jsx 의 좌표를 눈 기준으로 옮겨 적었다.
  * 전투기는 group scale 1.12 를 곱한 바깥 좌표다. 실내 유리는 이 안에 있어야 한다. */
 const EXTERIOR_CANOPY = {
+  shotgun: { centre: [0, -0.24, 0.50], half: [0.44, 0.40, 1.10] },
   jet: { centre: [0, -0.28, -0.10], half: [0.82, 0.60, 1.85] },
   bomber: { centre: [0.46, -0.03, 0], half: [1.10, 0.62, 2.40] },
   prop: { centre: [0, 0, 0.10], half: [0.60, 0.52, 1.30] },
@@ -23,7 +30,7 @@ const EXTERIOR_CANOPY = {
 };
 
 test('each aircraft has a compact labeled systems placard', () => {
-  for (const key of PLANE_KEYS) {
+  for (const key of LEGACY_AIRCRAFT_KEYS) {
     const placard = AIRCRAFT_PLACARDS[key];
     assert.ok(placard, `${key} has no placard`);
     assert.equal(typeof placard.title, 'string');
@@ -42,7 +49,8 @@ test('six-pack dials have short captions, units, and real scale limits', () => {
 });
 
 test('prop fighter and interceptor use gun-only instrument pages', () => {
-  assert.deepEqual(GUN_ONLY_PLANES, ['prop', 'interceptor']);
+  assert.deepEqual(GUN_ONLY_PLANES, ['prop', 'interceptor', 'shotgun', 'helicopter']);
+  assert.equal(COCKPIT_FRAME.shotgun, COCKPIT_FRAME.interceptor);
 });
 
 test('눈금 숫자가 바늘과 같은 자리를 가리킨다', () => {
@@ -62,7 +70,7 @@ test('눈금 숫자가 바늘과 같은 자리를 가리킨다', () => {
 });
 
 test('계기판이 눈에서 0.70~0.90 앞, 0.30~0.45 아래에 선다', () => {
-  for (const key of PLANE_KEYS) {
+  for (const key of LEGACY_AIRCRAFT_KEYS) {
     const frame = COCKPIT_FRAME[key];
     assert.ok(frame, `${key} 실내 뼈대가 없다`);
     assert.ok(eyePoint(key), `${key} 눈 좌표가 없다`);
@@ -72,7 +80,7 @@ test('계기판이 눈에서 0.70~0.90 앞, 0.30~0.45 아래에 선다', () => {
 });
 
 test('계기 아랫줄이 세로 화각 안에 다 들어온다', () => {
-  for (const key of PLANE_KEYS) {
+  for (const key of LEGACY_AIRCRAFT_KEYS) {
     const { panel } = COCKPIT_FRAME[key];
     const half = cockpitFov(key) / 2;
     for (const slot of visibleSlots(key)) {
@@ -115,7 +123,7 @@ test('HUD 유리 아래가 계기판 윗줄보다 위에 있다', () => {
 });
 
 test('실내 캐노피 유리가 외장 캐노피 구 안에 있다', () => {
-  for (const key of PLANE_KEYS) {
+  for (const key of LEGACY_AIRCRAFT_KEYS) {
     const { canopy } = COCKPIT_FRAME[key];
     const outside = EXTERIOR_CANOPY[key];
     const dx = Math.abs(canopy.x - outside.centre[0]), dy = Math.abs(canopy.y - outside.centre[1]);
@@ -140,7 +148,7 @@ test('실내 캐노피 유리가 외장 캐노피 구 안에 있다', () => {
 });
 
 test('좌석과 바닥이 눈 아래 사람 앉은 비례를 지킨다', () => {
-  for (const key of PLANE_KEYS) {
+  for (const key of LEGACY_AIRCRAFT_KEYS) {
     const { seat, tub } = COCKPIT_FRAME[key];
     // 앉은 사람의 눈은 방석에서 0.62~0.78 위다. 더 낮으면 좌석이 가슴에 붙고 더 높으면 공중에 뜬다.
     assert.ok(-seat.y >= 0.62 && -seat.y <= 0.78, `${key} 방석이 눈에서 ${-seat.y} 떨어져 있다`);
@@ -163,7 +171,7 @@ test('명판 토글 네 개가 명판 안에 선다', () => {
 test('옆 벽과 바닥이 캐노피 유리 앞 끝까지 간다', () => {
   // 계기판에서 끊으면 유리 밑선 아래 앞쪽이 뚫려 옆을 볼 때 잔디가 보이고 사이드 콘솔이
   // 허공에 뜬 것처럼 읽힌다. Tub 이 쓰는 식을 그대로 다시 계산한다.
-  for (const key of PLANE_KEYS) {
+  for (const key of LEGACY_AIRCRAFT_KEYS) {
     const { canopy, panel } = COCKPIT_FRAME[key];
     const canopyFront = canopy.z - canopy.length / 2;
     const wallFront = Math.min(canopyFront + 0.04, panel.z + 0.03);
@@ -173,7 +181,7 @@ test('옆 벽과 바닥이 캐노피 유리 앞 끝까지 간다', () => {
 });
 
 test('사이드 콘솔이 조종석 벽 안에 붙는다', () => {
-  for (const key of PLANE_KEYS) {
+  for (const key of LEGACY_AIRCRAFT_KEYS) {
     const { side, tub } = COCKPIT_FRAME[key];
     const centre = tub.x || 0, inner = tub.halfWidth - 0.025;
     for (const sign of [-1, 1]) {
@@ -246,7 +254,7 @@ test('폭격기 옆 창이 벽 윗단과 지붕 밑선을 잇는다', () => {
 test('기수 덮개와 조준기 마운트가 계기 윗줄 위에서 끝난다', () => {
   // 덮개는 눈보다 아래 띠로만 보여야 한다. 앞 모서리가 계기 윗변까지 내려오면 속도, 고도,
   // 연료 계기와 화면이 통째로 가린다. 요격기는 그 여유가 1도뿐이라 덮개를 아예 뺐다.
-  for (const key of PLANE_KEYS) {
+  for (const key of LEGACY_AIRCRAFT_KEYS) {
     const frame = COCKPIT_FRAME[key];
     const tops = visibleSlots(key).map((slot) => {
       const [, y, z] = panelPlace(frame.panel, slot.x, slot.up + slot.halfHeight, INSTRUMENT_OUT);
@@ -274,7 +282,7 @@ test('항공기 여섯 종 계기가 화각과 코 덮개, 요크 림, 조준기
   // aircraftGaugeRig 가 visibleSlots 와 COCKPIT_FRAME 에서 그대로 뽑은 좌표다. 계기 지름이나
   // 계기판 자리를 바꾸면 여기가 먼저 깨진다. 같은 검사를 지상 아홉 종과 함께
   // vehicle-interior-layout.test.mjs 가 15종 전부에 한 번 더 건다.
-  for (const key of PLANE_KEYS) {
+  for (const key of LEGACY_AIRCRAFT_KEYS) {
     const rig = aircraftGaugeRig(key);
     assert.equal(rig.gauges.length, visibleSlots(key).length, `${key} 계기 수가 slot 수와 다르다`);
     const faults = gaugeFaults(rig);
@@ -284,7 +292,7 @@ test('항공기 여섯 종 계기가 화각과 코 덮개, 요크 림, 조준기
 
 test('계기 아랫변이 계기판 받침 밑선 안에 든다', () => {
   // 받침보다 아래로 내려간 계기는 배경에 떠 보인다. panelFoot 이 받침 아랫변이다.
-  for (const key of PLANE_KEYS) {
+  for (const key of LEGACY_AIRCRAFT_KEYS) {
     const [, footY, footZ] = panelFoot(key);
     const foot = Math.atan2(-footY, -footZ) * DEG;
     for (const gauge of aircraftGaugeRig(key).gauges) {

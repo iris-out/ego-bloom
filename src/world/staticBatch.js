@@ -13,6 +13,7 @@ export function materialSignature(material) {
   return [
     material.type, hex(material.color), hex(material.emissive), material.emissiveIntensity,
     material.roughness, material.metalness, material.opacity, material.transparent, material.side,
+    material.envMap?.uuid, material.envMapIntensity,
     material.map?.uuid, material.emissiveMap?.uuid, material.alphaMap?.uuid, material.normalMap?.uuid,
     material.toneMapped, material.depthTest, material.depthWrite, material.colorWrite, material.blending,
     material.vertexColors, material.flatShading, material.wireframe, material.fog, material.alphaTest,

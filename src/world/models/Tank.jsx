@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import StaticBatch from '../StaticBatch.jsx';
 import * as THREE from 'three';
 import Block from './ModelBlock';
+import { ArmorShell, TrackLoop } from './SurfaceParts.jsx';
 import { PanelSeam, SurfaceVent } from './exteriorDetails.jsx';
 
 /** 플레이어가 모는 주력전차 시각 모델이다. Sedan, ArmoredCar 와 같은 축 규약을 따른다.
@@ -28,7 +29,7 @@ const OPTIC = '#8e979b';
 
 const TRACK_BOTTOM = -0.9;
 const TRACK_X = 1.55;
-const TRACK_BAND_HEIGHT = 0.5;
+
 const WHEEL_RADIUS = 0.42;
 const WHEEL_Y = TRACK_BOTTOM + WHEEL_RADIUS;
 const IDLER_Z = -2.7;
@@ -42,16 +43,16 @@ const TURRET_BASE_Z = -0.3;
 /* Sedan, ArmoredCar 의 Wheel 과 같은 규약이다. 바깥 group 이 rotation.x 로 회전축을 돌리고
  * 안쪽 group 은 원통 축을 X 로 눕혀 굴러가는 방향과 맞춘다. */
 function RoadWheel({ radius }) {
-  return <group rotation={[0, 0, HALF_PI]}>
-    <mesh castShadow><cylinderGeometry args={[radius, radius, 0.46, 10]} /><meshStandardMaterial color={METAL} roughness={0.85} /></mesh>
-    <mesh position={[0, 0.003, 0]}><cylinderGeometry args={[radius * 0.4, radius * 0.4, 0.47, 8]} /><meshStandardMaterial color={METAL_LIGHT} metalness={0.4} roughness={0.5} /></mesh>
-  </group>;
+  return <group rotation={[0, 0, HALF_PI]}><StaticBatch>
+    <mesh castShadow><cylinderGeometry args={[radius, radius, 0.46, 24]} /><meshStandardMaterial color={METAL} roughness={0.85} /></mesh>
+    <mesh position={[0, 0.003, 0]}><cylinderGeometry args={[radius * 0.4, radius * 0.4, 0.47, 24]} /><meshStandardMaterial color={METAL_LIGHT} metalness={0.4} roughness={0.5} /></mesh>
+  </StaticBatch></group>;
 }
 
 function SingleWheel({ radius }) {
-  return <group rotation={[0, 0, HALF_PI]}>
-    <mesh castShadow><cylinderGeometry args={[radius, radius, 0.44, 10]} /><meshStandardMaterial color={METAL} roughness={0.85} /></mesh>
-  </group>;
+  return <group rotation={[0, 0, HALF_PI]}><StaticBatch>
+    <mesh castShadow><cylinderGeometry args={[radius, radius, 0.44, 24]} /><meshStandardMaterial color={METAL} roughness={0.85} /></mesh>
+  </StaticBatch></group>;
 }
 
 /* Sedan, ArmoredCar 의 extrudeUpright 와 같은 규약이다. shape 의 x 는 Z 축, y 는 Y 축, 두께는 X 로 가운데 정렬한다. */
@@ -115,25 +116,25 @@ export default function Tank({ turretYaw = 0, barrelPitch = 0, wheelsRef, speed 
     {/* 차체와 궤도, 1인칭에서도 항상 보인다 */}
     <StaticBatch>
       {/* 하부 차체, 경사 장갑 글라시스 */}
-      <Block position={[0, -0.55, 0.1]} scale={[2.3, 0.5, 6.2]} color={OLIVE} castShadow />
-      <Block position={[0, -0.15, -2.7]} scale={[2.2, 0.6, 1.2]} rotation={[0.42, 0, 0]} color={OLIVE} castShadow />
-      <Block position={[0, -0.5, -3.15]} scale={[2.15, 0.35, 0.4]} rotation={[0.7, 0, 0]} color={OLIVE_DARK} castShadow />
+      <ArmorShell position={[0, -0.55, 0.1]} scale={[2.3, 0.5, 6.2]} color={OLIVE} castShadow />
+      <ArmorShell position={[0, -0.15, -2.7]} scale={[2.2, 0.6, 1.2]} rotation={[0.42, 0, 0]} color={OLIVE} castShadow />
+      <ArmorShell position={[0, -0.5, -3.15]} scale={[2.15, 0.35, 0.4]} rotation={[0.7, 0, 0]} color={OLIVE_DARK} castShadow />
       {[-1, 1].map((side) => <mesh key={side} geometry={geometries.glacisSide} position={[side * 1.12, 0, 0]} scale={[side, 1, 1]} dispose={null} castShadow>
         <meshStandardMaterial color={OLIVE_DARK} roughness={0.7} />
       </mesh>)}
 
       {/* 상부 차체 지붕, 후방 엔진 데크 */}
-      <Block position={[0, -0.02, 0.2]} scale={[2.2, 0.32, 3.2]} color={OLIVE_DARK} castShadow />
-      <Block position={[0, -0.05, 2.95]} scale={[2.15, 0.4, 1.15]} color={OLIVE} castShadow />
+      <ArmorShell position={[0, -0.02, 0.2]} scale={[2.2, 0.32, 3.2]} color={OLIVE_DARK} castShadow />
+      <ArmorShell position={[0, -0.05, 2.95]} scale={[2.15, 0.4, 1.15]} color={OLIVE} castShadow />
       <Block position={[0, 0.16, 2.9]} scale={[1.6, 0.06, 0.9]} color={METAL} />
       <SurfaceVent position={[0, 0.21, 2.9]} scale={[0.66, 0.018, 0.08]} />
-      <mesh position={[0, -0.28, 3.5]} rotation={[HALF_PI, 0, 0]}><cylinderGeometry args={[0.09, 0.09, 0.14, 8]} /><meshStandardMaterial color={METAL} metalness={0.6} roughness={0.4} /></mesh>
+      <mesh position={[0, -0.28, 3.5]} rotation={[HALF_PI, 0, 0]}><cylinderGeometry args={[0.09, 0.09, 0.14, 24]} /><meshStandardMaterial color={METAL} metalness={0.6} roughness={0.4} /></mesh>
 
       {/* 사이드 스커트, 궤도 상부를 가리는 판 */}
       {[-1, 1].map((side) => <Block key={side} position={[side * 1.42, -0.35, 0]} scale={[0.4, 0.3, 5.6]} color={OLIVE_DARK} castShadow />)}
 
       {/* 조종수 해치, 페리스코프 */}
-      <mesh position={[-0.55, 0.16, -2.3]} castShadow><cylinderGeometry args={[0.24, 0.24, 0.1, 10]} /><meshStandardMaterial color={OLIVE_DARK} roughness={0.6} /></mesh>
+      <mesh position={[-0.55, 0.16, -2.3]} castShadow><cylinderGeometry args={[0.24, 0.24, 0.1, 24]} /><meshStandardMaterial color={OLIVE_DARK} roughness={0.6} /></mesh>
       {[-0.16, 0.16].map((dx) => <Block key={dx} position={[-0.55 + dx, 0.28, -2.6]} scale={[0.1, 0.07, 0.06]} color={OPTIC} />)}
 
       {/* 전조등 */}
@@ -157,7 +158,7 @@ export default function Tank({ turretYaw = 0, barrelPitch = 0, wheelsRef, speed 
 
       {/* 궤도, 좌우 대칭. 하단 -0.9 를 보장하는 정적 궤도 하우징 */}
       {[-1, 1].map((side) => <group key={side}>
-        <Block position={[side * TRACK_X, TRACK_BOTTOM + TRACK_BAND_HEIGHT / 2, 0]} scale={[0.5, TRACK_BAND_HEIGHT, 6.0]} color={METAL} castShadow />
+        <TrackLoop position={[side*TRACK_X,-.265,0]} length={6.24} height={1.27} width={.50} color={METAL}/>
 
         {/* 유동륜(전방) */}
         <group position={[side * TRACK_X, WHEEL_Y, IDLER_Z]}>
@@ -173,7 +174,7 @@ export default function Tank({ turretYaw = 0, barrelPitch = 0, wheelsRef, speed 
         </group>)}
         {/* 상부 지지륜 */}
         {RETURN_ROLLER_Z.map((z) => <mesh key={z} position={[side * TRACK_X, RETURN_ROLLER_Y, z]} rotation={[0, 0, HALF_PI]} castShadow>
-          <cylinderGeometry args={[0.18, 0.18, 0.4, 8]} />
+          <cylinderGeometry args={[0.18, 0.18, 0.4, 24]} />
           <meshStandardMaterial color={METAL_LIGHT} roughness={0.7} />
         </mesh>)}
       </group>)}
@@ -184,25 +185,25 @@ export default function Tank({ turretYaw = 0, barrelPitch = 0, wheelsRef, speed 
         따로 묶어 firstPerson 일 때 숨긴다 */}
     <group ref={turretRef} position={[0, TURRET_BASE_Y, TURRET_BASE_Z]} userData={{ dynamic: true }}>
       {/* 후방 버슬. 전면 경사판과 맨틀릿은 아래 캐빈 group 으로 갔다 */}
-      <Block position={[0, 0.24, 1.0]} scale={[1.3, 0.4, 0.7]} color={OLIVE_DARK} castShadow />
+      <ArmorShell position={[0, 0.24, 1.0]} scale={[1.3, 0.4, 0.7]} color={OLIVE_DARK} castShadow />
 
       {/* 캐빈: 포탑 상자, 포탑 지붕, 볼 장갑, 큐폴라/해치/페리스코프, 로더 해치.
           firstPerson 이거나 조준경을 켠 동안 숨긴다 */}
       <group visible={!firstPerson && !scoped}>
         {/* 전면 경사판과 맨틀릿. 포수 조준선 정면 1.2~1.6m 를 채워 1인칭 조준경 안이 이 판이므로 캐빈과 함께 숨긴다 */}
-        <Block position={[0, 0.14, -0.95]} scale={[1.5, 0.55, 0.4]} rotation={[0.3, 0, 0]} color={OLIVE_DARK} castShadow />
+        <ArmorShell position={[0, 0.14, -0.95]} scale={[1.5, 0.55, 0.4]} rotation={[0.3, 0, 0]} color={OLIVE_DARK} castShadow />
         <Block position={[0, 0.14, -1.02]} scale={[0.6, 0.5, 0.3]} color={METAL_LIGHT} />
-        <Block position={[0, 0.2, 0]} scale={[1.7, 0.45, 2.0]} color={OLIVE} castShadow />
+        <ArmorShell position={[0, 0.2, 0]} scale={[1.7, 0.45, 2.0]} color={OLIVE} castShadow />
         <Block position={[0, 0.44, 0.05]} scale={[1.5, 0.1, 1.8]} color={OLIVE_DARK} castShadow />
         {[-1, 1].map((side) => <Block key={side} position={[side * 0.82, 0.2, 0.1]} scale={[0.32, 0.4, 1.9]} rotation={[0, 0, side * 0.14]} color={OLIVE} castShadow />)}
 
         {/* 큐폴라, 해치, 페리스코프 */}
-        <mesh position={[0.55, 0.6, 0.3]} castShadow><cylinderGeometry args={[0.28, 0.28, 0.26, 10]} /><meshStandardMaterial color={OLIVE_DARK} roughness={0.6} /></mesh>
-        <mesh position={[0.55, 0.75, 0.3]}><cylinderGeometry args={[0.29, 0.29, 0.06, 10]} /><meshStandardMaterial color={METAL} roughness={0.5} /></mesh>
+        <mesh position={[0.55, 0.6, 0.3]} castShadow><cylinderGeometry args={[0.28, 0.28, 0.26, 24]} /><meshStandardMaterial color={OLIVE_DARK} roughness={0.6} /></mesh>
+        <mesh position={[0.55, 0.75, 0.3]}><cylinderGeometry args={[0.29, 0.29, 0.06, 24]} /><meshStandardMaterial color={METAL} roughness={0.5} /></mesh>
         {[0, 1, 2].map((i) => <Block key={i} position={[0.55 + Math.cos(i * (TWO_PI / 3)) * 0.26, 0.62, 0.3 + Math.sin(i * (TWO_PI / 3)) * 0.26]} scale={[0.07, 0.06, 0.04]} color={OPTIC} />)}
 
         {/* 로더 해치 */}
-        <mesh position={[-0.5, 0.52, 0.35]} castShadow><cylinderGeometry args={[0.24, 0.24, 0.08, 10]} /><meshStandardMaterial color={OLIVE_DARK} roughness={0.6} /></mesh>
+        <mesh position={[-0.5, 0.52, 0.35]} castShadow><cylinderGeometry args={[0.24, 0.24, 0.08, 24]} /><meshStandardMaterial color={OLIVE_DARK} roughness={0.6} /></mesh>
       </group>
 
       {/* 측면 스토리지 빈 */}
@@ -211,7 +212,7 @@ export default function Tank({ turretYaw = 0, barrelPitch = 0, wheelsRef, speed 
       {/* 연막탄 발사기, 좌우 2연장 */}
       {[-1, 1].map((side) => <group key={side} position={[side * 0.72, 0.28, -0.75]} rotation={[0.14, 0, side * 0.3]}>
         {[0, 1].map((i) => <mesh key={i} position={[0, 0, i * 0.15 - 0.075]} rotation={[HALF_PI, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.04, 0.04, 0.24, 8]} />
+          <cylinderGeometry args={[0.04, 0.04, 0.24, 24]} />
           <meshStandardMaterial color={METAL} roughness={0.6} />
         </mesh>)}
       </group>)}
@@ -219,7 +220,7 @@ export default function Tank({ turretYaw = 0, barrelPitch = 0, wheelsRef, speed 
       {/* 대공 기관총, 큐폴라 옆 거치대 */}
       <Block position={[0.35, 0.75, 0.55]} scale={[0.1, 0.1, 0.22]} color={METAL_LIGHT} />
       <mesh position={[0.35, 0.76, 0.85]} rotation={[HALF_PI, 0, 0]} castShadow>
-        <cylinderGeometry args={[0.025, 0.03, 0.7, 8]} />
+        <cylinderGeometry args={[0.025, 0.03, 0.7, 24]} />
         <meshStandardMaterial color={METAL} metalness={0.5} roughness={0.4} />
       </mesh>
 
@@ -229,22 +230,22 @@ export default function Tank({ turretYaw = 0, barrelPitch = 0, wheelsRef, speed 
       {/* 주포와 동축 기관총, barrelPitch 로 x 축 회전. 회전축과 포구 끝은 GROUND_GUNS.tank 의 pivot, reach 와 같다 */}
       <group ref={barrelRef} position={[0, 0.14, -1.02]}>
         <mesh position={[0, 0, -1.0]} rotation={[HALF_PI, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.115, 0.125, 1.6, 10]} />
+          <cylinderGeometry args={[0.115, 0.125, 1.6, 24]} />
           <meshStandardMaterial color={METAL} metalness={0.5} roughness={0.4} />
         </mesh>
         <mesh position={[0, 0, -1.85]} rotation={[HALF_PI, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.095, 0.105, 2.5, 10]} />
+          <cylinderGeometry args={[0.095, 0.105, 2.5, 24]} />
           <meshStandardMaterial color={METAL} metalness={0.6} roughness={0.3} />
         </mesh>
         <mesh position={[0, 0, -3.15]} castShadow>
-          <cylinderGeometry args={[0.15, 0.15, 0.35, 10]} />
+          <cylinderGeometry args={[0.15, 0.15, 0.35, 24]} />
           <meshStandardMaterial color={OPTIC} metalness={0.4} roughness={0.3} />
         </mesh>
         {[-1, 1].map((side) => <Block key={side} position={[side * 0.125, 0, -3.15]} scale={[0.04, 0.2, 0.3]} color={METAL_LIGHT} />)}
 
         {/* 동축 기관총 */}
         <mesh position={[0.16, -0.03, -0.9]} rotation={[HALF_PI, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.025, 0.028, 1.5, 8]} />
+          <cylinderGeometry args={[0.025, 0.028, 1.5, 24]} />
           <meshStandardMaterial color={METAL} metalness={0.5} roughness={0.4} />
         </mesh>
       </group>

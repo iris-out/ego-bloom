@@ -2,13 +2,14 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import Block from './ModelBlock';
+import { Shell } from './SurfaceParts.jsx';
 import { Wheel } from './carParts.jsx';
-import { beamBetween, CAR_PALETTE as P, createVehicleBodyGeometries, flatPolygonGeometry, GLASS_OPACITY, loftBody, MAX_STEER, quadGeometry, rollWheels, steerAngle, VEHICLE_SHAPES } from './carGeometry.js';
+import { beamBetween, curvedPane, CAR_PALETTE as P, createVehicleBodyGeometries, flatPolygonGeometry, GLASS_OPACITY, loftBody, MAX_STEER, rollWheels, steerAngle, VEHICLE_SHAPES } from './carGeometry.js';
 import { PanelSeam } from './exteriorDetails.jsx';
 import StaticBatch from '../StaticBatch.jsx';
 import { SUV_FRONT_LIGHTS, SUV_REAR_LIGHTS } from '../headlights.js';
 
-const BODY = '#6b4f3a', BODY_DARK = '#493426', BODY_LINE = '#806047', GLASS = '#253b45';
+const BODY = '#b4b1a7', BODY_DARK = '#424b53', BODY_LINE = '#84949c', GLASS = '#253b45';
 const WHEEL_RADIUS = 0.48, WHEEL_Y = -0.9 + WHEEL_RADIUS;
 const FRONT_Z = -1.6, REAR_Z = 1.65, TRACK_X = 1.02;
 const SHAPE = VEHICLE_SHAPES.suv;
@@ -29,10 +30,10 @@ const mirrorOutline = points => points.map(([x, y]) => [-x, y]);
 
 const mirroredPane = points => points.map(([x, y, z]) => [-x, y, z]);
 
-function FrameBeam({ from, to, width = 0.065, depth = 0.085, color = BODY_DARK }) {
+function FrameBeam({ from, to, width = 0.046, depth = 0.06, color = BODY_DARK }) {
   const beam = beamBetween(from, to);
   return <mesh position={beam.position} quaternion={beam.quaternion} scale={[width, beam.length, depth]}>
-    <boxGeometry /><meshStandardMaterial color={color} metalness={0.24} roughness={0.46} />
+    <cylinderGeometry args={[.5,.5,1,12]} /><meshStandardMaterial color={color} metalness={0.24} roughness={0.46} />
   </mesh>;
 }
 
@@ -42,10 +43,10 @@ export default function Suv({ wheelsRef, steer = 0, speed = 0, firstPerson = fal
     const body = createVehicleBodyGeometries('suv'), left = SHAPE.sideWindows.left;
     return {
       ...body, roof: loftBody(SHAPE.roofSections),
-      windshield: quadGeometry(SHAPE.windshield), rearWindow: quadGeometry(SHAPE.rearWindow),
-      frontLeft: quadGeometry(left.front), rearLeft: quadGeometry(left.rear), quarterLeft: quadGeometry(left.quarter),
-      frontRight: quadGeometry(mirroredPane(left.front)), rearRight: quadGeometry(mirroredPane(left.rear)),
-      quarterRight: quadGeometry(mirroredPane(left.quarter)),
+      windshield: curvedPane(SHAPE.windshield), rearWindow: curvedPane(SHAPE.rearWindow),
+      frontLeft: curvedPane(left.front), rearLeft: curvedPane(left.rear), quarterLeft: curvedPane(left.quarter),
+      frontRight: curvedPane(mirroredPane(left.front)), rearRight: curvedPane(mirroredPane(left.rear)),
+      quarterRight: curvedPane(mirroredPane(left.quarter)),
       frontFascia: flatPolygonGeometry(FRONT_FASCIA, -2.481),
       frontGrilles: [flatPolygonGeometry(mirrorOutline(GRILLE_RIGHT), -2.489), flatPolygonGeometry(GRILLE_RIGHT, -2.489)],
       frontLampHousings: SUV_FRONT_LIGHTS.housings.map(lamp => flatPolygonGeometry(lamp.rear, 0)),
@@ -75,8 +76,8 @@ export default function Suv({ wheelsRef, steer = 0, speed = 0, firstPerson = fal
   return <group>
     <StaticBatch>
       {['hood', 'tail', 'sideSkin', 'frontDeck', 'rearDeck'].map(name => <mesh key={name}
-        userData={name === 'sideSkin' ? { part: 'g01-body-shell' } : undefined} geometry={geometries[name]} dispose={null}>
-        <meshStandardMaterial color={BODY} metalness={0.30} roughness={0.42} side={THREE.DoubleSide} />
+        userData={name === 'sideSkin' ? { part: 'g45-body-shell' } : undefined} geometry={geometries[name]} dispose={null}>
+        <meshStandardMaterial color={BODY} metalness={0.42} roughness={0.29} side={THREE.DoubleSide} />
       </mesh>)}
       <mesh geometry={geometries.floor} dispose={null}><meshStandardMaterial color={BODY_DARK} roughness={0.54} /></mesh>
       <PanelSeam position={[0, 0.39, -1.39]} scale={[1.58, 0.014, 0.03]} color={BODY_DARK} />
@@ -88,13 +89,14 @@ export default function Suv({ wheelsRef, steer = 0, speed = 0, firstPerson = fal
         <Block position={[side * 1.08, -0.545, 0.08]} scale={[0.10, 0.035, 1.92]} color={P.tire} />
         <group position={[side * 1.08, 0.52, -1.03]}>
           <Block position={[-side * 0.07, -0.06, 0.05]} scale={[0.15, 0.055, 0.08]} rotation={[0, side * 0.28, 0]} color={BODY_DARK} />
-          <Block scale={[0.20, 0.13, 0.18]} rotation={[0, side * 0.12, 0]} color={BODY_DARK} />
+          <Shell color={BODY_DARK} rotation={[0,side*.12,0]} segments={24} steps={3}
+            stations={[{z:-.10,rx:.055,ry:.045,power:2},{z:-.04,rx:.11,ry:.064,power:3},{z:.06,rx:.095,ry:.055,power:3},{z:.10,rx:.075,ry:.043,power:3}]}/>
         </group>
       </group>)}
 
-      <Block position={[0, -0.045, -2.40]} scale={[1.92, 0.79, 0.16]} color={BODY} />
+      <Shell color={BODY} stations={[{z:-2.48,rx:1.035,ry:.39,cy:-.045,power:7},{z:-2.36,rx:1.08,ry:.40,cy:-.045,power:5},{z:-2.22,rx:1.04,ry:.38,cy:-.045,power:5}]}/>
       <mesh geometry={geometries.frontFascia} dispose={null}>
-        <meshStandardMaterial color={BODY} metalness={0.30} roughness={0.42} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={BODY} metalness={0.42} roughness={0.29} side={THREE.DoubleSide} />
       </mesh>
       {[-1, 1].map((side, grilleIndex) => {
         const outline = side < 0 ? mirrorOutline(GRILLE_RIGHT) : GRILLE_RIGHT;
@@ -104,7 +106,7 @@ export default function Suv({ wheelsRef, steer = 0, speed = 0, firstPerson = fal
           </mesh>
           {outline.map((point, index) => <FrameBeam key={index}
             from={[...point, -2.501]} to={[...outline[(index + 1) % outline.length], -2.501]}
-            width={0.015} depth={0.014} color={P.trim} />)}
+            width={0.012} depth={0.014} color="#b3c0c6" />)}
           {[0.21, 0.13, 0.05, -0.03, -0.11].map((y, index) => <Block key={y}
             userData={{ part: 'suv-grille-slat' }} position={[side * 0.305, y, -2.503]}
             scale={[0.34 - index * 0.012, 0.012, 0.012]} color={BODY_LINE} />)}
@@ -130,9 +132,9 @@ export default function Suv({ wheelsRef, steer = 0, speed = 0, firstPerson = fal
         position={[side * 0.97, -0.285, -2.494]} scale={[0.065, 0.25, 0.018]} color="#111719" />)}
       <Block position={[0, -0.485, -2.455]} scale={[1.92, 0.05, 0.08]} color={BODY_DARK} />
 
-      <Block position={[0, -0.04, 2.40]} scale={[1.92, 0.80, 0.14]} color={BODY} />
+      <Shell color={BODY} stations={[{z:2.25,rx:1.04,ry:.4,cy:-.04,power:5},{z:2.37,rx:1.07,ry:.4,cy:-.04,power:5},{z:2.47,rx:1.035,ry:.39,cy:-.04,power:7}]}/>
       <mesh userData={{ part: 'suv-rear-fascia' }} geometry={geometries.rearFascia} dispose={null}>
-        <meshStandardMaterial color={BODY} metalness={0.30} roughness={0.42} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={BODY} metalness={0.42} roughness={0.29} side={THREE.DoubleSide} />
       </mesh>
       {SUV_REAR_LIGHTS.housings.map((lamp, index) => <mesh key={lamp.side}
         userData={{ part: 'suv-tail-housing' }} geometry={geometries.rearLampHousings[index]}
@@ -162,7 +164,7 @@ export default function Suv({ wheelsRef, steer = 0, speed = 0, firstPerson = fal
     <group visible={!firstPerson} userData={{ part: 'camera-intersection' }}>
       <StaticBatch>
         <mesh geometry={geometries.roof} dispose={null}><meshStandardMaterial color={BODY_DARK} metalness={0.26} roughness={0.44} /></mesh>
-        {[-1, 1].map(side => <Block key={side} position={[side * 0.68, 1.182, 0.22]} scale={[0.055, 0.016, 2.26]} color={P.trim} />)}
+        {[-1, 1].map(side => <Block key={side} position={[side * 0.66, 1.182, 0.33]} scale={[0.045, 0.016, 1.90]} color={P.trim} />)}
         {['windshield', 'rearWindow', 'frontLeft', 'rearLeft', 'quarterLeft', 'frontRight', 'rearRight', 'quarterRight'].map(name =>
           <mesh key={name} geometry={geometries[name]} dispose={null}>
             <meshStandardMaterial color={GLASS} metalness={0.18} roughness={0.16} transparent opacity={Math.max(GLASS_OPACITY, 0.62)} side={THREE.DoubleSide} />

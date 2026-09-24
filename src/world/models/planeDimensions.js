@@ -2,6 +2,7 @@
  * 값에 묶여 있다. 실루엣을 다듬어도 이 숫자는 바꾸지 않는다.
  * wheelBottom 은 접지면이다. 2.1 에서 이 값을 더하면 활주로 높이가 0 이 된다. */
 export const PLANE_DIMENSIONS = Object.freeze({
+  airship: { span: 13.6, length: 34, wheelBottom: -1.9 },
   jet: { span: 20, length: 12.2, wheelBottom: -1.9 },
   bomber: { span: 30, length: 22.8, wheelBottom: -1.9 },
   prop: { span: 11.6, length: 10, wheelBottom: -1.9 },

@@ -1,3 +1,4 @@
+import { surfaceFixtures } from './model-surface-fixtures.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -5,7 +6,7 @@ import { transformWithOxc } from 'vite';
 import { Object3D } from 'three';
 import * as THREE from 'three';
 import {
-  beamBetween, createVehicleBodyGeometries, flatPolygonGeometry, loftBody, quadGeometry, steerAngle,
+  beamBetween, curvedPane, createVehicleBodyGeometries, flatPolygonGeometry, loftBody, quadGeometry, steerAngle,
   VEHICLE_SHAPES,
 } from '../../src/world/models/carGeometry.js';
 import { SEDAN_FRONT_LIGHTS, SEDAN_REAR_LIGHTS } from '../../src/world/headlights.js';
@@ -36,14 +37,14 @@ async function mountSedan(props = {}) {
   };
   const Sedan = new Function(
     'h', 'Fragment', 'THREE', 'useEffect', 'useMemo', 'useRef', 'useFrame', 'Block', 'Wheel',
-    'beamBetween', 'createVehicleBodyGeometries', 'flatPolygonGeometry', 'loftBody', 'quadGeometry',
+    'Shell', 'beamBetween', 'curvedPane', 'createVehicleBodyGeometries', 'flatPolygonGeometry', 'loftBody', 'quadGeometry',
     'steerAngle', 'VEHICLE_SHAPES',
     'DetailLamp', 'PanelSeam', 'SurfaceVent', 'StaticBatch', 'SEDAN_FRONT_LIGHTS', 'SEDAN_REAR_LIGHTS',
     `${code}; return Sedan;`,
   )(
     h, 'fragment', THREE, effect => effect(), factory => factory(), () => ({ current: null }), callback => { frame = callback; },
     blockProps => h('block', blockProps), wheelProps => h('wheel', { ...wheelProps, userData: { spokes: wheelProps.spokes } }),
-    beamBetween, createVehicleBodyGeometries, flatPolygonGeometry, loftBody, quadGeometry, steerAngle,
+    surfaceFixtures(h).Shell, beamBetween, curvedPane, createVehicleBodyGeometries, flatPolygonGeometry, loftBody, quadGeometry, steerAngle,
     VEHICLE_SHAPES,
     props => h('detail-lamp', props), props => h('panel-seam', props), props => h('surface-vent', props),
     ({ children }) => h('fragment', null, children), SEDAN_FRONT_LIGHTS, SEDAN_REAR_LIGHTS,

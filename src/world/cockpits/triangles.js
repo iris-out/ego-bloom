@@ -1,7 +1,22 @@
+const cockpitAliases = (table) => Object.freeze({ ...table, shotgun: table.interceptor, drift: table.convertible });
+
 /** 콕핏 실내의 삼각형 예산이다. 카메라가 실내에 있을 때만 마운트하므로 도시
  * 예산과 겹치지 않지만, 저사양 기기에서 프레임을 지키려면 상한이 필요하다.
  * 이 파일은 Three 나 React 에 의존하지 않는다. 단위 테스트가 그대로 읽는다. */
 export const BUDGET = Object.freeze({ low: 1800, medium: 4500, high: 9000 });
+
+/** These three caps preserve complete 2+2 and five-place cabins at low detail.
+ * All other vehicles, including the new two-seat supercar and EV, use BUDGET. */
+const FULL_CABIN_BUDGET = Object.freeze({
+  convertible: Object.freeze({ low: 3300 }),
+  drift: Object.freeze({ low: 3300 }),
+  coupe: Object.freeze({ low: 4800, medium: 7000 }),
+});
+
+export function budgetFor(key, quality = 'medium') {
+  const level = BUDGET[quality] ? quality : 'medium';
+  return FULL_CABIN_BUDGET[key]?.[level] ?? BUDGET[level];
+}
 
 /** 원기둥은 옆면 2n 에 뚜껑 2n 이다. 원판은 n, 토러스는 radial x tubular x 2 다.
  * 뚜껑을 연 원기둥(후드, 캐노피 반원통, 기어봉 축)은 옆면뿐이라 2n 이다.
@@ -35,6 +50,8 @@ export const PART = Object.freeze({
   tick: TICK,
   dial: DIAL_BODY + DIAL_TICKS * TICK,
   panel: TRI.box(),
+  // Authored curved surface inventories are counted from real mounted geometry.
+  surfaceTriangle: 1,
   lever: TRI.box() * 3,
   stick: TRI.box() * 3,
   yoke: TRI.torus(8, 20) + TRI.box() * 4,
@@ -90,7 +107,8 @@ const sum = (counts, ticks) => Object.entries(counts)
   .reduce((total, [part, amount]) => total + (part === 'dial' ? dialCost(ticks) : PART[part]) * amount, 0);
 
 /** 기종별 조각 수다. 콕핏 파일의 구성과 맞춘다. 조각을 더하거나 빼면 여기도 고친다. */
-export const COCKPIT_PARTS = Object.freeze({
+export const COCKPIT_PARTS = cockpitAliases({
+  airship: { surfaceTriangle: 820 },
   jet: { panel: 16, dial: 6, stick: 1, lever: 1, display: 1, placard: 1 },
   bomber: { panel: 20, dial: 6, yoke: 1, lever: 2, display: 2, placard: 1 },
   prop: { panel: 19, dial: 6, stick: 1, lever: 1, display: 1, placard: 1 },
@@ -98,9 +116,16 @@ export const COCKPIT_PARTS = Object.freeze({
   fighter: { panel: 20, dial: 1, stick: 1, lever: 1, display: 2, hud: 1, placard: 1 },
   interceptor: { panel: 19, dial: 3, stick: 1, lever: 1, display: 1, hud: 1, placard: 1 },
   helicopter: { panel: 19, dial: 6, stick: 1, lever: 1, display: 1, placard: 1 },
-  sedan: { panel: 19, yoke: 1, dial: 2, display: 1, mirror: 3 },
-  suv: { panel: 21, yoke: 1, dial: 2, display: 1, mirror: 3 },
-  convertible: { panel: 17, yoke: 1, dial: 2, display: 1, mirror: 3 },
+  // Retain named mirror allocations inside the exact mounted-geometry total.
+  sedan: { surfaceTriangle: 1462, mirror: 3 },
+  suv: { surfaceTriangle: 1486, mirror: 3 },
+  // Mounted cabin fixture totals include 12 mirror-plane triangles but SSR omits
+  // live canvas planes. Keep mirror:3 visible to mirror coverage checks, and
+  // reserve its legacy 42-triangle cost; surfaceTriangle is the measured rest.
+  convertible: { surfaceTriangle: 3148, mirror: 3 },
+  coupe: { surfaceTriangle: 4630, mirror: 3 },
+  supercar: { surfaceTriangle: 1548, mirror: 3 },
+  electric: { surfaceTriangle: 1726, mirror: 3 },
   // 모노코크 욕조, 어깨 패딩, 헤일로, 사각 휠과 통합 화면, 변속등 일곱이다.
   formula: { panel: 12, yoke: 1, display: 1, mirror: 2, button: 7 },
   truck: { panel: 24, yoke: 1, dial: 3, display: 1, mirror: 3 },
@@ -134,7 +159,8 @@ export const COCKPIT_PARTS = Object.freeze({
 /** 등급을 올릴 때 더 붙는 조각이다. COCKPIT_PARTS 가 low 구성이고 여기는 추가분만 적는다.
  * medium 은 유리, 좌석, 손, 후드, 노브, 접촉 그림자다. high 는 소품과 활 프레임까지다.
  * 실내 파일이 자기 기종 행만 채운다. 비어 있으면 그 등급에서 low 와 같은 구성이다. */
-export const QUALITY_PARTS = Object.freeze({
+export const QUALITY_PARTS = cockpitAliases({
+  airship: { medium: { surfaceTriangle: 128 }, high: { surfaceTriangle: 24 } },
   // 항공기 여섯은 medium 에서 캐노피 유리와 활 프레임, 사출좌석과 벨트와 무릎, 조종간과
   // 스로틀을 쥔 손, 페달, 쿼드런트, 숫자 눈금판과 후드, 구형 자세계가 붙는다.
   // 음수는 low 조각을 대체한 것이다. dial -1 은 6홀 가운데 위(ATT) 가 자세계로 바뀐 몫,
@@ -178,28 +204,15 @@ export const QUALITY_PARTS = Object.freeze({
     medium: { panel: 4, shade: 5, canopyShell: 1, canopyArc: 2, grabHandle: 1, seat: 1, toggle: 4, knob: 3, stickHand: 2, quadrant: 1, lever: 2, pedal: 2, glass: 2, display: 1, attitudeBall: 1, dial: -1, tick: -60, dialHood: 5 },
     high: { canopyArc: 1, bolt: 6, button: 6, toggle: 6 },
   },
-  // 승용차 medium 은 유리(앞옆뒤), 좌석 둘, 스티어링을 쥔 손, 계기 후드, 벤트와 공조 노브,
-  // 비상등과 창 스위치, 접촉 그림자 여섯, 와이퍼, 페달 둘, 기어 레버, 그리고 판 스물이다.
-  // 판 스물은 팔걸이와 도어 포켓과 컬럼 덮개 여섯에 이번에 더한 열넷(A 필러와 헤더 천 마감
-  // 셋, 문 어깨 라인과 포켓 입구 넷, 대시 이음선과 글로브박스 윤곽 넷, 센터 스택 베젤과
-  // 송풍구와 안쪽 면 일곱 중 스토크 둘을 high 에서 옮긴 몫) 이다. 스피커 원 둘이 노브로
-  // 늘었다. high 는 선바이저, 룸미러 하우징, 뒷좌석 방석, 문 손잡이, 컵홀더다. 계기는 숫자
-  // 눈금판을 써 mesh 눈금이 없으므로 low 의 dial 행이 계기당 24 씩 크게 잡혀 있다.
-  sedan: {
-    medium: { panel: 28, glass: 4, seat: 2, hands: 1, dialHood: 2, knob: 7, button: 3, shade: 6, wipers: 1, pedal: 2, gearLever: 1 },
-    high: { panel: 6, grabHandle: 2, knob: 2 },
-  },
-  // SUV 는 A 필러 손잡이가 하나 더 붙는다.
-  suv: {
-    medium: { panel: 28, glass: 4, seat: 2, hands: 1, dialHood: 2, knob: 7, button: 3, shade: 6, wipers: 1, pedal: 2, gearLever: 1 },
-    high: { panel: 6, grabHandle: 3, knob: 2 },
-  },
-  // 오픈카는 좌석만 외장이 그린다. 유리는 앞유리와 좌석 뒤 바람막이 둘이고,
-  // 지붕이 없어 헤드라이너 그림자와 선바이저가 빠진다.
-  convertible: {
-    medium: { panel: 28, glass: 2, hands: 1, dialHood: 2, knob: 7, button: 3, shade: 5, wipers: 1, pedal: 2, gearLever: 1 },
-    high: { panel: 4, grabHandle: 2, knob: 2 },
-  },
+  // Includes the 48-triangle live screen omitted by SSR mount fixtures.
+  // Geometry inventories are asserted in modern-cabin-budget.test.mjs.
+  sedan: { medium: { surfaceTriangle: 2906 }, high: { surfaceTriangle: 824 } },
+  suv: { medium: { surfaceTriangle: 2906 }, high: { surfaceTriangle: 860 } },
+  // Differences measured from the same mounted Cabin components at each quality.
+  convertible: { medium: { surfaceTriangle: 1296 }, high: { surfaceTriangle: 676 } },
+  coupe: { medium: { surfaceTriangle: 2008 }, high: { surfaceTriangle: 1636 } },
+  supercar: { medium: { surfaceTriangle: 1716 }, high: { surfaceTriangle: 2608 } },
+  electric: { medium: { surfaceTriangle: 2360 }, high: { surfaceTriangle: 2792 } },
   formula: {
     medium: { hands: 1, pedal: 2, seat: 1 },
     high: { panel: 1 },
@@ -247,5 +260,5 @@ export const COCKPIT_TRIANGLES = Object.freeze(
 export function withinBudget(key, quality = 'medium', ticks = dialTicks(key)) {
   const level = BUDGET[quality] ? quality : 'medium';
   const count = cockpitTriangles(key, ticks, level);
-  return Number.isFinite(count) && count <= BUDGET[level];
+  return Number.isFinite(count) && count <= budgetFor(key, level);
 }

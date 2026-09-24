@@ -15,6 +15,7 @@ test('모든 탈것에 엔진 소리가 있다', () => {
 
 test('스로틀을 올리면 소리가 높고 커진다', () => {
   for (const key of Object.keys(ENGINES)) {
+    if (key === 'electric') continue; // EV has no idle voice and its tone follows speed.
     const idle = engineTargets(key, { throttle: 0, rpm: IDLE_RPM });
     const full = engineTargets(key, { throttle: 1, rpm: MAX_RPM });
     assert.ok(full.body >= idle.body, `${key} 주파수 ${idle.body} -> ${full.body}`);
@@ -113,6 +114,7 @@ test('WebAudio 가 없으면 조용히 넘어간다', () => {
 test('저역 통과가 기본 주파수를 따라가 고조파가 새지 않는다', () => {
   // 차단을 Hz 로 고정하면 회전이 낮은 엔진이 고조파를 수십 개씩 낸다. 그것이 앵앵거림이다.
   for (const key of Object.keys(ENGINES)) {
+    if (key === 'electric') continue;
     for (const rpm of [IDLE_RPM, 3000, MAX_RPM]) {
       const target = engineTargets(key, { throttle: 1, rpm });
       const overtones = target.cut / target.body;
@@ -122,8 +124,19 @@ test('저역 통과가 기본 주파수를 따라가 고조파가 새지 않는�
   }
 });
 
+test('electric drive is silent at rest and gains only speed-dependent motor and wind tone', () => {
+  assert.equal(engineSpec('electric').kind, 'electric');
+  const idle = engineTargets('electric', { speed: 0, power: 0 });
+  const rolling = engineTargets('electric', { speed: 24, power: .5 });
+  assert.equal(idle.gain, 0);
+  assert.equal(idle.air, 0);
+  assert.ok(rolling.gain > 0 && rolling.whine > idle.whine && rolling.air > 0);
+  assert.deepEqual(engineTargets('electric', { speed: 24, power: .5, shift: 1 }), rolling);
+});
+
 test('한 옥타브 아래 저역이 엔진에 무게를 준다', () => {
   for (const key of Object.keys(ENGINES)) {
+    if (key === 'electric') continue;
     const target = engineTargets(key, { throttle: 1, rpm: 3000 });
     assert.ok(target.sub > 0, `${key} 서브가 있다`);
     assert.ok(target.sub <= 1, `${key} 서브가 1 을 넘지 않는다`);

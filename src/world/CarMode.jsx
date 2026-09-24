@@ -1,3 +1,6 @@
+import DriftEffects from './models/DriftEffects.jsx';
+import { wheelFovOffset, cockpitZoomFov, approachFov } from './cockpitZoom.js';
+import { nextCombatLife, consumeCombatHits } from './worldScores.js';
 /** 지상 주행 모드. 조작과 카메라만 맡고 시각 모델은 models/ 에 있다.
  * 1인칭은 대시보드 시점, 3인칭은 차 뒤를 따라간다. 물리는 carPhysics.js 가 전부 계산한다.
  */
@@ -15,7 +18,7 @@ import { aimGroundWeapon, aimKeyboard, createGroundArsenal, GROUND_GUNS, isComba
 import { airTrafficTargets, applyAirHit } from './airTraffic.js';
 import { scoreTimeAttack, tickTimeAttack } from './timeAttackStore.js';
 import { cockpitFov, eyePoint, FAR_COCKPIT, FAR_DEFAULT, FOV_DEFAULT, NEAR_COCKPIT, NEAR_DEFAULT, nextScope, scopeFov, scopeSteps } from './eyePoints.js';
-import { bump, createHealth, hullRatio, hurt, repair } from './health.js';
+import { bump, createHealth, hullRatio, repair } from './health.js';
 import { groundImpact } from './reticle.js';
 import { projectAim } from './aimScreen.js';
 import { clearAimScreen, setAimScreen } from './aimScreenStore.js';
@@ -26,6 +29,7 @@ import {
   beamCone, defaultBeam, isBeamOn, nextBeam, rearLampIntensity, reverseLampIntensity,
 } from './headlights.js';
 import { IDLE_RPM } from './carGauges.js';
+import { FOUR_VEHICLE_LAYOUT } from './models/fourVehicleLayout.js';
 import AimMarker from './models/AimMarker';
 import Cockpit from './cockpits';
 
@@ -79,9 +83,13 @@ const DRAG_SLOP = 6;
 /** 전조등과 후미등이다. 밤에는 늘 켜지고, 브레이크를 밟으면 붉게 밝아지고 후진하면 흰 등이 켜진다. */
 /** 등화 자리다. 모델의 범퍼 끝과 램프 간격이라 VEHICLES 의 충돌 상자와 조금 다르다. */
 const LAMP_REACH = Object.freeze({
+  drift: { wide: .71, nose: FOUR_VEHICLE_LAYOUT.convertible.depth / 2, tail: FOUR_VEHICLE_LAYOUT.convertible.depth / 2, lift: .08 },
   motorcycle: { wide: 0, nose: 1.35, tail: 1.35, lift: 0 },
   suv: { wide: 0.78, nose: 2.42, tail: 2.42, lift: 0.22 },
-  convertible: { wide: 0.68, nose: 2.2, tail: 2.2, lift: 0.1 },
+  convertible: { wide: .71, nose: FOUR_VEHICLE_LAYOUT.convertible.depth / 2, tail: FOUR_VEHICLE_LAYOUT.convertible.depth / 2, lift: .08 },
+  coupe: { wide: .73, nose: FOUR_VEHICLE_LAYOUT.coupe.depth / 2, tail: FOUR_VEHICLE_LAYOUT.coupe.depth / 2, lift: .10 },
+  supercar: { wide: .76, nose: FOUR_VEHICLE_LAYOUT.supercar.depth / 2, tail: FOUR_VEHICLE_LAYOUT.supercar.depth / 2, lift: -.03 },
+  electric: { wide: .74, nose: FOUR_VEHICLE_LAYOUT.electric.depth / 2, tail: FOUR_VEHICLE_LAYOUT.electric.depth / 2, lift: .12 },
   formula: { wide: 0.54, nose: 2.72, tail: 2.62, lift: -0.16 },
   truck: { wide: 0.82, nose: 3.78, tail: 3.76, lift: 0.15 },
 });
@@ -201,15 +209,16 @@ function Lights({ vehicle, night, beam, lamps }) {
   </group>;
 }
 
-export default function CarMode({ extent, buildings = [], controlsRef, vehicle = 'sedan', pilotName, view = 'third', trafficCount = 0, night = false, quality = 'medium', weather = 'clear', onCameraChange, onStatus, onTrafficHit, onPose, incomingRef, airCount = 0, airCombatRef }) {
+export default function CarMode({ paused = false, inputBlocked = false, reducedMotion = false, extent, buildings = [], controlsRef, vehicle = 'sedan', pilotName, view = 'third', trafficCount = 0, night = false, quality = 'medium', weather = 'clear', onCameraChange, onStatus, onTrafficHit, onPose, incomingRef, onFatal, onAirKill, airCount = 0, airCombatRef }) {
   const obstacles = useMemo(() => buildings, [buildings]);
-  const body = useRef(), state = useRef(createCarState(extent)), keys = useRef(new Set());
+  const body = useRef(), state = useRef(createCarState(extent, vehicle)), keys = useRef(new Set());
   // 전투 차량 포탑 바스켓이다. Cockpit 을 감싸 GROUND_GUNS[vehicle].turret 에 두고
   // aim.yaw 로 돌린다. 비전투 차량과 3인칭에서는 마운트되지 않아 null 로 남는다.
   const basket = useRef();
   const orbit = useRef({ yaw: 0, pitch: 0 });
   // 3인칭 카메라 거리다. 휠로 바꾸고 범위를 넘지 않는다. 차가 화면에서 사라질 만큼 멀어지지 않는다.
   const zoom = useRef(CHASE.distance);
+  const cockpitZoom = useRef({ vehicle, offset: 0, scoped: false });
   // 전투 차량은 좌클릭 드래그를 조준에 쓴다. 고개만 돌리는 값은 Q, E 가 따로 만든다.
   const head = useRef(0);
   const pointer = useRef({ id: null, x: 0, yaw: 0 });
@@ -257,6 +266,8 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
   const shift = useRef({ gear: 1, cut: 0 });
   // 체력은 무장 차량만 갖는다. 세단과 오토바이는 max 가 0 이라 어떤 포탄도 통하지 않는다.
   const health = useRef(createHealth('car', vehicle));
+  const life = useRef(0);
+  if (!life.current) life.current = nextCombatLife();
   // 차에서 내리면 늦춰 둔 AI 차를 풀어 준다. 그대로 두면 다음 탑승에서 굳어 있다.
   useEffect(() => clearTrafficYield, []);
   // 조준선도 같이 비운다. 남겨 두면 다음 탑승의 첫 프레임에 지난 자리가 잠깐 보인다.
@@ -270,12 +281,15 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
   useEffect(() => {
     // near 0.5 는 눈에서 0.42 인 조준경과 천장을 잘라낸다. 1인칭에서만 내리고 far 도 같이 줄인다.
     const first = view === 'first';
+    if (cockpitZoom.current.vehicle !== vehicle) cockpitZoom.current = { vehicle, offset: 0, scoped: false };
+    cockpitZoom.current.scoped = scopeOn;
     // 배율 조준경이 있는 탈것은 3인칭에서도 조준경이 걸린다. 오른쪽 버튼을 누른 동안만이고
     // 배율은 Z 가 고른 단계다. 누르지 않으면 1배라 평소 화각 그대로다.
     const glass = steps && zoomed ? scope : 1;
     camera.fov = steps
       ? (first ? scopeFov(vehicle, glass) : FOV_DEFAULT / glass)
       : first ? cockpitFov(vehicle, zoomed) : FOV_DEFAULT;
+    if (first && !scopeOn) camera.fov = cockpitZoomFov(camera.fov, cockpitZoom.current.offset);
     camera.near = first ? NEAR_COCKPIT : NEAR_DEFAULT;
     camera.far = first ? FAR_COCKPIT : FAR_DEFAULT;
     camera.updateProjectionMatrix();
@@ -283,11 +297,11 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
       camera.fov = FOV_DEFAULT; camera.near = NEAR_DEFAULT; camera.far = FAR_DEFAULT;
       camera.updateProjectionMatrix();
     };
-  }, [camera, view, vehicle, zoomed, steps, scope]);
+  }, [camera, view, vehicle, zoomed, steps, scope, scopeOn]);
   /* eslint-enable react-hooks/immutability */
 
-  // 값은 마운트 때 한 번만 읽는다. 참이면 반동과 진동을 0 으로 둔다.
-  useEffect(() => { calm.current = !!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches; }, []);
+  // 접근성 설정이나 운영체제 설정이 켜지면 반동과 진동을 줄인다.
+  useEffect(() => { calm.current = reducedMotion || !!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches; }, [reducedMotion]);
 
   // 엔진 소리는 차종마다 하나다. 차종을 바꾸거나 주행을 끝내면 끈다.
   useEffect(() => {
@@ -301,6 +315,7 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
   const rig = useMemo(() => new THREE.PerspectiveCamera(), []);
 
   useEffect(() => {
+    if (inputBlocked) return;
     const canvas = gl.domElement;
     const codes = ['KeyW', 'KeyS', 'KeyA', 'KeyD', 'KeyQ', 'KeyE', 'KeyV', 'Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
     const down = (event) => {
@@ -354,10 +369,13 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
       pointer.current = { id: event.pointerId, x: event.clientX, y: event.clientY, yaw: orbit.current.yaw, pitch: orbit.current.pitch };
       try { canvas.setPointerCapture(event.pointerId); } catch { /* 잠금 중이거나 이미 놓친 포인터다 */ }
     };
-    // 휠은 3인칭 거리다. 범위를 좁게 두어 차가 점이 되거나 차체를 뚫고 들어가지 않는다.
+    // 휠은 1인칭 화각 / 3인칭 거리다. 조준경 배율과 운전석 화각은 분리한다.
     const wheel = (event) => {
-      if (view === 'first') return;
       event.preventDefault();
+      if (view === 'first') {
+        if (!cockpitZoom.current.scoped) cockpitZoom.current.offset = wheelFovOffset(cockpitZoom.current.offset, event.deltaY, event.deltaMode);
+        return;
+      }
       const next = zoom.current * (1 + Math.max(-1, Math.min(1, event.deltaY / 240)) * 0.18);
       zoom.current = Math.max(CHASE.near, Math.min(CHASE.far, next));
     };
@@ -368,8 +386,8 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
     const release = (event) => { if (event.button === 2) setZoomed(false); };
     const move = (event) => {
     // 전투 차량의 포탑 조준이다. 버튼을 누르지 않은 마우스 이동은 1인칭과 3인칭 모두에서
-    // 포탑을 돌린다. 좌클릭을 누른 채 끄는 동안은 시점 조작이라 3인칭에서는 아래 궤도
-    // 카메라로 내려가고, 1인칭에서는 포탑이 곧 시점이라 여기서 같이 돈다.
+    // 포탑을 돌린다. 대공포는 3인칭 우클릭 드래그도 포구를 움직인다. 좌클릭을 누른 채
+    // 끄는 동안은 시점 조작이라 3인칭에서는 아래 궤도 카메라로 내려간다.
     // 손가락은 예전처럼 어느 시점에서나 끌어서 조준한다. 방향키 조준도 그대로 남는다.
     // 버튼 없는 마우스 이동으로 조준하는 것은 포인터가 잠겨 있을 때만이다. 잠금이 없으면
     // 커서를 HUD 버튼에서 화면 가운데로 옮기는 동작까지 조준으로 들어가 포가 홱 돈다.
@@ -377,7 +395,8 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
     const freeAim = event.buttons === 0 && document.pointerLockElement === canvas;
     const turning = isCombatVehicle(vehicle)
       && (event.pointerType !== 'mouse' || freeAim
-        || (view === 'first' && event.pointerId === pointer.current.id));
+        || (view === 'first' && event.pointerId === pointer.current.id)
+        || (vehicle === 'aa' && (event.buttons & 2) !== 0 && event.pointerId === pointer.current.id));
     if (turning) {
       const dx=Number.isFinite(event.movementX)&&event.movementX!==0?event.movementX:event.clientX-(pointer.current.x||event.clientX);
       const dy=Number.isFinite(event.movementY)&&event.movementY!==0?event.movementY:event.clientY-(pointer.current.y||event.clientY);
@@ -435,15 +454,25 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
       if (document.pointerLockElement === canvas) document.exitPointerLock?.();
       clear();
     };
-  }, [gl,vehicle,scoped,view,steps]);
+  }, [gl,vehicle,scoped,view,steps,inputBlocked]);
 
   useEffect(() => {
-    state.current = createCarState(extent);
+    state.current = createCarState(extent, mounted.current);
     camera.position.set(state.current.x, 6, state.current.z + 14);
   }, [extent, camera]);
 
   useFrame(({ clock }, delta) => {
+    if (paused) return;
     const dt = Number.isFinite(delta) ? Math.max(0, Math.min(delta, 0.05)) : 0;
+    if (view === 'first' && !scopeOn) {
+      const targetFov = cockpitZoomFov(cockpitFov(vehicle), cockpitZoom.current.offset);
+      const nextFov = approachFov(camera.fov, targetFov, dt);
+      if (nextFov !== camera.fov) {
+        // eslint-disable-next-line react-hooks/immutability -- Three 카메라는 명령형 객체이며 프레임마다 투영을 갱신한다.
+        camera.fov = nextFov;
+        camera.updateProjectionMatrix();
+      }
+    }
     // 타임어택 시계는 조종 루프가 흘린다. 판이 걸려 있지 않으면 아무 일도 하지 않는다.
     tickTimeAttack(clock.elapsedTime);
     // 뒤따라오는 AI 차가 내 차를 보고 늦춘다. 자리 계산 전에 지난 프레임 자리로 정한다.
@@ -457,17 +486,17 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
     if (resetNonce.current === undefined) resetNonce.current = controls.resetNonce;
     else if (controls.resetNonce !== resetNonce.current) {
       resetNonce.current = controls.resetNonce;
-      state.current = createCarState(extent);
-      health.current = createHealth('car', vehicle);
+      state.current = createCarState(extent, vehicle);
+      health.current = createHealth('car', vehicle); life.current = nextCombatLife();
       keys.current.clear();
     }
     // 출발 지점에서 멀리 떨어져 차종을 바꾸면 타던 차가 터지고 3초 뒤 새 차로 다시 탄다.
     if (mounted.current !== vehicle) {
       mounted.current = vehicle;
-      health.current = createHealth('car', vehicle);
+      health.current = createHealth('car', vehicle); life.current = nextCombatLife();
       // 탈것이 바뀌면 시선과 반동을 0 으로 돌린다. 전차의 포탑각을 세단이 물려받지 않는다.
       orbit.current = { yaw: 0, pitch: 0 }; head.current = 0; shake.current = { pitch: 0, shots: 0 };
-      const home = createCarState(extent);
+      const home = createCarState(extent, vehicle);
       if (Math.hypot(state.current.x - home.x, state.current.z - home.z) > 40 && state.current.phase !== 'crashed') {
         state.current = { ...state.current, phase: 'crashed', speed: 0, crashElapsed: 0, message: '차종 변경 · 3초 후 새 차량으로 탑승합니다' };
       }
@@ -476,7 +505,7 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
     // 차체가 부서지면 이번 프레임부터 폭발이 시작되고 3초 뒤 출발 지점으로 돌아간다.
     const taken = incomingRef?.current;
     if (taken && taken.amount > 0) {
-      health.current = hurt(health.current, taken.amount, clock.elapsedTime);
+      health.current = consumeCombatHits(health.current, taken, life.current, clock.elapsedTime, state.current.phase === 'crashed' ? undefined : onFatal);
       // eslint-disable-next-line react-hooks/immutability -- incomingRef 는 RemoteCombat 과 공유하는 한 방향 대기열이다. 읽은 뒤 비워야 같은 피해가 두 번 들어오지 않는다.
       taken.amount = 0;
       if (health.current.wrecked && state.current.phase !== 'crashed') {
@@ -517,7 +546,7 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
     // 바퀴 모델이 매 프레임 이 ref 를 읽는다. 0.15초 상태로 올리면 조향이 끊긴다.
     wheelsRef.current = { steer: next.steer, speed: next.speed };
     // 복귀하면 차체를 새로 받는다. 부서진 채로 다시 달리지 않는다.
-    if (next.phase === 'drive' && wasPhase !== 'drive') health.current = createHealth('car', vehicle);
+    if (next.phase === 'drive' && wasPhase !== 'drive') { health.current = createHealth('car', vehicle); life.current = nextCombatLife(); }
     if(combat){
       // 좌우는 포탑, 위아래는 포신이다. 커서 위치로 즉시 스냅하던 방식은 조준이 튀었다.
       const yawInput = Number(input.has('ArrowLeft')) - Number(input.has('ArrowRight'));
@@ -545,7 +574,7 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
       // 한 발 맞을 때마다 틱을 치고 조준선을 번쩍인다. 격추는 그 위에 폭발음을 얹는다.
       airHits.current += 1;
       playTick();
-      if (result.downed) { kills.current = airCombatRef.current.kills; lastKill.current = airCombatRef.current.label; playBoom('car'); scoreTimeAttack(1); }
+      if (result.downed) { kills.current += 1; onAirKill?.(`air:${hit.index}:${clock.elapsedTime}`); lastKill.current = airCombatRef.current.label; playBoom('car'); scoreTimeAttack(1); }
     }
     hits.push(...arsenal.current.hits);
     for(const hit of hits)if(!destroyed.current.has(hit.index)){
@@ -563,12 +592,14 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
     const running = next.phase === 'drive';
     // 단수가 바뀌면 잠깐 힘이 빠진다. 회전수는 기어마다 이미 떨어지지만 그것만으로는
     // 변속이 아니라 음이 미끄러지는 것처럼 들린다.
-    if (next.gear !== shift.current.gear) { shift.current.gear = next.gear; shift.current.cut = 1; }
+    if (vehicle !== 'electric' && next.gear !== shift.current.gear) { shift.current.gear = next.gear; shift.current.cut = 1; }
     shift.current.cut *= Math.exp(-dt / SHIFT_CUT);
     engine.current?.set({
       throttle: running ? next.throttle || 0 : 0,
-      rpm: running ? next.rpm : IDLE_RPM,
-      shift: running ? shift.current.cut : 0,
+      rpm: running ? next.rpm : vehicle === 'electric' ? 0 : IDLE_RPM,
+      shift: running && vehicle !== 'electric' ? shift.current.cut : 0,
+      speed: running ? Math.abs(next.speed) : 0,
+      power: running ? next.power : 0,
     });
     // 누적 발사 수가 늘어난 프레임에만 충격량을 쌓는다. 기관포는 연사가 빨라 한 발을 약하게 둔다.
     const fired = Math.max(0, (arsenal.current.shots || 0) - shake.current.shots);
@@ -595,7 +626,7 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
       ...vehicleBox(next, vehicle),
       heading: next.heading, pitch: next.roadPitch || 0, roll: next.lean || 0,
       phase: next.phase === 'sinking' ? 'sinking' : next.phase === 'crashed' ? 'crashed' : 'drive',
-      kind: 'car', key: vehicle, hull: hullRatio(health.current) ?? 1,
+      kind: 'car', key: vehicle, life: life.current, hull: hullRatio(health.current) ?? 1,
       shots: arsenal.current.shots || 0, rockets: 0,
       turret: aim.current.yaw, barrel: aim.current.pitch,
     });
@@ -705,6 +736,8 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
       // Cockpit 은 이 ref 를 매 프레임 스스로 읽으므로 여기서는 값만 바꾼다. 렌더가 돌지 않는다.
       cockpitStatusRef.current = { ...report, steer: next.steer, weather };
     }
+    // 실내 바늘은 DOM 보고 주기와 분리해 최신 물리 상태를 읽는다. React 재렌더는 없다.
+    Object.assign(cockpitStatusRef.current, carStatus(next, vehicle), { steer: next.steer, weather });
   });
 
   // 전차, 자주포, 대공포만 바스켓으로 감싼다. 장갑차는 무인 포탑이 아니라 운전석 위 큐폴라에
@@ -726,14 +759,15 @@ export default function CarMode({ extent, buildings = [], controlsRef, vehicle =
           에 바로 둔다. */}
       {basketFirstPerson
         ? <group ref={basket} position={GROUND_GUNS[vehicle].turret}>
-          <Cockpit rideKey={vehicle} statusRef={cockpitStatusRef} aimRef={aim} night={night} quality={quality} weather={weather} />
+          <Cockpit rideKey={vehicle} statusRef={cockpitStatusRef} wheelsRef={wheelsRef} aimRef={aim} night={night} quality={quality} weather={weather} />
         </group>
-        : view === 'first' && <Cockpit rideKey={vehicle} statusRef={cockpitStatusRef} aimRef={aim} night={night} quality={quality} weather={weather} />}
+        : view === 'first' && <Cockpit rideKey={vehicle} statusRef={cockpitStatusRef} wheelsRef={wheelsRef} aimRef={aim} night={night} quality={quality} weather={weather} />}
       <Lights vehicle={vehicle} night={night} beam={beam} lamps={lamps} />
-      {pilotName && view !== 'first' && <Html position={[0, 2.2, 0]} center zIndexRange={[14, 1]} distanceFactor={14} style={{ pointerEvents: 'none' }}>
-        <span className="world-pilot-label" data-self="">{pilotName}</span>
+      {pilotName && view !== 'first' && <Html position={[0, 2.2, 0]} center zIndexRange={[14, 1]} style={{ pointerEvents: 'none' }}>
+        <span className="world-pilot-label actor-player-label" data-self="">● PLAYER · {pilotName}</span>
       </Html>}
     </group>
+    {vehicle === 'drift' && <DriftEffects stateRef={state} paused={paused || inputBlocked} reducedMotion={reducedMotion} />}
     <CrashBlast state={state} />
     <Tracers shellsRef={arsenal} max={SHELL_MAX}/>
     <BlastField arsenalRef={arsenal} kind="cannon" />

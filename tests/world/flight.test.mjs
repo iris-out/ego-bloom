@@ -45,7 +45,8 @@ test('runway touchdown preserves speed and continues ground taxi', () => {
 
 test('building and off-runway ground impacts explode then respawn after three seconds',()=>{
   const obstacle={x:0,z:0,height:80};
-  let state=stepFlight({...createFlightState(300),phase:'airborne',x:0,z:16,y:30,speed:100},{throttle:1},.05,300,[obstacle]);
+  // 비행 충돌은 화면에 보이는 상자와 교차해야 한다. z=16은 새 0 여유 정책에서 근접 통과다.
+  let state=stepFlight({...createFlightState(300),phase:'airborne',x:0,z:13,y:30,speed:100},{throttle:1},.05,300,[obstacle]);
   assert.equal(state.phase,'crashed');
   for(let i=0;i<59;i++)state=stepFlight(state,{},.05,300,[obstacle]);
   assert.equal(state.phase,'crashed');

@@ -1,7 +1,11 @@
+import { FOUR_VEHICLE_LAYOUT } from './models/fourVehicleLayout.js';
+
 /** 1인칭 카메라의 로컬 좌표다. 원점과 축은 각 모델과 같다.
  * 항공기는 코가 -Z 이므로 조종석은 음수 Z 다. 차량도 앞이 -Z 다.
  * 값을 바꾸면 cockpits/ 의 같은 기종 실내 위치도 함께 확인한다. */
 export const EYE_POINTS = Object.freeze({
+  airship: [0, .9, -5.2],
+  drift: FOUR_VEHICLE_LAYOUT.convertible.eye,
   jet: [0, 1.02, -3.4],
   // 이 도시는 우측통행이라(carPhysics 의 시작 x=6 이 오른쪽 차선이다) 기장석과 운전석이 왼쪽이다.
   bomber: [-0.46, 1.35, -5.6],
@@ -17,7 +21,10 @@ export const EYE_POINTS = Object.freeze({
   sedan: [-0.55, 0.55, -0.15],
   // 높은 SUV 착좌점을 반영한다. 주행 충돌/차체 원점은 바꾸지 않는다.
   suv: [-0.57, 0.86, -0.2],
-  convertible: [-0.53, 0.5, -0.05],
+  convertible: FOUR_VEHICLE_LAYOUT.convertible.eye,
+  coupe: FOUR_VEHICLE_LAYOUT.coupe.eye,
+  supercar: FOUR_VEHICLE_LAYOUT.supercar.eye,
+  electric: FOUR_VEHICLE_LAYOUT.electric.eye,
   // 포뮬러는 차체 가운데 낮게 누워 앞바퀴 뒤를 본다.
   formula: [0, 0.42, 0.35],
   // 캡오버라 운전석이 앞바퀴 위, 적재함보다 훨씬 앞에 있다.
@@ -58,16 +65,21 @@ export const NEAR_COCKPIT = 0.05, NEAR_DEFAULT = 0.5, FAR_COCKPIT = 2500, FAR_DE
 // 배율이 아니다. 전차 조준경 8배가 대략 세로 8도 안팎이라 실제 장비보다는 넓게 잡았다.
 // 2도대까지 좁히면 화면이 목표 하나로 가득 차 주변 상황을 잃는다.
 const COCKPIT_FOV = Object.freeze({
-  jet: { fov: 72 },          // 거품 캐노피라 시야가 넓다
-  bomber: { fov: 68 },       // 폭격기 조종석은 창이 크지만 코가 길다
-  prop: { fov: 68 },         // 버블 캐노피라 시야가 넓다
-  fighter: { fov: 74 },      // 캐노피 시야가 가장 넓다
-  interceptor: { fov: 70 },  // 좁은 캐노피에 기수가 길다
-  shotgun: { fov: 70 },
-  helicopter: { fov: 70 },   // 발밑까지 유리다
+  airship: { fov: 78 },
+  drift: { fov: FOUR_VEHICLE_LAYOUT.convertible.fov },
+  jet: { fov: 80 },          // 거품 캐노피라 시야가 넓다
+  bomber: { fov: 76 },       // 폭격기 조종석은 창이 크지만 코가 길다
+  prop: { fov: 76 },         // 버블 캐노피라 시야가 넓다
+  fighter: { fov: 82 },      // 캐노피 시야가 가장 넓다
+  interceptor: { fov: 78 },  // 좁은 캐노피에 기수가 길다
+  shotgun: { fov: 78 },
+  helicopter: { fov: 78 },   // 발밑까지 유리다
   sedan: { fov: 72 },        // 승용차 앞유리 기준이다
   suv: { fov: 70 },          // 앞유리가 세워져 있어 조금 좁다
-  convertible: { fov: 74 },  // 지붕이 없어 위가 트인다
+  convertible: { fov: FOUR_VEHICLE_LAYOUT.convertible.fov },
+  coupe: { fov: FOUR_VEHICLE_LAYOUT.coupe.fov },
+  supercar: { fov: FOUR_VEHICLE_LAYOUT.supercar.fov },
+  electric: { fov: FOUR_VEHICLE_LAYOUT.electric.fov },
   formula: { fov: 72 },      // 헤일로 안에서 앞바퀴와 윙 끝까지 본다
   truck: { fov: 68 },        // 높고 넓은 앞유리지만 기둥이 굵다
   motorcycle: { fov: 72 },   // 헬멧 없이 바람을 맞는다

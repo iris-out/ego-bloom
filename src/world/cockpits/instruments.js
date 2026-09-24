@@ -1,7 +1,11 @@
 import { FLIGHT_GROUND } from '../flightPhysics.js';
+import { gunOf, muzzleAim } from '../weapons.js';
+import { armamentOf } from '../hardpoints.js';
+import { eyePoint } from '../eyePoints.js';
 import { MAX_RPM, REDLINE_RPM } from '../carGauges.js';
 import { createUrbanPlan } from '../../../shared/urbanPlan.js';
 import { navigationRadius, toNavigationSegment } from '../navigationMap.js';
+import { BRAND_CLUSTER_SIZE, drawCoupeClassic, drawTeslaDriver, drawFerrariTach } from './brandClusters.js';
 
 /** 계기와 HUD 가 그리는 내용이다. 순수 함수이며 Three, React 에 의존하지 않는다.
  * 캔버스 2D context 만 인자로 받으므로 단위 테스트가 그대로 호출한다.
@@ -19,7 +23,7 @@ export const DISPLAY = Object.freeze({ ...WIDE, square: SQUARE });
 
 /** mode 에 맞는 캔버스 크기다. 정사각이 필요한 배치는 여기 한 곳에서만 정한다. */
 export function displaySize(mode) {
-  return mode === 'mfd' ? SQUARE : WIDE;
+  return BRAND_CLUSTER_SIZE[mode] || (mode === 'mfd' ? SQUARE : WIDE);
 }
 /** HUD 한 장의 픽셀 크기다. 정사각이라 피치 사다리의 중심이 256 이다. */
 export const HUD = Object.freeze({ size: 512 });
@@ -239,6 +243,9 @@ function roadPlan(extent) {
 }
 
 const LAYOUTS = {
+  coupeClassic(ctx, read, accent, { status = {} } = {}) { drawCoupeClassic(ctx, status); },
+  teslaDriver(ctx, read, accent, { status = {} } = {}) { drawTeslaDriver(ctx, status); },
+  ferrariTach(ctx, read, accent, { status = {} } = {}) { drawFerrariTach(ctx, status); },
   /** 여섯 칸 계기다. 실제 항공기 6홀 배치와 같은 순서로 이름과 숫자를 적는다. */
   sixpack(ctx, read, accent) {
     const cells = [
@@ -319,6 +326,28 @@ const LAYOUTS = {
     ctx.fillText('KM/H', 34, 190);
     readout(ctx, 'GEAR', read.gear, 300, 48, 54);
     readout(ctx, 'RPM', read.rpm, 300, 158, 40);
+  },
+
+  /** A single-speed EV has a signed traction/regen value, never engine RPM. */
+  electricCluster(ctx, read, accent, { status = {} } = {}) {
+    ctx.textAlign = 'left';
+    ctx.fillStyle = accent;
+    ctx.font = '112px monospace';
+    ctx.fillText(read.speed, 28, 151);
+    ctx.fillStyle = '#90a8b3';
+    ctx.font = '24px monospace';
+    ctx.fillText('KM/H', 34, 192);
+    readout(ctx, 'DRIVE', read.gear === 'R' ? 'R' : 'D', 308, 45, 50);
+    const power = finite(status.power) ? Math.max(-1, Math.min(1, Number(status.power))) : null;
+    const name = power === null ? 'POWER' : power < 0 ? 'REGEN' : 'POWER';
+    const value = power === null ? EMPTY : String(Math.round(Math.abs(power) * 100));
+    readout(ctx, name, value, 308, 150, 44);
+    ctx.fillStyle = '#273944';
+    ctx.fillRect(308, 220, 172, 10);
+    if (power !== null) {
+      ctx.fillStyle = power < 0 ? '#64c9d5' : accent;
+      ctx.fillRect(308, 220, Math.abs(power) * 172, 10);
+    }
   },
 
   /** 오토바이 계기다. 원형 속도계 하나와 보조 숫자다. */
@@ -596,7 +625,7 @@ export function drawInstrument(ctx, mode, status = {}, accent = '#83eda0', title
 
 /** 전투기 HUD 한 장이다. telemetry 는 물리 상태 그대로라 속도는 m/s, 각은 라디안이다.
  * 단위 변환을 여기 한 곳에서만 한다. status 는 0.15초마다 오는 잔탄과 탄착 거리다. */
-export function drawFlightHud(ctx, telemetry = {}, status = {}, weapons = 'stores') {
+export function drawFlightHud(ctx, telemetry = {}, status = {}, weapons = 'stores', plane = 'fighter') {
   const size = HUD.size, centre = size / 2;
   const pose = telemetry || {};
   ctx.clearRect(0, 0, size, size);
@@ -620,11 +649,28 @@ export function drawFlightHud(ctx, telemetry = {}, status = {}, weapons = 'store
     }
   }
 
-  // 기체 기준 기호다. 화면 정중앙이 아니라 조종석 기준선이므로 탄착점과 섞이지 않게 짧게 둔다.
+  // guns HUD 는 기체 중심 기호를 현재 거리의 탄도와 시차에 맞춰 옮긴다. 포구가 눈보다
+  // 낮고 탄이 비행 중 낙하하므로, 고정된 기수 표식은 실제 탄도보다 위에 남는다.
+  const gun = weapons === 'guns' ? gunOf(plane) : null;
+  const mounts = weapons === 'guns' ? armamentOf(plane) : null;
+  const mount = mounts?.cannon?.[0];
+  const [, eyeY, eyeZ] = eyePoint(plane) || [0, 0, 0];
+  const range = Number(status.range);
+  const aimRange = Number.isFinite(range) && range > 0 ? range : 0;
+  const projectileSpeed = Math.max(1, Number(pose.speed) || 0) + (gun?.speed || 0);
+  const flight = gun && aimRange > 0 ? aimRange / projectileSpeed : 0;
+  const [, aimY, aimZ] = mount && mounts ? muzzleAim(mount, mounts.converge) : [0, 0, -1];
+  const shotY = mount && aimRange > 0
+    ? mount[1] + aimY * aimRange - 0.5 * (gun?.gravity || 0) * flight * flight
+    : eyeY;
+  const shotZ = mount && aimRange > 0 ? mount[2] + aimZ * aimRange : eyeZ - 1;
+  // combiner 유리는 눈에서 0.46m, 높이 0.18m다. 월드 각도를 유리 위 픽셀로 옮긴다.
+  const aimAngle = gun && aimRange > 0 ? Math.atan2(shotY - eyeY, eyeZ - shotZ) : 0;
+  const aimPixel = centre - aimAngle * (0.46 / 0.18) * size;
   ctx.beginPath();
-  ctx.moveTo(centre - 46, centre); ctx.lineTo(centre - 16, centre);
-  ctx.moveTo(centre + 16, centre); ctx.lineTo(centre + 46, centre);
-  ctx.moveTo(centre, centre - 10); ctx.lineTo(centre, centre + 10);
+  ctx.moveTo(centre - 46, aimPixel); ctx.lineTo(centre - 16, aimPixel);
+  ctx.moveTo(centre + 16, aimPixel); ctx.lineTo(centre + 46, aimPixel);
+  ctx.moveTo(centre, aimPixel - 10); ctx.lineTo(centre, aimPixel + 10);
   ctx.stroke();
 
   const speed = Number.isFinite(Number(pose.speed)) ? Math.round(Number(pose.speed) * 3.6) : null;

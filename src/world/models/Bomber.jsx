@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import Block from './ModelBlock';
+import { fuselageGeometry, airfoilGeometry } from './vehicleSurfaces.js';
+import { Airfoil, Duct, CanopyFrame } from './SurfaceParts.jsx';
 import { PLANE_DIMENSIONS } from './planeDimensions.js';
 import { DetailLamp, PanelSeam, SurfaceVent } from './exteriorDetails.jsx';
 import StaticBatch from '../StaticBatch.jsx';
@@ -19,7 +21,7 @@ const HALF_PI = Math.PI / 2;
 const HALF_SPAN = PLANE_DIMENSIONS.bomber.span / 2;
 
 const SKIN = '#8f9ba2', SKIN_DARK = '#6e7a82', PANEL = '#5b666d';
-const GLASS = '#4a6f80', METAL = '#3d4a50', BAY = '#23292d', BOMB = '#4d5a46';
+const METAL = '#3d4a50', BAY = '#23292d', BOMB = '#4d5a46';
 
 /** 문이 열리는 각이다. 90도까지 열면 날개 아래로 튀어나와 보인다. */
 const DOOR_OPEN = 1.35;
@@ -43,11 +45,7 @@ const CABIN_PROFILE = FUSELAGE_PROFILE.filter(([, z]) => z >= CABIN_NOSE_Z && z 
 const REAR_PROFILE = FUSELAGE_PROFILE.filter(([, z]) => z >= CABIN_TAIL_Z);
 
 function latheOf(profile) {
-  const points = profile.map(([radius, z]) => new THREE.Vector2(radius, z));
-  const geometry = new THREE.LatheGeometry(points, 16);
-  geometry.rotateX(HALF_PI);
-  geometry.computeVertexNormals();
-  return geometry;
+  return fuselageGeometry(FUSELAGE_PROFILE, profile[0][1], profile.at(-1)[1], 1);
 }
 
 export default function Bomber({ glowRef, bay = 0, firstPerson = false }) {
@@ -60,31 +58,10 @@ export default function Bomber({ glowRef, bay = 0, firstPerson = false }) {
   const fuselageRear = useMemo(() => latheOf(REAR_PROFILE), []);
 
   /** 주익이다. 뿌리가 두껍고 끝으로 갈수록 좁아지는 사다리꼴이다. */
-  const wing = useMemo(() => {
-    const shape = new THREE.Shape();
-    shape.moveTo(1.4, -3.2); shape.lineTo(HALF_SPAN, -0.6);
-    shape.lineTo(HALF_SPAN, 1.2); shape.lineTo(1.4, 3.4);
-    shape.closePath();
-    const geometry = new THREE.ExtrudeGeometry(shape, { depth: 0.5, bevelEnabled: false });
-    // shape 의 x 가 날개 span, y 가 기체 z 다. 두께가 Y 로 서게 눕힌다.
-    geometry.rotateX(HALF_PI);
-    geometry.translate(0, 0.25, 0);
-    geometry.computeVertexNormals();
-    return geometry;
-  }, []);
+  const wing = useMemo(() => airfoilGeometry([{x:1.2,front:-3.2,back:3.4,thickness:.66},{x:3,front:-2.9,back:3.1,thickness:.53},{x:HALF_SPAN,front:-.6,back:1.2,thickness:.10,y:.22}]), []);
 
   /** 수평 미익이다. 주익과 같은 방식으로 만든다. */
-  const stabilizer = useMemo(() => {
-    const shape = new THREE.Shape();
-    shape.moveTo(0.8, 8.2); shape.lineTo(5.4, 9.6);
-    shape.lineTo(5.4, 10.6); shape.lineTo(0.8, 11.0);
-    shape.closePath();
-    const geometry = new THREE.ExtrudeGeometry(shape, { depth: 0.28, bevelEnabled: false });
-    geometry.rotateX(HALF_PI);
-    geometry.translate(0, 0.14, 0);
-    geometry.computeVertexNormals();
-    return geometry;
-  }, []);
+  const stabilizer = useMemo(() => airfoilGeometry([{x:.8,front:8.2,back:11,thickness:.28},{x:5.4,front:9.6,back:10.6,thickness:.07}]), []);
 
   useEffect(() => () => {
     fuselageNose.dispose(); fuselageCabin.dispose(); fuselageRear.dispose(); wing.dispose(); stabilizer.dispose();
@@ -114,7 +91,7 @@ export default function Bomber({ glowRef, bay = 0, firstPerson = false }) {
 
       {/* 유리 폭격수석. 코 쪽이라 조종석보다 앞부분에 남는다. */}
       <mesh position={[0, 0.35, -9.4]} scale={[1.05, 0.85, 1.5]} castShadow>
-        <sphereGeometry args={[1, 14, 10]} /><meshStandardMaterial color={GLASS} metalness={0.35} roughness={0.2} />
+        <sphereGeometry args={[1, 32, 20]} /><meshStandardMaterial color="#1c3542" metalness={0.12} roughness={0.2} />
       </mesh>
       <PanelSeam position={[0, 1.0, 1.8]} scale={[0.75, 0.025, 5.5]} color={PANEL} />
 
@@ -124,7 +101,7 @@ export default function Bomber({ glowRef, bay = 0, firstPerson = false }) {
       </mesh>)}
 
       {/* 수직 미익 하나와 수평 미익 두 장 */}
-      <Block position={[0, 2.6, 9.8]} scale={[0.3, 4.2, 3.2]} color={PANEL} rotation={[-0.22, 0, 0]} />
+      <Airfoil color={PANEL} rotation={[0,0,Math.PI/2]} stations={[{x:.5,front:7.65,back:11.4,thickness:.32},{x:4.65,front:9.9,back:11.1,thickness:.1}]}/>
       {[1, -1].map((side) => <mesh key={side} geometry={stabilizer} scale={[side, 1, 1]} position={[0, 0.5, 0]} castShadow dispose={null}>
         <meshStandardMaterial color={PANEL} roughness={0.58} side={THREE.DoubleSide} />
       </mesh>)}
@@ -132,12 +109,7 @@ export default function Bomber({ glowRef, bay = 0, firstPerson = false }) {
       {/* 네 발 엔진. 나셀, 배기구, 파일런이다. */}
       {[1, -1].flatMap((side) => ENGINE_X.map((x) => <group key={`${side}-${x}`} position={[side * x, 0.45, 0.4]}>
         <Block position={[0, 0.2, -0.6]} scale={[0.34, 0.5, 1.2]} color={SKIN_DARK} />
-        <mesh position={[0, -0.2, 0.1]} rotation={[HALF_PI, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.62, 0.7, 3.4, 14]} /><meshStandardMaterial color={SKIN} metalness={0.3} roughness={0.42} />
-        </mesh>
-        <mesh position={[0, -0.2, 1.82]} rotation={[HALF_PI, 0, 0]}>
-          <circleGeometry args={[0.5, 14]} /><meshStandardMaterial color={METAL} />
-        </mesh>
+        <Duct position={[0,-.2,.1]} radius={.7} length={3.4} color={SKIN}/>
         <SurfaceVent position={[0, 0.12, 0.35]} scale={[0.52, 0.018, 0.08]} />
       </group>))}
 
@@ -174,8 +146,9 @@ export default function Bomber({ glowRef, bay = 0, firstPerson = false }) {
           <meshStandardMaterial color={SKIN} metalness={0.2} roughness={0.5} />
         </mesh>
         <mesh position={[0, 1.32, -5.6]} scale={[1.1, 0.62, 2.4]} castShadow>
-          <sphereGeometry args={[1, 14, 10]} /><meshStandardMaterial color={GLASS} metalness={0.35} roughness={0.2} />
+          <sphereGeometry args={[1, 32, 20]} /><meshStandardMaterial color="#1c3542" metalness={0.12} roughness={0.2} />
         </mesh>
+      <CanopyFrame position={[0,1.32,-5.6]} rx={1.1} ry={0.62} rz={2.4} color="#45545e"/>
       </StaticBatch>
     </group>
   </group>;

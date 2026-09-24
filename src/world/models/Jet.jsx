@@ -1,6 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import Block from './ModelBlock';
+import { fuselageGeometry, airfoilGeometry } from './vehicleSurfaces.js';
+import { Airfoil, Duct, CanopyFrame } from './SurfaceParts.jsx';
 import { FUSELAGE_PROFILE, PLANE_DIMENSIONS, WING_THICKNESS } from './planeDimensions.js';
 import { DetailLamp, PanelSeam, SurfaceVent } from './exteriorDetails.jsx';
 import StaticBatch from '../StaticBatch.jsx';
@@ -35,12 +37,7 @@ const CABIN_PROFILE = [[CABIN_NOSE_R, CABIN_NOSE_Z], ...FUSELAGE_PROFILE.filter(
 const REAR_PROFILE = [[CABIN_TAIL_R, CABIN_TAIL_Z], ...FUSELAGE_PROFILE.filter(([, z]) => z >= CABIN_TAIL_Z)];
 
 function latheOf(profile) {
-  const points = profile.map(([radius, z]) => new THREE.Vector2(radius, z));
-  const geometry = new THREE.LatheGeometry(points, 14);
-  // lathe 는 Y 축을 돌린다. 코를 -Z 로 보내려면 X 축으로 눕힌다.
-  geometry.rotateX(Math.PI / 2);
-  geometry.computeVertexNormals();
-  return geometry;
+  return fuselageGeometry(FUSELAGE_PROFILE, profile[0][1], profile.at(-1)[1], 1);
 }
 
 export default function Jet({ firstPerson = false }) {
@@ -50,40 +47,7 @@ export default function Jet({ firstPerson = false }) {
   const fuselageRear = useMemo(() => latheOf(REAR_PROFILE), []);
 
   /** 날개는 앞이 두껍고 뒤가 얇은 익형 단면이다. 뿌리에서 끝으로 갈수록 좁아진다. */
-  const wing = useMemo(() => {
-    const { root, tip } = WING_THICKNESS;
-    const half = (chordFront, chordBack, thickness, x) => ({ chordFront, chordBack, thickness, x });
-    const stations = [
-      half(-2.2, 2.7, root, 1),
-      half(1.4, 3.6, root * 0.7, HALF_SPAN * 0.45),
-      half(3.0, 4.5, tip, HALF_SPAN),
-    ];
-    const positions = [], indices = [];
-    // 각 station 마다 위·아래 두 줄을 만들고 이웃 station 과 잇는다.
-    stations.forEach((station, index) => {
-      for (const side of [1, -1]) {
-        for (const z of [station.chordFront, (station.chordFront + station.chordBack) / 2, station.chordBack]) {
-          const camber = z === station.chordBack ? 0.25 : 1;
-          positions.push(station.x, side * station.thickness * 0.5 * camber, z);
-        }
-      }
-      if (index === 0) return;
-      const previous = (index - 1) * 6, current = index * 6;
-      for (let column = 0; column < 2; column++) {
-        for (const offset of [0, 3]) {
-          const a = previous + offset + column, b = previous + offset + column + 1;
-          const c = current + offset + column, d = current + offset + column + 1;
-          indices.push(a, c, b, b, c, d);
-        }
-      }
-    });
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    geometry.setIndex(indices);
-    geometry.computeVertexNormals();
-    // 좌우 날개는 같은 geometry 를 X 로 뒤집어 쓴다.
-    return geometry;
-  }, []);
+  const wing = useMemo(() => airfoilGeometry([{x:1,front:-2.2,back:2.7,thickness:WING_THICKNESS.root},{x:HALF_SPAN*.45,front:1.4,back:3.6,thickness:.28,y:.09},{x:HALF_SPAN,front:3,back:4.5,thickness:WING_THICKNESS.tip,y:.18}]), []);
 
   useEffect(() => () => {
     fuselageNose.dispose(); fuselageCabin.dispose(); fuselageRear.dispose(); wing.dispose();
@@ -103,17 +67,12 @@ export default function Jet({ firstPerson = false }) {
         <meshStandardMaterial color="#deded4" roughness={0.55} side={THREE.DoubleSide} />
       </mesh>)}
       {/* 수직 미익과 수평 미익 */}
-      <Block position={[0, 1.6, 4.2]} scale={[0.22, 3, 2.6]} color="#628e9b" rotation={[-0.25, 0, 0]} />
-      <Block position={[0, 0.55, 4.5]} scale={[6.5, 0.2, 1.5]} color="#628e9b" />
+      <Airfoil color="#628e9b" rotation={[0,0,Math.PI/2]} stations={[{x:.15,front:2.2,back:5.6,thickness:.24},{x:3.08,front:4.55,back:5.72,thickness:.075}]}/>
+      {[-1,1].map(side => <Airfoil key={side} position={[0,.55,0]} scale={[side,1,1]} color="#628e9b" stations={[{x:.15,front:3.65,back:5.2,thickness:.22},{x:3.25,front:4.3,back:5.25,thickness:.06}]}/>)}
       {[-1, 1].map((side) => <group key={side}>
         {/* 엔진을 파일런으로 날개 밑에 매단다. hardpoints.js 의 노즐 좌표와 같이 움직인다. */}
         <Block position={[side * 3.4, -0.42, 2.2]} scale={[0.2, 0.5, 0.7]} color="#a3afb0" />
-        <mesh position={[side * 3.4, -0.82, 2.7]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.55, 0.62, 2.6, 12]} /><meshStandardMaterial color="#a3afb0" metalness={0.3} roughness={0.4} />
-        </mesh>
-        <mesh position={[side * 3.4, -0.82, 4.02]} rotation={[Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.42, 12]} /><meshStandardMaterial color="#36454a" />
-        </mesh>
+        <Duct position={[side*3.4,-.82,2.7]} radius={.62} length={2.6} color="#a3afb0"/>
         <SurfaceVent position={[side * 3.4, -0.58, 2.1]} scale={[0.42, 0.018, 0.08]} rotation={[0, 0, 0]} />
         <DetailLamp position={[side * (HALF_SPAN - 0.42), 0.17, 3.42]} color={side < 0 ? '#ff3b30' : '#35d072'} scale={0.07} />
         {/* 주 랜딩기어. 스트럿, 토크링크, 바퀴 두 개다. */}
@@ -138,8 +97,9 @@ export default function Jet({ firstPerson = false }) {
           <meshStandardMaterial color="#ebe8df" metalness={0.15} roughness={0.45} />
         </mesh>
         <mesh position={[0, 0.74, -3.5]} scale={[0.82, 0.6, 1.85]} castShadow>
-          <sphereGeometry args={[1, 14, 9]} /><meshStandardMaterial color="#385c6d" metalness={0.3} roughness={0.22} />
+          <sphereGeometry args={[1, 32, 20]} /><meshStandardMaterial color="#15303d" metalness={0.12} roughness={0.22} />
         </mesh>
+      <CanopyFrame position={[0,.74,-3.5]} rx={0.82} ry={0.6} rz={1.85} color="#45545e"/>
       </StaticBatch>
     </group>
   </group>;

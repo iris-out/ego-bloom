@@ -180,3 +180,20 @@ test('전고를 채운 상자가 차체를 땅에 붙여 둔다', () => {
   // 모든 차종에 전고가 있다. 하나라도 빠지면 그 차만 세로를 보지 않는다.
   for (const key of VEHICLE_KEYS) assert.ok(HULL_HEIGHT[key] > 0, `${key} 전고가 없다`);
 });
+
+test('accepted remote hits retain shooter and victim life; previous shooter life shells expire', () => {
+  const peer = shots => ({ ...tank(shots), life: 7 });
+  const self = { ...selfTank, life: 22 };
+  let state = run(createRemoteCombat(), [peer(0)], { self });
+  const hits = [];
+  for (let index = 0; index < 8; index++) {
+    state = stepRemoteCombat(state, { dt: .05, peers: [peer(1)], self });
+    hits.push(...state.hits);
+  }
+  assert.deepEqual(hits, [{ owner: 'other', life: 22, amount: DAMAGE.tank, weapon: 'tank' }]);
+  const baseline = run(createRemoteCombat(), [peer(0)]);
+  const firing = run(baseline, [peer(1)]);
+  assert.ok(firing.shells.length > 0);
+  assert.equal(run(firing, [{ ...peer(0), life: 8 }]).shells.length, 0);
+  assert.equal(run(firing, []).shells.length, 0);
+});

@@ -1,3 +1,4 @@
+import { surfaceFixtures } from './model-surface-fixtures.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -29,12 +30,12 @@ async function mountSuv(props = {}) {
   };
   const Suv = new Function(
     'h', 'Fragment', 'THREE', 'useEffect', 'useMemo', 'useRef', 'useFrame', 'Block', 'Wheel',
-    'P', ...Object.keys(carGeometry), 'SUV_FRONT_LIGHTS', 'SUV_REAR_LIGHTS',
+    'Shell', 'P', ...Object.keys(carGeometry), 'SUV_FRONT_LIGHTS', 'SUV_REAR_LIGHTS',
     'DetailLamp', 'PanelSeam', 'SurfaceVent', 'StaticBatch',
     `${code}; return Suv;`,
   )(
     h, 'fragment', THREE, effect => effect(), factory => factory(), () => ({ current: [] }), () => {},
-    props => h('block', props), props => h('wheel', props), carGeometry.CAR_PALETTE, ...Object.values(carGeometry),
+    props => h('block', props), props => h('wheel', props), surfaceFixtures(h).Shell, carGeometry.CAR_PALETTE, ...Object.values(carGeometry),
     SUV_FRONT_LIGHTS, SUV_REAR_LIGHTS,
     props => h('detail-lamp', props), props => h('panel-seam', props), props => h('surface-vent', props),
     ({ children }) => h('fragment', null, children),
@@ -48,7 +49,7 @@ test('SUV has a hollow joined body and reference-shaped front and rear treatment
   root.traverse((node) => {
     if (node.userData.part) parts.set(node.userData.part, (parts.get(node.userData.part) || 0) + 1);
   });
-  assert.ok(parts.get('g01-body-shell') > 0, 'hollow lower body is missing');
+  assert.ok(parts.get('g45-body-shell') > 0, 'hollow lower body is missing');
   assert.equal(parts.get('suv-kidney-grille'), 2);
   assert.equal(parts.get('suv-grille-slat'), 10);
   assert.equal(parts.get('suv-headlamp-housing'), 2);

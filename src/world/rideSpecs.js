@@ -1,7 +1,8 @@
+import { AIRSHIP } from './airshipPhysics.js';
 import { VEHICLES } from './carPhysics.js';
 import { PLANES } from './flightPhysics.js';
 import { HOVER_COLLECTIVE, ROTOR_THRUST } from './rotorPhysics.js';
-import { PLANE_KEYS, PLANE_META, VEHICLE_KEYS, VEHICLE_META } from './identity.js';
+import { SELECTABLE_PLANE_KEYS, PLANE_META, VEHICLE_KEYS, VEHICLE_META } from './identity.js';
 import { RUN_SPEED } from './walkPhysics.js';
 
 /** 선택 카드의 막대는 물리 상수에서 파생한다. 손으로 적은 숫자를 두지 않으므로
@@ -15,6 +16,7 @@ const STALL_FLOOR = 28, STALL_CEIL = 45;
 
 function flightRide(key) {
   const meta = PLANE_META[key];
+  if (key === 'airship') return { kind: 'flight', key, ...meta, bars: { speed: unit(AIRSHIP.maxSpeed, TOP_SPEED), agility: unit(AIRSHIP.turnRate, TOP_AGILITY), stability: 1 } };
   if (key === 'helicopter') {
     // 헬기는 고정익 표에 없다. 로터 추력과 호버 콜렉티브로 값을 만든다.
     return { kind: 'flight', key, ...meta,
@@ -51,7 +53,7 @@ const walkRide = {
 };
 
 export const RIDE_GROUPS = Object.freeze([
-  { key: 'flight', ko: '항공기', rides: PLANE_KEYS.map(flightRide) },
+  { key: 'flight', ko: '항공기', rides: SELECTABLE_PLANE_KEYS.map(flightRide) },
   { key: 'car', ko: '차량', rides: VEHICLE_KEYS.map(carRide) },
   { key: 'walk', ko: '도보', rides: [walkRide] },
 ]);

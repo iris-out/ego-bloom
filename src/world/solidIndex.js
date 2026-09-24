@@ -12,19 +12,22 @@ const LINEAR_BELOW = 24;
 /** 건물 둘레에 더하는 기본 여유다. 벽에 코를 박기 전에 막아 몸통이 화면을 뚫지 않게 한다.
  * 가드레일처럼 얇은 구조물은 margin 을 따로 줘야 도로 위에 보이지 않는 벽이 생기지 않는다. */
 const MARGIN = 3;
+/** 비행체는 화면에 보이는 상자 바깥의 추가 여유 없이 건물 충돌체를 검사한다.
+ * 각 장애물이 지정한 margin/roofMargin 은 그대로 적용한다. */
+export const FLIGHT_CLEARANCE = Object.freeze({ margin: 0, roofMargin: 0 });
 
-const marginOf = (building) => (Number.isFinite(building.margin) ? building.margin : MARGIN);
-const roofMarginOf = (building) => (Number.isFinite(building.roofMargin) ? Math.max(0, building.roofMargin) : 4);
+const marginOf = (building, fallback = MARGIN) => (Number.isFinite(building.margin) ? building.margin : fallback);
+const roofMarginOf = (building, fallback = 4) => (Number.isFinite(building.roofMargin) ? Math.max(0, building.roofMargin) : fallback);
 
 /** 건물 몸통의 반폭이다. buildWorld 는 width, depth 를 주지 않고 lot 만 준다.
  * 화면에 그려지는 몸통이 lot * MASS_LOT_RATIO 이므로 그 값을 쓴다.
  * rotation 이 있으면 이 값은 돌아간 상자의 로컬 축 기준이다. */
-export function buildingHalf(building, axis) {
+export function buildingHalf(building, axis, fallbackMargin = MARGIN) {
   const given = axis === 'x' ? building.width : building.depth;
-  if (Number.isFinite(given) && given > 0) return given / 2 + marginOf(building);
+  if (Number.isFinite(given) && given > 0) return given / 2 + marginOf(building, fallbackMargin);
   // lot 이 없는 장애물은 공항 건물처럼 손으로 적은 것이다. 예전 기본값을 그대로 쓴다.
   const lot = Number.isFinite(building.lot) && building.lot > 0 ? building.lot * MASS_LOT_RATIO : 20;
-  return lot / 2 + marginOf(building);
+  return lot / 2 + marginOf(building, fallbackMargin);
 }
 
 /** 돌아간 상자를 축에 맞춘 상자로 감쌌을 때의 반폭이다. 격자에 넣을 때만 쓴다. */
@@ -54,8 +57,11 @@ const SPAN = [0, 1];
  * 점이 아니라 선분으로 보므로 빠르게 움직여도 벽을 뚫고 지나가지 않는다.
  * rotation 이 있으면 선분을 상자의 축으로 돌려서 본다. 돌아간 가드레일을 감싸는
  * 축 정렬 상자로 보면 호 안쪽 차선까지 막힌다. */
-export function hitsBuilding(from, to, building) {
-  const halfX = buildingHalf(building, 'x'), halfZ = buildingHalf(building, 'z');
+export function hitsBuilding(from, to, building, clearance = {}) {
+  const margin = Number.isFinite(clearance.margin) ? clearance.margin : MARGIN;
+  const roofMargin = Number.isFinite(clearance.roofMargin) ? clearance.roofMargin : 4;
+  const radius = Number.isFinite(clearance.radius) ? Math.max(0, clearance.radius) : 0;
+  const halfX = buildingHalf(building, 'x', margin) + radius, halfZ = buildingHalf(building, 'z', margin) + radius;
   const turn = Number.isFinite(building.rotation) ? building.rotation : 0;
   let fromX = from.x - building.x, fromZ = from.z - building.z;
   let toX = to.x - building.x, toZ = to.z - building.z;
@@ -67,7 +73,7 @@ export function hitsBuilding(from, to, building) {
   }
   SPAN[0] = 0; SPAN[1] = 1;
   return slab(fromX, toX, -halfX, halfX, SPAN) !== null
-    && slab(from.y, to.y, -2, building.height + roofMarginOf(building), SPAN) !== null
+    && slab(from.y, to.y, -2 - radius, building.height + roofMarginOf(building, roofMargin) + radius, SPAN) !== null
     && slab(fromZ, toZ, -halfZ, halfZ, SPAN) !== null;
 }
 
@@ -99,18 +105,21 @@ function gridOf(buildings) {
 }
 
 /** 선분이 배열의 어느 건물이든 지나면 true 다. buildings.some(hitsBuilding) 과 결과가 같다.
- * except 로 준 건물 하나는 보지 않는다. 자기 건물 위의 표식을 가리는지 볼 때 쓴다. */
-export function hitsAnyBuilding(from, to, buildings, except = null) {
+ * except 로 준 건물 하나는 보지 않는다. clearance 는 개별 여유 값이 없는 상자에 쓸 기본값이다. */
+export function hitsAnyBuilding(from, to, buildings, except = null, clearance = null) {
   if (!buildings?.length) return false;
   const finite = Number.isFinite(from.x) && Number.isFinite(from.z) && Number.isFinite(to.x) && Number.isFinite(to.z);
-  const linear = () => buildings.some((building) => building !== except && hitsBuilding(from, to, building));
+  const hit = (building) => hitsBuilding(from, to, building, clearance || undefined);
+  const linear = () => buildings.some((building) => building !== except && hit(building));
   if (buildings.length < LINEAR_BELOW || !finite) return linear();
-  const x0 = Math.floor(Math.min(from.x, to.x) / CELL), x1 = Math.floor(Math.max(from.x, to.x) / CELL);
-  const z0 = Math.floor(Math.min(from.z, to.z) / CELL), z1 = Math.floor(Math.max(from.z, to.z) / CELL);
+  // Expanding both local box axes reaches sqrt(2) times farther when rotated.
+  const padding = (Math.max(0, clearance?.radius || 0) + Math.max(0, (clearance?.margin || 0) - MARGIN)) * Math.SQRT2;
+  const x0 = Math.floor((Math.min(from.x, to.x) - padding) / CELL), x1 = Math.floor((Math.max(from.x, to.x) + padding) / CELL);
+  const z0 = Math.floor((Math.min(from.z, to.z) - padding) / CELL), z1 = Math.floor((Math.max(from.z, to.z) + padding) / CELL);
   // 도시를 가로지르는 긴 선분은 칸을 도는 비용이 전부 훑는 것보다 크다.
   if ((x1 - x0 + 1) * (z1 - z0 + 1) > buildings.length / 2) return linear();
   const grid = gridOf(buildings);
-  for (const index of grid.loose) if (buildings[index] !== except && hitsBuilding(from, to, buildings[index])) return true;
+  for (const index of grid.loose) if (buildings[index] !== except && hit(buildings[index])) return true;
   // 한 건물이 여러 칸에 걸쳐 있으므로 이번 질의에서 이미 본 건물은 건너뛴다.
   grid.stamp = grid.stamp === 0xffffffff ? 1 : grid.stamp + 1;
   if (grid.stamp === 1) grid.seen.fill(0);
@@ -121,7 +130,7 @@ export function hitsAnyBuilding(from, to, buildings, except = null) {
       const index = list[i];
       if (grid.seen[index] === grid.stamp) continue;
       grid.seen[index] = grid.stamp;
-      if (buildings[index] !== except && hitsBuilding(from, to, buildings[index])) return true;
+      if (buildings[index] !== except && hit(buildings[index])) return true;
     }
   }
   return false;

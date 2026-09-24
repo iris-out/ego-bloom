@@ -6,6 +6,7 @@ import { roadSurface } from './roadSurface.js';
 import { inWaterBody, riverCenter, riverClearance } from '../../shared/river.js';
 import { inPond } from '../../shared/nature.js';
 import { AIRPORT_OFFSET, carSpawn, onAirportLand } from './models/airportLayout.js';
+import { FOUR_VEHICLE_LAYOUT } from './models/fourVehicleLayout.js';
 
 /** 지상 차량 물리. 순수 함수이며 Three, React, 네트워크에 의존하지 않는다.
  * 지상 도로와 연결된 램프·고가 노면의 높이를 따라 달린다.
@@ -16,6 +17,7 @@ const clamp = (value, min, max) => Math.max(min, Math.min(max, finite(value)));
 
 /** 모든 차량이 쓰는 자동변속기의 유효 범위다. rpm 은 엔진 상태이고 화면에서만 만든 값이 아니다. */
 export const IDLE_RPM = 800, REDLINE_RPM = 6800, SHIFT_RPM = 7200, MAX_RPM = 8000;
+const RPM_SHIFT_SECONDS = 0.2;
 
 /** 도로 상판이 지면보다 높은 값이다. AI 차량 상자의 바닥도 이 높이에서 잰다. */
 export const ROAD_TOP = 0.31;
@@ -28,25 +30,29 @@ export const CAR_GROUND = ROAD_TOP + 0.9;
 // width 와 depth 는 차체 충돌 상자다. 남의 포탄이 나를 맞혔는지 보는 데 쓰므로
 // models/ 의 실루엣 크기와 맞춘다. 모델을 키우면 이 값도 함께 키운다.
 export const VEHICLES = {
-  sedan: { accel: 13, reverse: 5, top: 62, brake: 26, grip: 1, steerRate: 1.5, lean: 0, width: 2.2, depth: 4.6, gears: [0.16, 0.29, 0.43, 0.60, 0.79, 1], ko: '세단' },
-  motorcycle: { accel: 19, reverse: 4, top: 74, brake: 22, grip: 0.82, steerRate: 1.9, lean: 0.7, width: 1, depth: 2.2, gears: [0.18, 0.32, 0.48, 0.65, 0.82, 1], ko: '오토바이' },
-  suv: { accel: 12, reverse: 5, top: 58, brake: 24, grip: 0.97, steerRate: 1.35, lean: 0, width: 2.3, depth: 4.9, gears: [0.17, 0.3, 0.45, 0.62, 0.8, 1], ko: 'SUV' },
-  convertible: { accel: 16, reverse: 5, top: 70, brake: 27, grip: 0.95, steerRate: 1.6, lean: 0, width: 2.1, depth: 4.4, gears: [0.16, 0.28, 0.42, 0.59, 0.78, 1], ko: '오픈카' },
+  sedan: { accel: 6.18, reverse: 5, top: 62, brake: 26, grip: 1, steerRate: 1.5, lean: 0, width: 2.2, depth: 4.6, gears: [0.16, 0.29, 0.43, 0.60, 0.79, 1], ko: '세단' },
+  motorcycle: { accel: 9.81, reverse: 4, top: 74, brake: 22, grip: 0.82, steerRate: 1.9, lean: 0.7, width: 1, depth: 2.2, gears: [0.18, 0.32, 0.48, 0.65, 0.82, 1], ko: '오토바이' },
+  suv: { accel: 5.69, reverse: 5, top: 58, brake: 24, grip: 0.97, steerRate: 1.35, lean: 0, width: 2.3, depth: 4.9, gears: [0.17, 0.3, 0.45, 0.62, 0.8, 1], ko: 'SUV' },
+  convertible: { accel: 7.32, reverse: 5, top: 70, brake: 27, grip: 0.95, steerRate: 1.6, lean: 0, width: FOUR_VEHICLE_LAYOUT.convertible.width, depth: FOUR_VEHICLE_LAYOUT.convertible.depth, gears: [0.16, 0.28, 0.42, 0.59, 0.78, 1], ko: '오픈카' },
+  drift: { accel: 8.66, reverse: 5, top: 68, brake: 28, grip: 1.02, steerRate: 1.75, lean: 0, width: 2.5, depth: 5, gears: [.16,.28,.40,.59,.78,1], ko: '드리프트 튜닝카', handbrakeBrake: .22, driftYaw: 1.8, driftMinSpeed: 7, driftSteerMin: .15, driftTuned: true },
+  coupe: { accel: 6.93, reverse: 5, top: 68, brake: 26, grip: 1, steerRate: 1.4, lean: 0, width: FOUR_VEHICLE_LAYOUT.coupe.width, depth: FOUR_VEHICLE_LAYOUT.coupe.depth, gears: [0.16, 0.28, 0.40, 0.59, 0.78, 1], ko: '쿠페' },
+  supercar: { accel: 13.53, reverse: 6, top: 80, brake: 32, grip: 1.04, steerRate: 1.65, lean: 0, width: FOUR_VEHICLE_LAYOUT.supercar.width, depth: FOUR_VEHICLE_LAYOUT.supercar.depth, gears: [0.13, 0.23, 0.34, 0.45, 0.56, 0.69, 0.83, 1], shiftDuration: 0.06, shiftRpm: 8500, maxRpm: 8500, redlineRpm: 8000, dialMaxRpm: 10000, ko: '슈퍼카' },
+  electric: { accel: 9.15, reverse: 6, top: 72, brake: 28, grip: 1.02, steerRate: 1.45, lean: 0, width: FOUR_VEHICLE_LAYOUT.electric.width, depth: FOUR_VEHICLE_LAYOUT.electric.depth, gears: [1], powertrain: 'electric', ko: '전기차' },
   // 현대식 포뮬러 머신이다. top 은 300km/h 를 m/s 로 바꾼 값이다. 고속 조향 손실을
   // 크게 두어 최고속도에서 키 한 번으로 차체가 돌아서지 않고, 핸드브레이크를 잡았을 때만
   // 낮은 속도 영역에서 뒷축이 적극적으로 흐른다.
   formula: {
-    accel: 31, reverse: 4, top: 300 / 3.6, brake: 34, grip: 1.06, steerRate: 1.65, lean: 0,
+    accel: 11.26, reverse: 4, top: 300 / 3.6, brake: 34, grip: 1.06, steerRate: 1.65, lean: 0,
     width: 2.0, depth: 5.55, gears: [0.12, 0.22, 0.33, 0.45, 0.58, 0.72, 0.86, 1], ko: '포뮬러',
     handbrakeBrake: 0.34, driftYaw: 2.15, driftMinSpeed: 10, driftSteerMin: 0.18,
-    highSpeedSteerLoss: 0.78,
+    highSpeedSteerLoss: 0.78, shiftDuration: 0.03,
   },
-  truck: { accel: 7, reverse: 3.5, top: 44, brake: 18, grip: 1, steerRate: 0.85, lean: 0, width: 2.5, depth: 7.6, gears: [0.14, 0.25, 0.38, 0.54, 0.74, 1], ko: '트럭' },
-  tank: { accel: 7, reverse: 3, top: 22, brake: 16, grip: 1, steerRate: 0.9, lean: 0, width: 3.6, depth: 7.2, gears: [0.19, 0.36, 0.57, 0.78, 1], ko: '전차', combat: true },
-  howitzer: { accel: 6, reverse: 3, top: 19, brake: 14, grip: 1, steerRate: 0.8, lean: 0, width: 3.4, depth: 7.6, gears: [0.20, 0.39, 0.61, 0.81, 1], ko: '자주포', combat: true },
-  armored: { accel: 11, reverse: 4, top: 32, brake: 18, grip: 0.95, steerRate: 1.2, lean: 0, width: 3, depth: 6.4, gears: [0.17, 0.31, 0.46, 0.63, 0.81, 1], ko: '장갑차', combat: true },
+  truck: { accel: 1.98, reverse: 3.5, top: 44, brake: 18, grip: 1, steerRate: 0.85, lean: 0, width: 2.5, depth: 7.6, gears: [0.14, 0.25, 0.38, 0.54, 0.74, 1], ko: '트럭' },
+  tank: { accel: 1.47, reverse: 3, top: 22, brake: 16, grip: 1, steerRate: 0.9, lean: 0, width: 3.6, depth: 7.2, gears: [0.19, 0.36, 0.57, 0.78, 1], ko: '전차', combat: true },
+  howitzer: { accel: 1.15, reverse: 3, top: 19, brake: 14, grip: 1, steerRate: 0.8, lean: 0, width: 3.4, depth: 7.6, gears: [0.20, 0.39, 0.61, 0.81, 1], ko: '자주포', combat: true },
+  armored: { accel: 1.68, reverse: 4, top: 32, brake: 18, grip: 0.95, steerRate: 1.2, lean: 0, width: 3, depth: 6.4, gears: [0.17, 0.31, 0.46, 0.63, 0.81, 1], ko: '장갑차', combat: true },
   // 대공포는 장갑차 차대에 포탑만 올린 것이다. 포탑이 무거워 조금 느리고 덜 돈다.
-  aa: { accel: 10, reverse: 4, top: 29, brake: 17, grip: 0.94, steerRate: 1.1, lean: 0, width: 3, depth: 6.4, gears: [0.18, 0.33, 0.49, 0.67, 0.84, 1], ko: '대공포', combat: true },
+  aa: { accel: 1.47, reverse: 4, top: 29, brake: 17, grip: 0.94, steerRate: 1.1, lean: 0, width: 3, depth: 6.4, gears: [0.18, 0.33, 0.49, 0.67, 0.84, 1], ko: '대공포', combat: true },
 };
 
 /** 차체를 축에 맞춘 상자로 본다. 옆을 보고 있으면 가로와 세로가 바뀐다.
@@ -85,30 +91,58 @@ export function spawnZ(extent = 180) {
   return riverCenter(span, 6) + riverClearance(span, 6, 1) + span * 0.065;
 }
 
-export function createCarState(extent = 180) {
+export function createCarState(extent = 180, kind = 'sedan') {
   // 동쪽 공항 터미널 앞 공항로다. 도시를 향해 서 있어 곧장 둑을 건너 순환로로 들어간다.
   const spawn = carSpawn(finite(extent, 180));
-  return { x: spawn.x, y: CAR_GROUND, z: spawn.z, heading: spawn.heading, steer: 0, lean: 0, speed: 0, throttle: 0, gear: 1, rpm: IDLE_RPM,
+  const electric = vehicleSpec(kind).powertrain === 'electric';
+  return { x: spawn.x, y: CAR_GROUND, z: spawn.z, heading: spawn.heading, steer: 0, lean: 0, speed: 0, throttle: 0, gear: electric ? 'D' : 1, rpm: electric ? 0 : IDLE_RPM, power: 0, shiftRemaining: 0,
     phase: 'drive', message: '', extent: finite(extent, 180) };
 }
 
 /** 속도와 현재 단수로 엔진 회전을 정한다. 가속 중에는 레드존까지 올린 뒤 다음 단으로 넘긴다. */
-function updateTransmission(state, spec, gas, back) {
+function updateTransmission(state, spec, gas, back, dt) {
+  if (spec.powertrain === 'electric') {
+    state.gear = state.speed < -0.15 || (back > gas && Math.abs(state.speed) < 0.15) ? 'R' : 'D';
+    state.rpm = 0;
+    delete state.rpmShiftElapsed;
+    delete state.rpmShiftFrom;
+    return;
+  }
   const gears = spec.gears;
   const top = Math.max(1, spec.top);
   const speed = Math.abs(state.speed);
+  const previousGear = state.gear;
+  let gear;
+  let rpm;
   if (state.speed < -0.15 || (back > gas && speed < 0.15)) {
-    const rpm = IDLE_RPM + clamp(speed / Math.max(1, top * 0.35), 0, 1) * (SHIFT_RPM - IDLE_RPM);
-    state.gear = 'R'; state.rpm = Math.round(Math.min(MAX_RPM, rpm));
-    return;
+    gear = 'R';
+    rpm = IDLE_RPM + clamp(speed / Math.max(1, top * 0.35), 0, 1) * ((spec.shiftRpm || SHIFT_RPM) - IDLE_RPM);
+  } else {
+    gear = Number.isInteger(previousGear) ? clamp(previousGear, 1, gears.length) : 1;
+    while (gear < gears.length && speed > top * gears[gear - 1] * 0.97) gear += 1;
+    while (gear > 1 && speed < top * gears[gear - 2] * 0.68) gear -= 1;
+    const ceiling = top * gears[gear - 1];
+    rpm = IDLE_RPM + clamp(speed / Math.max(1, ceiling), 0, 1.13) * ((spec.shiftRpm || SHIFT_RPM) - IDLE_RPM);
   }
-  let gear = Number.isInteger(state.gear) ? clamp(state.gear, 1, gears.length) : 1;
-  while (gear < gears.length && speed > top * gears[gear - 1] * 0.97) gear += 1;
-  while (gear > 1 && speed < top * gears[gear - 2] * 0.68) gear -= 1;
-  const ceiling = top * gears[gear - 1];
-  const rpm = IDLE_RPM + clamp(speed / Math.max(1, ceiling), 0, 1.13) * (SHIFT_RPM - IDLE_RPM);
+  const targetRpm = Math.min(spec.maxRpm || MAX_RPM, rpm);
+  if (gear !== previousGear) {
+    state.rpmShiftFrom = finite(state.rpm, targetRpm);
+    state.rpmShiftElapsed = 0;
+  }
   state.gear = gear;
-  state.rpm = Math.round(Math.min(MAX_RPM, rpm));
+  if (Number.isFinite(state.rpmShiftElapsed)) {
+    state.rpmShiftElapsed = Math.min(RPM_SHIFT_SECONDS, state.rpmShiftElapsed + dt);
+    const progress = state.rpmShiftElapsed / RPM_SHIFT_SECONDS;
+    const eased = progress * progress * (3 - 2 * progress);
+    state.rpm = Math.round(state.rpmShiftFrom + (targetRpm - state.rpmShiftFrom) * eased);
+    if (progress >= 1) {
+      delete state.rpmShiftElapsed;
+      delete state.rpmShiftFrom;
+    }
+  } else state.rpm = Math.round(targetRpm);
+  if (Number.isInteger(previousGear) && gear > previousGear && gas > 0) {
+    state.shiftRemaining = spec.shiftDuration ?? (spec.lean ? 0.08 : 0.12);
+  }
 }
 
 /** 세로 여유다. 수평 여유와 따로 둔다. 차 지붕 바로 위를 스치는 탄까지는 맞은 것으로 본다.
@@ -167,11 +201,14 @@ export function slideAlongWall(from, to, buildings) {
 export function stepCar(previous, input = {}, delta = 0, extent = 180, buildings = [], kind = 'sedan', traffic = []) {
   const dt = clamp(delta, 0, 0.05);
   const state = { ...previous };
-  if (!['x', 'z', 'heading', 'speed'].every((field) => Number.isFinite(state[field]))) return createCarState(extent);
+  if (!['x', 'z', 'heading', 'speed'].every((field) => Number.isFinite(state[field]))) return createCarState(extent, kind);
   if (state.phase === 'sinking') {
+    state.power = 0;
+    delete state.rpmShiftElapsed;
+    delete state.rpmShiftFrom;
     // 물에 빠지면 하찮게 가라앉는다. 조작은 받지 않는다.
     state.sinkElapsed = (state.sinkElapsed || 0) + Math.max(0, finite(delta));
-    if (state.sinkElapsed >= 3 - 1e-9) return createCarState(extent);
+    if (state.sinkElapsed >= 3 - 1e-9) return createCarState(extent, kind);
     state.speed *= Math.max(0, 1 - dt * 3);
     state.y = Math.max(-3.6, CAR_GROUND - state.sinkElapsed * 1.8);
     state.pitchDown = Math.min(0.5, state.sinkElapsed * 0.5);
@@ -181,12 +218,16 @@ export function stepCar(previous, input = {}, delta = 0, extent = 180, buildings
     return state;
   }
   if (state.phase === 'crashed') {
+    state.power = 0;
+    delete state.rpmShiftElapsed;
+    delete state.rpmShiftFrom;
     state.crashElapsed = (state.crashElapsed || 0) + Math.max(0, finite(delta));
-    if (state.crashElapsed >= 3 - 1e-9) return createCarState(extent);
+    if (state.crashElapsed >= 3 - 1e-9) return createCarState(extent, kind);
     state.message = `충돌 · ${Math.ceil(3 - state.crashElapsed)}초 후 출발 지점으로 돌아갑니다`;
     return state;
   }
   const spec = vehicleSpec(kind);
+  const previousSpeed = state.speed;
   const gas = clamp(input.throttle, 0, 1), back = clamp(input.reverse, 0, 1);
   // 핸드브레이크는 뒷바퀴만 잠근다. 덜 서는 대신 뒤가 흘러 더 많이 돈다.
   const hand = !!input.handbrake;
@@ -195,16 +236,38 @@ export function stepCar(previous, input = {}, delta = 0, extent = 180, buildings
 
   // 구름 저항과 공기 저항, 브레이크가 함께 속도를 깎는다.
   const drag = state.speed * state.speed * 0.0022 + Math.abs(state.speed) * 0.12 + 0.8;
-  const push = gas * spec.accel - back * spec.reverse;
+  // Full throttle tapers toward the configured top speed. At that speed the
+  // drive force exactly balances drag; coasting still uses the same drag.
+  const speedRatio = clamp(Math.abs(state.speed) / spec.top, 0, 1);
+  const shifting = spec.powertrain !== 'electric' && finite(state.shiftRemaining) > 0;
+  // Rear-wheel braking reduces drive torque as well as speed. Otherwise full
+  // throttle cancels the handbrake and the tuned car accelerates through slides.
+  const handbrakeDrive = spec.driftTuned && hand ? .65 : 1;
+  const drive = shifting ? 0 : gas * handbrakeDrive * (drag + spec.accel * (1 - speedRatio * speedRatio));
+  const push = drive - back * spec.reverse;
   state.speed += (push - Math.sign(state.speed) * drag) * dt;
+  state.shiftRemaining = Math.max(0, finite(state.shiftRemaining) - dt);
+  const speedBeforeBrake = state.speed;
+  let brakeApplied = 0;
   if (braking) {
     const stop = spec.brake * (hand && !input.brake ? finite(spec.handbrakeBrake, 0.45) : 1) * dt;
     state.speed = Math.abs(state.speed) <= stop ? 0 : state.speed - Math.sign(state.speed) * stop;
+    brakeApplied = dt > 0 ? Math.min(Math.abs(speedBeforeBrake), stop) / dt : 0;
   }
   if (!gas && !back && !braking && Math.abs(state.speed) < 0.6) state.speed = 0;
   state.braking = braking;
   state.speed = clamp(state.speed, -spec.top * 0.35, spec.top);
-  updateTransmission(state, spec, gas, back);
+  updateTransmission(state, spec, gas, back, dt);
+  if (spec.powertrain === 'electric') {
+    const moving = Math.abs(previousSpeed) > .01;
+    const dragApplied = moving && dt > 0 ? Math.min(drag, Math.abs(previousSpeed) / dt) : 0;
+    const againstMotion = moving && Math.abs(push) > .01 && Math.sign(push) !== Math.sign(previousSpeed);
+    state.power = dt === 0 ? 0
+      : input.brake && moving ? -Math.min(1, (dragApplied + brakeApplied) / spec.brake)
+        : againstMotion ? -Math.min(1, (Math.abs(push) + dragApplied) / spec.brake)
+          : Math.abs(push) > .01 ? Math.min(1, Math.abs(push) / spec.accel)
+            : moving ? -Math.min(1, dragApplied / spec.brake) : 0;
+  } else state.power = 0;
 
   // 조향은 앞바퀴다. 멈춰 있으면 돌지 않고 빠를수록 조향각이 줄어든다.
   const wheel = clamp(input.steer, -1, 1);
@@ -220,9 +283,30 @@ export function stepCar(previous, input = {}, delta = 0, extent = 180, buildings
     && Math.abs(state.steer) > finite(spec.driftSteerMin, 0.25);
   state.lean = finite(state.lean) + (-state.steer * spec.lean * Math.min(1, Math.abs(state.speed) / 22) - finite(state.lean)) * (1 - Math.exp(-dt * 6));
 
+  // Only the tuned convertible carries momentum independently of body yaw.
+  // Handbrake breaks traction; throttle sustains an established slide, while
+  // countersteering/coasting restores it. Ordinary cars keep their old path.
+  let travel = state.heading;
+  if (spec.driftTuned) {
+    const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
+    const oldTravel = finite(previous.travelHeading, previous.heading);
+    const slip = wrap(oldTravel - state.heading);
+    const moving = state.speed > spec.driftMinSpeed;
+    const counter = slip * state.steer < -.015;
+    const initiating = moving && hand && Math.abs(state.steer) > spec.driftSteerMin;
+    const active = initiating || (previous.driftActive && moving && Math.abs(slip) > .06);
+    const sustaining = active && gas > .3 && Math.abs(slip) > .12 && !counter && !input.brake;
+    const loose = active && (hand || sustaining);
+    const recovery = loose ? .65 : counter ? 5 : 7;
+    travel = state.heading + clamp(slip * Math.exp(-dt * recovery), -.95, .95);
+    if (!active) travel = state.heading;
+    state.driftActive = !!active;
+    state.travelHeading = travel;
+    state.drift = moving && Math.abs(wrap(travel - state.heading)) > .12;
+  }
   const from = { x: state.x, y: finite(state.y,CAR_GROUND), z: state.z };
-  state.x -= Math.sin(state.heading) * state.speed * dt;
-  state.z -= Math.cos(state.heading) * state.speed * dt;
+  state.x -= Math.sin(travel) * state.speed * dt;
+  state.z -= Math.cos(travel) * state.speed * dt;
   const surface=roadSurface(createUrbanPlan(extent),state.x,state.z,from.y-CAR_GROUND+.33);
   state.y = CAR_GROUND+surface.top-.33;
   state.roadPitch=Math.atan(surface.slope*(-Math.sin(state.heading)*surface.dx-Math.cos(state.heading)*surface.dz));
@@ -236,7 +320,13 @@ export function stepCar(previous, input = {}, delta = 0, extent = 180, buildings
       state.x = slid.x; state.z = slid.z; state.speed *= SCRAPE;
       if (state.message === '막혔다') state.message = '';
     } else {
-      state.x = from.x; state.y = from.y; state.z = from.z; state.speed = 0; state.gear = 1; state.rpm = IDLE_RPM; state.message = '막혔다';
+      state.x = from.x; state.y = from.y; state.z = from.z; state.speed = 0;
+      state.gear = spec.powertrain === 'electric' ? (state.gear === 'R' ? 'R' : 'D') : 1;
+      state.rpm = spec.powertrain === 'electric' ? 0 : IDLE_RPM;
+      delete state.rpmShiftElapsed;
+      delete state.rpmShiftFrom;
+      state.power = 0;
+      state.message = '막혔다';
       return state;
     }
   } else if (state.message === '막혔다') state.message = '';
@@ -261,7 +351,11 @@ export function stepCar(previous, input = {}, delta = 0, extent = 180, buildings
   } else if (state.message === '충돌') state.message = '';
 
   if (surface.top <= .33 && inWater(state.x, state.z, extent)) {
-    return { ...state, phase: 'sinking', sinkElapsed: 0, throttle: 0, steer: 0, lean: 0, gear: 1, rpm: IDLE_RPM,
+    delete state.rpmShiftElapsed;
+    delete state.rpmShiftFrom;
+    return { ...state, phase: 'sinking', sinkElapsed: 0, throttle: 0, steer: 0, lean: 0,
+      gear: spec.powertrain === 'electric' ? (state.gear === 'R' ? 'R' : 'D') : 1,
+      rpm: spec.powertrain === 'electric' ? 0 : IDLE_RPM, power: 0,
       message: '물에 빠졌다 · 잠시 후 출발 지점으로 돌아갑니다' };
   }
   return state;
@@ -277,9 +371,14 @@ export function carStatus(state, kind = 'sedan') {
     heading: ((Math.round(-finite(state.heading) * 180 / Math.PI) % 360) + 360) % 360,
     throttle: finite(state.throttle),
     phase: state.phase === 'crashed' || state.phase === 'sinking' ? state.phase : 'drive',
-    gear: state.gear === 'R' ? 'R' : clamp(state.gear, 1, spec.gears.length),
-    rpm: clamp(state.rpm, IDLE_RPM, MAX_RPM),
-    redline: finite(state.rpm) >= REDLINE_RPM,
+    gear: spec.powertrain === 'electric' ? (state.gear === 'R' ? 'R' : 'D') : state.gear === 'R' ? 'R' : clamp(state.gear, 1, spec.gears.length),
+    rpm: spec.powertrain === 'electric' ? 0 : clamp(state.rpm, IDLE_RPM, spec.maxRpm || MAX_RPM),
+    redline: spec.powertrain !== 'electric' && finite(state.rpm) >= (spec.redlineRpm || REDLINE_RPM),
+    maxRpm: spec.maxRpm || MAX_RPM,
+    redlineRpm: spec.redlineRpm || REDLINE_RPM,
+    dialMaxRpm: spec.dialMaxRpm || MAX_RPM,
+    powertrain: spec.powertrain || 'combustion',
+    power: spec.powertrain === 'electric' ? clamp(state.power, -1, 1) : 0,
     drift: !!state.drift,
     braking: !!state.braking,
     top: spec.top,

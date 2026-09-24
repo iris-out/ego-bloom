@@ -1,3 +1,4 @@
+import { surfaceFixtures } from './model-surface-fixtures.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -26,12 +27,12 @@ async function mountFormula(props = {}) {
     return node;
   };
   const Formula = new Function(
-    'h', 'Fragment', 'useEffect', 'useRef', 'useFrame', 'Block', 'Wheel', 'StaticBatch', 'steerAngle', 'rollWheels',
+    'h', 'Fragment', 'useEffect', 'useRef', 'useFrame', 'Block', 'Wheel', 'StaticBatch', 'steerAngle', 'rollWheels', 'Shell', 'Airfoil', 'Duct',
     `${code}; return Formula;`,
   )(
     h, 'fragment', effect => effect(), initial => ({ current: initial ?? null }), callback => { frame = callback; },
     blockProps => h('block', blockProps), wheelProps => h('wheel', wheelProps),
-    ({ children }) => h('fragment', null, children), steerAngle, rollWheels,
+    ({ children }) => h('fragment', null, children), steerAngle, rollWheels, ...Object.values(surfaceFixtures(h)),
   );
   const root = Formula(props);
   return { root, advance: delta => frame({}, delta) };

@@ -1,0 +1,282 @@
+/* The playable HUD has its own night-slate palette so it remains legible over the city. */
+.wui-hybrid {
+  --bg: #0b1420;
+  --surface: #182432;
+  --surface-2: #253444;
+  --line: #637282;
+  --fg: #f7f8f7;
+  --fg-2: #d7dfe4;
+  --fg-3: #aebdc7;
+  --accent: #e6a955;
+  --accent-ink: #ffc97d;
+  --accent-soft: #4b392a;
+  --up: #83d6a7;
+  --warn: #ffc069;
+  --down: #ff7773;
+  --hud-panel: rgba(15, 25, 36, .86);
+  --hud-border: rgba(203, 220, 231, .32);
+  position: fixed;
+  inset: 0;
+  z-index: 16;
+  color: var(--fg);
+  font-family: var(--font-sans, Pretendard, sans-serif);
+  pointer-events: none;
+}
+.wui-hybrid[data-hud-contrast="high"] {
+  --fg-2: #fff;
+  --fg-3: #f4f8fa;
+  --hud-panel: #07111c;
+  --hud-border: #f6f8fa;
+  --line: #dce5eb;
+  --accent-ink: #ffdd91;
+}
+.wui-hybrid button:focus-visible, .wui-hybrid [role="slider"]:focus-visible {
+  outline: 3px solid var(--accent-ink);
+  outline-offset: 3px;
+}
+.wui-hybrid .wui-hud-top {
+  inset: 0 0 auto;
+  min-height: 62px;
+  padding: max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 15px max(16px, env(safe-area-inset-left));
+  gap: 12px;
+  background: linear-gradient(180deg, rgba(5, 14, 24, .8), rgba(5, 14, 24, 0));
+}
+.wui-hud-identity { display: flex; align-items: center; min-width: 0; gap: 9px; pointer-events: none !important; scale: var(--wui-hud-scale); transform-origin: left top; }
+.wui-hud-brand { color: var(--fg); font: 800 15px/1 var(--font-display, inherit); letter-spacing: .08em; white-space: nowrap; }
+.wui-hud-brand b { color: var(--accent-ink); }
+.wui-hud-ride { color: var(--fg); font-weight: 700; font-size: 13px; white-space: nowrap; padding-left: 10px; border-left: 2px solid var(--accent); }
+.wui-hud-pilot, .wui-hud-peers { font-size: 11px; color: var(--fg-3); white-space: nowrap; }
+.wui-hud-actions { display: flex; align-items: center; gap: 5px; pointer-events: auto; scale: var(--wui-hud-scale); transform-origin: right top; }
+.wui-hybrid .wui-hud-actions .wui-tab,
+.wui-hybrid .wui-hud-actions .world-help-tooltip summary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 35px; padding: 6px 9px;
+  border: 1px solid var(--hud-border); border-radius: 5px;
+  background: var(--hud-panel); color: var(--fg-2);
+  font: 600 11px/1 var(--font-sans, inherit); white-space: nowrap;
+  cursor: pointer;
+}
+.wui-hybrid .wui-hud-actions .wui-tab:hover { border-color: var(--accent-ink); color: var(--fg); }
+.wui-hybrid .wui-hud-actions .wui-tab[aria-pressed="true"] { border-color: var(--accent-ink); color: var(--accent-ink); }
+.wui-hybrid .wui-hud-actions .wui-hud-menu { border-color: var(--accent-ink); color: var(--fg); padding-inline: 12px; }
+.wui-hybrid .wui-hud-actions kbd { color: var(--fg-3); font-size: 9px; border-color: var(--hud-border); }
+.wui-hybrid .world-help-tooltip { position: relative; inset: auto; }
+.wui-hybrid .world-help-tooltip > div { top: 43px; bottom: auto; background: var(--hud-panel); border-color: var(--hud-border); color: var(--fg); }
+
+/* Combat health stays at the lower left in every armed mode. */
+.wui-hybrid .wui-hud-hull {
+  left: max(16px, env(safe-area-inset-left)); right: auto;
+  bottom: max(16px, env(safe-area-inset-bottom)); transform: none;
+  padding: 10px 12px; border: 1px solid var(--hud-border); border-left: 3px solid var(--accent);
+  border-radius: 5px; background: var(--hud-panel);
+  scale: var(--wui-hud-scale); transform-origin: left bottom;
+}
+.wui-hybrid .wui-hull { display: grid; grid-template-columns: 1fr; gap: 5px; align-items: end; border: 0; padding: 0; color: var(--fg-3); }
+.wui-hybrid .wui-hull-label { color: var(--fg-3); font-size: 10px; letter-spacing: .08em; }
+.wui-hybrid .wui-hull-value { display: flex; align-items: baseline; gap: 3px; }
+.wui-hybrid .wui-hull b { font-size: 30px; color: var(--fg); }
+.wui-hybrid .wui-hull-value small { color: var(--fg-3); font-size: 11px; }
+.wui-hybrid .wui-hull-track { width: 130px; height: 6px; border-radius: 0; background: rgba(220, 231, 238, .22); }
+.wui-hybrid .wui-hull-track i { background: var(--up); }
+.wui-hybrid .wui-hull[data-level="warn"] .wui-hull-track i { background: var(--warn); }
+.wui-hybrid .wui-hull[data-level="critical"] .wui-hull-track i { background: var(--down); }
+
+/* Third-person flight keeps the decisive values in one central strip. */
+.wui-hybrid .wui-flight-panel {
+  bottom: max(16px, env(safe-area-inset-bottom));
+  gap: 0; align-items: stretch; padding: 0;
+  border: 1px solid var(--hud-border); border-radius: 5px;
+  background: var(--hud-panel);
+  transform: translateX(-50%) scale(var(--wui-hud-scale)); transform-origin: center bottom;
+}
+.wui-hybrid .wui-flight-panel .wui-readout { min-width: 100px; padding: 10px 13px; justify-items: start; align-content: center; font-size: 9px; color: var(--fg-3); }
+.wui-hybrid .wui-flight-panel .wui-readout + .wui-readout { border-left: 1px solid var(--hud-border); }
+.wui-hybrid .wui-flight-panel .wui-readout b { font: 800 26px/1 var(--font-display, inherit); color: var(--fg); }
+.wui-hybrid .wui-readout-label-compact { display: none; }
+.wui-flight-throttle { display: flex; align-items: center; padding: 3px 9px; border-left: 1px solid var(--hud-border); }
+.wui-flight-throttle svg { width: 49px; height: 49px; }
+
+.wui-hybrid .wui-hud-map { left: max(16px, env(safe-area-inset-left)); bottom: 112px; border-color: var(--hud-border); background: var(--hud-panel); scale: var(--wui-hud-scale); transform-origin: left bottom; }
+.wui-hybrid[data-kind="car"] .wui-hud-map { bottom: max(16px, env(safe-area-inset-bottom)); }
+.wui-hybrid[data-kind="car"]:has(.wui-hud-hull) .wui-hud-map {
+  bottom: calc(max(16px, env(safe-area-inset-bottom)) + 90px * var(--wui-hud-scale));
+}
+.wui-hybrid[data-kind="flight"] .wui-hud-map { top: 78px; bottom: auto; transform-origin: left top; }
+.wui-hybrid .wui-hud-map-walk { left: max(16px, env(safe-area-inset-left)); right: auto; top: 78px; bottom: auto; transform-origin: left top; }
+.wui-hybrid .wui-hud-map .world-map { color: var(--fg-2); }
+.wui-hybrid .wui-hud-map .world-map-heading { color: var(--fg-2); }
+
+/* Drive focus: navigation left, clean speed/gear/RPM card right. */
+.wui-hybrid .wui-gauges {
+  left: auto; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom));
+  display: grid; gap: 8px; width: 236px; padding: 11px 14px;
+  border: 1px solid var(--hud-border); border-top: 2px solid var(--accent);
+  border-radius: 5px; background: var(--hud-panel);
+  scale: var(--wui-hud-scale); transform-origin: right bottom;
+  font-variant-numeric: tabular-nums;
+}
+.wui-drive-heading, .wui-drive-main, .wui-drive-rpm > div { display: flex; justify-content: space-between; align-items: center; }
+.wui-drive-heading { font-size: 9px; font-weight: 800; letter-spacing: .15em; color: var(--accent-ink); }
+.wui-drive-heading span:last-child { color: var(--fg-3); }
+.wui-drive-main { align-items: end; gap: 12px; }
+.wui-drive-speed { display: flex; align-items: baseline; gap: 6px; }
+.wui-drive-speed b { color: var(--fg); font: 800 51px/.9 var(--font-display, inherit); letter-spacing: -.05em; }
+.wui-drive-speed span, .wui-drive-gear span { font-size: 9px; font-weight: 700; color: var(--fg-3); }
+.wui-drive-gear { display: grid; justify-items: end; }
+.wui-drive-gear b { color: var(--accent-ink); font: 800 27px/1 var(--font-display, inherit); }
+.wui-drive-rpm { display: grid; gap: 5px; }
+.wui-drive-rpm > div { font-size: 10px; letter-spacing: .08em; color: var(--fg-3); }
+.wui-drive-rpm b { color: var(--fg-2); font-size: 13px; font-variant-numeric: tabular-nums; }
+.wui-drive-rpm small { color: var(--fg-3); font-weight: 500; }
+.wui-drive-rpm-track { position: relative; height: 5px; background: rgba(220, 231, 238, .21); }
+.wui-drive-rpm-track i { display: block; height: 100%; background: var(--accent); transition: width 120ms linear; }
+.wui-drive-rpm-track em { position: absolute; top: -2px; height: 9px; width: 2px; background: var(--down); }
+
+.wui-hybrid .wui-hud-arms { right: max(16px, env(safe-area-inset-right)); bottom: 164px; scale: var(--wui-hud-scale); transform-origin: right bottom; }
+.wui-hybrid[data-kind="flight"] .wui-hud-arms { right: 128px; bottom: max(16px, env(safe-area-inset-bottom)); }
+.wui-hybrid .wui-arm { min-height: 42px; border-color: var(--hud-border); border-radius: 5px; background: var(--hud-panel); color: var(--fg); }
+.wui-hybrid .wui-arm b { color: var(--accent-ink); font-size: 15px; }
+.wui-hybrid .wui-arm kbd { color: var(--fg-3); border-color: var(--hud-border); }
+.wui-hybrid .wui-stage { border-color: var(--hud-border); background: var(--hud-panel); color: var(--fg-2); }
+.wui-hybrid .wui-lever { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); border-color: var(--hud-border); background: var(--hud-panel); color: var(--fg-2); scale: var(--wui-hud-scale); transform-origin: right bottom; }
+.wui-hybrid .wui-lever-track { border-color: var(--hud-border); }
+.wui-hybrid .wui-lever-knob { background: var(--fg); }
+.wui-hybrid .wui-lever-keys + .wui-lever-keys { display: none; }
+.wui-hybrid .wui-hud-message { bottom: 96px; padding: 6px 12px; border-left: 3px solid var(--accent); background: var(--hud-panel); color: var(--fg); }
+.wui-hybrid[data-kind="car"] .wui-hud-message { bottom: 173px; }
+.wui-hybrid[data-view="first"] .wui-hud-hull { bottom: max(16px, env(safe-area-inset-bottom)); }
+.wui-hybrid[data-view="first"] .wui-hud-message { bottom: 16px; }
+.wui-hybrid[data-view="first"][data-kind="flight"] .wui-lever { display: none; }
+
+/* Keep both the scoreboard and the time-attack panel clear in the upper right. */
+.wui-hybrid .wui-fps-feed { left: 50%; right: auto; top: 72px; transform: translateX(-50%); border-color: var(--hud-border); background: var(--hud-panel); animation-name: wui-hybrid-feed; }
+@keyframes wui-hybrid-feed {
+  0% { opacity: 0; transform: translate(-50%, 12px); }
+  6%, 78% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, 0); }
+}
+.wui-hybrid .wui-supply { left: 16px; right: auto; top: 93px; border-color: var(--warn); background: var(--hud-panel); }
+
+/* Walking places survival and ammo at opposite corners and controls in the middle. */
+.wui-hybrid .wui-fps-bar {
+  bottom: max(16px, env(safe-area-inset-bottom)); width: min(1000px, calc((100vw - 32px) / var(--wui-hud-scale)));
+  grid-template-columns: minmax(160px, 1fr) auto minmax(160px, 1fr); gap: 16px;
+  transform: translateX(-50%) scale(var(--wui-hud-scale)); transform-origin: center bottom;
+}
+.wui-hybrid .wui-fps-health, .wui-hybrid .wui-fps-ammo {
+  min-height: 78px; padding: 9px 13px; border: 1px solid var(--hud-border); border-radius: 5px; background: var(--hud-panel);
+}
+.wui-hybrid .wui-fps-health { display: grid; grid-template-columns: 1fr; gap: 6px; border-left: 3px solid var(--up); }
+.wui-fps-health-value { display: flex; align-items: baseline; gap: 6px; }
+.wui-fps-health-value span { align-self: start; color: var(--fg-3); font-size: 9px; font-weight: 800; letter-spacing: .12em; }
+.wui-hybrid .wui-fps-health-value b { color: var(--fg); font-size: 38px; }
+.wui-fps-health-value small { color: var(--fg-3); font-size: 12px; }
+.wui-hybrid .wui-fps-pips i { height: 6px; border: 0; background: rgba(220, 231, 238, .2); border-radius: 0; }
+.wui-hybrid .wui-fps-ammo { align-content: center; border-right: 3px solid var(--accent); }
+.wui-hybrid .wui-fps-ammo-count b { color: var(--fg); font-size: 42px; }
+.wui-hybrid .wui-fps-ammo-count i { color: var(--fg-3); }
+.wui-hybrid .wui-fps-kit { gap: 7px; }
+.wui-hybrid .wui-fps-slot { min-height: 31px; border-color: var(--hud-border); background: var(--hud-panel); color: var(--fg-2); }
+.wui-hybrid .wui-fps-slot[aria-pressed="true"] { color: var(--fg); border-color: var(--accent-ink); box-shadow: inset 0 -2px var(--accent); }
+.wui-hybrid .wui-fps-ability { width: 75px; height: 39px; grid-template-columns: auto 1fr; justify-items: start; gap: 2px 4px; border-color: var(--hud-border); background: var(--hud-panel); color: var(--fg-2); }
+.wui-hybrid .wui-fps-ability svg { grid-row: 1 / 3; }
+.wui-hybrid .wui-fps-ability b { font-size: 10px; }
+.wui-hybrid .wui-fps-ability kbd { font-size: 8px; }
+.wui-hybrid .wui-fps-pad { border-color: var(--hud-border); background: var(--hud-panel); min-height: 48px; color: var(--fg); }
+.wui-hybrid .wui-fps-touch { position: absolute; bottom: calc(100% + 8px); right: 0; }
+
+@media (max-width: 950px) {
+  .wui-hud-pilot, .wui-hud-peers { display: none; }
+  .wui-hybrid .wui-hud-actions .wui-tab { font-size: 0; width: 35px; padding: 5px; }
+  .wui-hybrid .wui-hud-actions .wui-hud-menu { width: auto; font-size: 11px; padding-inline: 9px; }
+  .wui-hybrid .wui-hud-actions kbd { display: none; }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .wui-hybrid .wui-flight-panel { left: calc(50% - 45px); }
+}
+@media (max-width: 760px) {
+  .wui-hybrid .wui-hud-top { padding: max(8px, env(safe-area-inset-top)) max(9px, env(safe-area-inset-right)) 11px max(9px, env(safe-area-inset-left)); min-height: 52px; gap: 5px; }
+  .wui-hud-brand { font-size: 11px; }
+  .wui-hud-ride { font-size: 11px; padding-left: 6px; }
+  .wui-hud-actions { gap: 3px; }
+  .wui-hybrid .wui-hud-actions .wui-tab { width: 31px; min-height: 31px; }
+  .wui-hybrid .wui-hud-actions .wui-hud-menu { width: auto; }
+  .wui-hybrid .wui-hud-actions .world-help-tooltip summary { width: 31px; height: 31px; min-height: 31px; }
+  .wui-hybrid .wui-flight-panel { left: max(9px, env(safe-area-inset-left)); top: 70px; bottom: auto; width: calc(132px / var(--wui-hud-scale)); display: grid; transform: scale(var(--wui-hud-scale)); transform-origin: left top; }
+  .wui-hybrid .wui-flight-panel .wui-readout { min-width: 0; width: 100%; min-height: 35px; padding: 5px 8px; display: flex; flex-direction: row-reverse; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--hud-border); }
+  .wui-hybrid .wui-flight-panel .wui-readout b { font-size: 18px; }
+  .wui-hybrid .wui-flight-panel .wui-readout + .wui-readout { border-left: 0; }
+  .wui-hybrid .wui-flight-panel .wui-readout-label-full { display: none; }
+  .wui-hybrid .wui-flight-panel .wui-readout-label-compact { display: inline; }
+  .wui-hybrid .wui-flight-panel .wui-flight-throttle { display: none; }
+  .wui-hybrid .wui-hud-map { display: none; }
+  .wui-hybrid .wui-hud-hull { left: max(9px, env(safe-area-inset-left)); bottom: max(9px, env(safe-area-inset-bottom)); padding: 7px 9px; }
+  .wui-hybrid[data-kind="flight"] .wui-hud-hull { top: calc(70px + 145px * var(--wui-hud-scale)); bottom: auto; transform-origin: left top; }
+  .wui-hybrid[data-kind="flight"][data-view="first"] .wui-hud-hull { top: 70px; bottom: auto; }
+  .wui-hybrid .wui-hull b { font-size: 24px; }
+  .wui-hybrid .wui-hull-track { width: 95px; }
+  .wui-hybrid .wui-gauges { right: max(9px, env(safe-area-inset-right)); bottom: max(9px, env(safe-area-inset-bottom)); width: 167px; padding: 8px 10px; gap: 5px; }
+  .wui-drive-speed b { font-size: 35px; }
+  .wui-drive-gear b { font-size: 20px; }
+  .wui-hybrid .wui-hud-arms { right: max(9px, env(safe-area-inset-right)); bottom: 127px; }
+  .wui-hybrid[data-kind="flight"] .wui-hud-arms { right: calc(max(9px, env(safe-area-inset-right)) + 55px * var(--wui-hud-scale)); bottom: max(9px, env(safe-area-inset-bottom)); }
+  .wui-hybrid .wui-arm { min-height: 48px; padding: 6px 8px; font-size: 11px; }
+  .wui-hybrid .wui-arm kbd { display: none; }
+  .wui-hybrid .wui-lever { right: max(9px, env(safe-area-inset-right)); bottom: max(9px, env(safe-area-inset-bottom)); }
+  .wui-hybrid .wui-lever-keys { display: none; }
+  .wui-hybrid .wui-hud-message { bottom: 104px; max-width: 44vw; font-size: 10px; }
+  .wui-hybrid[data-kind="car"] .wui-hud-message { bottom: 135px; }
+  .wui-hybrid .wui-fps-feed { top: 54px; font-size: 10px; }
+  .wui-hybrid .wui-supply { top: 206px; left: 9px; max-width: 210px; font-size: 10px; }
+  .wui-hybrid .wui-fps-bar { width: calc((100vw - 18px) / var(--wui-hud-scale)); grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; bottom: max(9px, env(safe-area-inset-bottom)); }
+  .wui-hybrid .wui-fps-kit { grid-column: 1 / -1; grid-row: 1; gap: 4px; }
+  .wui-hybrid .wui-fps-health { grid-column: 1; grid-row: 2; }
+  .wui-hybrid .wui-fps-ammo { grid-column: 2; grid-row: 2; }
+  .wui-hybrid .wui-fps-health, .wui-hybrid .wui-fps-ammo { min-height: 60px; padding: 6px 8px; }
+  .wui-hybrid .wui-fps-health-value { display: grid; grid-template-columns: auto 1fr; align-items: baseline; column-gap: 4px; }
+  .wui-hybrid .wui-fps-health-value span { grid-column: 1 / -1; }
+  .wui-hybrid .wui-fps-health-value b { grid-column: 1; font-size: 27px; }
+  .wui-hybrid .wui-fps-health-value small { grid-column: 2; white-space: nowrap; }
+  .wui-hybrid .wui-fps-ammo-count b { font-size: 29px; }
+  .wui-hybrid .wui-fps-ability { width: 68px; height: 32px; }
+  .wui-hybrid .wui-fps-slot { min-height: 28px; padding: 3px 7px; }
+  .wui-hybrid .wui-fps-touch { bottom: calc(100% + 8px); right: 0; }
+}
+@media (max-width: 390px) {
+  .wui-hud-brand { display: none; }
+  .wui-hud-ride { border-left: 0; padding-left: 0; }
+  .wui-hybrid .wui-hud-actions .wui-tab { width: 29px; }
+  .wui-hybrid .wui-hud-actions .wui-hud-menu { width: auto; }
+  .wui-hybrid .wui-hud-actions .world-help-tooltip summary { width: 29px; }
+}
+@media (max-width: 360px) {
+  .wui-hybrid .wui-flight-panel { width: calc(112px / var(--wui-hud-scale)); }
+  .wui-hybrid .wui-flight-panel .wui-readout { padding-inline: 5px; }
+  .wui-hybrid .wui-flight-panel .wui-readout b { font-size: 16px; }
+}
+@media (max-height: 520px) and (max-width: 900px) {
+  .wui-hybrid .wui-flight-panel { top: 54px; scale: .8; }
+  .wui-hybrid[data-kind="flight"] .wui-hud-hull { top: calc(54px + 116px * var(--wui-hud-scale)); }
+  .wui-hybrid .wui-fps-abilities { display: none; }
+  .wui-hybrid .wui-fps-touch { bottom: calc(100% + 6px); }
+  .wui-hybrid .wui-lever-track { height: 74px; }
+}
+@media (max-height: 620px) and (max-width: 760px) {
+  .wui-hybrid[data-kind="flight"] .wui-hud-hull { padding: 6px 8px; }
+  .wui-hybrid[data-kind="flight"] .wui-hull { gap: 3px; }
+  .wui-hybrid[data-kind="flight"] .wui-hull-label { display: none; }
+  .wui-hybrid[data-kind="flight"] .wui-hull b { font-size: 22px; }
+  .wui-hybrid[data-kind="flight"] .wui-hull-track { width: 80px; height: 4px; }
+}
+@media (hover: none), (pointer: coarse) {
+  .wui-hybrid[data-view="first"][data-kind="flight"] .wui-lever { display: grid; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wui-hybrid .wui-fps-feed, .wui-hybrid .wui-boost-streaks { animation: none; }
+  .wui-hybrid .wui-drive-rpm-track i, .wui-hybrid .wui-hull-track i, .wui-hybrid .wui-fps-pips em { transition: none; }
+}
+.wui-hybrid[data-hud-motion="reduce"] .wui-fps-feed,
+.wui-hybrid[data-hud-motion="reduce"] .wui-boost-streaks { animation: none; }
+.wui-hybrid[data-hud-motion="reduce"] .wui-drive-rpm-track i,
+.wui-hybrid[data-hud-motion="reduce"] .wui-hull-track i,
+.wui-hybrid[data-hud-motion="reduce"] .wui-fps-pips em { transition: none; }

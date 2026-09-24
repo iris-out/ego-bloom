@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { transformWithOxc } from 'vite';
 import { Object3D, Vector3 } from 'three';
+import { tireGeometry } from '../../src/world/models/vehicleSurfaces.js';
+import { surfaceFixtures } from './model-surface-fixtures.mjs';
 import { steerAngle } from '../../src/world/models/carGeometry.js';
 
 // Evaluate the actual JSX hierarchy and frame callback without a WebGL renderer.
@@ -26,17 +28,18 @@ async function mountMotorcycle(props) {
     return node;
   };
   // 이 하네스는 import 를 지우고 필요한 것만 넣어 준다. 모델이 쓰는 값이 늘면 여기도 같이 넣는다.
-  const Model = new Function('h', 'Fragment', 'useRef', 'useFrame', 'Block', 'StaticBatch', 'steerAngle', `${code}; return Motorcycle;`)(
+  const Model = new Function('h', 'Fragment', 'useRef', 'useFrame', 'Block', 'StaticBatch', 'steerAngle', 'Shell', 'Fender', 'RoadWheel', `${code}; return Motorcycle;`)(
     h, 'fragment', () => ({ current: null }), callback => { frame = callback; },
     props => h('block', props),
     // StaticBatch merges meshes for draw calls only; this harness never renders, so it's a passthrough.
     ({ children }) => h('fragment', null, children),
-    steerAngle,
+    steerAngle, surfaceFixtures(h).Shell, props => h('fender',props),
+    ({radius,width}) => h('group',{rotation:[0,0,Math.PI/2]},h('mesh',{tire:true,geometry:tireGeometry(radius,width)})),
   );
   const root = Model(props);
   const tires = [], calipers = [];
   root.traverse(node => {
-    if (node.children.some(child => child.userData.type === 'cylinderGeometry' && child.userData.args[0] === 0.32)) tires.push(node);
+    if (node.userData.tire) tires.push(node);
     if (node.userData.type === 'block' && node.scale.equals(new Vector3(0.06, 0.1, 0.05))) calipers.push(node);
   });
   return { root, tires, calipers, advance: dt => frame({}, dt) };

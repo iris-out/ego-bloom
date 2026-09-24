@@ -19,7 +19,7 @@ const PLANE = new THREE.PlaneGeometry(1, 1);
 /** 기본 크기는 combiner 유리(aircraftDetail 의 HUD_COMBINER.fighter.glass) 와 같다.
  * 사다리 평면이 유리보다 크면 상이 유리 밖 허공에 뜬다. 호출자는 유리 크기를 그대로 넘긴다.
  * 기본 위치도 유리 바로 앞이다. combiner group 안에 두므로 유리 면에서 6mm 띄운다. */
-export default function FighterHud({ poseRef, statusRef, position = [0, 0, 0.006], width = 0.30, height = 0.24, visible = true, weapons = 'stores' }) {
+export default function FighterHud({ poseRef, statusRef, position = [0, 0, 0.006], width = 0.30, height = 0.24, visible = true, weapons = 'stores', plane = 'fighter' }) {
   const last = useRef(0);
   const drawn = useRef('');
 
@@ -46,11 +46,11 @@ export default function FighterHud({ poseRef, statusRef, position = [0, 0, 0.006
     const status = statusRef?.current || {};
     // 비행 중에는 자세가 늘 바뀌어 거의 매번 다시 그리지만, 활주로에 서 있을 때는
     // 값이 그대로라 캔버스와 텍스처 업로드를 건너뛴다.
-    const signature = `${weapons}|${pose.pitch}|${pose.roll}|${pose.speed}|${pose.y}|${pose.heading}|${pose.climb}|${pose.throttle}|`
+    const signature = `${weapons}|${plane}|${pose.pitch}|${pose.roll}|${pose.speed}|${pose.y}|${pose.heading}|${pose.climb}|${pose.throttle}|`
       + `${status.cannonAmmo}|${status.missileAmmo}|${status.range}|${status.hull}`;
     if (signature === drawn.current) return;
     drawn.current = signature;
-    drawFlightHud(screen.context, pose, status, weapons);
+    drawFlightHud(screen.context, pose, status, weapons, plane);
     screen.texture.needsUpdate = true;
   });
   /* eslint-enable react-hooks/immutability */

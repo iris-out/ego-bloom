@@ -27,6 +27,8 @@ export function cannonRange(extent, plane = null) {
  * interval 은 한 발 사이의 초다. 전 기종을 예전 값의 0.8 배로 줄여 연사를 20% 올렸다. */
 const GUNS = Object.freeze({
   fighter: CANNON,
+  // Same MG round as the fighter. Each helicopter volley consumes two rounds.
+  helicopter: CANNON,
   prop: { interval: 1 / 24, speed: 240, life: 1.1, ammo: 900, blast: 1.2, blastLife: 0.26 },
   // 요격기는 근거리용 30mm 2연장이다. 기준 300m/s 탄보다 20% 느리고, 기존 설정 대비 연사는 20% 더 빠르며 낙차가 크다.
   interceptor: { interval: 1 / (8.4 * 1.1 * 1.2), speed: 240, gravity: 12.25, range: 300, life: 1.3, ammo: 360, blast: 2.2, blastLife: 0.34 },
@@ -196,12 +198,14 @@ export function stepWeapons(previous, { dt = 0, pose, fire = {}, mounts = {}, ob
     }
   } else if (airborne && fire.cannon && mounts.cannon?.length && state.cannonTimer <= 0 && state.cannonAmmo > 0) {
     const ports = mounts.cannon;
-    const volley = plane === 'interceptor' ? ports : [ports[(finite(state.muzzle) + 1) % ports.length]];
+    const volley = plane === 'helicopter' ? ports.slice(0, Math.min(ports.length, state.cannonAmmo))
+      : plane === 'interceptor' ? ports : [ports[(finite(state.muzzle) + 1) % ports.length]];
     state.muzzle = (finite(state.muzzle) + 1) % ports.length;
     for (const port of volley) active.push(spawn(state, 'cannon', pose, port, gun.speed, gun.life, mounts.converge));
     state.cannonTimer += gun.interval;
-    state.cannonAmmo -= 1;
-    state.shots = (state.shots || 0) + 1;
+    const spent = plane === 'helicopter' ? volley.length : 1;
+    state.cannonAmmo -= spent;
+    state.shots = (state.shots || 0) + spent;
   }
   const flying = active.filter((projectile) => projectile.kind === 'missile').length;
   if (airborne && fire.missile && mounts.missile?.length && state.missileTimer <= 0 && state.missileAmmo > 0 && flying < MISSILE.flying) {

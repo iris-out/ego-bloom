@@ -1,3 +1,4 @@
+import { emptyScore, validScore } from './worldScores.js';
 import { displayName, validPlane, validVehicle } from './identity.js';
 
 export const WORLD_ROOM = 'ego-bloom-world-v1';
@@ -33,6 +34,7 @@ export function validPose(value) {
     hull: Number.isFinite(value.hull) ? Math.max(0, Math.min(1, value.hull)) : 1,
     shots: whole(value.shots), rockets: whole(value.rockets),
     turret: angle(value.turret), barrel: angle(value.barrel),
+    ...(Number.isSafeInteger(value.life) && value.life > 0 ? { life: value.life } : {}),
   };
 }
 
@@ -49,6 +51,7 @@ function snapshotChanged(previous, next) {
   if (!previous) return true;
   if (previous.status !== next.status || previous.count !== next.count) return true;
   if (previous.crowded !== next.crowded) return true;
+  if (JSON.stringify(previous.scores) !== JSON.stringify(next.scores)) return true;
   if (previous.roster.length !== next.roster.length) return true;
   return previous.roster.some((entry, index) => {
     const other = next.roster[index];
@@ -95,15 +98,30 @@ export function createWorldRoom(client, { id, onChange, onPeers, now = Date.now,
   const since = now();
   let profile = identityProfile(identity);
   const peers = new Map(), sequences = new Map(), roster = new Map();
+  const scores = new Map(), deaths = new Map(), lives = new Map(), aiEvents = new Set();
+  let ownScore = emptyScore();
+  const scoreMeta = () => ownScore.seq ? { score: ownScore } : {};
   const readProfile = key => roster.get(key) || profileOf(key, null);
   const notify = () => {
     if (closed) return;
-    const snapshot = { status, count: connected ? members.size : null, roster: connected ? [...roster.values()] : [], crowded };
+    const snapshot = { status, count: connected ? members.size : null, roster: connected ? [...roster.values()] : [], crowded, scores: connected ? Object.fromEntries(scores) : {} };
     if (snapshotChanged(lastSnapshot, snapshot)) { lastSnapshot = snapshot; onChange(snapshot); }
   };
   const notifyPeers = () => {
     if (closed) return;
     onPeers?.([...peers.values()].map(peer => ({ ...peer, ...readProfile(peer.id) })));
+  };
+  const send = (event, payload) => { if (connected && !closed) void Promise.resolve(channel.send({ type: 'broadcast', event, payload })).catch(() => {}); };
+  const publishPose = () => {
+    dirty = false;
+    send('flight', { id, seq: ++sequence, pose });
+  };
+  const award = kind => {
+    if (!connected || closed || !members.has(id)) return;
+    ownScore = { ...ownScore, seq: ownScore.seq + 1, [kind]: ownScore[kind] + 1 };
+    scores.set(id, ownScore); notify();
+    send('score', { id, score: ownScore });
+    void Promise.resolve(channel.track({ session: id, since, ...profile, ...scoreMeta() })).catch(() => {});
   };
   const channel = client.channel(topic, { config: { presence: { key: id }, broadcast: { self: false } } });
   const syncRoster = () => {
@@ -111,7 +129,16 @@ export function createWorldRoom(client, { id, onChange, onPeers, now = Date.now,
     members = new Set(Object.keys(state));
     crowded = overTabLimit(state, id);
     roster.clear();
-    for (const [key, metas] of Object.entries(state)) roster.set(key, profileOf(key, metas?.[metas.length - 1]));
+    for (const [key, metas] of Object.entries(state)) {
+      const meta = metas?.[metas.length - 1];
+      roster.set(key, profileOf(key, meta));
+      const score = validScore(meta?.score);
+      const old = scores.get(key) || emptyScore();
+      if (score && score.seq > old.seq && score.players >= old.players && score.ai >= old.ai) scores.set(key, score);
+    }
+    scores.set(id, ownScore);
+    for (const key of scores.keys()) if (!members.has(key)) scores.delete(key);
+    for (const key of lives.keys()) if (!members.has(key)) { lives.delete(key); deaths.delete(key); }
   };
   channel.on('presence', { event: 'sync' }, () => {
     if (closed || !connected) return;
@@ -120,11 +147,24 @@ export function createWorldRoom(client, { id, onChange, onPeers, now = Date.now,
     for (const key of sequences.keys()) if (!members.has(key)) { peers.delete(key); sequences.delete(key); peersChanged = true; }
     notify();
     if (peersChanged) notifyPeers();
+  }).on('broadcast', { event: 'score' }, ({ payload }) => {
+    if (closed || !connected || !payload || payload.id === id || !members.has(payload.id)) return;
+    const score = validScore(payload.score), old = scores.get(payload.id) || emptyScore();
+    if (!score || score.seq <= old.seq || score.players < old.players || score.ai < old.ai) return;
+    scores.set(payload.id, score); notify();
+  }).on('broadcast', { event: 'fatal' }, ({ payload }) => {
+    if (closed || !connected || !payload || !members.has(payload.id) || !members.has(payload.killer)) return;
+    if (payload.id === payload.killer || payload.killer !== id || !Number.isSafeInteger(payload.life)) return;
+    if (payload.life !== lives.get(payload.id) || payload.life <= (deaths.get(payload.id) || 0)) return;
+    deaths.set(payload.id, payload.life); award('players');
   }).on('broadcast', { event: 'flight' }, ({ payload }) => {
     if (closed || !connected || !payload || payload.id === id || !members.has(payload.id)) return;
     if (!Number.isSafeInteger(payload.seq) || payload.seq <= (sequences.get(payload.id) ?? -1)) return;
     const remote = validPose(payload.pose);
     if (payload.pose !== null && !remote) return;
+    if (remote?.life && remote.life < (lives.get(payload.id) || 0)) return;
+    if (remote?.life) lives.set(payload.id, remote.life);
+    if (!remote) lives.delete(payload.id);
     sequences.set(payload.id, payload.seq);
     if (!remote || remote.phase === 'crashed') peers.delete(payload.id);
     else peers.set(payload.id, { id: payload.id, pose: remote, receivedAt: now() });
@@ -134,13 +174,13 @@ export function createWorldRoom(client, { id, onChange, onPeers, now = Date.now,
     if (result === 'SUBSCRIBED') {
       connected = true; status = 'connecting';
       try {
-        const tracked = await channel.track({ session: id, since, ...profile });
+        const tracked = await channel.track({ session: id, since, ...profile, ...scoreMeta() });
         if (closed || !connected) return;
         if (tracked !== 'ok') { connected = false; status = 'offline'; }
         else { status = 'connected'; dirty = true; syncRoster(); }
       } catch { connected = false; status = 'offline'; }
     } else {
-      connected = false; status = 'offline'; peers.clear(); members.clear(); sequences.clear(); roster.clear();
+      connected = false; status = 'offline'; peers.clear(); members.clear(); sequences.clear(); roster.clear(); scores.clear(); lives.clear();
       notify(); notifyPeers();
       return;
     }
@@ -149,10 +189,23 @@ export function createWorldRoom(client, { id, onChange, onPeers, now = Date.now,
   notify(); notifyPeers();
   return {
     setPose(value) { pose = validPose(value); dirty = true; },
+    confirmFatal({ killer, life } = {}) {
+      if (!connected || closed || !members.has(killer) || killer === id || pose?.life !== life || deaths.get(id) === life) return;
+      // The frame may have advanced life since the last 100ms telemetry tick.
+      // Publish that validated life first on the same ordered channel, so the
+      // receiver can validate this confirmation before marking it consumed.
+      deaths.set(id, life);
+      publishPose();
+      send('fatal', { id, killer, life });
+    },
+    confirmAI(event) {
+      if (!connected || closed || typeof event !== 'string' || event.length > 160 || aiEvents.has(event)) return;
+      aiEvents.add(event); award('ai');
+    },
     setIdentity(value) {
       profile = identityProfile(value);
       if (closed || !connected) return;
-      void Promise.resolve(channel.track({ session: id, since, ...profile })).catch(() => {});
+      void Promise.resolve(channel.track({ session: id, since, ...profile, ...scoreMeta() })).catch(() => {});
     },
     tick() {
       if (closed) return;
@@ -160,9 +213,8 @@ export function createWorldRoom(client, { id, onChange, onPeers, now = Date.now,
       for (const [key, peer] of peers) if (now() - peer.receivedAt > 5000) { peers.delete(key); changed = true; }
       if (changed) notifyPeers();
       if (!connected || (!pose && !dirty)) return;
-      dirty = false;
       // Broadcast only after subscribing: no HTTP fallback while offline.
-      void channel.send({ type: 'broadcast', event: 'flight', payload: { id, seq: ++sequence, pose } }).catch(() => {});
+      publishPose();
     },
     close() { closed = true; connected = false; peers.clear(); roster.clear(); void client.removeChannel(channel).catch(() => {}); },
   };

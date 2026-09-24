@@ -1,10 +1,14 @@
+import { Vector3 } from 'three';
+import { actorLabelVisible } from './actorLabels.js';
+import { hitsAnyBuilding } from './solidIndex.js';
+import './ui/worldScores.css';
 import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import PlaneModel from './models/PlaneModel';
 import VehicleModel from './models/VehicleModel';
-import { isArmed } from './health.js';
-import { airHealthBarScale, showAirHealthBar } from './airTraffic.js';
+import { isArmed, showDamagedHealthBar } from './health.js';
+import { airHealthBarScale } from './airTraffic.js';
 
 /** 같은 도시에 있는 다른 세션의 탈것이다. 항공기, 차량, 도보를 한 곳에서 그린다.
  * 모델 원본은 PlaneModel 과 VehicleModel 이고 여기서 복제하지 않는다.
@@ -38,9 +42,9 @@ function Body({ kind, rideKey, phase, turret, barrel }) {
 
 /** kind/key/phase/name 은 slot 스냅샷 props 로 받는다(0.2초 주기 갱신).
  * 위치, 자세, 포탑 각도, 체력만 peersRef 에서 매 프레임 읽는다. */
-function RemoteActor({ id, kind, rideKey, phase, name, peersRef }) {
+function RemoteActor({ id, kind, rideKey, phase, name, peersRef, buildings }) {
   const group = useRef();
-  const hull = useRef(null);
+  const hull = useRef(null), plate = useRef(null), projection = useRef(new Vector3());
   const initialized = useRef(false);
   // 포탑 각도는 모델이 props 로 받으므로 매 프레임 state 로 올리지 않고 ref 를 공유한다.
   const turret = useRef(0), barrel = useRef(0);
@@ -61,29 +65,30 @@ function RemoteActor({ id, kind, rideKey, phase, name, peersRef }) {
     turret.current = pose.turret; barrel.current = pose.barrel;
     // 체력 게이지는 DOM 을 직접 고친다. state 로 올리면 피격마다 상대 모델이 다시 렌더된다.
     if (hull.current) {
-      const left = Math.max(0, Math.min(1, pose.hull));
+      const left = Number.isFinite(pose.hull) ? Math.max(0, Math.min(1, pose.hull)) : 1;
+      hull.current.parentElement.style.display = showDamagedHealthBar(pose.hull) ? '' : 'none';
       hull.current.style.width = `${Math.round(left * 100)}%`;
       hull.current.dataset.level = left <= 0.3 ? 'critical' : left <= 0.6 ? 'warn' : 'ok';
-      if (kind === 'flight') {
-        const bar = hull.current.parentElement;
-        const range = camera.position.distanceTo(object.position);
-        bar.style.display = showAirHealthBar(1 - left, false, range) ? 'block' : 'none';
-        bar.style.transform = `scale(${airHealthBarScale(range)})`;
-      }
+      if (kind === 'flight') hull.current.parentElement.style.transform = `scale(${airHealthBarScale(camera.position.distanceTo(object.position))})`;
     }
+    const anchor = projection.current.copy(object.position); anchor.y += rideKey === 'airship' ? 18 : kind === 'flight' ? 6 : 2.4;
+    const distance = camera.position.distanceTo(anchor);
+    const blocked = hitsAnyBuilding(camera.position, anchor, buildings);
+    anchor.project(camera);
+    if (plate.current) plate.current.style.display = actorLabelVisible(anchor, distance) && !blocked ? '' : 'none';
     initialized.current = true;
   });
-  const label = kind === 'flight' ? 6 : 2.4;
+  const label = rideKey === 'airship' ? 18 : kind === 'flight' ? 6 : 2.4;
   return <group ref={group} rotation-order="YXZ">
     <Body kind={kind} rideKey={rideKey} phase={phase} turret={turret} barrel={barrel} />
-    <Html position={[0, label, 0]} center zIndexRange={[14, 1]} distanceFactor={kind === 'flight' ? undefined : 14} style={{ pointerEvents: 'none' }}>
-      <span className="world-pilot-label" data-peer-id={id}>{name}</span>
+    <Html position={[0, label, 0]} center zIndexRange={[14, 1]} style={{ pointerEvents: 'none' }}>
+      <div ref={plate}><span className="world-pilot-label actor-player-label" data-peer-id={id}>● PLAYER · {name}</span>
       {armed && <span className={`world-peer-hull${kind === 'flight' ? ' world-peer-hull--air' : ''}`} aria-hidden="true"><i ref={hull} /></span>}
-    </Html>
+    </div></Html>
   </group>;
 }
 
-export default function RemoteActors({ peersRef }) {
+export default function RemoteActors({ peersRef, buildings = [] }) {
   const [slots, setSlots] = useState([]);
   // 렌더 중 ref 를 읽지 않도록, 첫 프레임에 곧바로 갱신되게 큰 값으로 시작한다.
   const elapsed = useRef(SLOT_REFRESH_INTERVAL);
@@ -97,5 +102,5 @@ export default function RemoteActors({ peersRef }) {
   });
   if (!peersRef) return null;
   return slots.map(slot => <RemoteActor key={slot.id} id={slot.id} kind={slot.kind} rideKey={slot.key}
-    phase={slot.phase} name={slot.name} peersRef={peersRef} />);
+    phase={slot.phase} name={slot.name} peersRef={peersRef} buildings={buildings} />);
 }

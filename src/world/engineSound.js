@@ -18,6 +18,8 @@ const clamp01 = (value) => Math.max(0, Math.min(1, finite(value)));
  * body 는 낮은 울림, whine 은 높은 쇳소리, air 는 공기가 지나는 잡음의 크기다.
  * gain 은 전체 크기이고 다른 효과음(총성 0.16~0.32) 보다 낮게 둬야 발사가 묻히지 않는다. */
 export const ENGINES = Object.freeze({
+  airship: { kind: 'prop', harmonics: 5, sub: .8, airHz: 420, body: 32, whine: 0, air: .08, gain: .035, idle: .1 },
+  drift: { kind: 'piston', harmonics: 8, sub: .65, airHz: 880, bodyIdle: 38, bodyRed: 280, whine: 0, air: .12, gain: .08, idle: .18 },
   // 터빈이다. 실제 기체 안에서 들리는 소리는 높은 휘파람이 아니라 낮은 울림과 공기 소리다.
   // 휘파람은 있다는 것만 알 정도로 섞는다(mix). 크기는 지상 차량보다도 낮게 둔다.
   //
@@ -29,6 +31,8 @@ export const ENGINES = Object.freeze({
   fighter: { kind: 'turbine', harmonics: 7, sub: 0.8, airHz: 1000, body: 38, whine: 360, mix: 0.04, air: 0.24, gain: 0.055, idle: 0.14 },
   // 요격기는 그중 가장 날카롭다. 부스트에서 휘파람이 한 옥타브 더 올라간다.
   interceptor: { kind: 'turbine', harmonics: 8, sub: 0.75, airHz: 1100, body: 40, whine: 400, mix: 0.05, air: 0.26, gain: 0.06, idle: 0.14 },
+  // 샷거너는 요격기 동체와 추진계를 공유한다.
+  shotgun: { kind: 'turbine', harmonics: 8, sub: 0.75, airHz: 1100, body: 40, whine: 400, mix: 0.05, air: 0.26, gain: 0.06, idle: 0.14 },
   // 폭격기는 엔진 넷이라 낮고 두껍다. 휘파람이 거의 없고 공기 소리가 가장 크다.
   bomber: { kind: 'turbine', harmonics: 6, sub: 0.95, airHz: 700, body: 24, whine: 170, mix: 0.025, air: 0.3, gain: 0.055, idle: 0.16 },
   // 프로펠러기는 날개 통과음이 전부다. 휘파람 대신 배기의 탁한 울림을 둔다.
@@ -40,6 +44,9 @@ export const ENGINES = Object.freeze({
   // SUV 는 6기통, 오픈카는 8기통이라 세단보다 굵고 부드럽다. 트럭은 디젤 6기통이다.
   suv: { kind: 'piston', harmonics: 6, sub: 0.7, airHz: 620, bodyIdle: 32, bodyRed: 200, whine: 0, air: 0.06, gain: 0.078, idle: 0.17 },
   convertible: { kind: 'piston', harmonics: 7, sub: 0.65, airHz: 720, bodyIdle: 36, bodyRed: 240, whine: 0, air: 0.07, gain: 0.08, idle: 0.18 },
+  coupe: { kind: 'piston', harmonics: 7, sub: .68, airHz: 680, bodyIdle: 34, bodyRed: 218, whine: 0, air: .06, gain: .078, idle: .18 },
+  supercar: { kind: 'piston', harmonics: 8, sub: .52, airHz: 950, bodyIdle: 46, bodyRed: 310, whine: 0, air: .12, gain: .082, idle: .17 },
+  electric: { kind: 'electric', harmonics: 5, sub: .12, airHz: 1200, body: 40, whine: 100, air: .035, gain: .035, idle: 0 },
   formula: { kind: 'piston', harmonics: 9, sub: 0.42, airHz: 1180, bodyIdle: 48, bodyRed: 360, whine: 0, air: 0.16, gain: 0.078, idle: 0.16 },
   truck: { kind: 'piston', harmonics: 5, sub: 0.95, airHz: 420, bodyIdle: 20, bodyRed: 105, whine: 0, air: 0.11, gain: 0.082, idle: 0.24 },
   // 오토바이는 2기통이라 간격이 성기고 소리가 거칠다.
@@ -71,6 +78,19 @@ export function engineTargets(key, input = {}) {
   // 정지 상태에서도 공회전은 돈다. 부하는 공회전 바닥 위에서 스로틀을 따라간다.
   const load = spec.idle + (1 - spec.idle) * throttle;
   const boost = input.boost ? 1 : 0;
+
+  if (spec.kind === 'electric') {
+    const speed = Math.max(0, finite(input.speed));
+    const motion = clamp01(speed / 28);
+    const power = clamp01(Math.abs(finite(input.power, throttle)));
+    const body = spec.body + motion * 70 + power * 24;
+    return {
+      body, sub: spec.sub * motion, whine: spec.whine + motion * 260 + power * 90,
+      air: spec.air * motion, airHz: spec.airHz * (.8 + motion * .4),
+      gain: spec.gain * motion * (.35 + power * .65), cut: body * spec.harmonics,
+      beat: 0,
+    };
+  }
 
   if (spec.kind === 'piston') {
     // 회전계가 이미 rpm 을 만든다. 소리도 같은 값을 읽어야 계기와 귀가 어긋나지 않는다.
@@ -190,7 +210,7 @@ export function createEngineVoice(key) {
   // 몸통이다. 피스톤과 프로펠러는 톱니가 폭발과 날개 통과를 잘 흉내 낸다.
   // 터빈은 낮은 울림이라 삼각파를 쓴다. 로터는 몸통을 소리로 내지 않고 잡음을 때리는 데만 쓴다.
   const body = ctx.createOscillator();
-  body.type = spec.kind === 'turbine' ? 'triangle' : 'sawtooth';
+  body.type = spec.kind === 'turbine' || spec.kind === 'electric' ? 'sine' : 'sawtooth';
   const bodyCut = ctx.createBiquadFilter();
   bodyCut.type = 'lowpass';
   bodyCut.Q.value = 0.9;
@@ -278,7 +298,7 @@ export function createEngineVoice(key) {
       if (target.beat > 0) apply('beatFreq', beat.frequency, Math.max(3, target.body));
       // 전체 크기도 다른 값과 같은 속도로 옮긴다. FADE 는 시동과 정지에만 쓴다.
       // 여기서 FADE 를 쓰면 0.1초 남짓한 변속 끊김이 뭉개져 들리지 않는다.
-      apply('masterGain', master.gain, Math.max(0.002, target.gain));
+      apply('masterGain', master.gain, Math.max(spec.kind === 'electric' ? 1e-4 : 0.002, target.gain));
     },
     stop() {
       if (stopped) return;

@@ -1,0 +1,89 @@
+/* Shared exploration controls. Scoped to the world shell; city geometry keeps its own palette. */
+.world-page .wui-tabs {
+  color: #edf2f5;
+  padding: 12px max(16px, env(safe-area-inset-right)) 35px max(16px, env(safe-area-inset-left));
+  gap: 7px;
+  background: linear-gradient(180deg, rgba(12, 20, 29, .78), rgba(12, 20, 29, .3) 65%, transparent);
+}
+.world-page .wui-tabs .wui-tab {
+  min-height: 39px;
+  padding: 8px 12px;
+  border: 1px solid rgba(166, 186, 201, .28);
+  border-radius: 5px;
+  background: rgba(22, 34, 46, .78);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .06), 0 3px 13px rgba(0, 0, 0, .18);
+  color: #edf2f5;
+  backdrop-filter: blur(8px);
+}
+.world-page .wui-tabs .wui-tab:hover {
+  border-color: rgba(231, 175, 98, .7);
+  background: rgba(38, 50, 61, .93);
+  color: #fff;
+}
+.world-page .wui-tabs .wui-tab[aria-selected="true"] {
+  border-color: #e6ab62;
+  background: rgba(89, 67, 46, .89);
+  box-shadow: inset 0 -2px #e8b574, 0 3px 13px rgba(0, 0, 0, .18);
+  color: #ffe4be;
+}
+.world-page .wui-tabs-end {
+  min-height: 39px;
+  padding: 8px 12px;
+  border: 1px solid rgba(166, 186, 201, .28);
+  border-radius: 5px;
+  background: rgba(22, 34, 46, .78);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .06), 0 3px 13px rgba(0, 0, 0, .18);
+  color: #e5edf2;
+  backdrop-filter: blur(8px);
+}
+.world-page .wui-tabs-end i { background: #75d0a0; }
+.world-page .wui-tabs-end[data-connection="connecting"] i,
+.world-page .wui-tabs-end[data-connection="reconnecting"] i { background: #e6ab62; }
+.world-page .wui-tabs-end[data-connection="unavailable"] i { background: #8897a4; }
+.world-page .wui-panel {
+  top: 65px;
+  border-color: rgba(174, 192, 207, .3);
+  border-radius: 6px;
+  background: rgba(18, 29, 40, .95);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .32);
+  color: #f0f3f5;
+  backdrop-filter: blur(14px);
+}
+.world-page .wui-panel select,
+.world-page .wui-panel input[type="text"] {
+  border-color: rgba(174, 192, 207, .32);
+  background: #273746;
+  color: #f0f3f5;
+}
+.world-page .wui-launcher-slot .wui-launcher {
+  border-color: #f4c681;
+  border-radius: 5px;
+  background: #e9ad5e;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .3);
+  color: #192432;
+}
+.world-page .wui-launcher-slot .wui-launcher:hover { background: #f1bf79; }
+.world-page .wui-launcher-slot .wui-launcher kbd { border-color: #75532e; }
+.world-page > .world-help-tooltip summary {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(166, 186, 201, .4);
+  border-radius: 5px;
+  background: rgba(22, 34, 46, .9);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, .25);
+  color: #f1c181;
+}
+.world-page > .world-help-tooltip > div {
+  border-color: rgba(166, 186, 201, .4);
+  background: rgba(19, 30, 41, .97);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, .3);
+  color: #e9edf0;
+}
+.world-page > .world-help-tooltip p { color: #afbdc7; }
+@media (max-width: 760px) {
+  .world-page .wui-tabs { padding: max(8px, env(safe-area-inset-top)) 10px 24px; gap: 4px; }
+  .world-page .wui-tabs .wui-tab { min-width: 36px; min-height: 36px; padding: 7px; }
+  .world-page .wui-tabs-end { min-height: 36px; padding: 7px 9px; font-size: 11px; }
+  .world-page .wui-panel { top: 55px; }
+  .world-page .wui-launcher-slot { left: max(12px, env(safe-area-inset-left)); bottom: max(12px, env(safe-area-inset-bottom)); }
+}

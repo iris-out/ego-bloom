@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { ringSurface, smoothProfile } from './vehicleSurfaces.js';
 
 /** 승용차 계열이 함께 쓰는 팔레트와 순수 헬퍼다. 컴포넌트는 carParts.jsx 에 있다. */
 const HALF_PI = Math.PI / 2;
@@ -18,11 +19,11 @@ const freezePane = (points) => Object.freeze(points.map(freezePoint));
 
 const SEDAN_WINDSHIELD = freezePane([
   [-0.75, 0.312, -1.006], [0.75, 0.312, -1.006],
-  [0.70, 0.831, -0.667], [-0.70, 0.831, -0.667],
+  [0.68, 0.831, -0.40], [-0.68, 0.831, -0.40],
 ]);
 const SUV_WINDSHIELD = freezePane([
   [-0.83, 0.337, -1.406], [0.83, 0.337, -1.406],
-  [0.78, 1.145, -1.045], [-0.78, 1.145, -1.045],
+  [0.745, 1.145, -.72], [-0.745, 1.145, -.72],
 ]);
 
 /** Sedan/SUV 외장과 실내가 함께 읽는 작은 형상 명세다. 유리 점은 차체 절대 좌표다. */
@@ -38,17 +39,17 @@ export const VEHICLE_SHAPES = Object.freeze({
     windshield: SEDAN_WINDSHIELD,
     sideWindows: Object.freeze({
       left: Object.freeze({
-        front: freezePane([SEDAN_WINDSHIELD[0], SEDAN_WINDSHIELD[3], [-0.77, 0.855, 0.12], [-0.82, 0.30, 0.12]]),
-        rear: freezePane([[-0.82, 0.30, 0.18], [-0.77, 0.855, 0.18], [-0.68, 0.82, 0.88], [-0.82, 0.30, 1.45]]),
+        front: freezePane([SEDAN_WINDSHIELD[0], SEDAN_WINDSHIELD[3], [-0.74, 0.875, 0.12], [-0.82, 0.30, 0.12]]),
+        rear: freezePane([[-0.82, 0.30, 0.18], [-0.74, 0.875, 0.18], [-0.65, 0.81, 1.02], [-0.82, 0.30, 1.45]]),
       }),
     }),
-    rearWindow: freezePane([[-0.75, 0.30, 1.58], [0.75, 0.30, 1.58], [0.68, 0.82, 0.88], [-0.68, 0.82, 0.88]]),
+    rearWindow: freezePane([[-0.75, 0.30, 1.58], [0.75, 0.30, 1.58], [0.65, 0.81, 1.02], [-0.65, 0.81, 1.02]]),
     roofSections: Object.freeze([
-      Object.freeze({ z: -0.67, width: 0.72, lowerY: 0.81, shoulderY: 0.84, topWidth: 0.63, topY: 0.85, crown: 0.012 }),
-      Object.freeze({ z: -0.32, width: 0.77, lowerY: 0.84, shoulderY: 0.86, topWidth: 0.67, topY: 0.875, crown: 0.012 }),
-      Object.freeze({ z: 0.05, width: 0.79, lowerY: 0.85, shoulderY: 0.87, topWidth: 0.69, topY: 0.88, crown: 0.01 }),
-      Object.freeze({ z: 0.48, width: 0.76, lowerY: 0.83, shoulderY: 0.85, topWidth: 0.66, topY: 0.865, crown: 0.01 }),
-      Object.freeze({ z: 0.92, width: 0.68, lowerY: 0.78, shoulderY: 0.81, topWidth: 0.60, topY: 0.825, crown: 0.01 }),
+      Object.freeze({ z: -0.40, width: 0.70, lowerY: 0.81, shoulderY: 0.84, topWidth: 0.63, topY: 0.85, crown: 0.012 }),
+      Object.freeze({ z: -0.16, width: 0.73, lowerY: 0.84, shoulderY: 0.86, topWidth: 0.67, topY: 0.875, crown: 0.012 }),
+      Object.freeze({ z: 0.20, width: 0.75, lowerY: 0.85, shoulderY: 0.87, topWidth: 0.69, topY: 0.88, crown: 0.01 }),
+      Object.freeze({ z: 0.57, width: 0.73, lowerY: 0.83, shoulderY: 0.85, topWidth: 0.66, topY: 0.865, crown: 0.01 }),
+      Object.freeze({ z: 1.04, width: 0.65, lowerY: 0.78, shoulderY: 0.81, topWidth: 0.60, topY: 0.825, crown: 0.01 }),
     ]),
   }),
   suv: Object.freeze({
@@ -62,16 +63,18 @@ export const VEHICLE_SHAPES = Object.freeze({
     windshield: SUV_WINDSHIELD,
     sideWindows: Object.freeze({
       left: Object.freeze({
-        front: freezePane([SUV_WINDSHIELD[0], SUV_WINDSHIELD[3], [-0.91, 1.17, 0.28], [-0.93, 0.46, 0.28]]),
-        rear: freezePane([[-0.93, 0.46, 0.34], [-0.91, 1.17, 0.34], [-0.88, 1.14, 1.24], [-0.93, 0.46, 1.24]]),
-        quarter: freezePane([[-0.93, 0.46, 1.31], [-0.88, 1.14, 1.31], [-0.80, 0.66, 1.94], [-0.92, 0.46, 1.94]]),
+        front: freezePane([SUV_WINDSHIELD[0], SUV_WINDSHIELD[3], [-0.80, 1.17, 0.28], [-0.93, 0.46, 0.28]]),
+        rear: freezePane([[-0.93, 0.46, 0.34], [-0.80, 1.17, 0.34], [-0.78, 1.14, 1.24], [-0.93, 0.46, 1.24]]),
+        quarter: freezePane([[-0.93, 0.46, 1.31], [-0.78, 1.14, 1.31], [-0.80, 0.66, 1.94], [-0.92, 0.46, 1.94]]),
       }),
     }),
     rearWindow: freezePane([[-0.80, 0.45, 2.00], [0.80, 0.45, 2.00], [0.72, 1.12, 1.34], [-0.72, 1.12, 1.34]]),
     roofSections: Object.freeze([
-      Object.freeze({ z: -1.045, width: 0.80, lowerY: 1.13, shoulderY: 1.16, topWidth: 0.72, topY: 1.175, crown: 0.01 }),
-      Object.freeze({ z: 0.40, width: 0.91, lowerY: 1.13, shoulderY: 1.16, topWidth: 0.82, topY: 1.17, crown: 0.02 }),
-      Object.freeze({ z: 1.34, width: 0.84, lowerY: 1.09, shoulderY: 1.12, topWidth: 0.75, topY: 1.14, crown: 0.02 }),
+      Object.freeze({ z: -.72, width: .765, lowerY: 1.13, shoulderY: 1.15, topWidth: .70, topY: 1.16, crown: .012 }),
+      Object.freeze({ z: -.32, width: .80, lowerY: 1.14, shoulderY: 1.16, topWidth: .73, topY: 1.175, crown: .012 }),
+      Object.freeze({ z: .35, width: .82, lowerY: 1.14, shoulderY: 1.16, topWidth: .745, topY: 1.175, crown: .012 }),
+      Object.freeze({ z: .88, width: .80, lowerY: 1.115, shoulderY: 1.145, topWidth: .72, topY: 1.16, crown: .015 }),
+      Object.freeze({ z: 1.34, width: .745, lowerY: 1.09, shoulderY: 1.12, topWidth: .68, topY: 1.14, crown: .015 }),
     ]),
   }),
 });
@@ -110,28 +113,24 @@ export function loftBody(sections) {
     [section.width, section.lowerY + Math.max(0, Math.min(0.08, (section.shoulderY - section.lowerY) * 0.45))],
     [(section.bottomWidth ?? section.width * 0.88), section.lowerY],
   ];
-  const positions = [];
-  for (const section of sections) {
-    for (const [x, y] of ring(section)) positions.push(x, y, section.z);
-  }
-  const indices = [];
-  const stride = 10;
-  for (let section = 0; section < sections.length - 1; section += 1) {
-    const current = section * stride;
-    const next = current + stride;
-    for (let edge = 0; edge < stride; edge += 1) {
-      const after = (edge + 1) % stride;
-      indices.push(current + edge, next + edge, next + after, current + edge, next + after, current + after);
+  const keys = ['width', 'bottomWidth', 'lowerY', 'shoulderY', 'topWidth', 'topY', 'crown'];
+  const samples = Object.fromEntries(keys.map(key => [key, smoothProfile(sections.map(row =>
+    [row[key] ?? (key === 'bottomWidth' ? row.width * .88 : key === 'crown' ? .025 : 0), row.z]), 5)]));
+  const rings = samples.width.map(([, z], index) => {
+    const section = Object.fromEntries(keys.map(key => [key, samples[key][index][0]]));
+    const contour = ring(section), rounded = [];
+    for (let i = 0; i < contour.length; i++) {
+      const a = contour[(i + contour.length - 1) % contour.length], b = contour[i], c = contour[(i + 1) % contour.length];
+      const start = b.map((v, k) => v + (a[k] - v) * .28), end = b.map((v, k) => v + (c[k] - v) * .28);
+      for (let j = 0; j < 4; j++) {
+        const t = j / 3;
+        rounded.push([start[0]*(1-t)**2+2*b[0]*t*(1-t)+end[0]*t*t,
+          start[1]*(1-t)**2+2*b[1]*t*(1-t)+end[1]*t*t, z]);
+      }
     }
-  }
-  for (let edge = 1; edge < stride - 1; edge += 1) indices.push(0, edge, edge + 1);
-  const end = (sections.length - 1) * stride;
-  for (let edge = 1; edge < stride - 1; edge += 1) indices.push(end, end + edge + 1, end + edge);
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  geometry.setIndex(indices);
-  geometry.computeVertexNormals();
-  return geometry;
+    return rounded.reverse();
+  });
+  return ringSurface(rings);
 }
 
 function mergeGeometryParts(parts) {
@@ -154,23 +153,6 @@ function mergeGeometryParts(parts) {
   return geometry;
 }
 
-function archSideProfile(shape) {
-  const points = shape.sideUpper.map(([z, y]) => [z, y]);
-  points.push([shape.zMax, shape.sillY]);
-  const { y: wheelY, radius } = shape.wheels;
-  const ratio = Math.max(-0.98, Math.min(0.98, (shape.sillY - wheelY) / radius));
-  const start = Math.asin(ratio);
-  const end = Math.PI - start;
-  for (const centerZ of [...shape.wheels.z].sort((a, b) => b - a)) {
-    for (let step = 0; step <= 12; step += 1) {
-      const angle = start + (end - start) * (step / 12);
-      points.push([centerZ + Math.cos(angle) * radius, wheelY + Math.sin(angle) * radius]);
-    }
-  }
-  points.push([shape.zMin, shape.sillY]);
-  return points;
-}
-
 function sideMagnitudeAt(shape, z) {
   const rows = shape.sideUpper;
   if (z <= rows[0][0]) return rows[0][2];
@@ -185,40 +167,42 @@ function sideMagnitudeAt(shape, z) {
 }
 
 function taperedSideSkin(shape) {
-  const profile = archSideProfile(shape);
-  const contour = profile.map(([z, y]) => new THREE.Vector2(z, y));
-  const faces = THREE.ShapeUtils.triangulateShape(contour, []);
-  const positions = [], normals = [], indices = [];
+  const positions = [], indices = [];
+  const countZ = 100, countY = 8;
+  const upperAt = z => {
+    const rows = shape.sideUpper;
+    for (let i=0; i<rows.length-1; i++) if(z<=rows[i+1][0]) {
+      const t=(z-rows[i][0])/(rows[i+1][0]-rows[i][0]); return rows[i][1]*(1-t)+rows[i+1][1]*t;
+    }
+    return rows.at(-1)[1];
+  };
   for (const side of [-1, 1]) {
-    const base = positions.length / 3;
-    for (const layer of [0, 1]) {
-      for (const [z, y] of profile) {
-        const outer = sideMagnitudeAt(shape, z);
-        const magnitude = layer === 0 ? outer : outer - shape.skinDepth;
-        positions.push(side * magnitude, y, z);
-        normals.push(layer === 0 ? side : -side, 0, 0);
+    const base=positions.length/3;
+    for(let i=0;i<=countZ;i++) {
+      const z=shape.zMin+(shape.zMax-shape.zMin)*i/countZ;
+      let lower=shape.sillY;
+      for(const wheelZ of shape.wheels.z) {
+        const dz=z-wheelZ;
+        if(Math.abs(dz)<shape.wheels.radius) lower=Math.max(lower,shape.wheels.y+Math.sqrt(shape.wheels.radius**2-dz**2));
+      }
+      const upper=upperAt(z);
+      for(let j=0;j<=countY;j++) {
+        const t=j/countY, y=lower+(upper-lower)*t;
+        // The lower sill tucks inward; the shoulder rolls into the deck. The
+        // broad door surface is convex, so reflections flow around the wheel arch.
+        const inset=.055*(1-t)**2 + .028*t**8;
+        const flare=.018*Math.exp(-Math.min(...shape.wheels.z.map(w=>(z-w)**2))/.3)*Math.sin(Math.PI*t);
+        positions.push(side*(sideMagnitudeAt(shape,z)-inset+flare),y,z);
       }
     }
-    const count = profile.length;
-    for (const [a, b, c] of faces) {
-      if (side < 0) {
-        indices.push(base + a, base + b, base + c, base + count + a, base + count + c, base + count + b);
-      } else {
-        indices.push(base + a, base + c, base + b, base + count + a, base + count + b, base + count + c);
-      }
-    }
-    for (let index = 0; index < count; index += 1) {
-      const next = (index + 1) % count;
-      indices.push(base + index, base + next, base + count + next, base + index, base + count + next, base + count + index);
+    for(let i=0;i<countZ;i++) for(let j=0;j<countY;j++) {
+      const a=base+i*(countY+1)+j,b=a+1,c=a+countY+1,d=c+1;
+      indices.push(...(side>0?[a,b,d,a,d,c]:[a,d,b,a,c,d]));
     }
   }
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  // 옆판은 z에 따라 폭이 변하지만 페인트 면의 조명은 큰 삼각형마다 갈라지지 않도록
-  // 바깥/안쪽 법선을 각각 옆 방향으로 고정한다. 얇은 경계도 같은 면에 묻힌다.
-  geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-  geometry.setIndex(indices);
-  return geometry;
+  const geometry=new THREE.BufferGeometry();
+  geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+  geometry.setIndex(indices);geometry.computeVertexNormals();return geometry;
 }
 
 function pairedDeckGeometry(rows) {
@@ -325,4 +309,23 @@ export function rollWheels(wheels, delta, speed) {
   wheels.forEach((wheel) => {
     if (wheel) wheel.rotation.x = (wheel.rotation.x + step) % TWO_PI;
   });
+}
+
+/** Curved glazing bows gently between fixed frame corners; perimeter coordinates
+ * are unchanged so the interior pillars continue meeting the external glass. */
+export function curvedPane(corners, bulge = .028, uSteps = 12, vSteps = 6) {
+  const positions=[],indices=[];
+  const [a,b,c,d]=corners.map(p=>new THREE.Vector3(...p));
+  const normal=b.clone().sub(a).cross(d.clone().sub(a)).normalize();
+  for(let y=0;y<=vSteps;y++) for(let x=0;x<=uSteps;x++) {
+    const u=x/uSteps,v=y/vSteps;
+    const p=a.clone().lerp(b,u).lerp(d.clone().lerp(c,u),v);
+    p.addScaledVector(normal,Math.sin(Math.PI*u)*Math.sin(Math.PI*v)*bulge);
+    positions.push(...p.toArray());
+  }
+  for(let y=0;y<vSteps;y++)for(let x=0;x<uSteps;x++) {
+    const a=y*(uSteps+1)+x,b=a+1,c=a+uSteps+1,d=c+1;
+    indices.push(a,b,d,a,d,c);
+  }
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setIndex(indices);g.computeVertexNormals();return g;
 }

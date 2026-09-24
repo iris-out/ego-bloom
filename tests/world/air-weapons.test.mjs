@@ -15,13 +15,14 @@ const run = (state, plane, fire, frames, extra = {}) => {
   return next;
 };
 
-test('기종 표가 샷거너를 포함한 일곱 기종을 갖는다', () => {
-  assert.deepEqual(PLANE_KEYS, ['jet', 'fighter', 'prop', 'interceptor', 'shotgun', 'bomber', 'helicopter']);
+test('기종 표가 샷거너와 비무장 비행선을 포함한다', () => {
+  assert.deepEqual(PLANE_KEYS, ['jet', 'fighter', 'prop', 'interceptor', 'shotgun', 'bomber', 'helicopter', 'airship']);
   assert.ok(PLANES.bomber && PLANES.prop && PLANES.interceptor && PLANES.shotgun, '비행 성능이 있다');
   assert.equal(armamentOf('interceptor').bomb, undefined, '요격기는 폭탄이 없다');
   assert.equal(armamentOf('prop').missile, undefined, '프로펠러기는 미사일이 없다');
   assert.equal(armamentOf('bomber').cannon, undefined, '폭격기는 기관총이 없다');
   assert.equal(armamentOf('jet'), null, '라이트 제트는 무장이 없다');
+  assert.equal(armamentOf('airship'), null, '관광 비행선은 무장이 없다');
 });
 
 test('샷거너는 한 번 누르면 14펠릿을 팡-팡 두 번 쏘고 0.9초 대기한다', () => {

@@ -180,11 +180,11 @@ test('평탄한 탄도라 4초 수명 안에 땅에 닿지 않는다', () => {
   assert.ok(groundImpact(pose, aim, 'aa', []).range > groundImpact(pose, aim, 'tank', []).range, '훨씬 멀리 간다');
 });
 
-test('대공포 반동이 기본 포의 85퍼센트다', () => {
+test('대공포 반동이 기존 값보다 40퍼센트 낮다', () => {
   // 반동 표는 순수 모듈에 있다. 예전에는 CarMode.jsx 원문을 정규식으로 파싱했다.
   assert.equal(RECOIL_KICK.armored, 0.008, '기관포');
   assert.equal(RECOIL_KICK.default, 0.035, '기본 포');
-  assert.ok(Math.abs(RECOIL_KICK.aa - RECOIL_KICK.default * 0.85) < 0.0005, `대공포 반동 ${RECOIL_KICK.aa}`);
+  assert.ok(Math.abs(RECOIL_KICK.aa - 0.0298 * 0.6) < 1e-9, `대공포 반동 ${RECOIL_KICK.aa}`);
   // 표에 없는 기종은 기본 포 반동을 쓴다.
   assert.equal(recoilKick('aa'), RECOIL_KICK.aa);
   assert.equal(recoilKick('tank'), RECOIL_KICK.default);

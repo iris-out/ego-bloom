@@ -6,7 +6,7 @@
 
 /** 차체 내구도다. 전차가 가장 단단하고 장갑차가 가장 약하다.
  * 전차포 세 발, 자주포 두 발이면 전차가 터지는 값이다. */
-export const HULL = Object.freeze({ tank: 1400, howitzer: 900, armored: 700, aa: 620, fighter: 500, prop: 320, bomber: 900, interceptor: 380, shotgun: 380 });
+export const HULL = Object.freeze({ tank: 1400, howitzer: 900, armored: 700, aa: 620, fighter: 500, prop: 320, bomber: 900, interceptor: 380, shotgun: 380, helicopter: 500 });
 
 /** 무기별 한 발 피해다. 키는 발사체가 들고 다니는 weapon 값과 같다. */
 export const DAMAGE = Object.freeze({ tank: 480, howitzer: 700, armored: 60, aa: 45, cannon: 16, shotgun: 7.2, missile: 420, bomb: 700 });
@@ -30,8 +30,8 @@ const finite = (value, fallback = 0) => Number.isFinite(value) ? value : fallbac
 /** 무장 여부는 탈것 종류와 키가 함께 정한다. 같은 key 가 다른 kind 에 있지는 않지만
  * 호출자가 kind 를 넘기므로 계약을 분명히 둔다. */
 export function isArmed(kind, key) {
-  // 무장한 기체만 체력을 갖는다. 라이트 제트와 헬기는 쏠 무기가 없다.
-  if (kind === 'flight') return ['fighter', 'prop', 'bomber', 'interceptor', 'shotgun'].includes(key);
+  // 무장한 기체만 체력을 갖는다. 헬기는 좌우 기관총과 전투기급 내구도를 갖는다.
+  if (kind === 'flight') return ['fighter', 'prop', 'bomber', 'interceptor', 'shotgun', 'helicopter'].includes(key);
   if (kind === 'car') return ['tank', 'howitzer', 'armored', 'aa'].includes(key);
   return false;
 }
@@ -97,4 +97,9 @@ export function repair(health, dt = 0, now = 0) {
 export function hullRatio(health) {
   if (!health || health.max <= 0) return null;
   return Math.max(0, Math.min(1, health.hp / health.max));
+}
+
+/** 월드의 다른 대상 위에 뜨는 체력바는 피해가 있을 때만 표시한다. */
+export function showDamagedHealthBar(ratio) {
+  return Number.isFinite(ratio) && ratio >= 0 && ratio < 1;
 }

@@ -9,6 +9,7 @@ import {
   beamCone, isBeamOn, rearLampIntensity, reverseLampIntensity,
 } from '../../src/world/headlights.js';
 import { flatPolygonGeometry, quadGeometry } from '../../src/world/models/carGeometry.js';
+import { FOUR_VEHICLE_LAYOUT } from '../../src/world/models/fourVehicleLayout.js';
 
 async function mountRuntimeLights({ vehicle = 'sedan', night = false, braking = false, reversing = false, beam = 'off' } = {}) {
   const source = await readFile(new URL('../../src/world/CarMode.jsx', import.meta.url), 'utf8');
@@ -36,13 +37,13 @@ async function mountRuntimeLights({ vehicle = 'sedan', night = false, braking = 
   const Lights = new Function(
     'h', 'Fragment', 'THREE', 'useRef', 'useMemo', 'useEffect', 'useFrame',
     'SEDAN_FRONT_LIGHTS', 'SEDAN_REAR_LIGHTS', 'SUV_FRONT_LIGHTS', 'SUV_REAR_LIGHTS',
-    'beamCone', 'isBeamOn', 'rearLampIntensity', 'reverseLampIntensity', 'flatPolygonGeometry', 'quadGeometry',
+    'beamCone', 'isBeamOn', 'rearLampIntensity', 'reverseLampIntensity', 'flatPolygonGeometry', 'quadGeometry', 'FOUR_VEHICLE_LAYOUT',
     `${code}; return Lights;`,
   )(
     h, 'fragment', THREE, value => ({ current: value }), factory => factory(), () => {}, callback => { frame = callback; },
     SEDAN_FRONT_LIGHTS, SEDAN_REAR_LIGHTS, SUV_FRONT_LIGHTS, SUV_REAR_LIGHTS,
     beamCone, isBeamOn, rearLampIntensity, reverseLampIntensity,
-    flatPolygonGeometry, quadGeometry,
+    flatPolygonGeometry, quadGeometry, FOUR_VEHICLE_LAYOUT,
   );
   const lamps = { current: { braking, reversing } };
   const root = Lights({ vehicle, night, beam, lamps });

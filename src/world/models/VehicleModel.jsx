@@ -1,3 +1,4 @@
+import ModelFinish from './ModelFinish.jsx';
 import Sedan from './Sedan';
 import Motorcycle from './Motorcycle';
 import Tank from './Tank';
@@ -6,6 +7,10 @@ import ArmoredCar from './ArmoredCar';
 import AntiAir from './AntiAir';
 import Suv from './Suv';
 import Convertible from './Convertible';
+import DriftCar from './DriftCar.jsx';
+import Coupe from './Coupe';
+import Supercar from './Supercar';
+import Electric from './Electric';
 import Truck from './Truck';
 import Formula from './Formula';
 import { validVehicle } from '../identity.js';
@@ -20,9 +25,9 @@ import { validVehicle } from '../identity.js';
  */
 // Keep this exhaustive with VEHICLE_KEYS. validVehicle deliberately accepts every
 // key, so omitting one here turns Model into undefined and crashes Canvas.
-const MODELS = { sedan: Sedan, motorcycle: Motorcycle, suv: Suv, convertible: Convertible, formula: Formula, truck: Truck, tank: Tank, howitzer: Howitzer, armored: ArmoredCar, aa: AntiAir };
+const MODELS = { drift: DriftCar, sedan: Sedan, motorcycle: Motorcycle, suv: Suv, convertible: Convertible, coupe: Coupe, supercar: Supercar, electric: Electric, formula: Formula, truck: Truck, tank: Tank, howitzer: Howitzer, armored: ArmoredCar, aa: AntiAir };
 
 export default function VehicleModel({ vehicle, wheelsRef, steer = 0, speed = 0, turretYaw = 0, barrelPitch = 0, aimRef, firstPerson = false, scoped = false }) {
   const Model = MODELS[validVehicle(vehicle)];
-  return <Model wheelsRef={wheelsRef} steer={steer} speed={speed} turretYaw={turretYaw} barrelPitch={barrelPitch} aimRef={aimRef} firstPerson={firstPerson} scoped={scoped} />;
+  return <ModelFinish version={`${vehicle}:${firstPerson}:${scoped}`}><Model wheelsRef={wheelsRef} steer={steer} speed={speed} turretYaw={turretYaw} barrelPitch={barrelPitch} aimRef={aimRef} firstPerson={firstPerson} scoped={scoped} /></ModelFinish>;
 }

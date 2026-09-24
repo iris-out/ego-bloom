@@ -266,7 +266,7 @@ function HudCombiner({ plane, poseRef, statusRef, mid }) {
       position={[0, sign * (height / 2 + edge / 2), 0]} scale={[width + edge * 2, edge, 0.014]} />)}
     {[-1, 1].map((sign) => <Panel key={`v${sign}`} material="metal"
       position={[sign * (width / 2 + edge / 2), 0, 0]} scale={[edge, height, 0.014]} />)}
-    <FighterHud poseRef={poseRef} statusRef={statusRef} weapons={hud.weapons}
+    <FighterHud poseRef={poseRef} statusRef={statusRef} weapons={hud.weapons} plane={plane}
       position={[0, 0, 0.006]} width={hud.plane[0]} height={hud.plane[1]} />
     {mid && <ShadeStrip position={[0, -height / 2 - edge - 0.03, 0.01]} scale={[width, 0.06, 1]} />}
   </group>;
@@ -498,7 +498,7 @@ export function FighterCockpit({ statusRef, controlsRef, poseRef, night = false,
 
 /** 요격기다. 좁은 캐노피에 RLM 66 계열 회색 계기판, 유리 반사 조준기,
  * 연료계가 있는 유일한 기종이다. 사다리는 전투기와 같은 FighterHud 가 그린다. */
-export function InterceptorCockpit({ statusRef, controlsRef, poseRef, night = false, quality = 'medium' }) {
+export function InterceptorCockpit({ rideKey = 'interceptor', statusRef, controlsRef, poseRef, night = false, quality = 'medium' }) {
   const { mid, high } = detailLevel(quality);
   const frame = COCKPIT_FRAME.interceptor;
   return <group>
@@ -512,7 +512,7 @@ export function InterceptorCockpit({ statusRef, controlsRef, poseRef, night = fa
     <Consoles plane="interceptor" mid={mid} high={high} />
     {/* combiner 유리 아랫단에 붙는 조준기 마운트다. 이 한 조각만 남겨야 계기판이 보인다. */}
     <Panel material="dark" position={deck('interceptor', [0, frame.sight.y, frame.sight.z])} scale={frame.sight.housing} />
-    <HudCombiner plane="interceptor" poseRef={poseRef} statusRef={statusRef} mid={mid} />
+    <HudCombiner plane={rideKey} poseRef={poseRef} statusRef={statusRef} mid={mid} />
     <Stick get={() => controlsRef?.current} position={deck('interceptor', [frame.stick.x, frame.stick.y, frame.stick.z])}
       limit={[0.32, 0.46]} hand={mid} />
     <Throttle plane="interceptor" spot={frame.throttle} get={() => statusRef?.current?.throttle} knobs={['#c8562f']} mid={mid} />

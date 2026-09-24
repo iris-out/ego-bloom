@@ -1,3 +1,4 @@
+import { armamentOf } from '../hardpoints.js';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { angleToScreen, dropLadder, reticleOf } from '../reticle.js';
 import { aimNow, getAimScreen } from '../aimScreenStore.js';
@@ -121,7 +122,7 @@ export default function Reticle({ kind, rideKey, status = {} }) {
           data-dash={spec.type === 'autocannon' ? 'true' : 'false'} data-dry={dry ? 'true' : 'false'} />}
 
         {/* 미사일 표식이다. 남아 있으면 사거리 원 양옆에 날개를 둔다. */}
-        {spec.type === 'pipper' && Number.isFinite(status.missileAmmo) && <g className="wui-reticle-msl"
+        {kind === 'flight' && armamentOf(rideKey)?.missile?.length > 0 && spec.type === 'pipper' && Number.isFinite(status.missileAmmo) && <g className="wui-reticle-msl"
           data-dry={status.missileAmmo > 0 ? 'false' : 'true'}>
           <line x1={cx - ring - 7} y1={cy} x2={cx - ring - 2} y2={cy} />
           <line x1={cx + ring + 2} y1={cy} x2={cx + ring + 7} y2={cy} />

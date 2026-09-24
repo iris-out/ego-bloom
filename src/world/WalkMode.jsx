@@ -56,7 +56,7 @@ function Blasts({ shots }) {
     ageOf={() => clock.elapsedTime - blast.start} life={BLAST_LIFE} size={blast.kind === 'vehicle' ? 3.2 : 1.4} />);
 }
 
-export default function WalkMode({ extent, buildings = [], controlsRef, pilotName, trafficCount = 0, onCameraChange, onStatus, onKill }) {
+export default function WalkMode({ paused = false, inputBlocked = false, extent, buildings = [], controlsRef, pilotName, trafficCount = 0, onCameraChange, onStatus, onKill, onPose }) {
   const state = useRef(createWalkState(extent)), keys = useRef(new Set());
   const shots = useRef([]), nextId = useRef(1);
   const firing = useRef(false), aiming = useRef(false), look = useRef({ yaw: 0, pitch: 0 });
@@ -93,6 +93,7 @@ export default function WalkMode({ extent, buildings = [], controlsRef, pilotNam
   /* eslint-enable react-hooks/immutability */
 
   useEffect(() => {
+    if (inputBlocked) return;
     const canvas = gl.domElement;
     const codes = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyC', 'KeyE', 'KeyR', 'Space',
       'ShiftLeft', 'ShiftRight', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5'];
@@ -143,14 +144,16 @@ export default function WalkMode({ extent, buildings = [], controlsRef, pilotNam
       canvas.removeEventListener('contextmenu', menu);
       window.removeEventListener('pointerup', stop); window.removeEventListener('mouseup', stop);
       if (document.pointerLockElement === canvas) document.exitPointerLock?.();
-      closeAudio();
       clear();
     };
-  }, [gl]);
+  }, [gl, inputBlocked]);
+
+  useEffect(() => () => closeAudio(), []);
 
   useEffect(() => { state.current = createWalkState(extent); lastReloadTicks.current = 0; }, [extent]);
 
   useFrame(({ clock }, delta) => {
+    if (paused) return;
     const controls = controlsRef?.current || {};
     if (resetNonce.current === undefined) resetNonce.current = controls.resetNonce;
     else if (controls.resetNonce !== resetNonce.current) { resetNonce.current = controls.resetNonce; state.current = createWalkState(extent); lastReloadTicks.current = 0; }
@@ -265,6 +268,7 @@ export default function WalkMode({ extent, buildings = [], controlsRef, pilotNam
     if (clock.elapsedTime - lastReport.current > 0.12) {
       lastReport.current = clock.elapsedTime;
       onCameraChange?.({ x: aimed.x, z: aimed.z });
+      onPose?.({ x: aimed.x, y: aimed.y || 0, z: aimed.z, heading: aimed.heading || 0, pitch: aimed.pitch || 0, roll: 0, phase: aimed.phase, kind: 'walk', key: 'walk' });
       const pouch = aimed.ammo[aimed.weapon];
       onStatus?.({
         weapon: aimed.weapon, mag: pouch.mag, reserve: pouch.reserve,

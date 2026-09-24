@@ -70,6 +70,27 @@ const Convertible = () => <svg {...box}>
   <circle cx="13" cy="14.8" r="2.4" /><circle cx="31" cy="14.8" r="2.4" />
 </svg>;
 
+const Coupe = () => <svg {...box}>
+  <path d="M5 11.4 L8 8.8 Q10 6.3 16 5.9 Q25 4.8 31 7.2 L37 11.4 Z" />
+  <rect x="4" y="11" width="36" height="2.7" rx="1.2" />
+  <circle cx="12" cy="14.4" r="2.3" /><circle cx="32" cy="14.4" r="2.3" />
+  <path d="M19 6 L18 10.5 M28 7 L29 10.5" stroke="currentColor" strokeWidth=".6" />
+</svg>;
+
+const Supercar = () => <svg {...box}>
+  <path d="M4 12 L10 10 L16 7.3 L25 6.9 L32 9.8 L40 11.8 Z" />
+  <rect x="4" y="11.9" width="36" height="2" rx=".8" />
+  <circle cx="12" cy="14.1" r="2.5" /><circle cx="33" cy="14.1" r="2.7" />
+  <path d="M27 9.8 L31 10.5 L29 11.3 L25 11.2 Z" fill="none" stroke="currentColor" strokeWidth=".8" />
+</svg>;
+
+const Electric = () => <svg {...box}>
+  <path d="M4 11.7 L8 9.5 Q11 6.3 17 5.6 L28 5.6 Q34 6 38 11.6 Z" />
+  <rect x="4" y="11.6" width="36" height="2.4" rx="1.2" />
+  <circle cx="12" cy="14.4" r="2.3" /><circle cx="32" cy="14.4" r="2.3" />
+  <path d="M27 5.7 Q34 6.2 38 11.5" fill="none" stroke="currentColor" strokeWidth=".7" />
+</svg>;
+
 /* 트럭. 앞의 캡과 뒤의 높은 적재함, 뒷바퀴 두 축이다. */
 const Truck = () => <svg {...box}>
   <path d="M4 13 L4 6 L7 3.4 L14 3.4 L14 13 Z" />
@@ -153,9 +174,20 @@ const Formula = () => <svg {...box}>
   <path d="M19 9.5 Q22 6.5 25 9.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
 </svg>;
 
+const Airship = () => <svg {...box}>
+  <ellipse cx="21" cy="7" rx="17" ry="6"/><path d="M33 5 L40 1 L39 7 L42 12 L32 10 Z"/>
+  <rect x="15" y="12" width="12" height="4" rx="1.5"/>
+</svg>;
+const Drift = () => <svg {...box}>
+  <path d="M14 10 L17 6 L22 6 L21 10 Z M5 10 L37 10 L39 14 L4 14 Z"/>
+  <path d="M30 6 H42 V8 H30 Z M34 8 H36 V11 H34 Z"/>
+  <circle cx="12" cy="15" r="2.7"/><circle cx="32" cy="15" r="2.7"/>
+</svg>;
 const RIDE_ART = {
+  drift: Drift, airship: Airship,
   jet: Jet, fighter: Fighter, prop: PropFighter, interceptor: Interceptor, shotgun: Interceptor, bomber: Bomber, helicopter: Helicopter,
-  sedan: Sedan, motorcycle: Motorcycle, suv: Suv, convertible: Convertible, formula: Formula, truck: Truck,
+  sedan: Sedan, motorcycle: Motorcycle, suv: Suv, convertible: Convertible, coupe: Coupe,
+  supercar: Supercar, electric: Electric, formula: Formula, truck: Truck,
   tank: Tank, howitzer: Howitzer, armored: Armored, aa: AntiAir,
   walk: Walk,
 };

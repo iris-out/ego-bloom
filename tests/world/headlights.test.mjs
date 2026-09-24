@@ -100,7 +100,7 @@ test('세단 전조등은 중앙 lightbar 없이 좌우 housing, 네 projector�
   }
 });
 
-test('SUV 등화는 좌우 독립형의 얇은 앞 두 줄과 뒤 두 줄을 공유한다', () => {
+test('G45 SUV has paired upright hooked DRLs and independent rear light rows', () => {
   assert.equal(SUV_FRONT_LIGHTS.housings.length, 2);
   assert.equal(SUV_FRONT_LIGHTS.rows.length, 4);
   assert.equal(SUV_REAR_LIGHTS.housings.length, 2);
@@ -110,7 +110,10 @@ test('SUV 등화는 좌우 독립형의 얇은 앞 두 줄과 뒤 두 줄을 공
     const inner = Math.min(...row.rear.map(([x]) => Math.abs(x)));
     const height = Math.max(...row.rear.map(([, y]) => y)) - Math.min(...row.rear.map(([, y]) => y));
     assert.ok(inner >= 0.60, 'front row crosses the twin-grille gap');
-    assert.ok(height <= 0.055, 'front row is not slim');
+    assert.ok(height >= 0.14 && height <= 0.17, 'G45 upright DRL height changed');
+    const stemWidth=Math.abs(row.rear[0][0]-row.rear[1][0]);
+    assert.ok(stemWidth<=0.03,'upright stem is too thick');
+    assert.equal(row.rear.length,8,'DRL needs a closed hooked outline');
   }
   assert.ok(SUV_FRONT_LIGHTS.runtimeRowZ <= SUV_FRONT_LIGHTS.rowZ - 0.006,
     'runtime front rows are coplanar with static lenses');

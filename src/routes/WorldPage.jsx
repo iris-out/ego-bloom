@@ -1,3 +1,4 @@
+import WorldScoreboard from '../world/ui/WorldScoreboard';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowUpRight, Search, LocateFixed, X } from 'lucide-react';
@@ -15,7 +16,7 @@ import TimeAttackHud from '../world/ui/TimeAttackHud';
 import { beginTimeAttack, endTimeAttack } from '../world/timeAttackStore.js';
 import Countdown from '../world/ui/Countdown';
 import RideHud from '../world/ui/RideHud';
-import { acceptsInput, createWorldPhase, worldPhaseReducer } from '../world/worldPhase';
+import { acceptsInput, createWorldPhase, worldPhaseReducer, sessionPolicy } from '../world/worldPhase';
 import { rideOf } from '../world/rideSpecs';
 import { displayName, loadIdentity, saveIdentity } from '../world/identity';
 import useWorldMultiplayer from '../world/useWorldMultiplayer';
@@ -26,6 +27,11 @@ import { variantCountOf } from '../world/models/tierBuildings.js';
 import { publishRideStatus, resetRideStatus, useRideStatus } from '../world/rideStatusStore';
 import { WEAPON_KEYS } from '../world/walkPhysics.js';
 import '../world/world.css';
+import WorldMenu from '../world/ui/WorldMenu';
+import WorldSettings from '../world/ui/WorldSettings';
+import { readHudPreferences, writeHudPreferences } from '../world/ui/hudPreferences.js';
+import { releaseWorldControls } from '../world/simulationClock.js';
+import { setWorldAudio, closeAudio } from '../world/sound.js';
 
 const WorldScene=lazy(()=>import('../world/WorldScene'));
 // 갤러리는 티어당 모델 전부를 보여준다. 티어마다 변형 수가 달라(8개 또는 6개) rank 는
@@ -41,22 +47,29 @@ const typing=target=>['INPUT','TEXTAREA','SELECT'].includes(target?.tagName)||ta
 export default function WorldPage() {
   const navigate=useNavigate();
   const [data,setData]=useState([]), [status,setStatus]=useState('loading'), [error,setError]=useState('');
-  const [attempt,setAttempt]=useState(0), [sceneAttempt,setSceneAttempt]=useState(0), [sceneReady,setSceneReady]=useState(false);
+  const [attempt,setAttempt]=useState(0), [sceneAttempt,setSceneAttempt]=useState(0), [sceneReady,setSceneReady]=useState(false), [sceneFailed,setSceneFailed]=useState(false);
   const [query,setQuery]=useState(''), [tier,setTier]=useState('all'), [limit,setLimit]=useState(40);
   const [selectedId,setSelectedId]=useState(null), [gallery,setGallery]=useState(false);
   const [tab,setTab]=useState(null);
   const [world,dispatch]=useReducer(worldPhaseReducer,undefined,createWorldPhase);
   const [identity,setIdentity]=useState(loadIdentity);
+  const [hudPreferences,setHudPreferences]=useState(readHudPreferences);
+  const [volume,setVolume]=useState(()=>{try{const value=Number(localStorage.getItem('world-audio-volume') ?? 0.8);return Number.isFinite(value)?Math.max(0,Math.min(1,value)):0.8;}catch{return 0.8;}});
+  const policy=sessionPolicy(world);
+  const menuVisible=!world.session||world.menuOpen;
+  const changeHudPreference=(key,value)=>setHudPreferences(previous=>writeHudPreferences({...previous,[key]:value}));
+  useEffect(()=>{setWorldAudio({volume,paused:policy.paused});try{localStorage.setItem('world-audio-volume',String(volume));}catch{/* Storage may be unavailable. */}},[volume,policy.paused]);
+  useEffect(()=>()=>{setWorldAudio();endTimeAttack();resetRideStatus();closeAudio();},[]);
   const [pickerGroup,setPickerGroup]=useState('flight');
   const [pendingRide,setPendingRide]=useState({kind:'flight',key:identity.plane});
   const [autopilot,setAutopilot]=useState(false);
-  const ride=world.ride, rideKind=ride?.kind||null, driving=world.phase==='driving';
+  const ride=world.ride, rideKind=ride?.kind||null, driving=world.phase==='driving'||(world.phase==='selecting'&&world.resumePhase==='driving');
   const flightMode=rideKind==='flight', carMode=rideKind==='car', walkMode=rideKind==='walk';
   // 도보는 전용 모델이 없어 자세를 보내지 않는다. 항공기와 차량은 같은 채널로 실시간 공유한다.
   const riding=driving&&(flightMode||carMode);
   // presence 에는 이름과 기종 선택, 지금 타고 있는 탈것을 함께 올린다. 접속자 목록이 이 값을 읽는다.
   const presence=useMemo(()=>({name:identity.name,plane:identity.plane,kind:rideKind||'flight',ride:driving&&ride?ride.key:null}),[identity.name,identity.plane,rideKind,driving,ride]);
-  const multiplayer=useWorldMultiplayer(riding,presence);
+  const multiplayer=useWorldMultiplayer(riding,presence,policy.multiplayer);
   const pilotName=displayName(multiplayer.sessionId,identity.name);
   const [view,setView]=useState('third');
   const carControls=useRef({throttle:0,reverse:0,steer:0,brake:false,fire:false,resetNonce:0});
@@ -109,10 +122,23 @@ export default function WorldPage() {
   const ready=useCallback(()=>{setSceneReady(true);if(stageRef.current)stageRef.current.dataset.readyMs=String(Math.round(performance.now()));},[]);
   const reportPerformance=useCallback(stats=>{if(stageRef.current)Object.assign(stageRef.current.dataset,{fps:String(stats.fps),drawCalls:String(stats.calls),triangles:String(stats.triangles)});},[]);
   const retry=()=>{setStatus('loading');setError('');setAttempt(n=>n+1);};
-  const retryScene=()=>{setSceneReady(false);setSceneAttempt(n=>n+1);};
+  const retryScene=(nextQuality)=>{if(['low','medium','high'].includes(nextQuality))setQuality(nextQuality);setSceneFailed(false);setSceneReady(false);setSceneAttempt(n=>n+1);};
+  const failScene=useCallback(()=>{setSceneFailed(true);setSceneReady(false);},[]);
   const changeSearch=value=>{setQuery(value);setLimit(40);setTab('discover');};
-  const toggleGallery=()=>{setGallery(v=>!v);setSelectedId(null);setQuery('');setTier('all');setSceneReady(false);setTab('discover');dispatch({type:'exitRide'});focus({x:0,z:0});};
+  const toggleGallery=()=>{setSceneFailed(false);setGallery(v=>!v);setSelectedId(null);setQuery('');setTier('all');setSceneReady(false);setTab('discover');dispatch({type:'exitRide'});focus({x:0,z:0});};
   const canRender=mountScene && (driving || gallery || status==='ready');
+
+  const releaseInput=useCallback(()=>{
+    releaseWorldControls(carControls.current);releaseWorldControls(flightControls.current);releaseWorldControls(walkControls.current);
+    values.current={move:{x:0,y:0},rotate:{x:0,y:0},vertical:0};
+    setAutopilot(false);
+    if(document.pointerLockElement)document.exitPointerLock?.();
+    window.dispatchEvent(new Event('blur'));
+  },[]);
+  const openMenu=useCallback(()=>{releaseInput();setTab(null);dispatch({type:'openMenu',now:performance.now()});},[releaseInput]);
+  const closeMenu=useCallback(()=>dispatch({type:'closeMenu',now:performance.now()}),[]);
+  const enterSession=useCallback(mode=>{releaseInput();setTab(null);dispatch({type:'enterSession',mode});},[releaseInput]);
+  const leaveSession=useCallback(()=>{releaseInput();setTab(null);resetRideStatus();endTimeAttack();setView('third');dispatch({type:'leaveSession'});},[releaseInput]);
 
   const openPicker=useCallback(()=>{setTab(null);setSelectedId(null);dispatch({type:'openPicker'});},[]);
   // WorldScene 에 넘기는 콜백이다. dispatch 는 useReducer 가 늘 같은 참조를 주므로 이 함수도 고정된다.
@@ -148,7 +174,16 @@ export default function WorldPage() {
 
   useEffect(()=>{
     const onKey=event=>{
-      if(typing(event.target))return;
+      if(event.key==='Escape'){
+        if(!world.session)return;
+        event.preventDefault();
+        if(world.menuOpen)closeMenu();
+        else if(world.phase==='selecting')dispatch({type:'closePicker'});
+        else if(tab)setTab(null);
+        else openMenu();
+        return;
+      }
+      if(typing(event.target)||menuVisible)return;
       if(event.code==='Space'&&(world.phase==='establishing'||world.phase==='exploring')){event.preventDefault();openPicker();return;}
       // 항공기는 V 를 미사일에 쓰므로 시점 전환은 C 다.
       if(event.code==='KeyC'&&driving&&rideKind!=='walk'){setView(v=>v==='first'?'third':'first');return;}
@@ -159,14 +194,11 @@ export default function WorldPage() {
         setAutopilot(active=>{const next=!active;flightControls.current.autopilot=next;return next;});
         return;
       }
-      if(event.key!=='Escape')return;
-      if(world.phase==='selecting')dispatch({type:'closePicker'});
-      else if(driving||world.phase==='countdown')exitRide();
-      else if(tab)setTab(null);
+
     };
     window.addEventListener('keydown',onKey);
     return ()=>window.removeEventListener('keydown',onKey);
-  },[world.phase,driving,rideKind,tab,openPicker,exitRide,resetRide]);
+  },[world.phase,world.session,world.menuOpen,menuVisible,driving,rideKind,tab,openPicker,openMenu,closeMenu,resetRide]);
 
   const closeTab=()=>setTab(null);
   const rideMeta=ride?rideOf(ride.kind,ride.key):null;
@@ -175,31 +207,30 @@ export default function WorldPage() {
   // 계기나 스로틀 레버와 겹친다.
   const helpTip = <details className="world-help-tooltip"><summary aria-label="조작 도움말">?</summary><div role="note">
     <strong>{flightMode?'비행 조작':carMode?'차량 조작':walkMode?'도보 조작':'도시 조작'}</strong>
-    <p className="world-desktop-help">{flightMode?(ride?.key==='fighter'?'W/S 기수 · A/D 기울기 · Q/E 방향 · +/- 스로틀 · Space 기관총 · V 미사일(적기를 2초 담으면 락온)':ride?.key==='interceptor'?'W/S 기수 · A/D 기울기 · Q/E 방향 · +/- 스로틀 · Shift 부스트 · Space 기관총':'W/S 기수 · A/D 기울기와 지상 조향 · Q/E 방향 · +/- 또는 ↑/↓ 스로틀 · 지상에서 Space 브레이크'):carMode?(['tank','howitzer','armored'].includes(ride?.key)?'W/S 이동 · A/D 조향 · 방향키 포탑 조준 · Space 또는 좌클릭 발사 · H 전조등 · 3인칭 드래그 시점, 휠 확대':'W/S 가속·후진 · A/D 조향 · Space 브레이크 · H 전조등 · 3인칭 드래그 시점, 휠 확대'):walkMode?`WASD 이동 · Shift 달리기 · Space 점프 · 좌클릭 사격 · 우클릭 정조준 · Q/C 피킹 · E 손전등 · R 재장전 · 1~${WEAPON_KEYS.length} 무기`:'WASD / 방향키 이동 · 드래그 회전 · 휠 확대 · Space 드라이브 시작'}</p>
-    <p className="world-mobile-help">{flightMode?'왼쪽 기수·기울기 · 오른쪽 시점 · 세로 스로틀 가속':'왼쪽 이동 · 오른쪽 회전 · 두 손가락 확대'}</p>
-    <p>{flightMode?'활주로 착륙 가능 · 충돌 시 3초 후 복귀':driving?'ESC 로 도시 탐색으로 돌아간다':'건물 또는 목록을 눌러 제작자 만나기'}</p>
+    <p className="world-desktop-help">{flightMode?(ride?.key==='airship'?'W/S 상승·하강 · A/D 또는 Q/E 선회 · ↑/↓ 스로틀 · Space 감속 · 손을 놓으면 고도 유지':ride?.key==='helicopter'?'↑/↓ 로터 출력 · W/S 전후 기울기 · A/D 기수 회전 · Q/E 좌우 이동 · Space 쌍열 기관총':ride?.key==='fighter'?'W/S 기수 · A/D 기울기 · Q/E 방향 · +/- 스로틀 · Space 기관총 · V 미사일(적기를 2초 담으면 락온)':ride?.key==='interceptor'?'W/S 기수 · A/D 기울기 · Q/E 방향 · +/- 스로틀 · Shift 부스트 · Space 기관총':'W/S 기수 · A/D 기울기와 지상 조향 · Q/E 방향 · +/- 또는 ↑/↓ 스로틀 · 지상에서 Space 브레이크'):carMode?(ride?.key==='drift'?'W/S 가속·후진 · A/D 조향 · Space 드리프트 · 가속으로 유지, 반대 조향으로 회복 · H 전조등':['tank','howitzer','armored'].includes(ride?.key)?'W/S 이동 · A/D 조향 · 방향키 포탑 조준 · Space 또는 좌클릭 발사 · H 전조등 · 3인칭 드래그 시점, 휠 확대':'W/S 가속·후진 · A/D 조향 · Space 브레이크 · H 전조등 · 3인칭 드래그 시점, 휠 확대'):walkMode?`WASD 이동 · Shift 달리기 · Space 점프 · 좌클릭 사격 · 우클릭 정조준 · Q/C 피킹 · E 손전등 · R 재장전 · 1~${WEAPON_KEYS.length} 무기`:'WASD / 방향키 이동 · 드래그 회전 · 휠 확대 · Space 드라이브 시작'}</p>
+    <p className="world-mobile-help">{flightMode?(ride?.key==='airship'?'왼쪽 상승·하강·선회 · 오른쪽 시점 · 세로 스로틀 가속':'왼쪽 기수·기울기 · 오른쪽 시점 · 세로 스로틀 가속'):'왼쪽 이동 · 오른쪽 회전 · 두 손가락 확대'}</p>
+    <p>{flightMode?'활주로 착륙 가능 · 충돌 시 3초 후 복귀':driving?'ESC 게임 메뉴 · 계속하기로 복귀':'건물 또는 목록을 눌러 제작자 만나기'}</p>
     {flightMode && ride?.key==='fighter' && <p>Space 기관총 · V 미사일 · 모바일은 무장 버튼</p>}
     {flightMode && ride?.key==='prop' && <p>Space 기관총. 전투기보다 연사가 빠르고 탄속은 느리다</p>}
     {flightMode && ride?.key==='interceptor' && <p>Shift 부스트로 1080km/h 까지 낸다. Q 를 누르면 강화 부스트로 바뀌어 1340km/h 까지 열리고 연료를 2.5배로 먹는다. 착륙하면 급유된다</p>}
     {flightMode && ride?.key==='bomber' && <p>Space 를 누르면 폭탄창이 열리고 폭탄이 떨어진다. 땅의 표식이 탄착점이다</p>}
-    {flightMode && (ride?.key==='fighter'||ride?.key==='prop') && <p>화면 중앙 조준선이 기관총 탄착점과 유효 사거리를 가리킨다</p>}
+    {flightMode && (ride?.key==='fighter'||ride?.key==='prop'||ride?.key==='helicopter') && <p>조준선이 기관총 탄착점과 유효 사거리를 가리킨다</p>}
     {carMode && ['tank','howitzer','armored'].includes(ride?.key) && <p>Q/E 고개 돌리기, 우클릭 조준경 배율, 조준선 눈금은 사거리다</p>}
-    {flightMode && ride?.key==='helicopter' && <p>↑/↓ 로터 출력 · W/S 전후 기울기 · A/D 기수 회전 · Q/E 좌우 이동</p>}
+    {flightMode && ride?.key==='helicopter' && <p>↑/↓ 로터 출력 · W/S 전후 기울기 · A/D 기수 회전 · Q/E 좌우 이동 · 비행 중 Space 기관총 2정</p>}
     {walkMode && <p>정조준하면 산포와 반동이 줄고 걸음이 느려진다. 저격총은 조준경이 붙는다</p>}
     {walkMode && <p>차도에 서 있으면 차에 치여 체력이 깎인다. 맞지 않으면 스스로 회복한다</p>}
   </div></details>;
 
-  return <main className={`world-page${driving?' world-flight-active':''}`} data-phase={world.phase}>
-    {multiplayer.crowded && <TabLimitModal />}
-    {!driving && <WorldTabs active={tab} onChange={setTab} onHome={()=>navigate('/')}
-      connection={multiplayer.status} count={multiplayer.count}/>}
+  const settings=<WorldSettings quality={quality} onQuality={setQuality} timeOfDay={timeOfDay}
+    onTimeOfDay={value=>{timeOverridden.current=true;setTimeOfDay(value);}} weather={weather} onWeather={setWeather}
+    anonymous={anonymous} onAnonymous={setAnonymous} volume={volume} onVolume={setVolume}
+    {...hudPreferences} onHudScale={value=>changeHudPreference('hudScale',value)}
+    onHighContrast={value=>changeHudPreference('highContrast',value)} onReducedMotion={value=>changeHudPreference('reducedMotion',value)}/>;
 
-    {world.phase==='establishing' && <div className="wui-establish">
-      <span className="world-eyebrow">A CITY MADE OF CREATORS</span>
-      <h1>크리에이터 시티<span> BETA</span></h1>
-      <p>{gallery?`${GALLERY_COUNT}가지 건물 컬렉션`:`${number.format(data.length)}명의 제작자 · KST ${season.dateKey} ${season.label}`}</p>
-      <button className="eb-btn eb-btn-secondary" onClick={()=>dispatch({type:'explore'})}>둘러보기</button>
-    </div>}
+  return <main className={`world-page${driving?' world-flight-active':''}`} data-phase={world.phase} data-session={world.session||'menu'} data-menu-open={String(menuVisible)} data-scene-ready={String(canRender && sceneReady)}>
+    {multiplayer.crowded && <TabLimitModal />}
+    {!driving && !menuVisible && <WorldTabs active={tab} onChange={setTab} onHome={openMenu}
+      connection={world.session==='single'?'single':multiplayer.status} count={multiplayer.count}/>}
 
     {tab==='discover' && <aside className="wui-panel" aria-label="제작자 탐색">
       <div className="world-explorer-title">
@@ -245,7 +276,7 @@ export default function WorldPage() {
       <div className="wui-panel-head"><div><span className="world-eyebrow">WHO IS HERE</span><h2>접속 세션</h2></div>
         <button className="eb-btn-icon" aria-label="접속자 닫기" onClick={closeTab}><X size={16}/></button></div>
       <div className="wui-panel-body">
-        <p role="status" data-connection={multiplayer.status}>{multiplayer.status==='connected'?`접속 ${multiplayer.count}명`:multiplayer.status==='connecting'?'연결 중…':multiplayer.status==='unavailable'?'실시간 연결 미설정':'재연결 중…'}</p>
+        <p role="status" data-connection={multiplayer.status}>{multiplayer.status==='connected'?`접속 ${multiplayer.count}명`:multiplayer.status==='connecting'?'연결 중…':multiplayer.status==='unavailable'?'실시간 연결 미설정':world.session==='single'?'싱글 플레이 · 로컬 세션':'재연결 중…'}</p>
         <p className="t-small">로그인 계정 수가 아니라 탭별 접속 세션 수다. 여러 탭은 각각 집계된다.</p>
         <Roster roster={multiplayer.roster} selfId={multiplayer.sessionId}/>
       </div>
@@ -253,28 +284,20 @@ export default function WorldPage() {
 
     {tab==='settings' && <section className="wui-panel" aria-label="월드 설정 패널">
       <div className="wui-panel-head"><h2>월드 설정</h2><button className="eb-btn-icon" aria-label="설정 닫기" onClick={closeTab}><X size={16}/></button></div>
-      <div className="wui-panel-body">
-        <p className="world-season" aria-label="도시 계절">KST {season.dateKey} · {season.label}</p>
-        <label>그래픽 품질<select value={quality} onChange={e=>setQuality(e.target.value)}><option value="low">낮음 · 가볍게</option><option value="medium">보통 · 균형 있게</option><option value="high">높음 · 섬세하게</option></select></label>
-        <label>시간대<select value={timeOfDay} onChange={e=>{timeOverridden.current=true;setTimeOfDay(e.target.value);}}><option value="day">낮</option><option value="dawn">새벽 · 일출</option><option value="sunset">저녁 · 노을</option><option value="night">밤</option></select></label>
-        <label>날씨<select value={weather} onChange={e=>setWeather(e.target.value)}><option value="clear">맑음</option><option value="cloudy">흐림</option><option value="rain">비</option><option value="snow">눈</option></select></label>
-        <label className="world-setting-check"><input type="checkbox" checked={anonymous} onChange={e=>setAnonymous(e.target.checked)}/>빌딩 제작자 미공개</label>
-        <p>시간대 기본값은 한국 시각을 따른다. 한 번 고르면 그 값을 유지한다.</p>
-        <p>미공개를 켜면 건물 카드에 티어와 번호만 뜬다. 닉네임과 사진은 가린다.</p>
-      </div>
+      <div className="wui-panel-body">{settings}</div>
     </section>}
 
-    <div ref={stageRef} className="world-stage" aria-label="3D 제작자 도시" data-ready={sceneReady?'true':'false'}>
-      {canRender ? <SceneBoundary key={`${sceneAttempt}-${gallery}`} onRetry={retryScene}>
-        <Suspense fallback={<div className="world-scene-message" role="status"><h2>도시를 준비하고 있습니다</h2><p>제작자 목록은 먼저 탐색할 수 있습니다.</p></div>}>
+    <div ref={stageRef} className="world-stage" aria-hidden={menuVisible || undefined} aria-label="3D 제작자 도시" data-ready={sceneReady?'true':'false'}>
+      {canRender ? <SceneBoundary key={`${sceneAttempt}-${gallery}`} onRetry={retryScene} onError={failScene}>
+        <Suspense fallback={menuVisible ? null : <div className="world-scene-message" role="status"><h2>도시를 준비하고 있습니다</h2><p>제작자 목록은 먼저 탐색할 수 있습니다.</p></div>}>
           <WorldScene buildings={buildings} selectedId={selectedId} onSelect={select} focusTarget={focusTarget} gallery={gallery} season={season} quality={quality} timeOfDay={timeOfDay} weather={weather} anonymous={anonymous} cameraRef={cameraRef} onReady={ready} onPerformance={reportPerformance} joystickValues={values}
-            cameraLocked={world.phase==='establishing'} ridePending={!!ride} onExplore={onExplore}
+            multiplayer={policy.multiplayer} scoreSession={multiplayer.sessionId || world.session} onConfirmAI={multiplayer.confirmAI} onConfirmFatal={multiplayer.confirmFatal} paused={policy.paused} inputBlocked={policy.inputBlocked} reducedMotion={hudPreferences.reducedMotion} cameraLocked={!world.session||world.phase==='establishing'} ridePending={!!ride} onExplore={onExplore}
             flightMode={flightMode&&driving} flightControls={flightControls} onFlightStatus={publishRideStatus} onFlightPose={multiplayer.publish} peersRef={gallery?emptyPeersRef:multiplayer.peersRef} plane={identity.plane} pilotName={pilotName}
             carMode={carMode&&driving} carControls={carControls} onCarStatus={publishRideStatus} vehicle={identity.vehicle} carView={view} rideView={view}
             walkMode={walkMode&&driving} walkControls={walkControls} onWalkStatus={publishRideStatus}/>
         </Suspense>
-      </SceneBoundary> : <div className="world-scene-message" role="status"><span className="world-eyebrow">A CITY MADE OF CREATORS</span><h2>{status==='error'?'도시에 연결하지 못했습니다':status==='empty'?'첫 번째 제작자를 기다리는 도시':'당신의 이야기가 도시가 되는 곳'}</h2><p>{status==='error'?error:status==='empty'?`건물 컬렉션에서 ${GALLERY_COUNT}가지 모델을 먼저 둘러보세요.`:'제작자 데이터를 불러오고 있습니다.'}</p>{status==='error' && <button className="eb-btn eb-btn-primary" onClick={retry}>다시 시도</button>}{(status==='error'||status==='empty') && <button className="eb-btn eb-btn-secondary" onClick={toggleGallery}>건물 컬렉션 둘러보기</button>}</div>}
-      {canRender && !sceneReady && <span className="world-render-status" role="status">3D 장면 준비 중…</span>}
+      </SceneBoundary> : !menuVisible && <div className="world-scene-message" role="status"><span className="world-eyebrow">A CITY MADE OF CREATORS</span><h2>{status==='error'?'도시에 연결하지 못했습니다':status==='empty'?'첫 번째 제작자를 기다리는 도시':'당신의 이야기가 도시가 되는 곳'}</h2><p>{status==='error'?error:status==='empty'?`건물 컬렉션에서 ${GALLERY_COUNT}가지 모델을 먼저 둘러보세요.`:'제작자 데이터를 불러오고 있습니다.'}</p>{status==='error' && <button className="eb-btn eb-btn-primary" onClick={retry}>다시 시도</button>}{(status==='error'||status==='empty') && <button className="eb-btn eb-btn-secondary" onClick={toggleGallery}>건물 컬렉션 둘러보기</button>}</div>}
+      {!menuVisible && canRender && !sceneReady && <span className="world-render-status" role="status">3D 장면 준비 중…</span>}
     </div>
 
     {selected && !driving && <section className="world-selection" aria-label="선택한 제작자">
@@ -292,19 +315,20 @@ export default function WorldPage() {
       <div className="world-selection-actions"><button className="eb-btn eb-btn-secondary" onClick={()=>focus({x:selected.x,z:selected.z,height:selected.height,y:selected.height*.35})}>건물로 이동</button>{!gallery && <Link className="eb-btn eb-btn-primary" to={`/profile?creator=${encodeURIComponent(selected.id)}`}>프로필 보기 <ArrowUpRight size={15}/></Link>}</div>
     </section>}
 
-    {(world.phase==='establishing'||world.phase==='exploring') && <RideLauncher onOpen={openPicker}/>}
-    {world.phase==='selecting' && <RidePicker group={pickerGroup} onGroup={setPickerGroup}
+    {!menuVisible && (world.phase==='establishing'||world.phase==='exploring') && <RideLauncher onOpen={openPicker}/>}
+    {!menuVisible && world.phase==='selecting' && <RidePicker group={pickerGroup} onGroup={setPickerGroup}
       selected={pendingRide} onSelect={setPendingRide} onLaunch={launch}
       onClose={()=>dispatch({type:'closePicker'})}/>}
-    <Countdown phase={world.phase} startedAt={world.countdownStartedAt} onDone={finishCountdown} label={rideMeta?.ko}/>
+    <Countdown phase={policy.paused?'paused':world.phase} startedAt={world.countdownStartedAt} onDone={finishCountdown} label={rideMeta?.ko}/>
 
-    {driving && <RideHud kind={rideKind} rideKey={ride.key} pilotName={pilotName}
-      peers={multiplayer.count}
+    {world.session === 'multi' && !menuVisible && <WorldScoreboard {...multiplayer} />}
+    {driving && !menuVisible && <RideHud kind={rideKind} rideKey={ride.key} pilotName={pilotName}
+      peers={multiplayer.count} onMenu={openMenu} {...hudPreferences}
       canSwap={canSwapRide} onSwap={openPicker}
       view={view} onView={setView} autopilot={autopilot}
       onAutopilot={active=>{setAutopilot(active);flightControls.current.autopilot=active;}}
       onThrottle={value=>{flightControls.current.throttle=value/100;}}
-      onBrake={active=>{if(flightMode)flightControls.current.brake=active;else carControls.current.brake=active;}}
+      onBrake={active=>{if(flightMode)flightControls.current.brake=active;else if(ride?.key==='drift')carControls.current.handbrake=active;else carControls.current.brake=active;}}
       onFire={(a,b)=>{
         if(flightMode){const slot=a==='missile'?'fireMissile':a==='bomb'?'fireBomb':'fireCannon';flightControls.current[slot]=b;}
         else if(walkMode)walkControls.current.fire=a;
@@ -320,11 +344,15 @@ export default function WorldPage() {
 
     {!driving && tab==='map' && buildings.length>0 && <WorldMap buildings={buildings} selected={selected} cameraRef={cameraRef} onFocus={focus} onSelect={select} onAirport={openPicker}/>}
 
-    {driving && <TimeAttackHud onClose={endTimeAttack}/>}
+    {driving && !menuVisible && <TimeAttackHud onClose={endTimeAttack}/>}
 
-    {!driving && helpTip}
+    {!driving && !menuVisible && helpTip}
 
-    {flightMode&&driving && <TouchControls flight onMove={(x,y)=>{flightControls.current.roll=x;flightControls.current.pitch=y;}} onRotate={(x,y)=>{flightControls.current.cameraYaw=x;flightControls.current.cameraPitch=y;}} onVertical={value=>{flightControls.current.pitch=value;}}/>}
-    {canRender && !driving && acceptsInput(world) && <TouchControls onMove={(x,y)=>{values.current.move={x,y};}} onRotate={(x,y)=>{values.current.rotate={x,y:-y};}} onVertical={value=>{values.current.vertical=value;}}/>}
+    {flightMode&&driving&&!policy.inputBlocked && <TouchControls flight airship={ride?.key==='airship'} onMove={(x,y)=>{flightControls.current.roll=x;flightControls.current.pitch=y;}} onRotate={(x,y)=>{flightControls.current.cameraYaw=x;flightControls.current.cameraPitch=y;}} onVertical={value=>{flightControls.current.pitch=value;}}/>}
+    {canRender && !driving && !policy.inputBlocked && acceptsInput(world) && <TouchControls onMove={(x,y)=>{values.current.move={x,y};}} onRotate={(x,y)=>{values.current.rotate={x,y:-y};}} onVertical={value=>{values.current.vertical=value;}}/>}
+    {world.session && !menuVisible && !driving && <button className="world-session-menu-button" onClick={openMenu}>메뉴 <span>ESC</span></button>}
+    {menuVisible && <WorldMenu session={world.session} count={data.length} season={season} settings={settings}
+      sceneState={sceneFailed?'scene-error':canRender&&sceneReady?'ready':gallery?'preparing':status==='error'?'error':status==='empty'?'empty':status==='loading'?'loading':'preparing'} onRetry={sceneFailed?()=>retryScene('low'):retry} onReload={()=>window.location.reload()} onGallery={toggleGallery}
+      onEnter={enterSession} onResume={closeMenu} onLeave={leaveSession} onHome={()=>navigate('/')}/>}
   </main>;
 }
