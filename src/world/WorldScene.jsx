@@ -571,7 +571,7 @@ function withoutOwners(batches, ownerIds) {
   return stripped;
 }
 
-function City({ multiplayer = false, scoreSession, onConfirmAI, onConfirmFatal, paused = false, inputBlocked = false, reducedMotion = false, buildings, selectedId, onSelect, labelsVisible = true, focusTarget, quality, timeOfDay, weather, anonymous, cameraRef, onReady, onPerformance, joystickValues, flightMode, flightControls, onFlightStatus, onFlightPose, peersRef, season, plane, pilotName, gallery, carMode, carControls, onCarStatus, vehicle, carView, rideView, walkMode, walkControls, onWalkStatus, cameraLocked, ridePending, onExplore, onContextLost, onContextRestored }) {
+function City({ multiplayer = false, scoreSession, onConfirmAI, onConfirmFatal, paused = false, inputBlocked = false, reducedMotion = false, buildings, selectedId, onSelect, labelsVisible = true, selectedOnly = false, focusTarget, quality, timeOfDay, weather, anonymous, cameraRef, onReady, onPerformance, joystickValues, flightMode, flightControls, onFlightStatus, onFlightPose, peersRef, season, plane, pilotName, gallery, carMode, carControls, onCarStatus, vehicle, carView, rideView, walkMode, walkControls, onWalkStatus, cameraLocked, ridePending, onExplore, onContextLost, onContextRestored }) {
   const pickMesh = useRef(), aircraft=useRef(null), reported=useRef(0), staticRoot = useRef(), shadowFrustum = useRef(null);
   // 남이 쏜 포탄이 쌓아 두는 피해 대기열이다. 주행 모드가 매 프레임 읽고 0 으로 비운다.
   const incoming = useRef({ amount: 0, weapon: null });
@@ -671,7 +671,7 @@ function City({ multiplayer = false, scoreSession, onConfirmAI, onConfirmFatal, 
       <CityTiles cells={cells.cells} resources={resources} shadows={shadows} bands={bands} />
       <Instances batch={pickBatch} resources={resources} shadows={false} meshRef={pickMesh} onSelect={pickBuilding} />
     </group>
-    {labelsVisible && <Labels buildings={buildings} selectedId={selectedId} onSelect={inputBlocked ? undefined : onSelect} pickMesh={pickMesh} resources={resources} flightMode={flightMode} aircraft={aircraft} driving={carMode} anonymous={anonymous} />}
+    {labelsVisible && <Labels buildings={buildings} selectedId={selectedId} selectedOnly={selectedOnly} onSelect={inputBlocked ? undefined : onSelect} pickMesh={pickMesh} resources={resources} flightMode={flightMode} aircraft={aircraft} driving={carMode} anonymous={anonymous} />}
     <StreetLamps lamps={scenery.lamps} night={night} cap={QUALITY[quality].streetlights} />
     <Traffic resources={resources} extent={extent} quality={quality} hiddenRef={hiddenTraffic} night={night} />
     <AirTraffic extent={extent} count={QUALITY[quality].aircraft} combatRef={airCombat} marked={marked} />

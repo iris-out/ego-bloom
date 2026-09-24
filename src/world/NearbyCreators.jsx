@@ -85,12 +85,19 @@ function GroundCard({ building, driving, selected, onSelect, avatar, name, tier,
 
 /** 라벨 하나는 drei Html 이라 매 프레임 DOM 에 transform 을 쓴다. 주행 중에는 그 수를 절반으로
  * 줄이고 후보도 절반 주기로만 다시 고른다. 빠르게 지나가는 동안 여섯 개는 읽히지도 않는다. */
-export default function NearbyLabels({ buildings, selectedId, onSelect, pickMesh, resources, flightMode, aircraft, driving = false, anonymous = false }) {
+export default function NearbyLabels({ buildings, selectedId, selectedOnly = false, onSelect, pickMesh, resources, flightMode, aircraft, driving = false, anonymous = false }) {
   const [visibleIds, setVisibleIds] = useState([]);
   const lastUpdate = useRef(-1), signature = useRef('');
   const scratch = useMemo(() => ({ point: new THREE.Vector3(), projected: new THREE.Vector3() }), []);
   const records = useMemo(() => new Map(buildings.map((building) => [building.id, building])), [buildings]);
   useFrame(({ camera, clock }) => {
+    if (selectedOnly) {
+      const ids = selectedId && records.has(selectedId) ? [selectedId] : [];
+      const nextSignature = JSON.stringify(ids);
+      if (nextSignature !== signature.current) { signature.current = nextSignature; setVisibleIds(ids); }
+      lastUpdate.current = clock.elapsedTime;
+      return;
+    }
     if (clock.elapsedTime - lastUpdate.current < (driving ? 0.3 : 0.25) || !pickMesh.current) return;
     lastUpdate.current = clock.elapsedTime;
     const anchorOf = (building) => {
