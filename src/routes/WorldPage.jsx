@@ -117,8 +117,10 @@ export default function WorldPage() {
   const selected=buildings.find(b=>b.id===selectedId)||null;
   const results=useMemo(()=>filterBuildings(buildings,query,tier),[buildings,query,tier]);
   const ranked=useMemo(()=>[...buildings].sort((a,b)=>(a.rank||9999)-(b.rank||9999)).slice(0,40),[buildings]);
+  const directoryResults=useMemo(()=>query?filterBuildings(data,query,'all'):[...data].sort((a,b)=>(a.rank||9999)-(b.rank||9999)).slice(0,40),[data,query]);
   const focus=useCallback(point=>{if(Number.isFinite(point?.x)&&Number.isFinite(point?.z))setFocusTarget(previous=>({...point,nonce:previous.nonce+1}));},[]);
   const select=useCallback(b=>{if(!b || !Number.isFinite(b.x) || !Number.isFinite(b.z))return;setSelectedId(b.id);dispatch({type:'explore'});focus({x:b.x,z:b.z,height:b.height,y:b.height*.35});setTab(null);},[focus]);
+  const selectInExplorer=useCallback(b=>{if(!b || !Number.isFinite(b.x) || !Number.isFinite(b.z))return;setSelectedId(b.id);dispatch({type:'explore'});focus({x:b.x,z:b.z,height:b.height,y:b.height*.35});},[focus]);
   const ready=useCallback(()=>{setSceneReady(true);if(stageRef.current)stageRef.current.dataset.readyMs=String(Math.round(performance.now()));},[]);
   const reportPerformance=useCallback(stats=>{if(stageRef.current)Object.assign(stageRef.current.dataset,{fps:String(stats.fps),drawCalls:String(stats.calls),triangles:String(stats.triangles)});},[]);
   const retry=()=>{setStatus('loading');setError('');setAttempt(n=>n+1);};
@@ -250,12 +252,16 @@ export default function WorldPage() {
           {status==='loading'&&!gallery && <p role="status">제작자를 불러오는 중입니다…</p>}
           {status==='error'&&!gallery && <div role="alert"><p>{error}</p><button className="eb-btn eb-btn-secondary" onClick={retry}>다시 시도</button></div>}
           {status!=='loading' && results.length===0 && status!=='error' && <p>{data.length?'검색 결과가 없습니다. 다른 이름이나 티어를 선택해주세요.':'아직 도시에 등록된 제작자가 없습니다.'}</p>}
-          {results.slice(0,limit).map(b=>{const t=tierOf(b);return <button className="world-result" key={b.id} aria-pressed={selectedId===b.id} onClick={()=>select(b)}>
+          {results.slice(0,limit).map(b=>{const t=tierOf(b);return <button className="world-result" key={b.id} aria-pressed={selectedId===b.id} onClick={()=>selectInExplorer(b)}>
             <span className="world-rank">{String(b.rank).padStart(2,'0')}</span><span className="world-tier-mark" style={{'--tier-color':`var(${t.cssVar})`}}>{t.code}</span>
             <span className="world-result-name"><strong>{b.nickname||b.handle||'이름 없는 제작자'}</strong><small>{gallery?b.handle:`@${(b.handle||'').replace(/^@/,'')}`}</small></span><ArrowUpRight size={15}/>
           </button>;})}
           {results.length>limit && <button className="eb-btn eb-btn-secondary world-more" onClick={()=>setLimit(n=>n+40)}>40명 더 보기</button>}
         </div>
+        {tab==='discover' && selected && !gallery && <section className="world-panel-selection" aria-label="선택한 제작자">
+          <div><span className="world-eyebrow">CITY RESIDENT / #{selected.rank}</span><strong>{selected.nickname||selected.handle}</strong><small>{tierOf(selected).ko} · ELO {number.format(selected.elo_score/1000)}</small></div>
+          <div className="world-panel-selection-actions"><button className="eb-btn eb-btn-secondary" onClick={()=>focus({x:selected.x,z:selected.z,height:selected.height,y:selected.height*.35})}>건물로 이동</button><Link className="eb-btn eb-btn-primary" to={`/profile?creator=${encodeURIComponent(selected.id)}`}>프로필 보기 <ArrowUpRight size={15}/></Link></div>
+        </section>}
         <div className="world-legend"><span>티어별 건물 색상</span><div>{CREATOR_TIERS.map(t=><button key={t.key} title={t.ko} aria-label={`${t.ko}만 보기`} onClick={()=>{setTier(t.key);setLimit(40);}}><i style={{background:`var(${t.cssVar})`}}/>{t.ko}</button>)}</div></div>
       </div>
     </aside>}
@@ -290,7 +296,7 @@ export default function WorldPage() {
     <div ref={stageRef} className="world-stage" aria-hidden={menuVisible || undefined} aria-label="3D 제작자 도시" data-ready={sceneReady?'true':'false'}>
       {canRender ? <SceneBoundary key={`${sceneAttempt}-${gallery}`} onRetry={retryScene} onError={failScene}>
         <Suspense fallback={menuVisible ? null : <div className="world-scene-message" role="status"><h2>도시를 준비하고 있습니다</h2><p>제작자 목록은 먼저 탐색할 수 있습니다.</p></div>}>
-          <WorldScene buildings={buildings} selectedId={selectedId} onSelect={select} focusTarget={focusTarget} gallery={gallery} season={season} quality={quality} timeOfDay={timeOfDay} weather={weather} anonymous={anonymous} cameraRef={cameraRef} onReady={ready} onPerformance={reportPerformance} joystickValues={values}
+          <WorldScene buildings={buildings} selectedId={selectedId} onSelect={select} labelsVisible={!menuVisible&&tab!=='discover'} focusTarget={focusTarget} gallery={gallery} season={season} quality={quality} timeOfDay={timeOfDay} weather={weather} anonymous={anonymous} cameraRef={cameraRef} onReady={ready} onPerformance={reportPerformance} joystickValues={values}
             multiplayer={policy.multiplayer} scoreSession={multiplayer.sessionId || world.session} onConfirmAI={multiplayer.confirmAI} onConfirmFatal={multiplayer.confirmFatal} paused={policy.paused} inputBlocked={policy.inputBlocked} reducedMotion={hudPreferences.reducedMotion} cameraLocked={!world.session||world.phase==='establishing'} ridePending={!!ride} onExplore={onExplore}
             flightMode={flightMode&&driving} flightControls={flightControls} onFlightStatus={publishRideStatus} onFlightPose={multiplayer.publish} peersRef={gallery?emptyPeersRef:multiplayer.peersRef} plane={identity.plane} pilotName={pilotName}
             carMode={carMode&&driving} carControls={carControls} onCarStatus={publishRideStatus} vehicle={identity.vehicle} carView={view} rideView={view}
@@ -300,7 +306,7 @@ export default function WorldPage() {
       {!menuVisible && canRender && !sceneReady && <span className="world-render-status" role="status">3D 장면 준비 중…</span>}
     </div>
 
-    {selected && !driving && <section className="world-selection" aria-label="선택한 제작자">
+    {selected && !driving && tab!=='discover' && <section className="world-selection" aria-label="선택한 제작자">
       <button className="eb-btn-icon world-selection-close" aria-label="선택 닫기" onClick={()=>setSelectedId(null)}><X size={16}/></button>
       <span className="world-eyebrow">{gallery?'BUILDING COLLECTION':`CITY RESIDENT / #${selected.rank}`}</span>
       <div className="world-selection-head">
@@ -351,8 +357,9 @@ export default function WorldPage() {
     {flightMode&&driving&&!policy.inputBlocked && <TouchControls flight airship={ride?.key==='airship'} onMove={(x,y)=>{flightControls.current.roll=x;flightControls.current.pitch=y;}} onRotate={(x,y)=>{flightControls.current.cameraYaw=x;flightControls.current.cameraPitch=y;}} onVertical={value=>{flightControls.current.pitch=value;}}/>}
     {canRender && !driving && !policy.inputBlocked && acceptsInput(world) && <TouchControls onMove={(x,y)=>{values.current.move={x,y};}} onRotate={(x,y)=>{values.current.rotate={x,y:-y};}} onVertical={value=>{values.current.vertical=value;}}/>}
     {world.session && !menuVisible && !driving && <button className="world-session-menu-button" onClick={openMenu}>메뉴 <span>ESC</span></button>}
-    {menuVisible && <WorldMenu session={world.session} count={data.length} season={season} settings={settings}
+    {menuVisible && <WorldMenu session={world.session} count={data.length} season={season} settings={settings} query={query} onQuery={setQuery} discoverResults={directoryResults} discoverCount={query?directoryResults.length:data.length} discoverStatus={status} discoverEnabled={!driving}
       sceneState={sceneFailed?'scene-error':canRender&&sceneReady?'ready':gallery?'preparing':status==='error'?'error':status==='empty'?'empty':status==='loading'?'loading':'preparing'} onRetry={sceneFailed?()=>retryScene('low'):retry} onReload={()=>window.location.reload()} onGallery={toggleGallery}
-      onEnter={enterSession} onResume={closeMenu} onLeave={leaveSession} onHome={()=>navigate('/')}/>}
+      onEnter={enterSession} onResume={closeMenu} onLeave={leaveSession} onHome={()=>navigate('/')}
+      onExploreCreator={building=>{if(world.session)closeMenu();else enterSession('single');setGallery(false);select(building);}}/>}
   </main>;
 }

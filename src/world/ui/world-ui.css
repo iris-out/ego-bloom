@@ -59,7 +59,7 @@
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   color: var(--fg); overflow: hidden;
 }
-.wui-panel-body { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.wui-panel-body { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
 
 /* 패널 안의 내용은 예전 .world-settings, .world-explorer 에 붙어 있던 규칙에 기대고
  * 있었다. 클래스가 .wui-panel 로 바뀌면서 그 규칙이 끊겨 줄이 무너졌다. 여기서 다시 준다. */
@@ -70,6 +70,9 @@
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
 }
 .wui-panel label { display: grid; gap: 6px; font-size: 12px; color: var(--fg-2); }
+.wui-panel .world-search { display: flex; align-items: center; gap: 8px; }
+.wui-panel .world-search input { width: 100%; min-width: 0; }
+.wui-panel .world-filter label { display: block; flex: 0 0 auto; }
 .wui-panel select, .wui-panel input[type="text"] {
   width: 100%; padding: 8px 10px; font: inherit; font-size: 13px;
   border: 1px solid var(--line); border-radius: 6px;
@@ -87,6 +90,12 @@
   position: static; inset: auto; width: auto; max-height: none;
   padding: 0; border: 0; background: transparent;
 }
+.world-panel-selection { display: grid; gap: 12px; margin: 2px 0 0; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius-m, 8px); background: var(--surface-2); }
+.world-panel-selection > div:first-child { display: grid; gap: 5px; min-width: 0; }
+.world-panel-selection strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fg); font-size: 14px; }
+.world-panel-selection small { color: var(--fg-2); font-size: 11px; }
+.world-panel-selection-actions { display: flex; gap: 8px; }
+.world-panel-selection-actions .eb-btn { width: auto; flex: 1; min-height: 38px; padding: 8px; font-size: 11px; }
 
 /* ----- 좌하단 드라이브 시작 ----- */
 .wui-launcher {
