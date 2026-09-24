@@ -29,6 +29,7 @@ let engine = null;
 let limits = createVoiceState();
 // planVoice 가 준 id 를 그 소리의 입구 GainNode 로 잇는다. 합치기와 밀어내기가 이 표를 읽는다.
 const slots = new Map();
+let sonicVoiceId = null;
 
 function audio() {
   if (context) return context;
@@ -442,7 +443,19 @@ export function closeAudio() {
   effects = null;
   engine = null;
   slots.clear();
+  sonicVoiceId = null;
   limits = createVoiceState();
+}
+
+/** 추락 폭발이 시작되면 남아 있는 소닉붐 꼬리를 짧게 낮춘다. */
+export function stopSonicBoom() {
+  const out = slots.get(sonicVoiceId);
+  sonicVoiceId = null;
+  if (!context || !out) return;
+  const now = context.currentTime;
+  out.gain.cancelScheduledValues(now);
+  out.gain.setValueAtTime(Math.max(1e-4, out.gain.value), now);
+  out.gain.exponentialRampToValueAtTime(1e-4, now + 0.08);
 }
 
 /** 음속을 넘는 순간의 소닉붐이다. 폭발음과 달리 파열이 한 번 크게 치고 긴 저역이 뒤로 끌린다.
@@ -450,6 +463,7 @@ export function closeAudio() {
 export function playSonicBoom() {
   const slot = voice('sonic');
   if (!slot) return;
+  sonicVoiceId = slot.id;
   const { ctx, out } = slot;
   const now = slot.at;
 

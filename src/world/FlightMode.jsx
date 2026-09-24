@@ -12,7 +12,7 @@ import * as THREE from 'three';
 import PlaneModel from './models/PlaneModel';
 import { cockpitFov, eyePoint, FAR_COCKPIT, FAR_DEFAULT, FOV_DEFAULT, NEAR_COCKPIT, NEAR_DEFAULT } from './eyePoints.js';
 import { airImpact } from './reticle.js';
-import { playBoom, playBombDrop, playCannon, playMissileLaunch, playSonicBoom, playTick } from './sound.js';
+import { playBoom, playBombDrop, playCannon, playMissileLaunch, playSonicBoom, playTick, stopSonicBoom } from './sound.js';
 import { createEngineVoice } from './engineSound.js';
 import AimMarker from './models/AimMarker';
 import Cockpit from './cockpits';
@@ -280,9 +280,9 @@ export default function FlightMode({ paused = false, inputBlocked = false, reduc
     if(respawned){camera.position.set(home.x,15,home.z);orbit.current={yaw:0,pitch:.32};health.current=createHealth('flight',plane);life.current=nextCombatLife();}
     // 격추, 추락, 충돌 어느 쪽이든 'crashed' 진입은 한 번뿐이다. 여기서 소리를 낸다.
     // 마하 1 을 넘은 순간 한 번 울린다. 되돌아올 때는 0.97 아래로 떨어져야 다시 무장한다.
-    if (next.supersonic && !sonic.current) { sonic.current = true; playSonicBoom(); }
-    else if (sonic.current && machOf(next.speed) < 0.97) sonic.current = false;
-    if (next.phase === 'crashed' && !boomed.current) { boomed.current = true; playBoom('self'); }
+    if (next.phase === 'airborne' && next.supersonic && !sonic.current) { sonic.current = true; playSonicBoom(); }
+    else if (sonic.current && (next.phase !== 'airborne' || machOf(next.speed) < 0.97)) sonic.current = false;
+    if (next.phase === 'crashed' && !boomed.current) { boomed.current = true; stopSonicBoom(); playBoom('self'); }
     else if (next.phase !== 'crashed') boomed.current = false;
     state.current = next;
     // AI 항공기 목표는 사거리 안쪽만 추린다. 도시 전체를 매 프레임 훑지 않는다.
@@ -348,6 +348,7 @@ export default function FlightMode({ paused = false, inputBlocked = false, reduc
       if (struck) {
         if (Number.isFinite(struck.index) && airCombatRef) downAirTraffic(airCombatRef.current, struck.index, clock.elapsedTime);
         state.current = { ...next, phase: 'crashed', speed: 0, crashElapsed: 0, message: '공중 충돌 · 3초 후 새 기체로 탑승합니다' };
+        stopSonicBoom();
         controls.throttle = 0;
       }
     }
