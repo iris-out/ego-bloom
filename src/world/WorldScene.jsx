@@ -163,7 +163,8 @@ const SurfaceMesh = memo(function SurfaceMesh({ surface, resources, shadows }) {
     return value;
   }, [surface]);
   useEffect(() => () => geometry.dispose(), [geometry]);
-  return <mesh geometry={geometry} material={resources.materials[surface.material]}
+  return <mesh geometry={geometry} renderOrder={surface.path ? 2 : surface.canonical ? 1 : 0}
+    material={resources.materials[surface.material]}
     receiveShadow={shadows} castShadow={false} />;
 });
 
@@ -622,6 +623,7 @@ function City({ multiplayer = false, scoreSession, onConfirmAI, onConfirmFatal, 
   // 고가 교각과 사장교 주탑이 모두 같은 상자 판정을 쓴다. 도보와 포탄도 이 배열을 읽는다.
   const solids = useMemo(() => [...buildings, ...scenery.obstacles, ...airportBoxes(extent),
     ...(gallery ? [] : npcSolids(buildings))], [buildings, scenery, extent, gallery]);
+  const vehicleSolids = useMemo(() => [...solids, ...scenery.vehicleBarriers], [solids, scenery]);
   const cells = useMemo(() => {
     const budget = QUALITY[quality];
     const creatorIds = new Set(buildings.map((building) => building.id));
@@ -689,7 +691,7 @@ function City({ multiplayer = false, scoreSession, onConfirmAI, onConfirmFatal, 
     <RemoteFire key={scoreSession || "local"} extent={extent} peersRef={multiplayer ? peersRef : null} buildings={solids} selfRef={aircraft} incomingRef={incoming} />
     {walkMode ? <Walk paused={paused} inputBlocked={inputBlocked} reducedMotion={reducedMotion} extent={extent} buildings={solids} controlsRef={walkControls} pilotName={pilotName}
       trafficCount={QUALITY[quality].cars} onCameraChange={reportCamera} onStatus={onWalkStatus} onKill={hideTraffic} onPose={reportPose} />
-      : carMode ? <Drive paused={paused} inputBlocked={inputBlocked} reducedMotion={reducedMotion} extent={extent} buildings={solids} controlsRef={carControls} vehicle={vehicle} view={carView} quality={quality}
+      : carMode ? <Drive paused={paused} inputBlocked={inputBlocked} reducedMotion={reducedMotion} extent={extent} buildings={vehicleSolids} controlsRef={carControls} vehicle={vehicle} view={carView} quality={quality}
       pilotName={pilotName} trafficCount={QUALITY[quality].cars} night={night} weather={weather} onCameraChange={reportCamera} onStatus={onCarStatus} onTrafficHit={hideTraffic}
       onPose={reportPose} incomingRef={incoming} onFatal={onConfirmFatal} onAirKill={onConfirmAI} airCount={QUALITY[quality].aircraft} airCombatRef={airCombat} />
       : flightMode ? <Fly paused={paused} inputBlocked={inputBlocked} reducedMotion={reducedMotion} extent={extent} buildings={solids} controlsRef={flightControls} view={rideView} onCameraChange={reportCamera} onStatus={onFlightStatus} onFlightPose={reportPose} plane={plane} pilotName={pilotName} incomingRef={incoming} onFatal={onConfirmFatal} onAirKill={onConfirmAI} airCount={QUALITY[quality].aircraft} airCombatRef={airCombat} trafficCount={QUALITY[quality].cars} onTrafficHit={hideTraffic} peersRef={peersRef} night={night} weather={weather} />

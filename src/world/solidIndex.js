@@ -51,7 +51,8 @@ function slab(from, to, min, max, span) {
 
 const SPAN = [0, 1];
 
-/** 선분 from-to 가 건물 상자를 지나는지 본다. 상자는 바닥 -2 부터 지붕 위 여유까지다.
+/** 선분 from-to 가 건물 상자를 지나는지 본다. bottom 이 있으면 그 높이부터
+ * bottom+height 까지, 없으면 기존 건물의 바닥 -2 부터 height 까지다.
  * 기본 지붕 여유는 4 이고, 상판 바로 아래 교각처럼 보이는 높이가 정확한 구조물은
  * roofMargin:0 을 명시해 차가 상판 위에서 보이지 않는 충돌에 걸리지 않게 한다.
  * 점이 아니라 선분으로 보므로 빠르게 움직여도 벽을 뚫고 지나가지 않는다.
@@ -63,6 +64,9 @@ export function hitsBuilding(from, to, building, clearance = {}) {
   const radius = Number.isFinite(clearance.radius) ? Math.max(0, clearance.radius) : 0;
   const halfX = buildingHalf(building, 'x', margin) + radius, halfZ = buildingHalf(building, 'z', margin) + radius;
   const turn = Number.isFinite(building.rotation) ? building.rotation : 0;
+  const raised = Number.isFinite(building.bottom);
+  const bottom = raised ? building.bottom : -2;
+  const top = (raised ? building.bottom : 0) + building.height + roofMarginOf(building, roofMargin);
   let fromX = from.x - building.x, fromZ = from.z - building.z;
   let toX = to.x - building.x, toZ = to.z - building.z;
   if (turn) {
@@ -73,7 +77,7 @@ export function hitsBuilding(from, to, building, clearance = {}) {
   }
   SPAN[0] = 0; SPAN[1] = 1;
   return slab(fromX, toX, -halfX, halfX, SPAN) !== null
-    && slab(from.y, to.y, -2 - radius, building.height + roofMarginOf(building, roofMargin) + radius, SPAN) !== null
+    && slab(from.y, to.y, bottom - radius, top + radius, SPAN) !== null
     && slab(fromZ, toZ, -halfZ, halfZ, SPAN) !== null;
 }
 

@@ -12,6 +12,7 @@ import { addNpcBuilding, MAX_FILL as NPC_FILL, NPC_OPEN, NPC_PLAN, pickNpcKind }
 import { createBatches, partFootprint } from './cityModels.js';
 import { CIVIC_BUILDINGS } from './models/civicBuildings.js';
 import { addBeach, addParasol, addPier, addResort } from './models/coastModels.js';
+import { addRiverfrontScenery } from './models/riverfront.js';
 import { addBridge, addCrosswalk, addInterchange, addSubwayEntrance } from './models/transitModels.js';
 import { beachStrips, parasols, piers, resortPlots } from '../../shared/coast.js';
 import { inRiverPark, inWaterBody, riverLandSpans, riverSurfaceMesh } from '../../shared/river.js';
@@ -313,11 +314,8 @@ export function buildUrbanScenery(buildings,extent,quality='medium',gallery=fals
     add('bank',[stream.x,-.01,mid],[stream.width+14,.18,length]);
     add('water',[stream.x,.1,mid],[stream.width,.16,length]);
   }
-  // 강 안의 섬은 물 위로 올라온 땅이다.
-  for(const island of plan.islands){
-    add('ground',[island.x,.16,island.z],[island.rx,.3,island.rz],null,'octagon');
-    add('green',[island.x,.26,island.z],[island.rx*.75,.12,island.rz*.75],null,'octagon');
-  }
+  // The island footprint and every pedestrian top use the plan's exact triangles.
+  surfaces.push(...addRiverfrontScenery(add,plan.riverfront,quality));
   // 산은 예전에 배치만 비우고 그리지 않아 평평한 빈 땅이었다. 이제 언덕 덩이로 세운다.
   for(const hill of plan.hills||[]){
     mound(add,hill.x,hill.z,hill.r*.95,hill.r*.34,'#7f9c63');
@@ -464,6 +462,7 @@ export function buildUrbanScenery(buildings,extent,quality='medium',gallery=fals
   const rails=guardrails(plan,quality,{clearance});
   for(const part of rails.parts)add(...part);
   obstacles.push(...rails.solids);
+  obstacles.push(...plan.riverfront.obstacles);
   // 광장과 공원에도 조명을 둔다. 가로등이 도로에만 있어 광장이 캄캄했다.
   for(const plaza of plan.plazas){
     for(let i=0;i<4;i++){
@@ -475,7 +474,7 @@ export function buildUrbanScenery(buildings,extent,quality='medium',gallery=fals
     }
   }
   if(rampFaces.length)surfaces.push({material:'road',category:'ramp-road',source:'roadRibbon',mesh:rampSurfaceMesh(rampFaces)});
-  return {batches,plan,surfaces,obstacles,lamps:lampSpotList};
+  return {batches,plan,surfaces,obstacles,vehicleBarriers:plan.riverfront.vehicleBarriers,lamps:lampSpotList};
 }
 
 /** 제작자가 쓰지 않은 필지를 배경 건물과 열린 공간으로 채운다. 종류는 지구 성격과

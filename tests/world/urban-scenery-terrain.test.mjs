@@ -31,17 +31,16 @@ test('강 표면 높이는 기존 상단 높이를 유지하고 모든 삼각형
   }
 });
 
-test('섬 렌더 반지름은 물리 판정 반지름과 같다',()=>{
-  const { batches,plan }=buildUrbanScenery([],1600,'low');
+test('섬 렌더 면은 물리 판정과 공유하는 polygon 꼭짓점을 쓴다',()=>{
+  const { surfaces,plan }=buildUrbanScenery([],1600,'low');
   for(const island of plan.islands){
-    const ground=batches['octagon-ground'].parts.find((part)=>part.position[0]===island.x&&part.position[2]===island.z);
-    const green=batches['octagon-green'].parts.find((part)=>part.position[0]===island.x&&part.position[2]===island.z);
-    assert.deepEqual(ground.scale,[island.rx,.3,island.rz]);
-    assert.deepEqual(green.scale,[island.rx*.75,.12,island.rz*.75]);
-    assert.equal(ground.position[1],.16);
-    assert.equal(green.position[1],.26);
-    assert.ok(green.position[1]+green.scale[1]/2<.33,'섬 잔디가 도로 위로 솟는다');
-    assert.ok(green.position[1]+green.scale[1]/2>ground.position[1]+ground.scale[1]/2,'섬 잔디가 땅에 묻힌다');
+    const area=plan.riverfront.areas.find(item=>item.polygon&&item.x===island.x);
+    const surface=surfaces.find(item=>item.id===`surface-${area.id}`);
+    assert.ok(surface);
+    assert.deepEqual(area.polygon,island.polygon);
+    assert.equal(surface.mesh.indices.length,island.polygon.length*3);
+    for(const [x,z] of island.polygon)assert.ok(surface.mesh.positions.some((value,index)=>
+      index%3===0&&value===x&&surface.mesh.positions[index+1]===.32&&surface.mesh.positions[index+2]===z));
   }
 });
 

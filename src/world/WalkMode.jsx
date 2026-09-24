@@ -9,6 +9,7 @@ import WeaponView from './models/WeaponView';
 import Blast from './models/Blast';
 import VehicleHealthBar from './VehicleHealthBar';
 import { trafficBoxes } from './traffic.js';
+import { createUrbanPlan } from '../../shared/urbanPlan.js';
 import { FAR_COCKPIT, FAR_DEFAULT, FOV_DEFAULT, NEAR_COCKPIT, NEAR_DEFAULT } from './eyePoints.js';
 import { closeAudio, playBoom, playClick, playHit, playPumpRack, playShot, playStep } from './sound.js';
 import {
@@ -57,6 +58,7 @@ function Blasts({ shots }) {
 }
 
 export default function WalkMode({ paused = false, inputBlocked = false, extent, buildings = [], controlsRef, pilotName, trafficCount = 0, onCameraChange, onStatus, onKill, onPose }) {
+  const riverfront = useMemo(() => createUrbanPlan(extent).riverfront, [extent]);
   const state = useRef(createWalkState(extent)), keys = useRef(new Set());
   const shots = useRef([]), nextId = useRef(1);
   const firing = useRef(false), aiming = useRef(false), look = useRef({ yaw: 0, pitch: 0 });
@@ -177,7 +179,7 @@ export default function WalkMode({ paused = false, inputBlocked = false, extent,
       run: input.has('ShiftLeft') || input.has('ShiftRight') || !!controls.run,
       aim: aiming.current || !!controls.aim,
       threats, lookYaw, lookPitch,
-    }, delta, extent, buildings);
+    }, delta, extent, buildings, riverfront);
     // 탄이 한 발 채워질 때마다 소리를 낸다. 관형 탄창은 재장전 한 번에 여러 번 울린다.
     // 관형 탄창은 한 발 들어갈 때마다 소리가 난다. 쓰러져 다시 시작하면 숫자가 0 으로 돌아가므로
     // 늘어났을 때만 울린다.

@@ -18,6 +18,12 @@ const pathFromPoints = (points, bounds) => points.map((p, index) => {
   return `${index === 0 ? 'M' : 'L'}${m.x} ${m.y}`;
 }).join('');
 
+const rectangleOnMap = (item, bounds) => {
+  const a = mapPoint({ x: item.x - item.width / 2, z: item.z - item.depth / 2 }, bounds);
+  const b = mapPoint({ x: item.x + item.width / 2, z: item.z + item.depth / 2 }, bounds);
+  return { x: a.x, y: a.y, width: b.x - a.x, height: b.y - a.y };
+};
+
 // 해변 띠 사각형의 네 꼭짓점을 지도 좌표로 편다. angle 0 이면 x 축을 따라 눕고, 아니면 z 축을 따라 눕는다.
 function beachPolygon(strip, bounds) {
   const halfLen = strip.length / 2, halfWide = strip.width / 2;
@@ -150,6 +156,12 @@ function OverviewMap({buildings, selected, cameraRef, onFocus, onSelect, onAirpo
         const p=mapPoint(pond,bounds),edge=mapPoint({x:pond.x+pond.rx,z:pond.z+pond.rz},bounds);
         return {cx:p.x,cy:p.y,rx:Math.abs(edge.x-p.x),ry:Math.abs(edge.y-p.y)};
       }),
+      riverfrontAreas: plan.riverfront.areas.map(area=>({id:area.id,kind:area.kind,
+        polygon:area.polygon?.map(([x,z])=>{const point=mapPoint({x,z},bounds);return `${point.x},${point.y}`;}).join(' '),
+        box:rectangleOnMap(area,bounds)})),
+      riverfrontPaths: plan.riverfront.paths.map(path=>({id:path.id,d:pathFromPoints(path.points,bounds)})),
+      riverfrontBuildings: plan.riverfront.structures.filter(item=>item.kind==='pavilion'||item.kind==='culture-hall')
+        .map(item=>({id:item.id,box:rectangleOnMap(item,bounds)})),
     };
   },[buildings,bounds,plan,extent]);
 
@@ -176,6 +188,14 @@ function OverviewMap({buildings, selected, cameraRef, onFocus, onSelect, onAirpo
       {staticLayers.districts.map(d=><ellipse key={d.id} cx={d.cx} cy={d.cy} rx={d.rx} ry={d.ry} fill={d.color} opacity=".12"/>)}
       <path d={staticLayers.river} fill="none" stroke="var(--t-platinum)" strokeWidth="1.1" opacity=".4" />
       {staticLayers.ponds.map((p,index)=><ellipse key={index} cx={p.cx} cy={p.cy} rx={p.rx} ry={p.ry} fill="var(--t-platinum)" opacity=".35"/>)}
+      {staticLayers.riverfrontAreas.map(area=>area.polygon
+        ? <polygon key={area.id} points={area.polygon} fill="#8eaa78" stroke="#5a8069" strokeWidth=".28" opacity=".88"/>
+        : <rect key={area.id} {...area.box} fill={area.kind==='pavilion'?'#c4aa80':'#8eaa78'}
+          stroke="#5a8069" strokeWidth=".22" opacity=".7"/>)}
+      {staticLayers.riverfrontPaths.map(path=><path key={path.id} d={path.d} fill="none" stroke="#e3d0a6"
+        strokeWidth=".32" strokeDasharray=".9 .45" opacity=".95"/>)}
+      {staticLayers.riverfrontBuildings.map(item=><rect key={item.id} {...item.box} fill="#8c928d"
+        stroke="#e4d1ac" strokeWidth=".24"/>)}
       {staticLayers.roads.map((road,index)=><path key={index} d={`M${road.a.x} ${road.a.y}L${road.b.x} ${road.b.y}`} stroke="var(--fg-3)" strokeWidth={road.kind==='arterial'?'.75':road.kind==='collector'?'.45':'.22'} opacity={road.kind==='alley'?'.28':'.48'}/>)}
       {staticLayers.highways.map((road,index)=><path key={index} d={`M${road.a.x} ${road.a.y}L${road.b.x} ${road.b.y}`} stroke="var(--warn)" strokeWidth="1.1" opacity=".6" strokeDasharray={road.tunnel?'1.6 1.1':undefined}/>)}
       {staticLayers.ramps.map((ramp,index)=><path key={`ramp-${index}`} d={ramp.d} fill="none" stroke="var(--warn)" strokeWidth={ramp.kind==='portal'?'.8':'.55'} opacity=".72"/>)}

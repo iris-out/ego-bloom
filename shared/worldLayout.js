@@ -60,6 +60,8 @@ function reservations(plan){
   // 연못과 호수도 비운다. 타원이지만 외접 사각형이면 충분히 넉넉하다.
   for(const pond of plan.ponds||[])list.push({x:pond.x,z:pond.z,rx:pond.rx+6,rz:pond.rz+6});
   for(const plaza of plan.plazas)list.push({x:plaza.x,z:plaza.z,rx:plaza.r,rz:plaza.r});
+  list.push(...(plan.neighborhoodReservations||[]));
+  list.push(...(plan.riverfront?.reservations||[]));
   for(const circle of plan.roundabouts||[])list.push({x:circle.x,z:circle.z,rx:circle.r+8,rz:circle.r+8});
   // 랜드마크마다 제 크기만큼 비운다. 한 값으로 뭉뚱그리면 시청 둘레에 건물이 파고든다.
   for(const mark of plan.landmarks){

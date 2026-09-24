@@ -63,3 +63,15 @@ test('except 로 준 건물은 가림 판정에서 뺀다', () => {
   const others = buildings.filter((building) => building !== target);
   assert.equal(hitsAnyBuilding(from, to, buildings, target), others.some((building) => hitsBuilding(from, to, building)));
 });
+
+test('raised solids collide only across their actual bottom and top', () => {
+  const raised = { x: 0, z: 0, width: 4, depth: 4, bottom: 5, height: 2, margin: 0, roofMargin: 0 };
+  const segment = y => [{ x: -4, y, z: 0 }, { x: 4, y, z: 0 }];
+  assert.equal(hitsAnyBuilding(...segment(4.9), [raised]), false);
+  assert.equal(hitsAnyBuilding(...segment(5), [raised]), true);
+  assert.equal(hitsAnyBuilding(...segment(7), [raised]), true);
+  assert.equal(hitsAnyBuilding(...segment(7.1), [raised]), false);
+  const legacy = { x: 0, z: 0, width: 4, depth: 4, height: 2, margin: 0, roofMargin: 0 };
+  assert.equal(hitsAnyBuilding(...segment(-1), [legacy]), true);
+  assert.equal(hitsAnyBuilding(...segment(2.1), [legacy]), false);
+});

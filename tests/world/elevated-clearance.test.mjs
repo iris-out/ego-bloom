@@ -36,7 +36,7 @@ test('고가 교각이 지상 도로 한복판에 서지 않는다', () => {
     const { obstacles } = buildUrbanScenery([], EXTENT, quality);
     assert.ok(obstacles.length > 0, `${quality} 에서 구조물이 나온다`);
     // 사장교 주탑은 다리 상판 위 중앙분리대에 선다. 지상 도로 판정에서 빼고 본다.
-    const piers = obstacles.filter((item) => item.height < 30);
+    const piers = obstacles.filter((item) => item.height < 30 && !item.kind);
     const blocking = piers.filter((pier) => !clearOfRoads(index, pier.x, pier.z, 0));
     assert.equal(blocking.length, 0, `${quality} 에서 도로 위에 선 교각이 없다`);
   }

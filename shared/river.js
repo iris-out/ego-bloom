@@ -174,19 +174,38 @@ const ISLANDS = Object.freeze([
   { id: 'yeoui', x: -0.42, rx: 0.105, rz: 0.040 },
   { id: 'nodeul', x: 0.30, rx: 0.072, rz: 0.028 },
 ]);
+const islandCache = new Map();
 
 export function riverIslands(extent) {
   const e = span(extent);
-  return ISLANDS.map((island) => ({
-    id: island.id, x: island.x * e, z: riverCenter(e, island.x * e),
-    rx: island.rx * e, rz: island.rz * e,
-  }));
+  if (islandCache.has(e)) return islandCache.get(e);
+  const islands = ISLANDS.map((island) => {
+    const x = island.x * e, z = riverCenter(e, x), rx = island.rx * e, rz = island.rz * e;
+    return { id: island.id, x, z, rx, rz, polygon: Array.from({ length: 24 }, (_, index) => {
+      const angle = index * Math.PI * 2 / 24;
+      return [x + Math.cos(angle) * rx, z + Math.sin(angle) * rz];
+    }) };
+  });
+  if (islandCache.size >= 16) islandCache.delete(islandCache.keys().next().value);
+  islandCache.set(e, islands);
+  return islands;
+}
+
+export function inIslandPolygon(island, x, z) {
+  const polygon = island?.polygon;
+  if (!polygon?.length) return false;
+  if (Math.abs(x - island.x) > island.rx || Math.abs(z - island.z) > island.rz) return false;
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const a = polygon[i], b = polygon[j];
+    if ((a[1] > z) !== (b[1] > z) && x < (b[0] - a[0]) * (z - a[1]) / (b[1] - a[1]) + a[0]) inside = !inside;
+  }
+  return inside;
 }
 
 export function onIsland(extent, x, z) {
   for (const island of riverIslands(extent)) {
-    const dx = (x - island.x) / island.rx, dz = (z - island.z) / island.rz;
-    if (dx * dx + dz * dz < 1) return island;
+    if (inIslandPolygon(island, x, z)) return island;
   }
   return null;
 }

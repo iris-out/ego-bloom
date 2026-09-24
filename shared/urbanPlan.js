@@ -13,6 +13,8 @@ import { NATURE_ARC_RADIUS, NATURE_CORNER, inNature, natureCorners, naturePonds 
 import { riverZoneAt } from './riverZones.js';
 import { LOOP_HALF_RATIO, highwayLoop, highwayRadials, highwayStraightHalf, interchanges as buildInterchanges, subwayNetwork } from './transit.js';
 import { buildRoadNetwork, surfaceConnectors, surfaceEdgeSeams } from './roadNetwork.js';
+import { createNeighborhoodPlan } from './neighborhoodPlan.js';
+import { createRiverfrontPlan } from './riverfrontPlan.js';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const segment=(a,b,kind='lane',extra={})=>({x1:a[0],z1:a[1],x2:b[0],z2:b[1],kind,
@@ -703,6 +705,11 @@ function buildUrbanPlan(extent){
   const roundabouts=[C[1],C[2]].map(x=>({x,z:R[1],r:44}));
   const overpasses=[];
 
+  // Neighborhood streets use existing endpoints and replace covered local
+  // paving before bridge, access, and building placement generation.
+  const neighborhoodPlan=createNeighborhoodPlan({extent:e,roads,districts});
+  roads.splice(0,roads.length,...neighborhoodPlan.roads);
+
   // 강은 하나다. 모든 소비자가 shared/river.js 한 곳을 읽는다. 중심선이 굽어 있으므로
   // 미니맵과 렌더도 같은 표본을 쓴다.
   const riverLine=riverSamples(e,64);
@@ -796,7 +803,10 @@ function buildUrbanPlan(extent){
       if(road.elevated||road.tunnel||road.kind==='alley')continue;
       const lo=Math.min(road.x1,road.x2),hi=Math.max(road.x1,road.x2);
       // 지천 x 가 두 도로 조각의 공유 꼭짓점과 같아도 하나의 실제 횡단이다.
-      if(lo>stream.x+1e-6||hi<stream.x-1e-6||hi-lo<stream.width)continue;
+      // Neighborhood curves use short tessellated segments. Their crossing
+      // segment can be shorter than the stream width but still needs a deck.
+      if(lo>stream.x+1e-6||hi<stream.x-1e-6
+        ||(hi-lo<stream.width&&!road.path?.startsWith('neighborhood-')))continue;
       const t=(stream.x-road.x1)/(road.x2-road.x1),z=road.z1+(road.z2-road.z1)*t;
       if(z<zLo||z>zHi||inRiver(e,stream.x,z))continue;
       if(bridges.some(b=>b.axis==='x'&&Math.abs(b.x-stream.x)<1&&Math.abs(b.z-z)<(ROAD_WIDTH[road.kind]||8)))continue;
@@ -929,9 +939,22 @@ function buildUrbanPlan(extent){
     if(atIn)road.deadEndIn=reason;else road.deadEndOut=reason;
   }
   for(const bridge of bridges){bridge.sourceRoadIndex=roads.indexOf(bridge._sourceRoad);delete bridge._sourceRoad;}
-  const parks=shareHoles(wide,4,used).map((block,index)=>({x:block.x,z:block.z,rx:inner(block),rz:inner(block),
+  const neighborhoodRoads=roads.filter(road=>road.path?.startsWith('neighborhood-'));
+  const parkSites=wide.filter((block,index)=>!used.has(index)&&!neighborhoodRoads.some(road=>
+    holeSpan(road,{x:block.x,z:block.z,hx:inner(block)+(ROAD_WIDTH[road.kind]||8)/2,
+      hz:inner(block)+(ROAD_WIDTH[road.kind]||8)/2})!==null));
+  const parkBlocks=shareHoles(parkSites,4,new Set());
+  for(const block of parkBlocks)used.add(wide.indexOf(block));
+  const parks=parkBlocks.map((block,index)=>({x:block.x,z:block.z,rx:inner(block),rz:inner(block),
     kind:['central','oldtown','garden','arts'][index]||'central'}));
-  const plazas=shareHoles(wide,3,used).map(block=>({x:block.x,z:block.z,r:Math.min(44,inner(block))}));
+  const plazaSites=wide.filter((block,index)=>!used.has(index)&&!neighborhoodRoads.some(road=>{
+    const pad=Math.min(44,inner(block))+(ROAD_WIDTH[road.kind]||8)/2;
+    return holeSpan(road,{x:block.x,z:block.z,hx:pad,hz:pad})!==null;
+  }));
+  const plazaBlocks=shareHoles(plazaSites,3,new Set());
+  for(const block of plazaBlocks)used.add(wide.indexOf(block));
+  const plazas=plazaBlocks.map(block=>({x:block.x,z:block.z,r:Math.min(44,inner(block))}));
+  plazas.push(...neighborhoodPlan.neighborhoods.flatMap(neighborhood=>neighborhood.plazas));
 
   // 연못이다. 자연지대의 호수와 골짜기 못, 공원마다 하나, 남안 강변 습지 셋이다.
   // 강변 습지는 물이나 다리 자리에 겹치면 뺀다.
@@ -942,6 +965,9 @@ function buildUrbanPlan(extent){
     if(inWaterBody(e,x,z)||bridges.some(b=>Math.abs(b.x-x)<60))continue;
     ponds.push({x,z,rx:e*.035,rz:e*.02,kind:'marsh'});
   }
+
+  const islands=riverIslands(e);
+  const riverfront=createRiverfrontPlan({extent:e,roads,bridges,ponds,islands});
 
   const waterfront=[
     {points:[[-e*.76,-e*.93],[-e*.1,-e*.96],[e*.7,-e*.92]],kind:'promenade'},
@@ -962,10 +988,11 @@ function buildUrbanPlan(extent){
   const roadIndex=createSegmentIndex([...roads.filter(r=>r.kind!=='alley'),...rampSegments],LOT_CHAMPION+ALLEY);
   const subway=subwayNetwork(e);
   const plan={extent,riverZ:riverCenter(e,0),districts,roads,bridges,parks,plazas,waterfront,landmarks,routes,highwayRoutes,
+    neighborhoods:neighborhoodPlan.neighborhoods,neighborhoodReservations:neighborhoodPlan.reservations,
     ramps,roundabouts,tunnels,overpasses,highwayDeck:HIGHWAY_DECK,
     nodes,hills,nature,ponds,airportRoads:[{side:1,points:[[border,AIRPORT_ROAD_Z],[e+AIRPORT_OFFSET+AIRPORT_ROAD_END,AIRPORT_ROAD_Z]]}],
     subway,interchanges,roadIndex,riverLine,
-    islands:riverIslands(e),streams};
+    islands,streams,riverfront};
   let network;
   Object.defineProperty(plan,'network',{enumerable:true,get:()=>network??=(buildRoadNetwork({roads,ramps}))});
   return plan;

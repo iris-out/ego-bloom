@@ -1,8 +1,10 @@
 import { hitsAnyBuilding } from './solidIndex.js';
-import { hitsVehicle, inWater, slideAlongWall } from './carPhysics.js';
+import { hitsVehicle, inWater } from './carPhysics.js';
 import { walkSpawn } from './models/airportLayout.js';
 import { cockpitFov } from './eyePoints.js';
 import { MASS_LOT_RATIO } from './cityModels.js';
+import { inWaterBody } from '../../shared/river.js';
+import { pedestrianSurface } from '../../shared/pedestrianSurface.js';
 
 /** 도보 모드의 이동과 사격. 순수 함수이며 Three, React, 네트워크에 의존하지 않는다.
  * 총알은 hitscan 이다. 사람 모델이 없으므로 사람은 쏘지 못하고 AI 차량만 맞는다.
@@ -168,9 +170,34 @@ function insideAnyBuilding(point, buildings) {
       dx = rx;
     }
     const y = finite(point.y, EYE_HEIGHT);
+    const raised = Number.isFinite(building.bottom);
+    const bottom = raised ? building.bottom : -2;
+    const top = (raised ? building.bottom : 0) + building.height
+      + (Number.isFinite(building.roofMargin) ? Math.max(0, building.roofMargin) : 4);
     return Math.abs(dx) <= solidHalf(building, 'x') && Math.abs(dz) <= solidHalf(building, 'z')
-      && y >= -2 && y <= building.height + 4;
+      && y >= bottom && y <= top;
   });
+}
+
+/** A low rail can intersect the walker's body while remaining below eye level.
+ * Keep the two swept lines at real body heights so jumping can clear it. */
+function hitsWalkerBody(from, to, buildings) {
+  if (hitsAnyBuilding(from, to, buildings)) return true;
+  for (const offset of [.6, .7]) {
+    const bodyY = from.y - EYE_HEIGHT + offset;
+    if (hitsAnyBuilding({ ...from, y: bodyY }, { ...to, y: bodyY }, buildings)) return true;
+  }
+  return false;
+}
+
+function slideWalkerBody(from, to, buildings) {
+  const alongX = { x: to.x, y: to.y, z: from.z };
+  const alongZ = { x: from.x, y: to.y, z: to.z };
+  const freeX = Math.abs(to.x - from.x) > 1e-6 && !hitsWalkerBody(from, alongX, buildings);
+  const freeZ = Math.abs(to.z - from.z) > 1e-6 && !hitsWalkerBody(from, alongZ, buildings);
+  if (!freeX && !freeZ) return null;
+  if (freeX && freeZ) return Math.abs(to.x - from.x) >= Math.abs(to.z - from.z) ? alongX : alongZ;
+  return freeX ? alongX : alongZ;
 }
 
 /** 차에 깔렸는지 본다. 사람은 상자 하나로 본다. */
@@ -190,7 +217,12 @@ function runOver(state, threats) {
   return null;
 }
 
-export function stepWalk(previous, input = {}, delta = 0, extent = 180, buildings = []) {
+function walkInWater(x, z, extent) {
+  const insideCity = Math.abs(x) <= extent + 16 && Math.abs(z) <= extent + 16;
+  return inWater(x, z, extent) || (insideCity && inWaterBody(extent, x, z));
+}
+
+export function stepWalk(previous, input = {}, delta = 0, extent = 180, buildings = [], riverfront = null) {
   const dt = clamp(delta, 0, 0.05);
   const state = { ...previous };
   if (!['x', 'z', 'heading'].every((field) => Number.isFinite(state[field]))) return createWalkState(extent);
@@ -231,33 +263,43 @@ export function stepWalk(previous, input = {}, delta = 0, extent = 180, building
   const length = Math.hypot(forward, strafe) || 1;
   const sin = Math.sin(state.heading), cos = Math.cos(state.heading);
   const step = pace * move * dt;
-  const from = { x: state.x, y: EYE_HEIGHT, z: state.z };
+  const from = { x: state.x, y: state.y, z: state.z };
   const next = {
     x: state.x + (-sin * (forward / length) + cos * (strafe / length)) * step,
-    y: EYE_HEIGHT,
+    y: state.y,
     z: state.z + (-cos * (forward / length) - sin * (strafe / length)) * step,
   };
   // 건물은 막되 carPhysics 와 같은 방식으로 미끄러진다. 비스듬히 닿으면 한 축만 열어
   // 벽을 따라 걷고, 정면으로 막히면 제자리다. 이미 상자 안(트랩)이면 막지 않아 빠져나간다.
-  if (insideAnyBuilding(from, buildings) || !hitsAnyBuilding(from, next, buildings)) {
+  if (insideAnyBuilding(from, buildings)
+    || [.6, .7].some(offset => insideAnyBuilding({ ...from, y: from.y - EYE_HEIGHT + offset }, buildings))
+    || !hitsWalkerBody(from, next, buildings)) {
     state.x = next.x; state.z = next.z;
   } else {
-    const slid = slideAlongWall(from, next, buildings);
+    const slid = slideWalkerBody(from, next, buildings);
     if (slid) { state.x = slid.x; state.z = slid.z; }
   }
   state.moving = move;
 
-  // 점프는 땅에 있을 때만 시작한다. 공중에서는 중력만 받는다.
-  const height = Math.max(0, finite(state.y, EYE_HEIGHT) - EYE_HEIGHT);
+  // Stepping up is permitted only from dry land or from a floor that was already
+  // carrying the feet. Airborne walkers can land only on a floor below their
+  // previous foot height, so they cannot rise through the underside of a deck.
+  const previousFeetY = finite(previous.y, EYE_HEIGHT) - EYE_HEIGHT;
+  const previousFloor = pedestrianSurface(riverfront, previous.x, previous.z, previousFeetY);
+  const groundedOnFloor = previousFloor && Math.abs(previousFeetY - previousFloor.top) <= .02;
+  const canStepUp = !previous.airborne && (!walkInWater(previous.x, previous.z, extent) || groundedOnFloor);
+  const floor = pedestrianSurface(riverfront, state.x, state.z, previousFeetY + (canStepUp ? .38 : 0));
+  const floorY = floor?.top ?? 0;
+  const height = finite(state.y, EYE_HEIGHT) - EYE_HEIGHT;
   let vy = finite(state.vy);
-  if (!state.airborne && input.jump && height <= 1e-6) { vy = JUMP_SPEED; state.airborne = true; }
+  if (!state.airborne && input.jump && height <= floorY + 1e-6) { vy = JUMP_SPEED; state.airborne = true; }
   if (state.airborne) {
     vy -= GRAVITY * dt;
     const lifted = height + vy * dt;
-    if (lifted <= 0) { state.airborne = false; vy = 0; state.y = EYE_HEIGHT; }
+    if (lifted <= floorY && vy <= 0) { state.airborne = false; vy = 0; state.y = EYE_HEIGHT + floorY; }
     else state.y = EYE_HEIGHT + lifted;
   } else {
-    state.y = EYE_HEIGHT;
+    state.y = EYE_HEIGHT + floorY;
   }
   state.vy = vy;
 
@@ -266,10 +308,14 @@ export function stepWalk(previous, input = {}, delta = 0, extent = 180, building
   const eased = finite(state.lean) + (want - finite(state.lean)) * Math.min(1, dt * LEAN_RATE);
   const peek = leanOffset({ heading: state.heading, lean: eased });
   const wall = hitsAnyBuilding(
-    { x: state.x, y: EYE_HEIGHT, z: state.z }, { x: state.x + peek.x, y: EYE_HEIGHT, z: state.z + peek.z }, buildings);
+    { x: state.x, y: state.y, z: state.z }, { x: state.x + peek.x, y: state.y, z: state.z + peek.z }, buildings);
   state.lean = wall ? 0 : eased;
 
-  if (inWater(state.x, state.z, extent)) {
+  // carPhysics excludes bridge footprints from water at every height. Walking
+  // requires real support at foot level, including when under a bridge.
+  const wet = walkInWater(state.x, state.z, extent);
+  const supportedAboveWater = floor && state.y - EYE_HEIGHT >= floor.top - 1e-6;
+  if (wet && !supportedAboveWater) {
     return { ...state, phase: 'drowned', drownElapsed: 0, message: '물에 빠졌다 · 잠시 후 출발 지점으로 돌아갑니다' };
   }
 
