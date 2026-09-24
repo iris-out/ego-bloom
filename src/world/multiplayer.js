@@ -25,6 +25,9 @@ export function validPose(value) {
   const kind = RIDE_KINDS.includes(value.kind) ? value.kind : 'flight';
   return {
     ...Object.fromEntries(POSE_FIELDS.map(key => [key, value[key]])),
+    // Flight projectiles inherit the shooter's forward speed. Clamp remote input
+    // so malformed telemetry cannot create arbitrarily fast reconstructed shots.
+    speed: Number.isFinite(value.speed) ? Math.max(0, Math.min(value.speed, 500)) : 0,
     phase: value.phase, kind, key: validRideKey(kind, value.key),
     // 체력은 0 에서 1 이다. 없으면 멀쩡한 것으로 본다.
     hull: Number.isFinite(value.hull) ? Math.max(0, Math.min(1, value.hull)) : 1,

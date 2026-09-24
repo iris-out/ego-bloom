@@ -1,5 +1,6 @@
 import { hitsAnyBuilding } from './solidIndex.js';
 import { hitsVehicle } from './carPhysics.js';
+import { hitsSphere } from './airTraffic.js';
 import { GROUND_GUNS, hullBox, muzzlePoint } from './groundWeapons.js';
 import { MISSILE, gunOf, muzzleAim, pelletOffset, toWorld } from './weapons.js';
 import { armamentOf } from './hardpoints.js';
@@ -37,7 +38,7 @@ function shellSpec(weapon, plane) {
 }
 
 export function createRemoteCombat() {
-  return { shells: [], blasts: [], fired: {}, nextId: 1, damage: 0, weapon: null };
+  return { shells: [], blasts: [], fired: {}, nextId: 1, damage: 0, weapon: null, targetPose: null };
 }
 
 /** 지상 전투 차량의 포구다. 로컬 발사와 같은 muzzlePoint 를 쓴다. */
@@ -69,7 +70,9 @@ function spawn(state, pose, weapon, index, pellet = null) {
   if (!spec) return null;
   const mouth = pose.kind === 'car' ? groundMuzzle(pose, index) : airMuzzle(pose, weapon, index, pellet);
   if (![mouth.x, mouth.y, mouth.z].every(Number.isFinite)) return null;
-  const speed = spec.speed + (weapon === 'shotgun' ? finite(pose.speed) : 0);
+  // Match weapons.spawn(): every air weapon inherits the aircraft's velocity.
+  const inheritsSpeed = pose.kind === 'flight' || weapon === 'shotgun';
+  const speed = spec.speed + (inheritsSpeed ? finite(pose.speed) : 0);
   return {
     id: state.nextId++, weapon, owner: pose.id,
     x: mouth.x, y: mouth.y, z: mouth.z,
@@ -112,11 +115,17 @@ function launchFrom(state, peers, fired) {
 /** 내 차체에 닿았는지 본다. 지상은 상자, 공중은 구로 본다.
  * 지상 상자는 hullBox 가 바닥과 전고를 채운 것이라 세 축을 모두 본다. 채우기 전에는
  * 남의 포탄이 내 차 200m 위를 지나가도 수평만 겹치면 체력이 깎였다. */
-function hitsSelf(from, to, self) {
+function hitsSelf(from, to, self, previousSelf = self) {
   if (!self) return false;
   if (self.kind === 'car' || self.kind === 'walk') return hitsVehicle(from, to, self, 0.6);
   const radius = finite(self.radius, 7);
-  return Math.hypot(to.x - self.x, to.y - finite(self.y), to.z - self.z) <= radius;
+  // Compare relative projectile/target motion so a fast shell cannot tunnel
+  // through a moving aircraft between simulation frames.
+  return hitsSphere(
+    { x: from.x - previousSelf.x, y: from.y - finite(previousSelf.y), z: from.z - previousSelf.z },
+    { x: to.x - self.x, y: to.y - finite(self.y), z: to.z - self.z },
+    { x: 0, y: 0, z: 0, radius },
+  );
 }
 
 /** 원격 포탄을 한 걸음 굴린다. peers 는 pose 를 펼친 배열이고 self 는 내 탈것의 충돌 상자다.
@@ -126,6 +135,11 @@ export function stepRemoteCombat(previous, { dt = 0, peers = [], self = null, bu
   const step = Math.max(0, Math.min(finite(dt), 0.05));
   const fired = { ...previous.fired };
   const state = { ...previous, shells: [], blasts: [], fired, damage: 0, weapon: null };
+  const previousTarget = previous.targetPose;
+  const sameTargetLife = previousTarget && self
+    && previousTarget.kind === self.kind && previousTarget.key === self.key && previousTarget.life === self.life;
+  const collisionSelf = sameTargetLife ? previousTarget : self;
+  state.targetPose = self ? { x: finite(self.x), y: finite(self.y), z: finite(self.z), kind: self.kind, key: self.key, life: self.life } : null;
   // 떠난 상대의 기준값은 버린다. 다시 들어오면 그때 다시 잡는다.
   const present = new Set(peers.map((peer) => peer?.id));
   for (const key of Object.keys(fired)) if (!present.has(key.slice(0, key.lastIndexOf(':')))) delete fired[key];
@@ -149,7 +163,7 @@ export function stepRemoteCombat(previous, { dt = 0, peers = [], self = null, bu
     moved.x += moved.vx * step; moved.y += moved.vy * step; moved.z += moved.vz * step;
     moved.travel = finite(shell.travel) + Math.hypot(moved.x - shell.x, moved.y - shell.y, moved.z - shell.z);
     if (![moved.x, moved.y, moved.z].every(Number.isFinite)) continue;
-    const struck = vulnerable && hitsSelf(shell, moved, target);
+    const struck = vulnerable && hitsSelf(shell, moved, target, collisionSelf);
     if (struck) {
       state.damage += damageOf(shell.weapon);
       state.weapon = shell.weapon;

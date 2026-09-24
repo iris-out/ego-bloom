@@ -33,7 +33,7 @@ export default function useWorldMultiplayer(riding, identity) {
       connection=createWorldRoom(supabase,{id,onChange:setState,onPeers:peers=>{peersRef.current=peers;},identity:{...initial.current,origin:key}});
       room.current=connection;
       setSessionId(id);
-      interval=setInterval(()=>connection.tick(),100);
+      interval=setInterval(()=>connection.tick(),50);
     }).catch(()=>{if(!cancelled)setState({...IDLE_STATE,status:'offline'});});
     return ()=>{cancelled=true;clearInterval(interval);connection?.close();room.current=null;peersRef.current=[];setSessionId(null);};
   }, []);
