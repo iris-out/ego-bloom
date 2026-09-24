@@ -1,4 +1,4 @@
-import { riverCenter, riverHalf, riverParkWidth, riverStreams, inRiver, inWaterBody } from './river.js';
+import { riverCenter, riverHalf, riverParkWidth, riverStreams, inRiver, inRiverPark, inWaterBody } from './river.js';
 import { bridgeSegment, onBridge } from './bridgeGeometry.js';
 
 // The existing river park mesh tops out at .13. Canonical destination floors
@@ -57,7 +57,7 @@ function islandTriangles(island, y) {
 }
 
 export function createRiverfrontPlan({ extent, roads = [], bridges = [], ponds = [], islands = [] }) {
-  const e = Math.max(1, extent), areas = [], paths = [], surfaces = [], structures = [];
+  const e = Math.max(1, extent), areas = [], paths = [], surfaces = [], structures = [], lamps = [];
   const obstacles = [], vehicleBarriers = [], reservations = [];
   const diagnostics = { skippedCandidates: [], bridgeCrossings: [] };
   const addFixture = (id, kind, x, bottom, z, width, height, depth, margin = 0) => {
@@ -284,11 +284,66 @@ export function createRiverfrontPlan({ extent, roads = [], bridges = [], ponds =
       .15, .14, deck.depth - 2, .42);
   }
 
+  // Small retail faces the access ribbon from either side, outside each destination.
+  // The same records feed its visible model, collision, map outline and lamp spots.
+  // The 13 x 10 roof and optional 8.5 m rooftop unit fit within this solid.
+  const shopWidth = 14, shopDepth = 14, shopHeight = 8.6;
+  const clearRectangle = (x, z, width, depth, item, gap) =>
+    Math.abs(x - item.x) >= width / 2 + (item.width ?? item.rx * 2) / 2 + gap
+    || Math.abs(z - item.z) >= depth / 2 + (item.depth ?? item.rz * 2) / 2 + gap;
+  const clearPath = (x, z, radius, gap) => paths.every(path => path.points.slice(1).every((point, index) =>
+    distanceToRoad(x, z, { x1: path.points[index][0], z1: path.points[index][1],
+      x2: point[0], z2: point[1] }) >= radius + path.width / 2 + gap));
+  const retailAreas = [lawn, picnic, grove, terraces].filter(Boolean);
+  for (const [index, area] of retailAreas.entries()) for (const side of [-1, 1]) {
+    let placed = false;
+    for (const outward of [0, 12, 24, 36]) {
+      if (placed) break;
+      for (const forward of [0, 10, -10]) {
+        const x = area.x + side * (18 + outward);
+        const z = area.z + area.depth / 2 + 16 + forward;
+        const corners = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+        if (Math.abs(x) > e * .85 || corners.some(([sx, sz]) =>
+          !inRiverPark(e, x + sx * shopWidth / 2, z + sz * shopDepth / 2))) continue;
+        if (!usableSite(e, x, z, shopWidth, shopDepth, roads, bridges, ponds)) continue;
+        if (!clearPath(x, z, Math.hypot(shopWidth, shopDepth) / 2, 3)) continue;
+        if (areas.some(item => !clearRectangle(x, z, shopWidth, shopDepth, item, 5))) continue;
+        if (structures.some(item => item.width && item.depth
+          && !clearRectangle(x, z, shopWidth, shopDepth, item, 5))) continue;
+        if (reservations.some(item => !clearRectangle(x, z, shopWidth, shopDepth,
+          { x: item.x, z: item.z, width: item.rx * 2, depth: item.rz * 2 }, 1))) continue;
+        const id = `park-shop-${area.id}-${side < 0 ? 'west' : 'east'}`;
+        structures.push({ id, kind: 'park-shop', shopKind: 'parkShop', x, z,
+          width: shopWidth, depth: shopDepth, height: shopHeight, lot: 14,
+          rotation: side < 0 ? Math.PI / 2 : -Math.PI / 2,
+          seed: index * 13 + (side + 1) / 2 });
+        obstacles.push({ id: `solid-${id}`, kind: 'park-shop', x, z,
+          width: shopWidth, depth: shopDepth, rotation: 0, bottom: 0,
+          height: shopHeight, margin: 0, roofMargin: 0 });
+        reservations.push({ id: `reserve-${id}`, x, z, rx: shopWidth / 2 + 2, rz: shopDepth / 2 + 2 });
+        // Both fixtures stay to the sides of the storefront, clear of its entrance.
+        for (const lampSide of [-1, 1]) {
+          const lx = x - side * 10;
+          const lz = [9, 7, 5].map(offset => z + lampSide * offset).find(candidate =>
+            inRiverPark(e, lx, candidate) && !inWaterBody(e, lx, candidate)
+            && clearPath(lx, candidate, .25, 1.5)
+            && usableSite(e, lx, candidate, .5, .5, roads, bridges, ponds));
+          if (lz === undefined) continue;
+          const lampId = `${id}-lamp-${lampSide < 0 ? 'west' : 'east'}`;
+          lamps.push({ id: lampId, x: lx, z: lz, y: 4.55 });
+          addFixture(lampId, 'park-lamp', lx, 0, lz, .24, 4.4, .24);
+        }
+        placed = true;
+        break;
+      }
+    }
+  }
+
   // Short bollards guard only the edges of an entrance. The central five metres stay open.
   for (const reservation of reservations.filter(item => item.id.startsWith('turnaround-'))) {
     for (const side of [-1, 1]) obstacles.push({ id: `bollard-${reservation.id}-${side}`, kind: 'bollard',
       x: reservation.x + side * 3.8, z: reservation.z, width: .55, depth: .55,
       rotation: 0, bottom: 0, height: 1.8, margin: 0, roofMargin: 0 });
   }
-  return { areas, paths, surfaces, structures, obstacles, vehicleBarriers, reservations, diagnostics };
+  return { areas, paths, surfaces, structures, obstacles, vehicleBarriers, reservations, lamps, diagnostics };
 }

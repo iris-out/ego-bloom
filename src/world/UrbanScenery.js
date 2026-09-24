@@ -458,6 +458,7 @@ export function buildUrbanScenery(buildings,extent,quality='medium',gallery=fals
   const lamps=lampSpots(plan,quality,{clearance});
   for(const part of lamps.parts)add(...part);
   lampSpotList.push(...lamps.spots);
+  lampSpotList.push(...plan.riverfront.lamps);
   for(const part of streetTrees(plan,quality,{clearance}))add(...part);
   const rails=guardrails(plan,quality,{clearance});
   for(const part of rails.parts)add(...part);

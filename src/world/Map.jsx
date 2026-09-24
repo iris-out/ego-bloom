@@ -160,7 +160,7 @@ function OverviewMap({buildings, selected, cameraRef, onFocus, onSelect, onAirpo
         polygon:area.polygon?.map(([x,z])=>{const point=mapPoint({x,z},bounds);return `${point.x},${point.y}`;}).join(' '),
         box:rectangleOnMap(area,bounds)})),
       riverfrontPaths: plan.riverfront.paths.map(path=>({id:path.id,d:pathFromPoints(path.points,bounds)})),
-      riverfrontBuildings: plan.riverfront.structures.filter(item=>item.kind==='pavilion'||item.kind==='culture-hall')
+      riverfrontBuildings: plan.riverfront.structures.filter(item=>item.kind==='pavilion'||item.kind==='culture-hall'||item.kind==='park-shop')
         .map(item=>({id:item.id,box:rectangleOnMap(item,bounds)})),
     };
   },[buildings,bounds,plan,extent]);

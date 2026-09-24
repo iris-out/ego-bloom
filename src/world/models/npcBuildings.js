@@ -29,6 +29,7 @@ export const NPC_LOT = {
   rowhouse: 64, house: 42, shop: 36, office: 54, apartment: 62, warehouse: 58,
   market: 54, parking: 48, gas: 40, pocketPark: 34, playground: 32, yard: 38,
   cornerShop: 30, streetShop: 48, complexShop: 50, signBuilding: 34,
+  parkShop: 14,
 };
 
 /** 각 종류가 실제로 그리는 평면의 한 변이다. NPC_LOT 은 자리 크기이고 이 값은 그 안에
@@ -42,6 +43,7 @@ export const NPC_PLAN = {
   rowhouse: 48, house: 32, shop: 16, office: 20, apartment: 25, warehouse: 35,
   market: 33, parking: 31, gas: 29, pocketPark: 25, playground: 23, yard: 27,
   cornerShop: 14, streetShop: 23, complexShop: 22, signBuilding: 15,
+  parkShop: 14,
 };
 
 /** 자리를 채우려고 도면을 늘릴 수 있는 최대 배율이다. 이보다 키우면 높이는 그대로인데
@@ -447,6 +449,23 @@ function buildCornerShop(t, ctx) {
   roofClutter(t, ctx, h, 6, 83);
 }
 
+/** parkShop: 공원 산책로 가장자리의 작은 카페·편의점. 간판과 유리 정면은 모든 품질에서 남긴다. */
+function buildParkShop(t, ctx) {
+  const wall = pickOf(ctx.seed, 32, PALETTES.cornerShop);
+  const sign = pickOf(ctx.seed, 33, PALETTES.shop);
+  t.box('stone', 0, 0, 0, 12, 7.2, 9, wall);
+  t.box('roof', 0, 0, 7.2, 13, 0.45, 10, '#8b9ea6');
+  t.pane('glass', -1.5, 4.56, 2.55, 7.5, 3.5);
+  t.door(4.3, 4.6, 0, 1.9, 2.8);
+  t.canopy(0, 5.1, 3.65, 12, 1.8, sign);
+  t.sign(0, 4.72, 5.15, 9, 1.05, sign);
+  if (ctx.quality !== 'low') {
+    t.pane('glass', 0, 4.56, 6.25, 8, 1.15);
+    t.pane('glass', 6.06, 0, 2.55, 5.8, 3, Math.PI / 2);
+  }
+  if (ctx.quality === 'high') t.box('steel', -3.8, -2.5, 7.65, 1.4, .85, 1.2);
+}
+
 /** streetShop: 도로변 근린상가. 한 동에 상점 두세 칸이 늘어서고 위층은 반복되는 주거 창이다. */
 function buildStreetShop(t, ctx) {
   const rich = ctx.quality !== 'low', full = ctx.quality === 'high';
@@ -519,7 +538,7 @@ const BUILDERS = {
   parking: buildParking, gas: buildGas, pocketPark: buildPocketPark,
   playground: buildPlayground, yard: buildYard,
   cornerShop: buildCornerShop, streetShop: buildStreetShop,
-  complexShop: buildComplexShop, signBuilding: buildSignBuilding,
+  complexShop: buildComplexShop, signBuilding: buildSignBuilding, parkShop: buildParkShop,
 };
 
 // 먼 거리용 윤곽. 종류마다 상자 한두 개로 덩어리만 낸다.
@@ -540,6 +559,7 @@ const SILHOUETTES = {
   streetShop: (t) => { t.box('stone', 0, 0, 0, 22, 10, 12, '#b98f52'); t.box('accent', 0, 0, 10, 22.5, 0.4, 12.5, '#8b9ea6'); },
   complexShop: (t) => { t.box('tint', 0, 0, 0, 20, 16, 16); t.box('accent', 0, 0, 16, 20.5, 0.4, 16.5, '#8b9ea6'); },
   signBuilding: (t) => { t.box('stone', 0, 0, 0, 14, 15, 13, '#8f8577'); t.box('accent', 0, 0, 15, 14.5, 0.4, 13.5, '#8b9ea6'); },
+  parkShop: (t) => { t.box('stone', 0, 0, 0, 12, 7.2, 9, '#b98f6a'); t.box('roof', 0, 0, 7.2, 13, .45, 10); },
 };
 
 /** kind 건물 하나를 (x, z) 부지 중심에 세운다. options: {lot, rotation, quality, seed, color}. */

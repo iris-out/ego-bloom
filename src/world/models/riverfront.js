@@ -1,5 +1,6 @@
 /** Visual detail for the canonical riverfront plan. Positions and walkable tops
  * come from shared/riverfrontPlan; this module only adds decoration. */
+import { addNpcBuilding } from './npcBuildings.js';
 
 export function triangleSurfaceMesh(triangles) {
   const positions = triangles.flat(2);
@@ -96,6 +97,14 @@ export function addRiverfrontScenery(add, plan, quality) {
     if (structure.kind === 'culture-hall') culture(add, structure);
     else if (structure.kind === 'pavilion') pavilion(add, structure, Number(structure.id.at(-1)) - 1);
     else if (structure.kind === 'outdoor-stage') outdoorStage(add, structure);
+    else if (structure.kind === 'park-shop') addNpcBuilding(add, structure.shopKind,
+      structure.x, structure.z, { lot: structure.lot, rotation: structure.rotation,
+        quality, seed: structure.seed });
+  }
+  for (const lamp of plan.lamps) {
+    add('dark', [lamp.x, 2.2, lamp.z], [.24, 4.4, .24]);
+    add('lamp', [lamp.x, lamp.y, lamp.z], [.7, .3, .7]);
+    add('glow', [lamp.x, .2, lamp.z], [5, .02, 5], null, 'octagon');
   }
   for (const place of plan.reservations.filter(item => item.id.startsWith('turnaround-'))) {
     add('pavement', [place.x, .17, place.z], [19, .18, 15]);
@@ -104,6 +113,7 @@ export function addRiverfrontScenery(add, plan, quality) {
       add('marking', [place.x + side * 4.8, .35, place.z - 2.5], [.14, .02, 4.2]);
   }
   for (const obstacle of plan.obstacles) {
+    if (obstacle.kind === 'park-shop' || obstacle.kind === 'park-lamp') continue;
     const material = obstacle.kind === 'gate-post' ? 'head'
       : ['pavilion-column', 'pavilion-rail', 'pavilion-rail-post', 'deck-rail'].includes(obstacle.kind) ? 'wood' : 'stone';
     add(material, [obstacle.x, obstacle.bottom + obstacle.height / 2, obstacle.z],
